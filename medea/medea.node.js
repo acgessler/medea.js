@@ -1,6 +1,6 @@
 
 
-(function() {
+medea.stubs["Node"] = (function() {
 
 	this.Node = function(name) {		
 		this.children = [];
@@ -9,7 +9,6 @@
 	}
 
 	this.Node.prototype = {
-
 		name:"",
 
 		GetEntities: function() {
@@ -29,5 +28,5 @@
 
 	};
 	
-
-}).apply(medea);
+	medea.stubs["Node"] = null;
+});

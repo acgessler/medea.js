@@ -3,6 +3,9 @@
 
 medea = new (function() {
 
+	// used to collect Init() functions for all delay-initialized modules
+	this.stubs = {};
+
 	this.Init = function(where,settings) {
 		this.canvas  = document.getElementById(where); 
 		this.gl = WebGLUtils.setupWebGL(this.canvas);
@@ -14,9 +17,11 @@ medea = new (function() {
 			'count_frames' : 0
 		};
 
-		this.root = this.Node("root");
-		this.viewports = [];
+		// always allocate a default root node
+		this._Require("Node");
+		this.root = new this.Node("root");
 
+		this.viewports = [];
 		return this.context;
 	};
 
@@ -33,10 +38,12 @@ medea = new (function() {
 	};
 
 	this.CreateNode = function(name,parent) {
+		this._Require("Node");
 		return new this.Node(name,parent);
 	}
 
 	this.CreateViewport = function(name,x,y,z,w,h,zorder) {
+		this._Require("Viewport");
 		var vp = new this.Viewport(name,x,y,w,h,zorder);
 
 		zorder = vp.GetZOrder();
@@ -110,7 +117,6 @@ medea = new (function() {
 
 
 	this.VisitGraph = function(node,visitor) {
-
 		if (!visitor(node)) {
 			return false;
 		}
@@ -123,6 +129,16 @@ medea = new (function() {
 		}
 
 		return true;
+	};
+
+
+	this._Require = function(whom) {
+		var init = this.stubs[whom];
+		if (!init) {
+			return;
+		}
+
+		init.apply(this);
 	};
 
 } )();
