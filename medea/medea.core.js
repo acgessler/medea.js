@@ -14,8 +14,13 @@ medea = new (function() {
 		this.settings.fps = this.settings.fps || 60;
 
 		this.statistics = {
-			'count_frames' : 0
+			  count_frames : 0
+			, smoothed_fps : 0
+			, exact_fps    : 0	
 		};
+
+		this.dtacc = 0.0;
+		this.dtcnt = 0;
 
 		// always allocate a default root node
 		this._Require("Node");
@@ -69,7 +74,7 @@ medea = new (function() {
 	}
 
 	this.Start = function() {
-		window.requestAnimFrame(function() { medea.Start; },null);
+		window.requestAnimFrame(function() { medea.Start(); },this.canvas);
 		this.DoSingleFrame();
 	};
 
@@ -78,7 +83,6 @@ medea = new (function() {
 	}
 
 	this.DoSingleFrame = function(dtime) {
-		this.statistics.count_frames++;
 		if (!this.CanRender()) {
 			this.NotifyFatal("Not ready for rendering; need a GL context and a viewport");
 			return;
@@ -86,18 +90,13 @@ medea = new (function() {
 
 		// get time delta if not specified
 		if (!dtime) {
-			if(!this.timer) {
-				this.timer = new Date();
-				this.time = this.timer.getTime();
-				dtime = 0.0;
-			}
-			else {
-				var old = this.time;
-				this.time = this.timer.getTime();
+			var old = this.time || 0;
+			this.time = (new Date).getTime() * 0.001;
 
-				dtime = this.time - old;
-			}
+			dtime = this.time - old;
 		}
+
+		this._UpdateFrameStatistics(dtime);
 
 		// perform update
 		this.VisitGraph(this.root,function(node) {
@@ -141,6 +140,23 @@ medea = new (function() {
 		init.apply(this);
 	};
 
+
+	this._UpdateFrameStatistics = function(dtime) {
+		this.statistics.count_frames += 1;
+		this.statistics.exact_fps = 1/dtime;
+		
+		this.dtacc += dtime;
+		++this.dtcnt;
+
+		if (this.dtcnt > 25) {
+			this.statistics.smoothed_fps = this.statistics.smoothed_fps*0.3+ 0.7/(this.dtacc/this.dtcnt);
+			
+			this.dtcnt *= 0.33;
+			this.dtacc *= 0.33;
+		}
+	};
 } )();
+
+
 
 
