@@ -7,7 +7,6 @@ medea = new (function() {
 	this.stubs = {};
 
 
-
 	// constants
 	this.FRAME_VIEWPORT_UPDATED = 0x1;
 	this.FRAME_CANVAS_SIZE_CHANGED = this.FRAME_VIEWPORT_UPDATED | 0x2;
@@ -35,6 +34,7 @@ medea = new (function() {
 		this.stop_asap = false;
 
 		this.frame_flags = 0;
+		this.debug_panel = null;
 
 		// always allocate a default root node
 		this._Require("Node");
@@ -57,18 +57,22 @@ medea = new (function() {
 		this.root = node;
 	};
 
+	this.GetStatistics = function() {
+		return this.statistics;
+	};
+
 	this.GetTickCallback = function() {
 		return this.tick_callback;
-	}
+	};
 
 	this.SetTickCallback = function(clb) {
 		this.tick_callback = clb;
-	}
+	};
 
 	this.CreateNode = function(name,parent) {
 		this._Require("Node");
 		return new this.Node(name,parent);
-	}
+	};
 
 	this.CreateViewport = function(name,x,y,w,h,zorder) {
 		this._Require("Viewport");
@@ -97,11 +101,31 @@ medea = new (function() {
 		}
 
 		return vp;
-	}
+	};
+
+	this.SetDebugPanel = function(where) {
+		this._Require("debug");
+
+		if(where) {
+			where = document.getElementById(where);
+		}
+		if(!where) {
+			// create a canvas element of appropriate size and
+			// insert it on top of the page. 'course, this
+			// can cause trouble with some page layouts.
+			where = document.createElement("canvas");
+			where.width = 500;
+			where.height = 200;
+
+			document.body.appendChild(where);
+		}
+
+		this.debug_panel = new this.DebugPanel(where);
+	};
 
 	this.NotifyFatal = function(what) {
 		alert("Medea: " + what);
-	}
+	};
 
 	this.Start = function() {
 		if (!this.stop_asap) {
@@ -180,6 +204,11 @@ medea = new (function() {
 		// perform rendering
 		for(var vn = 0; vn < this.viewports.length; ++vn) {
 			this.viewports[vn].Render(this,dtime);
+		}
+
+		// draw debug pannel
+		if (this.debug_panel) {
+			this.debug_panel.Update();
 		}
 
 		this.frame_flags = 0;

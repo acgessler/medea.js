@@ -2,7 +2,7 @@
 
 medea.stubs["Viewport"] = (function() {
 
-	var medea = this;
+	var medea = this, gl = medea.gl;
 
 	// use medea.CreateViewport() instead
 	this.Viewport = function(name,x,y,w,h,zorder) {		
@@ -27,7 +27,7 @@ medea.stubs["Viewport"] = (function() {
 		y : 0.0,
 		zorder : 0,
 		ccolor : [0.0,0.0,0.0,1.0],
-		clearFlags : medea.gl.COLOR_BUFFER_BIT | medea.gl.DEPTH_BUFFER_BIT,
+		clearFlags : gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT,
 		enabled : 0xdeadbeef,
 		updated : false,
 		
@@ -152,19 +152,19 @@ medea.stubs["Viewport"] = (function() {
 				cw = Math.floor(this.w*cw), ch = Math.floor(this.h*ch);
 
 				if (this.clearFlags) {
-					if (this.clearFlags & medea.gl.COLOR_BUFFER_BIT) {
-						medea.gl.clearColor(this.ccolor[0],this.ccolor[1],this.ccolor[2],this.ccolor[3]);
+					if (this.clearFlags & gl.COLOR_BUFFER_BIT) {
+						gl.clearColor(this.ccolor[0],this.ccolor[1],this.ccolor[2],this.ccolor[3]);
 					}
 
-					medea.gl.scissor(cx,cy,cw,ch);
+					gl.scissor(cx,cy,cw,ch);
 				}
 
-				medea.gl.viewport(cx,cy,cw,ch);
+				gl.viewport(cx,cy,cw,ch);
 			}
 
 			// clear the viewport
 			if (this.clearFlags) {
-				medea.gl.clear(this.clearFlags);
+				gl.clear(this.clearFlags);
 			}
 
 			// and traverse all nodes in the graph, collecting their render jobs
