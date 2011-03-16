@@ -21,6 +21,7 @@ medea.stubs["debug"] = (function() {
 			ctx.save();
 			ctx.clearRect(0,0,canvas.width,canvas.height);
 
+			ctx.fillText("Medea Debug Panel",0,10);
  			ctx.fillText("FPS cur: " + stats.exact_fps + "avg: " + stats.smoothed_fps,0,20);
 			
 			ctx.restore();

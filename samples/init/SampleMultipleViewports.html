@@ -9,27 +9,29 @@
 <script type="text/javascript" src="../../medea/medea.core.js"></script>
 <script type="text/javascript" src="../../medea/medea.node.js"></script>
 <script type="text/javascript" src="../../medea/medea.viewport.js"></script>
-
+<script type="text/javascript" src="../../medea/medea.debug.js"></script>
 <script type="text/javascript">
 
 
 function run() {
 	medea.Init("canvas");
 	var vp0 = medea.CreateViewport();
-	var vp1 = medea.CreateViewport("secondary",0.1,0,0.2,0.2);
+	var vp1 = medea.CreateViewport("secondary",0.1,0.1,0.1,0.1);
 
 	vp0.SetClearColor([1.0,0.0,0.0,1.0]);
 	vp1.SetClearColor([0.5,1.0,0.0,1.0]);
-	vp1.SetPos(0.5);
 
-	var tx = 0, ty = 0;
+	var tx = 0, ty = 0,time=0;
 	medea.SetTickCallback(function(dtime) {
-		vp1.SetPos([tx+=0.05*dtime,ty+0.05*dtime]);
+		time += dtime;
+
+		vp1.SetPos((Math.sin(time)+1.0)*0.5,(Math.cos(time)+1.0)*0.5);
 
 		// note: we must return true here because otherwise the
 		// main loop would be quit.
 		return true;
 	});	
+	medea.SetDebugPanel();
 	medea.Start();
 }
 

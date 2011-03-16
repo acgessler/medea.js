@@ -148,7 +148,7 @@ medea.stubs["Viewport"] = (function() {
 			// setup the viewport - we usually only need to do this if we're competing with other viewports
 			if (medea.enabled_viewports>1 || medea.frame_flags & medea.FRAME_VIEWPORT_UPDATED || this.updated) {
 				var cw = medea.canvas.width, ch = medea.canvas.height;
-				var cx = Math.floor(this.x*cw), cy = Math.floor(this.y*cw);
+				var cx = Math.floor(this.x*cw), cy = Math.floor(this.y*ch);
 				cw = Math.floor(this.w*cw), ch = Math.floor(this.h*ch);
 
 				if (this.clearFlags) {

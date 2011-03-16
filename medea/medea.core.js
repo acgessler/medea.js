@@ -130,6 +130,10 @@ medea = new (function() {
 	this.Start = function() {
 		if (!this.stop_asap) {
 			window.requestAnimFrame(function() { medea.Start(); },this.canvas);
+
+			if (this.debug_panel) {
+				//setTimeout(function(){medea.debug_panel.Update();},1000);
+			}
 		}
 		this.DoSingleFrame();
 	};
@@ -194,10 +198,10 @@ medea = new (function() {
 		if (this.frame_flags & medea.FRAME_VIEWPORT_UPDATED) {
 			// XXX
 			if (this.enabled_viewports>1) {
-				this.gl.enable(this.gl.SCISSOR_BOX);
+				this.gl.enable(this.gl.SCISSOR_TEST);
 			}
 			else {
-				this.gl.disable(this.gl.SCISSOR_BOX);
+				this.gl.disable(this.gl.SCISSOR_TEST);
 			}
 		}
 
