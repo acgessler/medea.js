@@ -34,7 +34,7 @@ medea.stubs["RenderQueue"] = (function() {
 	
 		Run : function(entries) {
 			entries.sort(function(a,b) {
-				return a.MaterialHash() < b.MaterialHash();
+				return a.MaterialId() < b.MaterialId();
 			});
 		}
 	});
@@ -46,6 +46,10 @@ medea.stubs["RenderQueue"] = (function() {
 		
 		init: function() {		
 			this.entries = [];
+		},
+		
+		Push: function(e) {
+			this.entries.push(e);
 		},
 		
 		Flush: function() {
@@ -100,7 +104,7 @@ medea.stubs["RenderQueue"] = (function() {
 			}
 // #endif
 
-			this.queues[idx].push(renderable);
+			this.queues[idx].Push(renderable);
 		},
 		
 		Flush : function() {
@@ -114,6 +118,11 @@ medea.stubs["RenderQueue"] = (function() {
 			this.queues[idx] = queue;
 		}
 	});
+	
+	
+	medea.CreateRenderQueueManager = function() {
+		return new medea.RenderQueueManager();
+	}
 	
 	medea.stubs["RenderQueue"] = null;
 });

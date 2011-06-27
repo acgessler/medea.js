@@ -13,6 +13,10 @@
 <script type="text/javascript" src="../../medea/medea.renderqueue.js"></script>
 <script type="text/javascript" src="../../medea/medea.entity.js"></script>
 <script type="text/javascript" src="../../medea/medea.mesh.js"></script>
+<script type="text/javascript" src="../../medea/medea.vertexbuffer.js"></script>
+<script type="text/javascript" src="../../medea/medea.indexbuffer.js"></script>
+<script type="text/javascript" src="../../medea/medea.material.js"></script>
+<script type="text/javascript" src="../../medea/medea.standardmesh.js"></script>
 <script type="text/javascript" src="../../medea/sprintf-0.7.js"></script>
 
 <script type="text/javascript">
@@ -30,6 +34,9 @@ function run() {
 		// main loop would be quit.
 		return true;
 	});	
+
+	var m = medea.CreateStandardMesh_Cube();
+	medea.GetRootNode().AddEntity(m);
 
 	medea.SetDebugPanel(null,true);
 	medea.Start();

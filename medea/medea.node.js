@@ -14,6 +14,10 @@ medea.stubs["Node"] = (function() {
 		GetEntities: function() {
 			return this.entities;
 		},
+		
+		AddEntity: function(ent) {
+			this.entities.push(ent);
+		},
 
 		GetChildren: function() {
 			return this.children;

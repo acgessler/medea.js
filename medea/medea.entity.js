@@ -1,6 +1,7 @@
 
 
 medea.stubs["Entity"] = (function() {
+	var medea = this;
 
 	this.Entity = medea.Class.extend({
 		name : "",
@@ -13,6 +14,9 @@ medea.stubs["Entity"] = (function() {
 	
 		Render : function(viewport,rqmanager) {
 			// at this level of abstraction Render() is empty, deriving classes will substitute their own logic
+		},
+		
+		Update : function(dtime) {
 		}
 	});
 	

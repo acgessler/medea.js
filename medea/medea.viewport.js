@@ -144,8 +144,7 @@ medea.stubs["Viewport"] = (function() {
 			}
 
 			if (!this.rqManager) {
-				medea._Require("RenderQueue");
-				this.rqManager = new medea.RenderQueueManager();
+				this.rqManager = medea.CreateRenderQueueManager(); 
 			}
 			
 			// setup the viewport - we usually only need to do this if we're competing with other viewports
@@ -171,10 +170,11 @@ medea.stubs["Viewport"] = (function() {
 			}
 
 			// and traverse all nodes in the graph, collecting their render jobs
+			var rq = this.rqManager;
 			medea.VisitGraph(medea.GetRootNode(),function(node) {
-				node.GetEntities().forEach(function(val) {
-					val.Render(this,this.rqManager);
-				},this);
+				node.GetEntities().forEach(function(val,idx,outer) {
+					val.Render(this,val,rq);
+				});
 			});
 			
 			this.rqManager.Flush();

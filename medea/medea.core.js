@@ -131,7 +131,7 @@ medea = new (function() {
 
 		// always allocate a default root node
 		this._Require("Node");
-		this.root = new this.Node("root");
+		this.root = new medea.Node("root");
 
 		this.viewports = [];
 		this.enabled_viewports = 0;
@@ -195,6 +195,7 @@ medea = new (function() {
 
 		return vp;
 	};
+	
 
 	this.SetDebugPanel = function(where) {
 		this._Require("debug");
@@ -204,6 +205,15 @@ medea = new (function() {
 	this.NotifyFatal = function(what) {
 		alert("Medea: " + what);
 	};
+	
+// #ifndef DEBUG
+	this.DebugAssert = function(what) {
+	};
+// #else
+	this.DebugAssert = function(what) {
+		alert("Medea DEBUG ASSERTION: " + what);
+	};
+// #endif
 
 	this.Start = function() {
 		if (!this.stop_asap) {
@@ -267,7 +277,7 @@ medea = new (function() {
 		this.VisitGraph(this.root,function(node) {
 			var e = node.GetEntities();
 			for(var i = 0; i < e.length; ++i) {
-				e[i].Update(this,dtime);
+				e[i].Update(dtime);
 			}
 
 			node.Update(dtime);
@@ -367,6 +377,34 @@ medea = new (function() {
 			this.statistics.max_fps = this.dtmax_fps;
 		}
 	};
+	
+	
+	this._SetFunctionStub = function(name,module_dep) {
+		this[name] = function() {
+// #ifdef DEBUG
+			var old = this[name];
+// #endif
+			module_dep = module_dep instanceof Array ? module_dep : [module_dep];
+			this._Require(module_dep);
+// #ifdef DEBUG
+			if (old == this[name]) {
+				medea.DebugAssert("infinite recursion, something is wrong here, function stub should have been removed: " + name);
+				return;
+			}
+// #endif
+ 			return this[name].apply(this,arguments);
+		};
+	}
+	
+	this._SetFunctionStub("CreateSimpleMaterialFromColor","Material");
+	this._SetFunctionStub("CreateVertexBuffer","VertexBuffer");
+	this._SetFunctionStub("CreateIndexBuffer","IndexBuffer");
+	
+	this._SetFunctionStub("CreateStandardMesh_Cube","StandardMesh");
+	this._SetFunctionStub("CreateSimpleMesh","Mesh");
+	
+	this._SetFunctionStub("CreateRenderQueueManager","RenderQueue");
+	
 } )();
 
 
