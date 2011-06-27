@@ -4,22 +4,7 @@ medea.stubs["Viewport"] = (function() {
 
 	var medea = this, gl = medea.gl;
 
-	// use medea.CreateViewport() instead
-	this.Viewport = function(name,x,y,w,h,zorder) {		
-		this.name = name;
-		this.x = x || 0;
-		this.y = y || 0;
-		this.w = w || 1.0;
-		this.h = h || 1.0;
-		this.zorder = zorder || 0;
-
-		// viewports are initially enabled since this is what 
-		// users will most likely want.
-		this.Enable();
-	}
-
-	this.Viewport.prototype = {
-
+	this.Viewport = medea.Class.extend({
 		name:"",
 		w : 1.0,
 		h : 1.0,
@@ -31,6 +16,20 @@ medea.stubs["Viewport"] = (function() {
 		enabled : 0xdeadbeef,
 		updated : false,
 		rqManager : null,
+		
+		
+		init : function(name,x,y,w,h,zorder) {		
+			this.name = name;
+			this.x = x || 0;
+			this.y = y || 0;
+			this.w = w || 1.0;
+			this.h = h || 1.0;
+			this.zorder = zorder || 0;
+
+			// viewports are initially enabled since this is what 
+			// users will most likely want.
+			this.Enable();
+		},
 		
 		GetName: function() {
 			return this.name;
@@ -181,7 +180,7 @@ medea.stubs["Viewport"] = (function() {
 			this.rqManager.Flush();
 			this.updated = false;
 		}
-	};
+	});
 	
 	medea.stubs["Viewport"] = null;
 });

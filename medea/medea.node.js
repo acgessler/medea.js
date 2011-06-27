@@ -2,14 +2,14 @@
 
 medea.stubs["Node"] = (function() {
 
-	this.Node = function(name) {		
-		this.children = [];
-		this.entities = [];
-		this.name = name || "";
-	}
-
-	this.Node.prototype = {
+	this.Node = medea.Class.extend({
 		name:"",
+		
+		init : function(name) {		
+			this.children = [];
+			this.entities = [];
+			this.name = name || "";
+		},
 
 		GetEntities: function() {
 			return this.entities;
@@ -26,7 +26,7 @@ medea.stubs["Node"] = (function() {
 		Update: function(dtime) {
 		}
 
-	};
+	});
 	
 	medea.stubs["Node"] = null;
 });

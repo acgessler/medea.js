@@ -19,40 +19,34 @@ medea.stubs["RenderQueue"] = (function() {
 	
 	
 	// class DistanceSorter
-	this.DistanceSorter = function() {
-	}
-	
-	this.DistanceSorter.prototype = {
+	this.DistanceSorter = medea.Class.extend({
 	
 		Run : function(entries) {
 			entries.sort(function(a,b) {
 				return a.Distance() < b.Distance();
 			});
 		}
-	}
+	});
 	
 	
 	// class MaterialSorter
-	this.MaterialSorter = function() {
-	}
-	
-	this.MaterialSorter.prototype = {
+	this.MaterialSorter = medea.Class.extend({
 	
 		Run : function(entries) {
 			entries.sort(function(a,b) {
 				return a.MaterialHash() < b.MaterialHash();
 			});
 		}
-	}
+	});
 	
 	
 	// class RenderQueue
-	this.RenderQueue = function() {		
-		this.entries = [];
-	}
-
-	this.RenderQueue.prototype = {
+	this.RenderQueue = medea.Class.extend({
 		sorter : null,
+		
+		init: function() {		
+			this.entries = [];
+		},
 		
 		Flush: function() {
 			if (this.sorter) {
@@ -72,32 +66,31 @@ medea.stubs["RenderQueue"] = (function() {
 		GetSorter : function() {
 			return this.sorter;
 		}
-	};
-
-
-	this.RenderQueueManager = function(name) {		
-	
-		// allocates queues, by default all queues use the same implementation
-		this.queues = new Array(medea.RENDERQUEUE_LAST+1);
-		for(var i = 0, l = this.queues.length; i < l; ++i) {
-			this.queues[i] = new medea.RenderQueue();
-		}
-		
-		// choose some suitable default sorting algorithms
-		var distance_sorter = new medea.DistanceSorter();
-		var material_sorter = new medea.MaterialSorter();
-		
-		this.queues[medea.RENDERQUEUE_DEFAULT_EARLY].SetSorter(material_sorter);
-		this.queues[medea.RENDERQUEUE_DEFAULT].SetSorter(material_sorter);
-		this.queues[medea.RENDERQUEUE_DEFAULT_LATE].SetSorter(material_sorter);
-		
-		this.queues[medea.RENDERQUEUE_ALPHA_EARLY].SetSorter(distance_sorter);
-		this.queues[medea.RENDERQUEUE_ALPHA].SetSorter(distance_sorter);
-		this.queues[medea.RENDERQUEUE_ALPHA_LATE].SetSorter(distance_sorter);
-	}
+	});
 	
 
-	this.RenderQueueManager.prototype = {
+	// class RenderQueueManager
+	this.RenderQueueManager = medea.Class.extend({
+	
+		init : function(name) {		
+			// allocates queues, by default all queues use the same implementation
+			this.queues = new Array(medea.RENDERQUEUE_LAST+1);
+			for(var i = 0, l = this.queues.length; i < l; ++i) {
+				this.queues[i] = new medea.RenderQueue();
+			}
+			
+			// choose some suitable default sorting algorithms
+			var distance_sorter = new medea.DistanceSorter();
+			var material_sorter = new medea.MaterialSorter();
+			
+			this.queues[medea.RENDERQUEUE_DEFAULT_EARLY].SetSorter(material_sorter);
+			this.queues[medea.RENDERQUEUE_DEFAULT].SetSorter(material_sorter);
+			this.queues[medea.RENDERQUEUE_DEFAULT_LATE].SetSorter(material_sorter);
+			
+			this.queues[medea.RENDERQUEUE_ALPHA_EARLY].SetSorter(distance_sorter);
+			this.queues[medea.RENDERQUEUE_ALPHA].SetSorter(distance_sorter);
+			this.queues[medea.RENDERQUEUE_ALPHA_LATE].SetSorter(distance_sorter);
+		},
 	
 		Push : function(idx,renderable) {
 // #ifdef DEBUG
@@ -120,7 +113,7 @@ medea.stubs["RenderQueue"] = (function() {
 		SetQueueImpl : function(idx,queue) {
 			this.queues[idx] = queue;
 		}
-	};
+	});
 	
 	medea.stubs["RenderQueue"] = null;
 });

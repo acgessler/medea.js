@@ -2,19 +2,19 @@
 
 medea.stubs["Entity"] = (function() {
 
-	this.Entity = function(name) {	
-		if(name) {	
-			this.name = name;
-		}
-	}
-
-	this.Entity.prototype = {
+	this.Entity = medea.Class.extend({
 		name : "",
+		
+		init : function(name) {	
+			if(name) {	
+				this.name = name;
+			}
+		},
 	
-		Render : function() {
+		Render : function(viewport,rqmanager) {
 			// at this level of abstraction Render() is empty, deriving classes will substitute their own logic
 		}
-	};
+	});
 	
 	medea.stubs["Entity"] = null;
 });
