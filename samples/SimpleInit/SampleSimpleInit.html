@@ -10,6 +10,8 @@
 <script type="text/javascript" src="../../medea/medea.node.js"></script>
 <script type="text/javascript" src="../../medea/medea.viewport.js"></script>
 <script type="text/javascript" src="../../medea/medea.debug.js"></script>
+<script type="text/javascript" src="../../medea/medea.renderqueue.js"></script>
+<script type="text/javascript" src="../../medea/sprintf-0.7.js"></script>
 
 <script type="text/javascript">
 
@@ -27,7 +29,7 @@ function run() {
 		return true;
 	});	
 
-	medea.SetDebugPanel();
+	medea.SetDebugPanel(null,true);
 	medea.Start();
 }
 

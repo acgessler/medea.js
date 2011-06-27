@@ -3,6 +3,31 @@
 
 medea = new (function() {
 
+	// workaround if Array.forEach is not available
+	// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/array/foreach
+	if (!Array.prototype.forEach)
+	{
+	  Array.prototype.forEach = function(fun /*, thisp */)
+	  {
+		"use strict";
+
+		if (this === void 0 || this === null)
+		  throw new TypeError();
+
+		var t = Object(this);
+		var len = t.length >>> 0;
+		if (typeof fun !== "function")
+		  throw new TypeError();
+
+		var thisp = arguments[1];
+		for (var i = 0; i < len; i++)
+		{
+		  if (i in t)
+			fun.call(thisp, t[i], i, t);
+		}
+	  };
+	}
+
 	// used to collect Init() functions for all delay-initialized modules
 	this.stubs = {};
 
@@ -22,12 +47,17 @@ medea = new (function() {
 
 		this.statistics = {
 			  count_frames : 0
-			, smoothed_fps : 0
-			, exact_fps    : 0	
+			, smoothed_fps : -1
+			, exact_fps    : -1	
+			, min_fps      : -1
+			, max_fps      : -1
 		};
 
 		this.dtacc = 0.0;
 		this.dtcnt = 0;
+		this.dtmin_fps = 1e6;
+		this.dtmax_fps = 0;
+
 		this.default_zorder = 0;
 
 		this.tick_callback = null;
@@ -105,21 +135,6 @@ medea = new (function() {
 
 	this.SetDebugPanel = function(where) {
 		this._Require("debug");
-
-		if(where) {
-			where = document.getElementById(where);
-		}
-		if(!where) {
-			// create a canvas element of appropriate size and
-			// insert it on top of the page. 'course, this
-			// can cause trouble with some page layouts.
-			where = document.createElement("canvas");
-			where.width = 500;
-			where.height = 200;
-
-			document.body.appendChild(where);
-		}
-
 		this.debug_panel = new this.DebugPanel(where);
 	};
 
@@ -135,6 +150,7 @@ medea = new (function() {
 				//setTimeout(function(){medea.debug_panel.Update();},1000);
 			}
 		}
+		
 		this.DoSingleFrame();
 	};
 
@@ -245,18 +261,49 @@ medea = new (function() {
 	};
 
 
+	this._AjaxFetch = function(url, callback) {
+
+		var ajax;
+  		if (window.XMLHttpRequest) {              
+      			ajax = new XMLHttpRequest();              
+    		} else {                                  
+      			ajax = new ActiveXObject("Microsoft.XMLHTTP");
+    		}       
+
+		ajax.onreadystatechange = function() {  
+        		if (ajax.readyState==4) {                          
+          			callback(ajax.responseText,ajax.status,ajax.responseXML);                                             
+       			}       
+		}               
+
+		ajax.open("GET",url,true);
+		ajax.send(null);    
+	};
+
+
 	this._UpdateFrameStatistics = function(dtime) {
 		this.statistics.count_frames += 1;
-		this.statistics.exact_fps = 1/dtime;
+		var e = this.statistics.exact_fps = 1/dtime;
+
+		this.dtmin_fps = Math.min(this.dtmin_fps,e);
+		this.dtmax_fps = Math.max(this.dtmin_fps,e);
 		
 		this.dtacc += dtime;
 		++this.dtcnt;
 
-		if (this.dtcnt > 25) {
-			this.statistics.smoothed_fps = this.statistics.smoothed_fps*0.3+ 0.7/(this.dtacc/this.dtcnt);
-			
+		if (this.dtacc > 0.5) {
+			if ( this.statistics.smoothed_fps > 0) {
+				this.statistics.smoothed_fps = this.statistics.smoothed_fps*0.3+ 0.7/(this.dtacc/this.dtcnt);
+			}
+			else {
+				this.statistics.smoothed_fps = this.dtcnt/this.dtacc;
+			}
+
 			this.dtcnt *= 0.33;
 			this.dtacc *= 0.33;
+
+			this.statistics.min_fps = this.dtmin_fps;
+			this.statistics.max_fps = this.dtmax_fps;
 		}
 	};
 } )();

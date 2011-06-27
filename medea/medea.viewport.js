@@ -30,6 +30,7 @@ medea.stubs["Viewport"] = (function() {
 		clearFlags : gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT,
 		enabled : 0xdeadbeef,
 		updated : false,
+		rqManager : null,
 		
 		GetName: function() {
 			return this.name;
@@ -143,7 +144,10 @@ medea.stubs["Viewport"] = (function() {
 				return;
 			}
 
-			var rq = null; // medea.RenderQueueManager();
+			if (!this.rqManager) {
+				medea._Require("RenderQueue");
+				this.rqManager = new medea.RenderQueueManager();
+			}
 			
 			// setup the viewport - we usually only need to do this if we're competing with other viewports
 			if (medea.enabled_viewports>1 || medea.frame_flags & medea.FRAME_VIEWPORT_UPDATED || this.updated) {
@@ -169,13 +173,12 @@ medea.stubs["Viewport"] = (function() {
 
 			// and traverse all nodes in the graph, collecting their render jobs
 			medea.VisitGraph(medea.GetRootNode(),function(node) {
-				var e = node.GetEntities();
-				for(var i = 0; i < e.length; ++i) {
-					e[i].Render(vl,rq);
-				}
+				node.GetEntities().forEach(function(val) {
+					val.Render(this,this.rqManager);
+				},this);
 			});
-			//rq.Flush();
-
+			
+			this.rqManager.Flush();
 			this.updated = false;
 		}
 	};
