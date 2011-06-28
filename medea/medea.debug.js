@@ -2,14 +2,19 @@
 
 medea.stubs["debug"] = (function() {
 	var medea = this;
+	
 
-	this.DebugPanel = function(where,win) {
-		this.where = where;
-		this.win = win;
-		this.TryInit();
-	};
+	medea._CanvasUtilFillTextMultiline = function(context,text,x,y,lineheight) {
+		lineheight = lineheight || parseInt(context.font)+2;
+		var lines = text.split('\n');
 
-	this.DebugPanel.prototype = {
+		for (var i = 0; i< lines.length; i++) {
+			context.fillText(lines[i], x, y + (i*lineheight) );
+		}
+	}
+	
+
+	this.DebugPanel = medea.Class.extend({
 
 		canvas: null,
 		ctx: null,
@@ -26,6 +31,13 @@ medea.stubs["debug"] = (function() {
 		dimx_full : 700,
 		dimy_full : 500,
 
+		
+		init : function(where,win) {
+			this.where = where;
+			this.win = win;
+			this.TryInit();
+		},
+		
 
 		TryInit : function() {
 
@@ -44,13 +56,18 @@ medea.stubs["debug"] = (function() {
 				// create a canvas element of appropriate size and
 				// insert it on top of the page. 'course, this
 				// can cause trouble with some page layouts.
+				var parent = doc.createElement("div");
+				parent.style.paddingTop = 10;
+				
 				var where = doc.createElement("canvas");
 				where.width = this.dimx_small;
 				where.height = this.dimy_small;
-
-				doc.body.appendChild(where);
-			
+				
+				parent.appendChild(where);
+				
+				/*
 				var but = doc.createElement("input");
+				parent.appendChild(but);
 				but.type = "button";
 
 				var outer = this;
@@ -87,8 +104,9 @@ medea.stubs["debug"] = (function() {
 			
 					but.value = "Close Full Debugger";
 				}
-
-				doc.body.appendChild(but);
+				*/
+				
+				doc.body.appendChild(parent);
 				this.canvas = where;
 			}
 
@@ -119,11 +137,18 @@ medea.stubs["debug"] = (function() {
 			ctx.fillText("Medea Debug Panel",xs,ys);
 
 			ctx.fillStyle = "blue";
- 			ctx.fillText(sprintf("FPS cur: %.2f avg: %.2f min: %.2f max: %.2f",stats.exact_fps,stats.smoothed_fps,stats.min_fps,stats.max_fps),xs,ys+10);
+ 			medea._CanvasUtilFillTextMultiline(ctx,sprintf("FPS cur: %.2f avg: %.2f min: %.2f max: %.2f\nPrimitives: %f\nVertices: %f",
+				stats.exact_fps,
+				stats.smoothed_fps,
+				stats.min_fps,
+				stats.max_fps,
+				stats.primitives_frame,
+				stats.vertices_frame
+			),xs,ys+14);
 			
 			ctx.restore();
 		}
-	};
+	});
 	
 	medea.stubs["debug"] = null;
 });

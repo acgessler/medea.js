@@ -114,6 +114,8 @@ medea = new (function() {
 			, exact_fps    : -1	
 			, min_fps      : -1
 			, max_fps      : -1
+			, primitives_frame 	: 0
+			, vertices_frame 	: 0
 		};
 
 		this.dtacc = 0.0;
@@ -376,6 +378,8 @@ medea = new (function() {
 			this.statistics.min_fps = this.dtmin_fps;
 			this.statistics.max_fps = this.dtmax_fps;
 		}
+		
+		this.statistics.vertices_frame = this.statistics.primitives_frame = 0;
 	};
 	
 	
