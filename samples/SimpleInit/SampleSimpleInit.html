@@ -5,6 +5,7 @@
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="../../medea/webgl-utils.js"></script>
+<script type="text/javascript" src="../../medea/mjs.js"></script>
 
 <script type="text/javascript" src="../../medea/medea.core.js"></script>
 <script type="text/javascript" src="../../medea/medea.node.js"></script>
@@ -37,6 +38,8 @@ function run() {
 
 	var m = medea.CreateStandardMesh_Cube();
 	medea.GetRootNode().AddEntity(m);
+	var root = medea.GetRootNode();
+	root.Translate(V3.$(0,0,-4));
 
 	medea.SetDebugPanel(null,true);
 	medea.Start();

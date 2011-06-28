@@ -10,18 +10,25 @@ medea.stubs["Mesh"] = (function() {
 	// class RenderJob
 	this.RenderJob = medea.Class.extend({
 		
-		init : function(mesh) {
+		distance: null,
+		
+		init : function(mesh,node,viewport) {
 			this.mesh = mesh;
-			this.Draw = function() { mesh.DrawNow(); };
+			this.node = node;
+			this.viewport = viewport;
+			this.Draw = function(statepool) { mesh.DrawNow(statepool); };
 		},
 		
 		// required methods for automatic sorting of renderqueues
-		Distance : function() {
-			return 0.0;
+		DistanceEstimate : function() {
+			if (this.distance === null) {
+				this.distance = V3.lengthSquared(V3.sub(this.viewport.GetCameraWorldPos(),this.node.GetWorldPos()));
+			}
+			return this.distance;
 		},
 		
 		MaterialId : function() {
-			return 0;
+			return this.mesh.material.GetId();
 		},
 	});
 	
@@ -46,35 +53,39 @@ medea.stubs["Mesh"] = (function() {
 	
 		Render : function(viewport,node,rqmanager) {
 			// construct a renderable capable of drawing this mesh upon request by the render queue manager
-			rqmanager.Push(medea.RENDERQUEUE_DEFAULT,new medea.RenderJob(this));
+			rqmanager.Push(medea.RENDERQUEUE_DEFAULT,new medea.RenderJob(this,node,viewport));
 		},
 		
 		Update : function() {
 		},
 		
-		DrawNow : function() {
+		DrawNow : function(statepool) {
+	
 			var st = medea.GetStatistics();
-		
-			// set vbo
-			gl.bindBuffer(gl.ELEMENT_BUFFER,this.vbo.GetBufferId());
 			var vboc = this.vbo.GetItemCount();
+			var iboc = this.ibo ? this.ibo.GetItemCount()/3 : null;
 			
-			// update statistics
-			st.vertices_frame += vboc;
+			// set vbo and ibo if needed
+			gl.bindBuffer(gl.ELEMENT_BUFFER,this.vbo.GetBufferId());
 			
-			// set ibo if needed and draw
 			if (this.ibo) {
-				vboc = this.ibo.GetItemCount()/3;
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.ibo.GetBufferId());
-				gl.drawElements(gl.TRIANGLES,vboc,this.ibo.GetGlType(),0);
-				
-				st.primitives_frame += vboc;
 			}
-			else {
-				
-				gl.drawArrays(gl.TRIANGLES,this.vboc);
-				st.primitives_frame += vboc/3;
-			}		
+					
+			this.material.Use(function() {
+					// update statistics
+					st.vertices_frame += vboc;
+					
+					if (this.ibo) {
+						gl.drawElements(gl.TRIANGLES,iboc,this.ibo.GetGlType(),0);
+						st.primitives_frame += iboc;
+					}
+					else {
+						
+						gl.drawArrays(gl.TRIANGLES,this.vboc);
+						st.primitives_frame += vboc/3;
+					}	
+			},statepool);				
 		}
 	});
 	

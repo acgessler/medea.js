@@ -23,7 +23,7 @@ medea.stubs["RenderQueue"] = (function() {
 	
 		Run : function(entries) {
 			entries.sort(function(a,b) {
-				return a.Distance() < b.Distance();
+				return a.DistanceEstimate() < b.DistanceEstimate();
 			});
 		}
 	});
@@ -52,13 +52,13 @@ medea.stubs["RenderQueue"] = (function() {
 			this.entries.push(e);
 		},
 		
-		Flush: function() {
+		Flush: function(statepool) {
 			if (this.sorter) {
 				this.sorter.Run(this.entries);
 			}
 			
 			this.entries.forEach(function(e) {
-				e.Draw();
+				e.Draw(statepool);
 			});
 			this.entries = [];
 		},
@@ -107,9 +107,9 @@ medea.stubs["RenderQueue"] = (function() {
 			this.queues[idx].Push(renderable);
 		},
 		
-		Flush : function() {
+		Flush : function(statepool) {
 			this.queues.forEach(function(e) {
-				e.Flush();
+				e.Flush(statepool);
 			});
 		},
 		

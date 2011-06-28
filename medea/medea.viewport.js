@@ -3,8 +3,78 @@
 medea.stubs["Viewport"] = (function() {
 
 	var medea = this, gl = medea.gl;
+	
+	medea._DefaultStateDependencies = {
+		W : ["WVP","WV"],
+		V : ["WVP","WV"],
+		P : ["WVP"],
+	};
+	
+	medea._DefaultDerivedStates = {
+	
+		"WVP": function(statepool) {
+			var m = M4x4.$();
+			M4x4.mul(statepool.GetQuick("W"),statepool.GetQuick("V"),m);
+			M4x4.mul(m,statepool.GetQuick("P"),m);
+			
+			return m;
+		},
+		
+		"WIT": function(statepool) {
+			var m = M4x4.$();
+			// XXX inverse() does not actually exist.
+			M4x4.inverse(statepool.GetQuick("W"),m);
+			M4x4.transpose(m,m);
+			return m;
+		},
+	};
+	
+	// class StatePool
+	medea.StatePool = medea.Class.extend({
+	
+		init : function(deps,derived_states) {
+			this.states = {};
+			this.deps = deps || medea._DefaultStateDependencies;
+			this.derived_states = derived_states || medea._DefaultDerivedStates;
+			this.dirty = {};
+		},
+	
+		Set : function(key,value) {
+			if (key in this.deps) {
+				var v = this.deps[key];
+				for(var i = 0, e = v.length; i < e; ++i) {
+					this.dirty[v[i]] = true;
+				}
+			}
+			return this.states[key] = value;
+		},
+		
+		Get : function(key) {
+			if (key in this.dirty) {
+// #ifdef DEBUG
+				if (!(key in this.derived_states)) {
+					medea.DebugAssert("only derived states can be dirty: " + key);
+				}
+// #endif
+				delete this.dirty[key];
+				return this.states[key] = this.derived_states[key](this);
+			}
+			
+			return this.states[key];
+		},
+		
+		GetQuick : function(key) {
+// #ifdef DEBUG
+			if (key in this.derived_states) {
+				medea.DebugAssert("only non-derived states can be queried using GetQuick(): " + key);
+			}
+// #endif
+			return this.states[key];
+		}
+	});
 
-	this.Viewport = medea.Class.extend({
+	// class Viewport
+	medea.Viewport = medea.Class.extend({
 		name:"",
 		w : 1.0,
 		h : 1.0,
@@ -18,13 +88,16 @@ medea.stubs["Viewport"] = (function() {
 		rqManager : null,
 		
 		
-		init : function(name,x,y,w,h,zorder) {		
+		init : function(name,x,y,w,h,zorder,camera) {		
 			this.name = name;
 			this.x = x || 0;
 			this.y = y || 0;
 			this.w = w || 1.0;
 			this.h = h || 1.0;
 			this.zorder = zorder || 0;
+			
+			medea._Require("Camera");
+			this.camera = camera || new medea.Camera();
 
 			// viewports are initially enabled since this is what 
 			// users will most likely want.
@@ -136,6 +209,14 @@ medea.stubs["Viewport"] = (function() {
 			return [this.w,this.h];
 		},
 
+		
+		GetCamera : function() {
+			return this.camera;
+		},
+		
+		SetCamera : function(cam) {
+			this.camera = cam;
+		},
 
 
 		Render: function(dtime) {
@@ -177,7 +258,15 @@ medea.stubs["Viewport"] = (function() {
 				});
 			});
 			
-			this.rqManager.Flush();
+			// setup a fresh pool to easily pass global rendering states to all renderables
+			// eventually these states will be automatically transferred to shaders.
+			var statepool = new medea.StatePool();
+			
+			statepool.Set("V",this.camera.GetViewMatrix());
+			statepool.Set("P",this.camera.GetProjectionMatrix());
+			statepool.Set("W",M4x4.I);
+			
+			this.rqManager.Flush(statepool);
 			this.updated = false;
 		}
 	});
