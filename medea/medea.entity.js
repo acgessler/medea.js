@@ -5,6 +5,7 @@ medea.stubs["Entity"] = (function() {
 
 	this.Entity = medea.Class.extend({
 		name : "",
+		parent : null,
 		
 		init : function(name) {	
 			if(name) {	
@@ -17,7 +18,12 @@ medea.stubs["Entity"] = (function() {
 		},
 		
 		Update : function(dtime) {
-		}
+		},
+		
+		
+		OnSetParent : function(parent) {
+				this.parent = parent;
+		},
 	});
 	
 	medea.stubs["Entity"] = null;

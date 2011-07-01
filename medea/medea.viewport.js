@@ -97,7 +97,7 @@ medea.stubs["Viewport"] = (function() {
 			this.zorder = zorder || 0;
 			
 			medea._Require("Camera");
-			this.camera = camera || new medea.Camera();
+			this.SetCamera(camera || new medea.Camera());
 
 			// viewports are initially enabled since this is what 
 			// users will most likely want.
@@ -208,6 +208,11 @@ medea.stubs["Viewport"] = (function() {
 		GetSize: function() {
 			return [this.w,this.h];
 		},
+		
+		
+		GetAspect: function() {
+			return this.w/this,h;
+		},
 
 		
 		GetCamera : function() {
@@ -215,7 +220,13 @@ medea.stubs["Viewport"] = (function() {
 		},
 		
 		SetCamera : function(cam) {
+			if (this.camera) {
+				this.camera.OnSetViewport(null);
+			}
 			this.camera = cam;
+			if (this.camera) {
+				this.camera.OnSetViewport(this);
+			}
 		},
 
 

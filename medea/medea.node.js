@@ -27,6 +27,12 @@ medea.stubs["Node"] = (function() {
 		
 		AddEntity: function(ent) {
 			this.entities.push(ent);
+			ent.OnSetParent(this);
+		},
+		
+		RemoveEntity: function(ent) {
+			ent.OnSetParent(null);
+			delete this.entities[ent];
 		},
 
 		GetChildren: function() {
@@ -35,6 +41,11 @@ medea.stubs["Node"] = (function() {
 
 		AddChild: function(child) {
 			this.children.push(child);
+			child.parent = this;
+		},
+		
+		RemoveChild: function(child) {
+			delete this.children[child];
 			child.parent = this;
 		},
 

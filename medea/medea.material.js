@@ -8,9 +8,10 @@ medea.stubs["Material"] = (function() {
 	
 		program:null,
 	
-		init : function(vs,ps) {
+		init : function(vs,ps,constants) {
 			this.vs = vs;
 			this.ps = ps;
+			this.constants = constants;
 			
 // #ifdef DEBUG
 			if (!vs || !ps) {
@@ -28,6 +29,7 @@ medea.stubs["Material"] = (function() {
 			}
 			
 			gl.useProgram(this.program);
+			this._SetAutoState();
 		},
 		
 		End : function() {
@@ -46,6 +48,9 @@ medea.stubs["Material"] = (function() {
 				medea.NotifyFatal(gl.getProgramInfoLog(p));
 				return;
 			}
+		},
+		
+		_SetAutoState : function() {
 		}
 	});
 
@@ -59,6 +64,9 @@ medea.stubs["Material"] = (function() {
 			}
 			
 			this.passes = passes;
+			if (this.passes instanceof medea.Pass) {
+				this.passes = [this.passes];
+			}
 // #ifdef DEBUG
 			if (!this.passes) {
 				medea.DebugAssert("need at least one pass for a material to be complete");
@@ -81,7 +89,11 @@ medea.stubs["Material"] = (function() {
 	});
 	
 	medea.CreateSimpleMaterialFromColor = function(color) {
-		return new medea.Material();
+		return new medea.Material(medea.CreatePassFromShaderPair("simple-color",{color:color}));
+	};
+	
+	medea.CreatePassFromShaderPair = function(name) {
+		return new medea.Pass( medea.CreateShader('remote:'+name+'.vs'), medea.CreateShader('remote:'+name+'.ps') );
 	};
 	
 	medea.stubs["Material"] = null;

@@ -1,5 +1,5 @@
 
-
+// #include "sprintf-0.7.js"
 
 medea = new (function() {
 
@@ -98,6 +98,11 @@ medea = new (function() {
 	// constants
 	this.FRAME_VIEWPORT_UPDATED = 0x1;
 	this.FRAME_CANVAS_SIZE_CHANGED = this.FRAME_VIEWPORT_UPDATED | 0x2;
+	
+	
+	this.AssertionError = function(what) {this.what = what;};
+	this.FatalError = function(what) {this.what = what;};
+	
 
 	this.Init = function(where,settings) {
 		this.canvas  = document.getElementById(where); 
@@ -139,6 +144,20 @@ medea = new (function() {
 		this.enabled_viewports = 0;
 		return this.context;
 	};
+	
+// #ifndef DEBUG
+	this.LogDebug = function(message) {
+	};
+// #else
+	this.LogDebug = function(message) {
+		console.log('DEBUG: ' + message);
+	};
+// #endif
+	
+	this.LogError = function(message) {
+		console.log('ERROR: ' + message);
+	};
+	
 
 	this.GetSettings = function() {
 		return this.settings;
@@ -205,7 +224,9 @@ medea = new (function() {
 	};
 
 	this.NotifyFatal = function(what) {
-		alert("Medea: " + what);
+		what = "Medea: " + what;
+		alert(what);
+		throw new medea.FatalError(what);
 	};
 	
 // #ifndef DEBUG
@@ -213,7 +234,9 @@ medea = new (function() {
 	};
 // #else
 	this.DebugAssert = function(what) {
-		alert("Medea DEBUG ASSERTION: " + what);
+		what = "Medea DEBUG ASSERTION: " + what;
+		alert(what);
+		throw new medea.AssertionError(what);
 	};
 // #endif
 
@@ -226,7 +249,17 @@ medea = new (function() {
 			}
 		}
 		
-		this.DoSingleFrame();
+		// commented due to Chrome swallowing the stacktrace
+	//	try {
+			this.DoSingleFrame();
+	//	}
+	//	catch(a) {
+	//		// resume if an assertion occured during frame processing, greater good stems from the
+	//		// user being able to see what happens next frame.
+	//		if (!(a instanceof medea.AssertionError)) {
+	//			throw a;
+	//		}
+	//	}
 	};
 
 	this.StopNextFrame = function(unset_marker) {
@@ -400,14 +433,25 @@ medea = new (function() {
 		};
 	}
 	
+	this._SetFunctionStub("MakeResource","FileSystem");
+	this._SetFunctionStub("Fetch","FileSystem");
+	this._SetFunctionStub("FetchMultiple","FileSystem");
+	
 	this._SetFunctionStub("CreateSimpleMaterialFromColor","Material");
+	this._SetFunctionStub("CreatePassFromShaderPair","Material");
+	
 	this._SetFunctionStub("CreateVertexBuffer","VertexBuffer");
 	this._SetFunctionStub("CreateIndexBuffer","IndexBuffer");
+	
+	this._SetFunctionStub("CreateShader","Shader");
 	
 	this._SetFunctionStub("CreateStandardMesh_Cube","StandardMesh");
 	this._SetFunctionStub("CreateSimpleMesh","Mesh");
 	
 	this._SetFunctionStub("CreateRenderQueueManager","RenderQueue");
+	
+	
+	this.sprintf = sprintf;
 	
 } )();
 
