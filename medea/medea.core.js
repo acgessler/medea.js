@@ -379,7 +379,7 @@ medea = new (function() {
 
 		ajax.onreadystatechange = function() {  
         		if (ajax.readyState==4) {                          
-          			callback(ajax.responseText,ajax.status,ajax.responseXML);                                             
+          			callback(ajax.responseText,ajax.status);                                             
        			}       
 		}               
 

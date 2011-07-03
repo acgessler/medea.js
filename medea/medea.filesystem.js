@@ -3,6 +3,12 @@
 medea.stubs["FileSystem"] = (function() {
 	var medea = this, gl = medea.gl;
 	
+	// find root location for remote files
+	var root = medea.GetSettings()['dataroot'] || 'data';
+	if (root.charAt(root.length-1) !== '/') {
+		root += '/';
+	}
+	
 	// class Resource
 	medea.Resource = medea.Class.extend({
 	
@@ -10,9 +16,15 @@ medea.stubs["FileSystem"] = (function() {
 			this.complete = false;
 			this.src = src;
 			
-			(src instanceof Array ? medea.FetchMultiple : medea.Fetch)(src,this.OnDelayedInit,function(error) {
-				medea.LogError('failed to delay initialize resource from ' + src + ', resource remains non-complete: '+error);
-			});
+			var outer = this;
+			(src instanceof Array ? medea.FetchMultiple : medea.Fetch)(src,
+				function() {
+					outer.OnDelayedInit.apply(outer,arguments);
+				},
+				function(error) {
+					medea.LogError('failed to delay initialize resource from ' + src + ', resource remains non-complete: '+error);
+				}
+			);
 		},
 		
 		IsComplete : function() {
@@ -40,31 +52,36 @@ medea.stubs["FileSystem"] = (function() {
 	// class LocalFileSystemHandler
 	medea.LocalFileSystemHandler = medea.FileSystemHandler.extend({
 	
-		init : function() {
-		//	window.requestFileSystem(window.PERSISTENT,);
-		}
+		init : function(root) {
+			this.root = root;
+// #ifdef DEBUG
+			if (!this.root) {
+				medea.DebugAssert("need a valid filesystem handle for local file support");
+			}
+// #endif
+		},
 	
 		CanHandle : function(prefix) {
-// #ifdef MEDEA_LOCAL_TEST
-			return prefix == "local" || prefix == 'remote';
-// #else
 			return prefix == "local";
-// #endif
 		},
 		
 		Load : function(what,callback,onerror) {
 			medea.LogDebug("begin loading: " + what + " from local disk");
 			
-			root.getFile('log.txt', {}, function(fileEntry) {} )l
+			root.getFile(what, {}, function(fileEntry) {
 			
-			var reader = new FileReader();
-			reader.onload = function(e) {
-				callback(e.target.result);
-			};
-			
-			reader.onerror = onerror;
-			reader.readAsText(what);			
-			return true;
+				var reader = new FileReader();
+				reader.onload = function(e) {
+					callback(e.target.result);
+				};
+				
+				reader.onerror = onerror;
+				reader.readAsText(fileEntry);			
+				return true;
+			},
+			function(e) {
+				onerror("got error from getFile: " + e);
+			});
 		}
 	});
 	
@@ -76,17 +93,20 @@ medea.stubs["FileSystem"] = (function() {
 		},
 		
 		Load : function(what,callback,onerror) {
+		
+			what = root+what;
+		
 			medea.LogDebug("begin loading: " + what + " via HTTP");
-			medea._AjaxFetch(what,function(response,status,data) {
+			medea._AjaxFetch(what,function(response,status) {
 			
-				medea.LogDebug(medea.sprintf("end loading %s, got response %s with HTTP status %i",what,response,status));
+				medea.LogDebug(medea.sprintf("end loading %s, got response with HTTP status %s",what,status));
 				if (status >= 300 || status < 200) {
 					if (onerror) {
 						onerror(status);
 					}
 					return;
 				}
-				callback(data);
+				callback(response);
 			});
 			return true;
 		}
@@ -181,16 +201,6 @@ medea.stubs["FileSystem"] = (function() {
 	medea._fs_handlers = [
 		new medea.DocumentFileSystemHandler(),
 	];
-
-// #ifdef MEDEA_LOCAL_TEST	
-	if (window.File && window.FileReader && window.FileList && window.Blob) {
-		// workaround for Chrome 
-		window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
-		
-		medea.AddFileSystemHandler(new medea.LocalFileSystemHandler());
-		medea.LogDebug('HTML5 file APIs are available');
-	}
-// #endif
 
 	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler());
 	medea.stubs["FileSystem"] = null;

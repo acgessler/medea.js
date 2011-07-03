@@ -19,17 +19,28 @@ medea.stubs["Shader"] = (function() {
 		},
 		
 		OnDelayedInit : function(data) {
+
 // #ifdef DEBUG
-			if (!(data instanceof String)) {
+			if (typeof data != "string") {
 				medea.DebugAssert("got unexpected argument, perhaps the source for the shader was not a single resource?");
 			}
 // #endif
 
-			gl.shaderSource(this.shader,data);
-			gl.compileShader(this.shader);
+			var s = this.shader;
+			gl.shaderSource(s,data);
+			
+			gl.compileShader(s);
+			if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+				medea.NotifyFatal("failure compiling shader " +  this.src + ", error log: " + gl.getShaderInfoLog(s));
+				return;
+			}
 		
 			// mark this resource as complete
 			this._super();
+		},
+		
+		GetGlShader : function(gl) {
+			return this.shader;
 		}
 	});
 	

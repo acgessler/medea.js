@@ -45,7 +45,7 @@ medea.stubs["Material"] = (function() {
 			
 			gl.linkProgram(p);
 			if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
-				medea.NotifyFatal(gl.getProgramInfoLog(p));
+				medea.NotifyFatal("failure linking program, error log: " + gl.getProgramInfoLog(p));
 				return;
 			}
 		},
@@ -93,7 +93,7 @@ medea.stubs["Material"] = (function() {
 	};
 	
 	medea.CreatePassFromShaderPair = function(name) {
-		return new medea.Pass( medea.CreateShader('remote:'+name+'.vs'), medea.CreateShader('remote:'+name+'.ps') );
+		return new medea.Pass( medea.CreateShader('remote:mcore/shaders/'+name+'.vs'), medea.CreateShader('remote:mcore/shaders/'+name+'.ps') );
 	};
 	
 	medea.stubs["Material"] = null;
