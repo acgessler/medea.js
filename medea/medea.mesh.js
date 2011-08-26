@@ -49,6 +49,12 @@ medea.stubs["Mesh"] = (function() {
 				medea.DebugAssert("need valid material for mesh to be complete");
 			}
 // #endif
+
+// #ifdef LOG
+			medea.LogDebug(medea.sprintf("create mesh, %s items in VBO, %s items in IBO",
+				this.vbo.GetItemCount(),
+				this.ibo ? this.ibo.GetItemCount() : -1));
+// #endif
 		},
 	
 		Render : function(viewport,node,rqmanager) {

@@ -3,6 +3,27 @@
 medea.stubs["Material"] = (function() {
 	var medea = this, gl = medea.gl;
 	
+	
+	medea.ShaderSetters = {
+		"WVP" :  function(prog, pos, state) {
+			//gl.uniformMatrix4fv(pos, false, state.WVP);
+		},
+		
+		"W" :  function(prog, pos, state) {
+			gl.uniformMatrix4fv(pos, false, state.W);
+		},
+		
+		"V" :  function(prog, pos, state) {
+			gl.uniformMatrix4fv(pos, false, state.V);
+		},
+		
+		"P" :  function(prog, pos, state) {
+			gl.uniformMatrix4fv(pos, false, state.P);
+		},
+	
+	};
+	
+	
 	// class Pass
 	medea.Pass = medea.Class.extend({
 	
@@ -12,6 +33,7 @@ medea.stubs["Material"] = (function() {
 			this.vs = vs;
 			this.ps = ps;
 			this.constants = constants;
+			this.auto_setters = [];
 			
 // #ifdef DEBUG
 			if (!vs || !ps) {
@@ -29,7 +51,7 @@ medea.stubs["Material"] = (function() {
 			}
 			
 			gl.useProgram(this.program);
-			this._SetAutoState();
+			this._SetAutoState(statepool);
 		},
 		
 		End : function() {
@@ -48,10 +70,21 @@ medea.stubs["Material"] = (function() {
 				medea.NotifyFatal("failure linking program, error log: " + gl.getProgramInfoLog(p));
 				return;
 			}
+			
+			// extract relevant program parameters
+			for(var k in medea.ShaderSetters) {
+				var pos = gl.getUniformLocation(p, k);
+				if(pos) {
+					this.auto_setters.push([pos,medea.ShaderSetters[k]]);
+				}
+			};
 		},
 		
-		_SetAutoState : function() {
-		}
+		_SetAutoState : function(statepool) {
+			this.auto_setters.forEach(function(v,k) {
+				v[1](this.program,v[0],statepool);
+			});
+		},
 	});
 
 	// class Material
