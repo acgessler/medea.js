@@ -4,8 +4,8 @@ medea.stubs["Shader"] = (function() {
 	
 	medea._Require("FileSystem");
 	
-	medea.SHADER_TYPE_PIXEL = 'ps';
-	medea.SHADER_TYPE_VERTEX = 'vs'; 
+	medea.SHADER_TYPE_PIXEL = gl.FRAGMENT_SHADER;
+	medea.SHADER_TYPE_VERTEX = gl.VERTEX_SHADER; 
 	
 	medea.Shader = medea.Resource.extend( {
 	
@@ -37,6 +37,8 @@ medea.stubs["Shader"] = (function() {
 		
 			// mark this resource as complete
 			this._super();
+			
+			medea.LogDebug("successfully compiled shader " + this.src);
 		},
 		
 		GetGlShader : function(gl) {
