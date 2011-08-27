@@ -73,7 +73,7 @@ medea.stubs["Mesh"] = (function() {
 	
 			var st = medea.GetStatistics();
 			var vboc = this.vbo.GetItemCount();
-			var iboc = this.ibo ? this.ibo.GetItemCount()/3 : null;
+			var iboc = this.ibo ? this.ibo.GetItemCount() : null;
 			
 			// set vbo and ibo if needed
 			gl.bindBuffer(gl.ARRAY_BUFFER,this.vbo.GetBufferId());
@@ -82,17 +82,19 @@ medea.stubs["Mesh"] = (function() {
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.ibo.GetBufferId());
 			}
 					
+			var outer = this;
 			this.material.Use(function() {
 					// update statistics
 					st.vertices_frame += vboc;
 					
-					if (this.ibo) {
-						gl.drawElements(gl.TRIANGLES,iboc,this.ibo.GetGlType(),0);
+					if (outer.ibo) {
+					
+						gl.drawElements(gl.TRIANGLES,iboc,outer.ibo.GetGlType(),0);
 						st.primitives_frame += iboc;
 					}
 					else {
 						
-						gl.drawArrays(gl.TRIANGLES,this.vboc);
+						gl.drawArrays(gl.TRIANGLES,vboc);
 						st.primitives_frame += vboc/3;
 					}	
 			},statepool);				

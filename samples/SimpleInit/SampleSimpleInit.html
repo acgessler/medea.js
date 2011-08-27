@@ -23,6 +23,7 @@
 <script type="text/javascript" src="../../medea/medea.material.js"></script>
 <script type="text/javascript" src="../../medea/medea.standardmesh.js"></script>
 
+
 <script type="text/javascript">
 
 function run() {
@@ -43,7 +44,7 @@ function run() {
 	var m = medea.CreateStandardMesh_Cube();
 	medea.GetRootNode().AddEntity(m);
 	var root = medea.GetRootNode();
-	root.Translate(vec3.create([0,0,-10]));
+	root.Translate(vec3.create([0,0,-5]));
 
 	medea.SetDebugPanel(null,true);
 	medea.Start();

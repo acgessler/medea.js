@@ -26,6 +26,8 @@ medea.stubs["Camera"] = (function() {
 			if (viewport) {
 				viewport.SetCamera(this);
 			}
+			
+			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_VIEW;
 		},
 		
 	
@@ -47,7 +49,7 @@ medea.stubs["Camera"] = (function() {
 		
 		GetProjectionMatrix : function() {
 			this._UpdateProjectionMatrix();
-			return this.view;
+			return this.proj;
 		},
 		
 		OnSetParent : function(parent) {
@@ -79,19 +81,23 @@ medea.stubs["Camera"] = (function() {
 		
 		
 		SetZNear : function(v) {
+			this.flags |= medea._CAMERA_DIRTY_PROJ;
 			this.znear = v;
 		},
 		
 		SetZFar : function(v) {
+			this.flags |= medea._CAMERA_DIRTY_PROJ;
 			this.zfar = v;
 		},
 		
 		// aspect may be set to null to have the camera implementation take it from the viewport
 		SetAspect : function(v) {
+			this.flags |= medea._CAMERA_DIRTY_PROJ;
 			this.aspect = v;
 		},
 		
 		SetFOV : function(v) {
+			this.flags |= medea._CAMERA_DIRTY_PROJ;
 			this.fovy = v;
 		},
 		
@@ -100,6 +106,8 @@ medea.stubs["Camera"] = (function() {
 			if (!(this.flags & medea._CAMERA_DIRTY_VIEW)) {
 				return this.view;
 			}
+			
+			// XXX take camera node's transformation into account
 			
 			this.flags &= ~medea._CAMERA_DIRTY_VIEW;
 			return this.view;
@@ -111,7 +119,7 @@ medea.stubs["Camera"] = (function() {
 			}
 			
 			var aspect = this.aspect;
-			if (aspect === null) {
+			if (aspect === undefined) {
 // #ifdef DEBUG
 				if (!this.viewport) {
 					medea.DebugAssert("aspect may only be omitted if the camera is assigned to a viewport");
@@ -119,7 +127,9 @@ medea.stubs["Camera"] = (function() {
 // #endif
 				aspect = this.viewport.GetAspect();
 			}
+			
 			mat4.perspective(this.fovy,aspect,this.znear,this.zfar,this.proj);
+			
 			
 			this.flags &= ~medea._CAMERA_DIRTY_PROJ;
 			return this.proj;

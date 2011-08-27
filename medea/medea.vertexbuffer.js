@@ -149,7 +149,7 @@ medea.stubs["VertexBuffer"] = (function() {
 			var offset = 0;
 			if (this.positions) {
 				var view = new Float32Array(ab,offset);
-				for(var i = 0, end = this.itemcount*3, p = this.positions, mul = stride/4; i < end; i += 3) {
+				for(var i = 0, end = this.itemcount, p = this.positions, mul = stride/4; i < end; ++i) {
 					view[i*mul+0] = p[i+0]; 
 					view[i*mul+1] = p[i+1];
 					view[i*mul+2] = p[i+2];
@@ -161,7 +161,7 @@ medea.stubs["VertexBuffer"] = (function() {
 			
 			if (this.normals) {
 				var view = new Float32Array(ab,offset);
-				for(var i = 0, end = this.itemcount*3, p = this.normals, mul = stride/4; i < end; i += 3) {
+				for(var i = 0, end = this.itemcount, p = this.normals, mul = stride/4; i < end; ++i) {
 					view[i*mul+0] = p[i+0]; 
 					view[i*mul+1] = p[i+1];
 					view[i*mul+2] = p[i+2];
@@ -198,7 +198,9 @@ medea.stubs["VertexBuffer"] = (function() {
 			}
 			
 			this.stride = stride;
-			gl.bufferData(gl.ARRAY_BUFFER,ab, this.flags & medea.VERTEXBUFFER_USAGE_DYNAMIC ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
+			// HACK: WebGlInspector currently throws errors if it encounters a raw ArrayBuffer ---
+	
+			gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(ab,0), this.flags & medea.VERTEXBUFFER_USAGE_DYNAMIC ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
 			this.interleaved = ab;
 		},
 

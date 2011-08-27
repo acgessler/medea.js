@@ -149,7 +149,7 @@ var create3DContext = function(canvas, opt_attribs) {
     } catch(e) {}
     if (context) {
 		// ACG: automatically create debug context if webgl-debug.js is present
-	  if (WebGLDebugUtils !== undefined) {
+	  if (window['WebGLDebugUtils'] !== undefined) {
 		context = WebGLDebugUtils.makeDebugContext(context);
 	  }
       break;
