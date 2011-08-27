@@ -13,9 +13,9 @@ medea.stubs["Viewport"] = (function() {
 	medea._DefaultDerivedStates = {
 	
 		"WVP": function(statepool) {
-			var m = M4x4.$();
-			M4x4.mul(statepool.GetQuick("W"),statepool.GetQuick("V"),m);
-			M4x4.mul(m,statepool.GetQuick("P"),m);
+			var m = mat4.create();
+			mat4.multiply(statepool.GetQuick("W"),statepool.GetQuick("V"),m);
+			mat4.multiply(m,statepool.GetQuick("P"),m);
 			
 			return m;
 		},
@@ -275,9 +275,11 @@ medea.stubs["Viewport"] = (function() {
 			
 			statepool.Set("V",this.camera.GetViewMatrix());
 			statepool.Set("P",this.camera.GetProjectionMatrix());
-			statepool.Set("W",M4x4.I);
+			statepool.Set("W",mat4.identity(mat4.create()));
 			
 			this.rqManager.Flush(statepool);
+			medea.gl.flush();
+			
 			this.updated = false;
 		}
 	});

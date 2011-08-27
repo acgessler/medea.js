@@ -14,8 +14,8 @@ medea.stubs["Camera"] = (function() {
 		init : function(name,fovy,aspect,znear,zfar,viewport) {	
 			this._super(name);
 			
-			this.view = M4x4.clone(M4x4.I);
-			this.proj = M4x4.clone(M4x4.I);
+			this.view = mat4.identity(mat4.create());
+			this.proj = mat4.identity(mat4.create());
 			
 			this.fovy = fovy || 90;
 			this.aspect = aspect;
@@ -119,7 +119,7 @@ medea.stubs["Camera"] = (function() {
 // #endif
 				aspect = this.viewport.GetAspect();
 			}
-			M4x4.makePerspective(this.fovy,aspect,this.znear,this.zfar,this.proj);
+			mat4.perspective(this.fovy,aspect,this.znear,this.zfar,this.proj);
 			
 			this.flags &= ~medea._CAMERA_DIRTY_PROJ;
 			return this.proj;

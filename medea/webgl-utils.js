@@ -145,8 +145,13 @@ var create3DContext = function(canvas, opt_attribs) {
   for (var ii = 0; ii < names.length; ++ii) {
     try {
       context = canvas.getContext(names[ii], opt_attribs);
+	  
     } catch(e) {}
     if (context) {
+		// ACG: automatically create debug context if webgl-debug.js is present
+	  if (WebGLDebugUtils !== undefined) {
+		context = WebGLDebugUtils.makeDebugContext(context);
+	  }
       break;
     }
   }

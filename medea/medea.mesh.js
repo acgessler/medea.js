@@ -12,17 +12,21 @@ medea.stubs["Mesh"] = (function() {
 		
 		distance: null,
 		
-		init : function(mesh,node,viewport) {
+		init : function(mesh,entity,viewport) {
 			this.mesh = mesh;
-			this.node = node;
+			this.entity = entity;
 			this.viewport = viewport;
-			this.Draw = function(statepool) { mesh.DrawNow(statepool); };
+			this.Draw = function(statepool) { 
+		
+				statepool.Set("W",entity.parent.GetGlobalTransform());
+				mesh.DrawNow(statepool); 
+			};
 		},
 		
 		// required methods for automatic sorting of renderqueues
 		DistanceEstimate : function() {
 			if (this.distance === null) {
-				this.distance = V3.lengthSquared(V3.sub(this.viewport.GetCameraWorldPos(),this.node.GetWorldPos()));
+				this.distance = V3.lengthSquared(V3.sub(this.viewport.GetCameraWorldPos(),this.entity.parent.GetWorldPos()));
 			}
 			return this.distance;
 		},
@@ -57,9 +61,9 @@ medea.stubs["Mesh"] = (function() {
 // #endif
 		},
 	
-		Render : function(viewport,node,rqmanager) {
+		Render : function(viewport,entity,rqmanager) {
 			// construct a renderable capable of drawing this mesh upon request by the render queue manager
-			rqmanager.Push(medea.RENDERQUEUE_DEFAULT,new medea.RenderJob(this,node,viewport));
+			rqmanager.Push(medea.RENDERQUEUE_DEFAULT,new medea.RenderJob(this,entity,viewport));
 		},
 		
 		Update : function() {
@@ -72,7 +76,7 @@ medea.stubs["Mesh"] = (function() {
 			var iboc = this.ibo ? this.ibo.GetItemCount()/3 : null;
 			
 			// set vbo and ibo if needed
-			gl.bindBuffer(gl.ELEMENT_BUFFER,this.vbo.GetBufferId());
+			gl.bindBuffer(gl.ARRAY_BUFFER,this.vbo.GetBufferId());
 			
 			if (this.ibo) {
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.ibo.GetBufferId());

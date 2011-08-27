@@ -6,21 +6,24 @@ medea.stubs["Material"] = (function() {
 	
 	medea.ShaderSetters = {
 		"WVP" :  function(prog, pos, state) {
-			//gl.uniformMatrix4fv(pos, false, state.WVP);
+			gl.uniformMatrix4fv(pos, false, state.Get("WVP"));
+		},
+		
+		"WIT" :  function(prog, pos, state) {
+			gl.uniformMatrix4fv(pos, false, state.Get("WIT"));
 		},
 		
 		"W" :  function(prog, pos, state) {
-			gl.uniformMatrix4fv(pos, false, state.W);
+			gl.uniformMatrix4fv(pos, false, state.Get("W"));
 		},
 		
 		"V" :  function(prog, pos, state) {
-			gl.uniformMatrix4fv(pos, false, state.V);
+			gl.uniformMatrix4fv(pos, false, state.Get("V"));
 		},
 		
 		"P" :  function(prog, pos, state) {
-			gl.uniformMatrix4fv(pos, false, state.P);
+			gl.uniformMatrix4fv(pos, false, state.Get("P"));
 		},
-	
 	};
 	
 	
