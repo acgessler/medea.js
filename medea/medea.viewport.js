@@ -211,7 +211,7 @@ medea.stubs["Viewport"] = (function() {
 		
 		
 		GetAspect: function() {
-			return this.w/this.h;
+			return (this.w*medea.canvas.width)/(this.h*medea.canvas.height);
 		},
 
 		
