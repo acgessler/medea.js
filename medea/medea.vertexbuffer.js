@@ -76,6 +76,7 @@ medea.stubs["VertexBuffer"] = (function() {
 		itemcount : -1,
 		
 		interleaved : null,
+		state_closure : [],
 	
 		init : function(data,flags) {
 		
@@ -118,6 +119,7 @@ medea.stubs["VertexBuffer"] = (function() {
 		SetupGlData : function() {
 
 			var stride = 0, idx = 0;
+			var state_closure = this.state_closure = [];
 			
 			// compute stride per vertex
 			if (this.positions) {
@@ -144,39 +146,46 @@ medea.stubs["VertexBuffer"] = (function() {
 			}
 			
 			var ab = new ArrayBuffer(this.itemcount * stride);
+			var addStateEntry = function(idx,elems,type) { (function(idx,stride,offset) { 
+					state_closure.push(function() {
+						gl.enableVertexAttribArray(idx);
+						gl.vertexAttribPointer(idx,elems || 3, type || gl.FLOAT,false,stride,offset);
+					});
+				}) (idx,stride,offset);
+			};
 			
 			// now setup vertex attributes accordingly
 			var offset = 0;
 			if (this.positions) {
 				var view = new Float32Array(ab,offset);
 				for(var i = 0, end = this.itemcount, p = this.positions, mul = stride/4; i < end; ++i) {
-					view[i*mul+0] = p[i+0]; 
-					view[i*mul+1] = p[i+1];
-					view[i*mul+2] = p[i+2];
+					view[i*mul+0] = p[i*3+0]; 
+					view[i*mul+1] = p[i*3+1];
+					view[i*mul+2] = p[i*3+2];
 				}
 				
-				gl.vertexAttribPointer(idx++,3,gl.FLOAT,false,stride,offset);
+				addStateEntry(idx++);
 				offset += 3*4;
 			}
 			
 			if (this.normals) {
 				var view = new Float32Array(ab,offset);
 				for(var i = 0, end = this.itemcount, p = this.normals, mul = stride/4; i < end; ++i) {
-					view[i*mul+0] = p[i+0]; 
-					view[i*mul+1] = p[i+1];
-					view[i*mul+2] = p[i+2];
+					view[i*mul+0] = p[i*3+0]; 
+					view[i*mul+1] = p[i*3+1];
+					view[i*mul+2] = p[i*3+2];
 				}
 				
-				gl.vertexAttribPointer(idx++,3,gl.FLOAT,false,stride,offset);
+				addStateEntry(idx++);
 				offset += 3*4;
 			}
 			
 			// XXX
 			if (this.tangents) {
-				gl.vertexAttribPointer(idx++,3,gl.FLOAT,false,stride,offset);
+				addStateEntry(idx++);
 				offset += 3*4;
 				if (bitangents) {
-					gl.vertexAttribPointer(idx++,3,gl.FLOAT,false,stride,offset);
+					addStateEntry(idx++);
 					offset += 3*4;
 				}
 			}
@@ -184,7 +193,7 @@ medea.stubs["VertexBuffer"] = (function() {
 			if (this.colors) {
 				this.colors.forEach(function(u) {
 					var elems = Math.floor(u.length / this.itemcount), type = medea._GLUtilIDForArrayType(u);
-					gl.vertexAttribPointer(idx++,elems,type,false,stride,offset);
+					addStateEntry(idx++,elems,type);
 					offset += elems * medea._GLUtilSpaceForSingleElement(type);
 				},this);
 			}
@@ -192,7 +201,7 @@ medea.stubs["VertexBuffer"] = (function() {
 			if (this.uvs) {
 				this.uvs.forEach(function(u) {
 					var elems = Math.floor(u.length / this.itemcount), type = medea._GLUtilIDForArrayType(u);
-					gl.vertexAttribPointer(idx++,elems,type,false,stride,offset);
+					addStateEntry(idx++,elems,type);
 					offset += elems * medea._GLUtilSpaceForSingleElement(type);
 				},this);
 			}
@@ -209,6 +218,10 @@ medea.stubs["VertexBuffer"] = (function() {
 			return this.itemcount;
 		},
 		
+		GetStateClosure : function() {
+			return this.state_closure;
+		},
+		
 	});
 	
 	// class VertexBuffer
@@ -223,6 +236,8 @@ medea.stubs["VertexBuffer"] = (function() {
 		// initial flags
 		flags: 0,
 		
+		state_closure : [],
+		
 		init : function(init_data,flags) {	
 			this.flags = flags | 0;
 			var access = new medea._VBOInitDataAccessor(init_data,this.flags);
@@ -232,6 +247,7 @@ medea.stubs["VertexBuffer"] = (function() {
 			
 			access.SetupGlData();
 			this.itemcount = access.GetItemCount();
+			this.state_closure = access.GetStateClosure();
 		},
 		
 		GetBufferId : function() {
@@ -244,6 +260,13 @@ medea.stubs["VertexBuffer"] = (function() {
 		
 		GetItemCount : function() {
 			return this.itemcount;
+		},
+		
+		_Bind : function() {
+			gl.bindBuffer(gl.ARRAY_BUFFER,this.GetBufferId());
+			this.state_closure.forEach(function(e) {
+				e();
+			});
 		},
 	});
 	

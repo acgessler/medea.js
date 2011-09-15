@@ -26,7 +26,7 @@ medea.stubs["Mesh"] = (function() {
 		// required methods for automatic sorting of renderqueues
 		DistanceEstimate : function() {
 			if (this.distance === null) {
-				this.distance = V3.lengthSquared(V3.sub(this.viewport.GetCameraWorldPos(),this.entity.parent.GetWorldPos()));
+				this.distance = vec3.lengthSquared(vec3.sub(this.viewport.GetCameraWorldPos(),this.entity.parent.GetWorldPos()));
 			}
 			return this.distance;
 		},
@@ -76,10 +76,10 @@ medea.stubs["Mesh"] = (function() {
 			var iboc = this.ibo ? this.ibo.GetItemCount() : null;
 			
 			// set vbo and ibo if needed
-			gl.bindBuffer(gl.ARRAY_BUFFER,this.vbo.GetBufferId());
+			this.vbo._Bind();
 			
 			if (this.ibo) {
-				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.ibo.GetBufferId());
+				this.ibo._Bind();
 			}
 					
 			var outer = this;
@@ -90,14 +90,15 @@ medea.stubs["Mesh"] = (function() {
 					if (outer.ibo) {
 					
 						gl.drawElements(gl.TRIANGLES,iboc,outer.ibo.GetGlType(),0);
-						st.primitives_frame += iboc;
+						st.primitives_frame += iboc/3;
 					}
 					else {
 						
 						gl.drawArrays(gl.TRIANGLES,vboc);
 						st.primitives_frame += vboc/3;
 					}	
-			},statepool);				
+			},statepool);	
+		
 		}
 	});
 	

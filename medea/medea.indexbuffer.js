@@ -53,6 +53,11 @@ medea.stubs["IndexBuffer"] = (function() {
 		GetFlags : function() {
 			return this.flags;
 		},
+		
+		
+		_Bind : function() {
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.GetBufferId());
+		},
 	});
 	
 	medea.CreateIndexBuffer = function(indices,flags) {

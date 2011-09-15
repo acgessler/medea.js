@@ -53,6 +53,7 @@ medea.stubs["Material"] = (function() {
 				return;
 			}
 			
+			
 			gl.useProgram(this.program);
 			this._SetAutoState(statepool);
 		},
@@ -68,11 +69,21 @@ medea.stubs["Material"] = (function() {
 			gl.attachShader(p,this.vs.GetGlShader());
 			gl.attachShader(p,this.ps.GetGlShader());
 			
+			//gl.bindAttribLocation(this.program,0,"POSIN");
+			
 			gl.linkProgram(p);
 			if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
 				medea.NotifyFatal("failure linking program, error log: " + gl.getProgramInfoLog(p));
 				return;
 			}
+			
+			// #ifdef DEBUG
+			gl.validateProgram(p);
+			if (!gl.getProgramParameter(p, gl.VALIDATE_STATUS)) {
+				medea.NotifyFatal("failure validating program, error log: " + gl.getProgramInfoLog(p));
+				return;
+			}
+			// #endif
 			
 			// extract relevant program parameters
 			for(var k in medea.ShaderSetters) {
@@ -84,7 +95,7 @@ medea.stubs["Material"] = (function() {
 		},
 		
 		_SetAutoState : function(statepool) {
-			this.auto_setters.forEach(function(v,k) {
+			this.auto_setters.forEach(function(v) {
 				v[1](this.program,v[0],statepool);
 			});
 		},
