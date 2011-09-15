@@ -32,11 +32,12 @@ medea.stubs["Material"] = (function() {
 	
 		program:null,
 	
-		init : function(vs,ps,constants) {
+		init : function(vs,ps,constants,attr_map) {
 			this.vs = vs;
 			this.ps = ps;
 			this.constants = constants;
 			this.auto_setters = [];
+			this.attr_map = attr_map || {};
 			
 // #ifdef DEBUG
 			if (!vs || !ps) {
@@ -60,6 +61,12 @@ medea.stubs["Material"] = (function() {
 		
 		End : function() {
 		},
+		
+		GetAttributeMap : function() {
+			return this.attr_map;
+		},
+		
+		
 		
 		_TryAssembleProgram : function() {
 			if (this.program || !this.vs.IsComplete() || !this.ps.IsComplete()) {
@@ -129,10 +136,10 @@ medea.stubs["Material"] = (function() {
 			// invoke the drawing callback once per pass
 			this.passes.forEach(function(pass) {
 				pass.Begin(statepool);
-					drawfunc();
+					drawfunc(pass);
 				pass.End();
 			});
-		}
+		},
 	});
 	
 	medea.CreateSimpleMaterialFromColor = function(color) {

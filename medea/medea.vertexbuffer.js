@@ -2,6 +2,20 @@
 medea.stubs["VertexBuffer"] = (function() {
 	var medea = this, gl = medea.gl;
 	
+	
+	// constants for mappings of various vertex attributes
+	medea.ATTR_POSITION      = 0x10000;
+	medea.ATTR_NORMAL        = 0x10001;
+	medea.ATTR_TANGENT       = 0x10002;
+	medea.ATTR_BITANGENT     = 0x10003;
+	
+	medea.ATTR_TEXCOORD_BASE = 0x20000;
+	medea.ATTR_COLOR_BASE    = 0x30000;
+	
+	medea.ATTR_TEXCOORD = function(n) { return medea.ATTR_TEXCOORD_BASE + n; };
+	medea.ATTR_COLOR = function(n) { return medea.ATTR_COLOR_BASE + n; };
+	
+	
 	// mark data in the buffer as frequently changing and hint the driver to optimize for this
 	medea.VERTEXBUFFER_USAGE_DYNAMIC = 0x1;
 	
@@ -146,10 +160,13 @@ medea.stubs["VertexBuffer"] = (function() {
 			}
 			
 			var ab = new ArrayBuffer(this.itemcount * stride);
-			var addStateEntry = function(idx,elems,type) { (function(idx,stride,offset) { 
-					state_closure.push(function() {
-						gl.enableVertexAttribArray(idx);
-						gl.vertexAttribPointer(idx,elems || 3, type || gl.FLOAT,false,stride,offset);
+			var addStateEntry = function(attr_type,idx,elems,type) { (function(idx,stride,offset) { 
+					state_closure.push(function(in_map) {
+						// first see if there is a mapping defined for this attribute, if so take the
+						// index from the given mapping table rather than counting from zero.
+						var real_idx = in_map[attr_type] || idx;
+						gl.enableVertexAttribArray(real_idx);
+						gl.vertexAttribPointer(real_idx,elems || 3, type || gl.FLOAT,false,stride,offset);
 					});
 				}) (idx,stride,offset);
 			};
@@ -164,7 +181,7 @@ medea.stubs["VertexBuffer"] = (function() {
 					view[i*mul+2] = p[i*3+2];
 				}
 				
-				addStateEntry(idx++);
+				addStateEntry(medea.ATTR_POSITION,idx++);
 				offset += 3*4;
 			}
 			
@@ -176,32 +193,32 @@ medea.stubs["VertexBuffer"] = (function() {
 					view[i*mul+2] = p[i*3+2];
 				}
 				
-				addStateEntry(idx++);
+				addStateEntry(medea.ATTR_NORMAL,idx++);
 				offset += 3*4;
 			}
 			
 			// XXX
 			if (this.tangents) {
-				addStateEntry(idx++);
+				addStateEntry(medea.ATTR_TANGENT,idx++);
 				offset += 3*4;
 				if (bitangents) {
-					addStateEntry(idx++);
+					addStateEntry(medea.ATTR_BITANGENT,idx++);
 					offset += 3*4;
 				}
 			}
 			
 			if (this.colors) {
-				this.colors.forEach(function(u) {
+				this.colors.forEach(function(u,i) {
 					var elems = Math.floor(u.length / this.itemcount), type = medea._GLUtilIDForArrayType(u);
-					addStateEntry(idx++,elems,type);
+					addStateEntry(medea.ATTR_COLOR(i),idx++,elems,type);
 					offset += elems * medea._GLUtilSpaceForSingleElement(type);
 				},this);
 			}
 			
 			if (this.uvs) {
-				this.uvs.forEach(function(u) {
+				this.uvs.forEach(function(u,i) {
 					var elems = Math.floor(u.length / this.itemcount), type = medea._GLUtilIDForArrayType(u);
-					addStateEntry(idx++,elems,type);
+					addStateEntry(medea.ATTR_TEXCOORD(i),idx++,elems,type);
 					offset += elems * medea._GLUtilSpaceForSingleElement(type);
 				},this);
 			}
@@ -262,10 +279,10 @@ medea.stubs["VertexBuffer"] = (function() {
 			return this.itemcount;
 		},
 		
-		_Bind : function() {
+		_Bind : function(attrMap) {
 			gl.bindBuffer(gl.ARRAY_BUFFER,this.GetBufferId());
 			this.state_closure.forEach(function(e) {
-				e();
+				e(attrMap);
 			});
 		},
 	});

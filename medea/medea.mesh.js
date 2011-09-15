@@ -74,16 +74,17 @@ medea.stubs["Mesh"] = (function() {
 			var st = medea.GetStatistics();
 			var vboc = this.vbo.GetItemCount();
 			var iboc = this.ibo ? this.ibo.GetItemCount() : null;
-			
-			// set vbo and ibo if needed
-			this.vbo._Bind();
-			
-			if (this.ibo) {
-				this.ibo._Bind();
-			}
+
 					
 			var outer = this;
-			this.material.Use(function() {
+			this.material.Use(function(pass) {
+					// set vbo and ibo if needed
+					outer.vbo._Bind(pass.GetAttributeMap());
+					
+					if (outer.ibo) {
+						outer.ibo._Bind();
+					}
+			
 					// update statistics
 					st.vertices_frame += vboc;
 					

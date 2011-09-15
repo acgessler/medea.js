@@ -14,17 +14,17 @@ medea.stubs["Viewport"] = (function() {
 	
 		"WVP": function(statepool) {
 			var m = mat4.create();
-			mat4.multiply(statepool.GetQuick("W"),statepool.GetQuick("V"),m);
-			mat4.multiply(m,statepool.GetQuick("P"),m);
+			mat4.multiply(statepool.GetQuick("V"),statepool.GetQuick("W"),m);
+			mat4.multiply(statepool.GetQuick("P"),m,m);
 			
 			return m;
 		},
 		
 		"WIT": function(statepool) {
-			var m = M4x4.$();
+			var m = mat4.create();
 			// XXX inverse() does not actually exist.
-			M4x4.inverse(statepool.GetQuick("W"),m);
-			M4x4.transpose(m,m);
+			mat4.inverse(statepool.GetQuick("W"),m);
+			mat4.transpose(m,m);
 			return m;
 		},
 	};
