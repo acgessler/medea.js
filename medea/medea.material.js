@@ -36,7 +36,7 @@ medea.stubs["Material"] = (function() {
 			this.vs = vs;
 			this.ps = ps;
 			this.constants = constants;
-			this.auto_setters = [];
+			this.auto_setters = {};
 			this.attr_map = attr_map || {};
 			
 // #ifdef DEBUG
@@ -54,7 +54,6 @@ medea.stubs["Material"] = (function() {
 				return;
 			}
 			
-			
 			gl.useProgram(this.program);
 			this._SetAutoState(statepool);
 		},
@@ -66,6 +65,53 @@ medea.stubs["Material"] = (function() {
 			return this.attr_map;
 		},
 		
+		Set : function(k,val) {
+			if (val === undefined) {
+				return;
+			}
+		
+			var c = this.constants;
+			c[k] = val;	
+			
+			if (!this.program) {
+				// do the real work later when we have the actual program 
+				return;
+			}
+			
+			var pos = gl.getUniformLocation(this.program, k);
+			if (!pos) {
+				// #ifdef DEBUG
+				medea.DebugAssert("uniform variable location not found: " + k);
+				// #endif
+				return;
+			}
+			
+			var handler = null;
+			// XXX WHY does isArray() not work here?
+			if (val instanceof Array) {
+				handler = function(prog, pos, state) {gl.uniform4fv(pos, c[k]);};
+			}
+			// note: presence of glMatrixArrayType depends on glMatrix.js
+			else if (val instanceof glMatrixArrayType) {
+				handler = function(prog, pos, state) {gl.uniformMatrix4fv(pos, false, c[k]);};
+			}
+			else if (val instanceof Image) {
+				// explicitly bound texture
+			}
+			// #ifdef DEBUG
+			else {
+				medea.DebugAssert('constant type not recognized, ignoring: ' + k);
+			}
+			// #endif
+			
+			if(handler) {
+				this.auto_setters[k] = [pos,handler]; 
+			}
+		},
+		
+		Get : function(k) {
+			return this.constants[k];
+		},
 		
 		
 		_TryAssembleProgram : function() {
@@ -92,19 +138,27 @@ medea.stubs["Material"] = (function() {
 			}
 			// #endif
 			
-			// extract relevant program parameters
+			// extract uniforms that we update automatically and setup state managers for them
 			for(var k in medea.ShaderSetters) {
-				var pos = gl.getUniformLocation(p, k);
+				var pos = gl.getUniformLocation(this.program, k);
 				if(pos) {
-					this.auto_setters.push([pos,medea.ShaderSetters[k]]);
+					this.auto_setters[k] = [pos,medea.ShaderSetters[k]];
 				}
 			};
+			
+			// install state managers for all pre-defined constants that we got from the caller
+			var old = this.constants;
+			this.constants = {};
+			for(var k in old) {
+				this.Set(k,old[k]);
+			}
 		},
 		
 		_SetAutoState : function(statepool) {
-			this.auto_setters.forEach(function(v) {
+			for(k in this.auto_setters) {
+				var v = this.auto_setters[k];
 				v[1](this.program,v[0],statepool);
-			});
+			}
 		},
 	});
 
@@ -128,6 +182,10 @@ medea.stubs["Material"] = (function() {
 // #endif
 		},
 		
+		Pass : function(n) {
+			return this.passes[n];
+		},
+		
 		GetId: function() {
 			return 0;
 		},
@@ -146,8 +204,12 @@ medea.stubs["Material"] = (function() {
 		return new medea.Material(medea.CreatePassFromShaderPair("simple-color",{color:color}));
 	};
 	
-	medea.CreatePassFromShaderPair = function(name) {
-		return new medea.Pass( medea.CreateShader('remote:mcore/shaders/'+name+'.vs'), medea.CreateShader('remote:mcore/shaders/'+name+'.ps') );
+	medea.CreateSimpleMaterialFromTexture = function(tex) {
+		return new medea.Material(medea.CreatePassFromShaderPair("simple-textured",{texture:texture}));
+	};
+	
+	medea.CreatePassFromShaderPair = function(name, constants, attr_map) {
+		return new medea.Pass( medea.CreateShader('remote:mcore/shaders/'+name+'.vs'), medea.CreateShader('remote:mcore/shaders/'+name+'.ps'), constants, attr_map );
 	};
 	
 	medea.stubs["Material"] = null;

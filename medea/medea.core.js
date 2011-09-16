@@ -28,6 +28,13 @@ medea = new (function() {
 	  };
 	}
 	
+	// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
+	if (typeof Array.isArray != 'function') {
+	  Array.isArray = function (obj) {
+		return Object.prototype.toString.call(obj) == '[object Array]';
+	  };
+	}
+	
 	/* Simple JavaScript Inheritance
 	 * By John Resig http://ejohn.org/
 	 * MIT Licensed.
@@ -438,6 +445,7 @@ medea = new (function() {
 	this._SetFunctionStub("FetchMultiple","FileSystem");
 	
 	this._SetFunctionStub("CreateSimpleMaterialFromColor","Material");
+	this._SetFunctionStub("CreateSimpleMaterialFromTexture","Material");
 	this._SetFunctionStub("CreatePassFromShaderPair","Material");
 	
 	this._SetFunctionStub("CreateVertexBuffer","VertexBuffer");

@@ -51,7 +51,7 @@ medea.stubs["StandardMesh"] = (function() {
 			16, 17, 18,     16, 18, 19,   // right  
 			20, 21, 22,     20, 22, 23    // left
 		],
-		color_or_material || [0.5,0.5,0.5,1.0]);
+		color_or_material || [1.0,0.0,0.0,1.0]);
 	};
 
 

@@ -69,6 +69,13 @@ medea.stubs["Mesh"] = (function() {
 		Update : function() {
 		},
 		
+		Material : function(m) {
+			if (m === undefined) {
+				return this.material;
+			}
+			this.material = m;
+		},
+		
 		DrawNow : function(statepool) {
 	
 			var st = medea.GetStatistics();
