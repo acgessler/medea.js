@@ -42,8 +42,6 @@ function run() {
 	medea.SetTickCallback(function(dtime) {
 		time += dtime;
 		root.Rotate(dtime,vec3.create([1,1,0]));
-		
-		m.Material().Pass(0).Set('color', [Math.sin(time),Math.sin(time+1.6),0.5,1.0] );
 		return true;
 	});	
 

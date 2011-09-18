@@ -95,8 +95,11 @@ medea.stubs["Material"] = (function() {
 			else if (val instanceof glMatrixArrayType) {
 				handler = function(prog, pos, state) {gl.uniformMatrix4fv(pos, false, c[k]);};
 			}
-			else if (val instanceof Image) {
+			else if (val instanceof medea.Texture) {
 				// explicitly bound texture
+				handler = function(prog, pos, state) {
+					gl.uniform1i(pos,c[k]._Bind());
+				};
 			}
 			// #ifdef DEBUG
 			else {
@@ -182,8 +185,21 @@ medea.stubs["Material"] = (function() {
 // #endif
 		},
 		
-		Pass : function(n) {
-			return this.passes[n];
+		Pass : function(n,p) {
+			if(p === undefined) {
+				return this.passes[n];
+			}
+			if (n == this.passes.length) {
+				this.passes.push(p);
+				return;
+			}
+			// #ifdef DEBUG
+			else if (n > this.passes.length) {
+				medea.DebugAssert('pass index out of range, cannot add pass if there is no pass that preceedes it: ' + n);
+				return;
+			}
+			// #endif 
+			this.passes[n] = p;
 		},
 		
 		GetId: function() {

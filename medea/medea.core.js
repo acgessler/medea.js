@@ -452,6 +452,7 @@ medea = new (function() {
 	this._SetFunctionStub("CreateIndexBuffer","IndexBuffer");
 	
 	this._SetFunctionStub("CreateShader","Shader");
+	this._SetFunctionStub("CreateTexture","Texture");
 	
 	this._SetFunctionStub("CreateStandardMesh_Cube","StandardMesh");
 	this._SetFunctionStub("CreateSimpleMesh","Mesh");
