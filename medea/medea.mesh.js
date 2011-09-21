@@ -1,11 +1,11 @@
 
-medea.stubs["Mesh"] = (function() {
+medea.stubs["mesh"] = (function(undefined) {
 	var medea = this, gl = medea.gl;
 	
-	medea._Require("VertexBuffer");
-	medea._Require("IndexBuffer");
-	medea._Require("Material");
-	medea._Require("Entity");
+	medea._Require("vertexbuffer");
+	medea._Require("indexbuffer");
+	medea._Require("material");
+	medea._Require("entity");
 	
 	// class RenderJob
 	this.RenderJob = medea.Class.extend({

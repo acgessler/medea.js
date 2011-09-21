@@ -1,8 +1,8 @@
 
-medea.stubs["Shader"] = (function() {
+medea.stubs["shader"] = (function() {
 	var medea = this, gl = medea.gl;
 	
-	medea._Require("FileSystem");
+	medea._Require("filesystem");
 	
 	medea.SHADER_TYPE_PIXEL = gl.FRAGMENT_SHADER;
 	medea.SHADER_TYPE_VERTEX = gl.VERTEX_SHADER; 
@@ -50,5 +50,5 @@ medea.stubs["Shader"] = (function() {
 		return new medea.Shader(res);
 	}
 	
-	medea.stubs["Shader"] = null;
+	medea.stubs["shader"] = null;
 });

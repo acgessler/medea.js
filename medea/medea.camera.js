@@ -1,9 +1,9 @@
 
 
-medea.stubs["Camera"] = (function() {
+medea.stubs["camera"] = (function() {
 	var medea = this;
 	
-	medea._Require("Entity");
+	medea._Require("entity");
 	
 	medea._CAMERA_DIRTY_VIEW = 0x1;
 	medea._CAMERA_DIRTY_PROJ = 0x2;
@@ -136,7 +136,7 @@ medea.stubs["Camera"] = (function() {
 		},
 	});
 	
-	medea.stubs["Camera"] = null;
+	medea.stubs["camera"] = null;
 });
 
 

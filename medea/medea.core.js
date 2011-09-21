@@ -144,7 +144,7 @@ medea = new (function() {
 		this.debug_panel = null;
 
 		// always allocate a default root node
-		this._Require("Node");
+		this._Require("node");
 		this.root = new medea.Node("root");
 
 		this.viewports = [];
@@ -191,12 +191,12 @@ medea = new (function() {
 	};
 
 	this.CreateNode = function(name,parent) {
-		this._Require("Node");
+		this._Require("node");
 		return new this.Node(name,parent);
 	};
 
 	this.CreateViewport = function(name,x,y,w,h,zorder) {
-		this._Require("Viewport");
+		this._Require("viewport");
 
 		// if no z-order is given, default to stacking
 		// viewports on top of each other in creation order.
@@ -364,15 +364,48 @@ medea = new (function() {
 
 		return true;
 	};
-
-
-	this._Require = function(whom) {
-		var init = this.stubs[whom];
-		if (!init) {
-			return;
+	
+	
+	this.Invoke = function(func) {
+		// #ifdef DEBUG
+		if (typeof func !== 'string') {
+			medea.DebugAssert('Invoke expects a string');
 		}
+		// #endif
+					
+		func = this[func];
+		var outer_arguments = arguments;
+		
+		this._Require(deps[func],function() {
+			func.apply(this,Array.prototype.slice.apply(outer_arguments,1));
+		});
+	};
 
-		init.apply(this);
+
+	this._Require = function(whom,callback) {
+		var whom = whom instanceof Array ? whom : [whom];
+		var clb = function() {
+		
+		};
+	
+		for(var i = 0; i < whom.length; ++i) {
+			var init = this.stubs[whom[i]];
+			if (init === undefined) {
+				// no stub present, try to fetch the corresponding file
+				if (!callback) {
+					// #ifdef DEBUG
+					medea.DebugAssert('missing stub, forgot to add <script>? ' + whom[i]);
+					// #endif
+					continue;
+				}
+				
+			}
+			if (!init) {
+				continue;
+			}
+			
+			init.apply(this);
+		}
 	};
 
 	this._AjaxFetch = function(url, callback) {
@@ -422,13 +455,14 @@ medea = new (function() {
 		this.statistics.vertices_frame = this.statistics.primitives_frame = 0;
 	};
 	
-	
+	this._deps = {};
 	this._SetFunctionStub = function(name,module_dep) {
+		this._deps[name] = module_dep = module_dep instanceof Array ? module_dep : [module_dep];
 		this[name] = function() {
 // #ifdef DEBUG
 			var old = this[name];
 // #endif
-			module_dep = module_dep instanceof Array ? module_dep : [module_dep];
+			
 			this._Require(module_dep);
 // #ifdef DEBUG
 			if (old == this[name]) {
@@ -438,26 +472,28 @@ medea = new (function() {
 // #endif
  			return this[name].apply(this,arguments);
 		};
-	}
+	};
 	
-	this._SetFunctionStub("MakeResource","FileSystem");
-	this._SetFunctionStub("Fetch","FileSystem");
-	this._SetFunctionStub("FetchMultiple","FileSystem");
+
 	
-	this._SetFunctionStub("CreateSimpleMaterialFromColor","Material");
-	this._SetFunctionStub("CreateSimpleMaterialFromTexture","Material");
-	this._SetFunctionStub("CreatePassFromShaderPair","Material");
+	this._SetFunctionStub("MakeResource","filesystem");
+	this._SetFunctionStub("Fetch","filesystem");
+	this._SetFunctionStub("FetchMultiple","filesystem");
 	
-	this._SetFunctionStub("CreateVertexBuffer","VertexBuffer");
-	this._SetFunctionStub("CreateIndexBuffer","IndexBuffer");
+	this._SetFunctionStub("CreateSimpleMaterialFromColor","material");
+	this._SetFunctionStub("CreateSimpleMaterialFromTexture","material");
+	this._SetFunctionStub("CreatePassFromShaderPair","material");
 	
-	this._SetFunctionStub("CreateShader","Shader");
-	this._SetFunctionStub("CreateTexture","Texture");
+	this._SetFunctionStub("CreateVertexBuffer","vertexBuffer");
+	this._SetFunctionStub("CreateIndexBuffer","indexbuffer");
 	
-	this._SetFunctionStub("CreateStandardMesh_Cube","StandardMesh");
-	this._SetFunctionStub("CreateSimpleMesh","Mesh");
+	this._SetFunctionStub("CreateShader","shader");
+	this._SetFunctionStub("CreateTexture","texture");
 	
-	this._SetFunctionStub("CreateRenderQueueManager","RenderQueue");
+	this._SetFunctionStub("CreateStandardMesh_Cube","standardmesh");
+	this._SetFunctionStub("CreateSimpleMesh","mesh");
+	
+	this._SetFunctionStub("CreateRenderQueueManager","renderqueue");
 	
 	
 	this.sprintf = sprintf;

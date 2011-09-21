@@ -13,11 +13,13 @@
 <script type="text/javascript" src="../../medea/medea.camera.js"></script>
 <script type="text/javascript" src="../../medea/medea.viewport.js"></script>
 <script type="text/javascript" src="../../medea/medea.debug.js"></script>
+<script type="text/javascript" src="../../medea/medea.renderstate.js"></script>
 <script type="text/javascript" src="../../medea/medea.renderqueue.js"></script>
 <script type="text/javascript" src="../../medea/medea.entity.js"></script>
 <script type="text/javascript" src="../../medea/medea.mesh.js"></script>
 <script type="text/javascript" src="../../medea/medea.shader.js"></script>
 <script type="text/javascript" src="../../medea/medea.filesystem.js"></script>
+<script type="text/javascript" src="../../medea/medea.texture.js"></script>
 <script type="text/javascript" src="../../medea/medea.vertexbuffer.js"></script>
 <script type="text/javascript" src="../../medea/medea.indexbuffer.js"></script>
 <script type="text/javascript" src="../../medea/medea.material.js"></script>
@@ -32,7 +34,7 @@ function run() {
 	var vp1 = medea.CreateViewport();
 	vp1.SetClearColor([0.5,0.5,0.5]);
 	
-	var m = medea.CreateStandardMesh_Cube();
+	var m = medea.CreateStandardMesh_Cube(medea.CreateSimpleMaterialFromTexture('test_texture.png'));
 	medea.GetRootNode().AddEntity(m);
 	
 	var root = medea.GetRootNode();

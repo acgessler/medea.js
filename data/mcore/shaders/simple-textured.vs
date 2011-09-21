@@ -4,7 +4,7 @@ attribute vec2 TEXIN0;
 
 uniform mat4 WVP;
 
-varying vec2 va_TexCoord;
+varying highp vec2 va_TexCoord;
 
 void main()
 {

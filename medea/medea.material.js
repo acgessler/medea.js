@@ -1,8 +1,7 @@
 
 
-medea.stubs["Material"] = (function() {
+medea.stubs["material"] = (function() {
 	var medea = this, gl = medea.gl;
-	
 	
 	medea.ShaderSetters = {
 		"WVP" :  function(prog, pos, state) {
@@ -32,12 +31,13 @@ medea.stubs["Material"] = (function() {
 	
 		program:null,
 	
-		init : function(vs,ps,constants,attr_map) {
+		init : function(vs,ps,constants,attr_map,state) {
 			this.vs = vs;
 			this.ps = ps;
 			this.constants = constants;
 			this.auto_setters = {};
 			this.attr_map = attr_map || {};
+			this.state = state;
 			
 // #ifdef DEBUG
 			if (!vs || !ps) {
@@ -86,29 +86,97 @@ medea.stubs["Material"] = (function() {
 				return;
 			}
 			
+			var info = gl.getActiveUniform(this.program,pos), type = info.type;
 			var handler = null;
-			// XXX WHY does isArray() not work here?
-			if (val instanceof Array) {
-				handler = function(prog, pos, state) {gl.uniform4fv(pos, c[k]);};
+			
+			switch(type) {
+				case gl.FLOAT_VEC4:
+					handler = function(prog, pos, state, curval) {
+						gl.uniform4fv(pos, curval );
+					};
+					break;
+				case gl.FLOAT_VEC3:
+					handler = function(prog, pos, state, curval) {
+						gl.uniform3fv(pos, curval );
+					};
+					break;
+				case gl.FLOAT_VEC2:
+					handler = function(prog, pos, state, curval) {
+						gl.uniform2fv(pos, curval );
+					};
+					break;
+					
+				case gl.INT_VEC4:
+				case gl.BOOL_VEC4:
+					handler = function(prog, pos, state, curval) {
+						gl.uniform4iv(pos, curval );
+					};
+					break;
+				case gl.INT_VEC3:
+				case gl.BOOL_VEC3:
+					handler = function(prog, pos, state, curval) {
+						gl.uniform3iv(pos, curval );
+					};
+					break;
+				case gl.INT_VEC2:
+				case gl.BOOL_VEC2:
+					handler = function(prog, pos, state, curval) {
+						gl.uniform2iv(pos, curval );
+					};
+					break;
+					
+				case gl.FLOAT_MAT4:
+					handler = function(prog, pos, state,curval) {
+						gl.uniformMatrix4fv(pos, false, curval);
+					};
+					break;
+					
+				case gl.FLOAT_MAT3:
+					handler = function(prog, pos, state,curval) {
+						gl.uniformMatrix3fv(pos, false, curval);
+					};
+					break;
+					
+				case gl.FLOAT_MAT2:
+					handler = function(prog, pos, state,curval) {
+						gl.uniformMatrix2fv(pos, false, curval);
+					};
+					break;
+					
+				case gl.SAMPLER_2D:
+				case gl.SAMPLER_CUBE:
+					medea._Require("texture");
+					
+					// explicitly bound texture
+					handler = function(prog, pos, state, curval) {
+						if (typeof curval === 'string') {
+							//curval = medea.GetDefaultTexture();
+							return;
+						}
+						gl.uniform1i(pos, curval._Bind());
+					};
+					
+					if (typeof val === 'string') {
+						c[k] = medea.CreateTexture(val); 
+					}
+					break;
+					
+				default:
+					// #ifdef DEBUG
+					medea.DebugAssert('constant type not recognized, ignoring: ' + k);
+					// #endif
 			}
-			// note: presence of glMatrixArrayType depends on glMatrix.js
-			else if (val instanceof glMatrixArrayType) {
-				handler = function(prog, pos, state) {gl.uniformMatrix4fv(pos, false, c[k]);};
-			}
-			else if (val instanceof medea.Texture) {
-				// explicitly bound texture
-				handler = function(prog, pos, state) {
-					gl.uniform1i(pos,c[k]._Bind());
-				};
-			}
-			// #ifdef DEBUG
-			else {
-				medea.DebugAssert('constant type not recognized, ignoring: ' + k);
-			}
-			// #endif
 			
 			if(handler) {
-				this.auto_setters[k] = [pos,handler]; 
+				this.auto_setters[k] = [pos,function(prog,pos,state) {
+					var value = c[k];
+					
+					if (typeof value === 'string') {
+						value = eval(value);
+					}
+					
+					handler(prog,pos,state,value);
+				}]; 
 			}
 		},
 		
@@ -158,9 +226,16 @@ medea.stubs["Material"] = (function() {
 		},
 		
 		_SetAutoState : function(statepool) {
+		
+			// update shader variables automatically
 			for(k in this.auto_setters) {
 				var v = this.auto_setters[k];
 				v[1](this.program,v[0],statepool);
+			}
+			
+			// and apply global state blocks
+			if (this.state) {
+				medea.SetState(this.state,statepool);
 			}
 		},
 	});
@@ -220,7 +295,7 @@ medea.stubs["Material"] = (function() {
 		return new medea.Material(medea.CreatePassFromShaderPair("simple-color",{color:color}));
 	};
 	
-	medea.CreateSimpleMaterialFromTexture = function(tex) {
+	medea.CreateSimpleMaterialFromTexture = function(texture) {
 		return new medea.Material(medea.CreatePassFromShaderPair("simple-textured",{texture:texture}));
 	};
 	
@@ -228,5 +303,5 @@ medea.stubs["Material"] = (function() {
 		return new medea.Pass( medea.CreateShader('remote:mcore/shaders/'+name+'.vs'), medea.CreateShader('remote:mcore/shaders/'+name+'.ps'), constants, attr_map );
 	};
 	
-	medea.stubs["Material"] = null;
+	medea.stubs["material"] = null;
 });

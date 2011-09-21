@@ -1,6 +1,6 @@
 
 
-medea.stubs["FileSystem"] = (function() {
+medea.stubs["filesystem"] = (function() {
 	var medea = this, gl = medea.gl;
 	
 	// find root location for remote files
@@ -203,5 +203,5 @@ medea.stubs["FileSystem"] = (function() {
 	];
 
 	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler());
-	medea.stubs["FileSystem"] = null;
+	medea.stubs["filesystem"] = null;
 });

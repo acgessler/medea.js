@@ -1,6 +1,6 @@
 
 
-medea.stubs["Entity"] = (function() {
+medea.stubs["entity"] = (function() {
 	var medea = this;
 
 	this.Entity = medea.Class.extend({
@@ -26,5 +26,5 @@ medea.stubs["Entity"] = (function() {
 		},
 	});
 	
-	medea.stubs["Entity"] = null;
+	medea.stubs["entity"] = null;
 });

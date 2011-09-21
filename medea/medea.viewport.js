@@ -1,7 +1,6 @@
 
 
-medea.stubs["Viewport"] = (function() {
-
+medea.stubs["viewport"] = (function() {
 	var medea = this, gl = medea.gl;
 	
 	medea._DefaultStateDependencies = {
@@ -96,7 +95,7 @@ medea.stubs["Viewport"] = (function() {
 			this.h = h || 1.0;
 			this.zorder = zorder || 0;
 			
-			medea._Require("Camera");
+			medea._Require("camera");
 			this.SetCamera(camera || new medea.Camera());
 
 			// viewports are initially enabled since this is what 
@@ -284,5 +283,5 @@ medea.stubs["Viewport"] = (function() {
 		}
 	});
 	
-	medea.stubs["Viewport"] = null;
+	medea.stubs["viewport"] = null;
 });

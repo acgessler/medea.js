@@ -1,6 +1,6 @@
 
 
-medea.stubs["Node"] = (function() {
+medea.stubs["node"] = (function(undefined) {
 
 	medea._NODE_FLAG_DIRTY = 0x1;
 
@@ -100,5 +100,5 @@ medea.stubs["Node"] = (function() {
 
 	});
 	
-	medea.stubs["Node"] = null;
+	medea.stubs["node"] = null;
 });

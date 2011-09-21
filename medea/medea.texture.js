@@ -1,8 +1,8 @@
 
-medea.stubs["Texture"] = (function() {
+medea.stubs["texture"] = (function() {
 	var medea = this, gl = medea.gl;
 	
-	medea._Require("FileSystem");
+	medea._Require("filesystem");
 	
 	medea.TEXTURE_TYPE_2D = gl.TEXTURE_2D;
 
@@ -13,6 +13,8 @@ medea.stubs["Texture"] = (function() {
 			this.texture = gl.createTexture();
 			
 			this.img = new Image();
+			
+			var outer = this;
 			this.img.onload = function() {
 				outer.OnDelayedInit();
 			};
@@ -44,6 +46,8 @@ medea.stubs["Texture"] = (function() {
 		
 		
 		_Bind : function() {
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_2D,this.texture);
 		},
 	});
 	
@@ -51,5 +55,5 @@ medea.stubs["Texture"] = (function() {
 		return new medea.Texture(res);
 	}
 	
-	medea.stubs["Texture"] = null;
+	medea.stubs["texture"] = null;
 });

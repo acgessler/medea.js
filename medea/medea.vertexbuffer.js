@@ -1,5 +1,5 @@
 
-medea.stubs["VertexBuffer"] = (function() {
+medea.stubs["vertexbuffer"] = (function(undefined) {
 	var medea = this, gl = medea.gl;
 	
 	
@@ -150,12 +150,12 @@ medea.stubs["VertexBuffer"] = (function() {
 			}
 			if (this.colors) {
 				this.colors.forEach(function(u) {
-					stride += Math.floor(u.length / this.itemcount);
+					stride += Math.floor(u.length / this.itemcount) * 4; // XXX packing as UBYTE8?
 				},this);
 			}
 			if (this.uvs) {
 				this.uvs.forEach(function(u) {
-					stride += Math.floor(u.length / this.itemcount);
+					stride += Math.floor(u.length / this.itemcount) * 4;
 				},this);
 			}
 			
@@ -210,6 +210,14 @@ medea.stubs["VertexBuffer"] = (function() {
 			if (this.colors) {
 				this.colors.forEach(function(u,i) {
 					var elems = Math.floor(u.length / this.itemcount), type = medea._GLUtilIDForArrayType(u);
+					
+					var view = new Float32Array(ab,offset);
+					for(var i = 0, end = this.itemcount, mul = stride/4; i < end; ++i) {
+						for(var n = 0; n < elems; ++n) {
+							view[i*mul+n] = u[i*elems+n]; 
+						}
+					}
+					
 					addStateEntry(medea.ATTR_COLOR(i),idx++,elems,type);
 					offset += elems * medea._GLUtilSpaceForSingleElement(type);
 				},this);
@@ -218,6 +226,14 @@ medea.stubs["VertexBuffer"] = (function() {
 			if (this.uvs) {
 				this.uvs.forEach(function(u,i) {
 					var elems = Math.floor(u.length / this.itemcount), type = medea._GLUtilIDForArrayType(u);
+					
+					var view = new Float32Array(ab,offset);
+					for(var i = 0, end = this.itemcount, mul = stride/4; i < end; ++i) {
+						for(var n = 0; n < elems; ++n) {
+							view[i*mul+n] = u[i*elems+n]; 
+						}
+					}
+				
 					addStateEntry(medea.ATTR_TEXCOORD(i),idx++,elems,type);
 					offset += elems * medea._GLUtilSpaceForSingleElement(type);
 				},this);
@@ -292,5 +308,5 @@ medea.stubs["VertexBuffer"] = (function() {
 		return new medea.VertexBuffer(init_data,flags);
 	}
 	
-	medea.stubs["VertexBuffer"] = null;
+	medea.stubs["vertexbuffer"] = null;
 });

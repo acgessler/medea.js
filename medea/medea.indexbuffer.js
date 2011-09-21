@@ -1,6 +1,6 @@
 
 
-medea.stubs["IndexBuffer"] = (function() {
+medea.stubs["indexbuffer"] = (function(undefined) {
 
 	var medea = this, gl = medea.gl;
 
@@ -64,5 +64,5 @@ medea.stubs["IndexBuffer"] = (function() {
 		return new medea.IndexBuffer(indices,flags);
 	};
 	
-	medea.stubs["IndexBuffer"] = null;
+	medea.stubs["indexbuffer"] = null;
 });

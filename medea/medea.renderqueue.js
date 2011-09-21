@@ -1,5 +1,5 @@
 
-medea.stubs["RenderQueue"] = (function() {
+medea.stubs["renderqueue"] = (function() {
 
 	//
 	this.RENDERQUEUE_FIRST = 0;
@@ -13,9 +13,19 @@ medea.stubs["RenderQueue"] = (function() {
 	this.RENDERQUEUE_ALPHA_LATE = 16;
 	
 	this.RENDERQUEUE_LAST = 19;
-
-
 	var medea = this;
+	
+	medea._Require('renderstate');
+	
+	
+	this._initial_state_depth_test_enabled = {
+		'depth_test' : true,
+		'depth_func' : 'less',
+	};
+	
+	this._initial_state_depth_test_disabled = {
+		'depth_test' : false,
+	};
 	
 	
 	// class DistanceSorter
@@ -42,10 +52,11 @@ medea.stubs["RenderQueue"] = (function() {
 	
 	// class RenderQueue
 	this.RenderQueue = medea.Class.extend({
-		sorter : null,
 		
-		init: function() {		
+		init: function(sorter,default_state) {		
 			this.entries = [];
+			this.sorter = sorter;
+			this.default_state = default_state;
 		},
 		
 		Push: function(e) {
@@ -53,6 +64,10 @@ medea.stubs["RenderQueue"] = (function() {
 		},
 		
 		Flush: function(statepool) {
+			if (this.default_state) {
+				medea.SetState(this.default_state,statepool);
+			}
+		
 			if (this.sorter) {
 				this.sorter.Run(this.entries);
 			}
@@ -63,13 +78,19 @@ medea.stubs["RenderQueue"] = (function() {
 			this.entries = [];
 		},
 		
-		SetSorter : function(sorter) {
+		Sorter : function(sorter) {
+			if(!sorter) {
+				return this.sorter;
+			}
 			this.sorter = sorter;
 		},
 		
-		GetSorter : function() {
-			return this.sorter;
-		}
+		DefaultState : function(default_state) {
+			if(!default_state) {
+				return this.default_state;
+			}
+			this.default_state = default_state;
+		},
 	});
 	
 
@@ -87,13 +108,19 @@ medea.stubs["RenderQueue"] = (function() {
 			var distance_sorter = new medea.DistanceSorter();
 			var material_sorter = new medea.MaterialSorter();
 			
-			this.queues[medea.RENDERQUEUE_DEFAULT_EARLY].SetSorter(material_sorter);
-			this.queues[medea.RENDERQUEUE_DEFAULT].SetSorter(material_sorter);
-			this.queues[medea.RENDERQUEUE_DEFAULT_LATE].SetSorter(material_sorter);
+			var defs = [medea.RENDERQUEUE_DEFAULT_EARLY,medea.RENDERQUEUE_DEFAULT,medea.RENDERQUEUE_DEFAULT_LATE], outer = this;
+			defs.forEach(function(s) {
+				s = outer.queues[s];
+				s.Sorter(material_sorter);
+				s.DefaultState(medea._initial_state_depth_test_enabled);
+			});
 			
-			this.queues[medea.RENDERQUEUE_ALPHA_EARLY].SetSorter(distance_sorter);
-			this.queues[medea.RENDERQUEUE_ALPHA].SetSorter(distance_sorter);
-			this.queues[medea.RENDERQUEUE_ALPHA_LATE].SetSorter(distance_sorter);
+			defs = [medea.RENDERQUEUE_ALPHA_EARLY,medea.RENDERQUEUE_ALPHA,medea.RENDERQUEUE_ALPHA_LATE];
+			defs.forEach(function(s) {
+				s = outer.queues[s];
+				s.Sorter(distance_sorter);
+				s.DefaultState(medea._initial_state_depth_test_disabled);
+			});
 		},
 	
 		Push : function(idx,renderable) {
@@ -124,5 +151,5 @@ medea.stubs["RenderQueue"] = (function() {
 		return new medea.RenderQueueManager();
 	}
 	
-	medea.stubs["RenderQueue"] = null;
+	medea.stubs["renderqueue"] = null;
 });
