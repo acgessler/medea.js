@@ -19,7 +19,8 @@ medea.stubs["texture"] = (function() {
 				outer.OnDelayedInit();
 			};
 			
-			this.img.src = this.src = src;
+			this.src = src;
+			this.img.src = medea.FixURL(src);
 		},
 		
 		OnDelayedInit : function() {
@@ -48,6 +49,7 @@ medea.stubs["texture"] = (function() {
 		_Bind : function() {
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D,this.texture);
+			return 0;
 		},
 	});
 	

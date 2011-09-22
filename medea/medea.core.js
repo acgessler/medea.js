@@ -323,6 +323,7 @@ medea = new (function() {
 			}
 
 			node.Update(dtime);
+			return true;
 		});
 
 		// adjust render settings if we switched to multiple viewports or vice versa
@@ -357,7 +358,7 @@ medea = new (function() {
 
 		var c = node.children;
 		for(var i = 0; i < c.length; ++i) {
-			if(!visitor(c[i])) {
+			if(!this.VisitGraph(c[i],visitor)) {
 				return false;
 			}
 		}
@@ -490,6 +491,7 @@ medea = new (function() {
 	this._SetFunctionStub("CreateShader","shader");
 	this._SetFunctionStub("CreateTexture","texture");
 	
+	this._SetFunctionStub("CreateStandardMesh_Plane","standardmesh");
 	this._SetFunctionStub("CreateStandardMesh_Cube","standardmesh");
 	this._SetFunctionStub("CreateSimpleMesh","mesh");
 	

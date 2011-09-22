@@ -292,15 +292,15 @@ medea.stubs["material"] = (function() {
 	});
 	
 	medea.CreateSimpleMaterialFromColor = function(color) {
-		return new medea.Material(medea.CreatePassFromShaderPair("simple-color",{color:color}));
+		return new medea.Material(medea.CreatePassFromShaderPair("remote:mcore/shaders/simple-color",{color:color}));
 	};
 	
 	medea.CreateSimpleMaterialFromTexture = function(texture) {
-		return new medea.Material(medea.CreatePassFromShaderPair("simple-textured",{texture:texture}));
+		return new medea.Material(medea.CreatePassFromShaderPair("remote:mcore/shaders/simple-textured",{texture:texture}));
 	};
 	
 	medea.CreatePassFromShaderPair = function(name, constants, attr_map) {
-		return new medea.Pass( medea.CreateShader('remote:mcore/shaders/'+name+'.vs'), medea.CreateShader('remote:mcore/shaders/'+name+'.ps'), constants, attr_map );
+		return new medea.Pass( medea.CreateShader(name+'.vs'), medea.CreateShader(name+'.ps'), constants, attr_map );
 	};
 	
 	medea.stubs["material"] = null;

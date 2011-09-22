@@ -5,17 +5,21 @@ medea.stubs["viewport"] = (function() {
 	
 	medea._DefaultStateDependencies = {
 		W : ["WVP","WV"],
-		V : ["WVP","WV"],
-		P : ["WVP"],
+		V : ["WVP","WV","VP"],
+		P : ["WVP","VP"],
 	};
 	
 	medea._DefaultDerivedStates = {
 	
+		"VP": function(statepool) {
+			var m = mat4.create();
+			mat4.multiply(statepool.GetQuick("V"),statepool.GetQuick("P"),m);
+			return m;
+		},
+	
 		"WVP": function(statepool) {
 			var m = mat4.create();
-			mat4.multiply(statepool.GetQuick("V"),statepool.GetQuick("W"),m);
-			mat4.multiply(statepool.GetQuick("P"),m,m);
-			
+			mat4.multiply(statepool.Get("VP"),statepool.GetQuick("W"),m);
 			return m;
 		},
 		
@@ -264,8 +268,10 @@ medea.stubs["viewport"] = (function() {
 			var rq = this.rqManager;
 			medea.VisitGraph(medea.GetRootNode(),function(node) {
 				node.GetEntities().forEach(function(val,idx,outer) {
-					val.Render(this,val,rq);
+					val.Render(this,val,node,rq);
 				});
+				
+				return true;
 			});
 			
 			// setup a fresh pool to easily pass global rendering states to all renderables

@@ -9,6 +9,13 @@ medea.stubs["filesystem"] = (function() {
 		root += '/';
 	}
 	
+	medea.FixURL = function(s) {
+		if (s.slice(0,7) === 'remote:') {
+			s = s.slice(7);
+		}
+		return root + s;
+	};
+	
 	// class Resource
 	medea.Resource = medea.Class.extend({
 	
@@ -94,7 +101,7 @@ medea.stubs["filesystem"] = (function() {
 		
 		Load : function(what,callback,onerror) {
 		
-			what = root+what;
+			what = medea.FixURL(what);
 		
 			medea.LogDebug("begin loading: " + what + " via HTTP");
 			medea._AjaxFetch(what,function(response,status) {

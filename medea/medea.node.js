@@ -19,6 +19,7 @@ medea.stubs["node"] = (function(undefined) {
 			this.name = name || "";
 			
 			this.lmatrix = mat4.identity(mat4.create());
+			this.gmatrix = mat4.identity(mat4.create());
 		},
 
 		GetEntities: function() {
@@ -40,8 +41,12 @@ medea.stubs["node"] = (function(undefined) {
 		},
 
 		AddChild: function(child) {
+			child = child || new medea.Node();
+		
 			this.children.push(child);
 			child.parent = this;
+			
+			return child;
 		},
 		
 		RemoveChild: function(child) {
@@ -65,26 +70,25 @@ medea.stubs["node"] = (function(undefined) {
 		Translate: function(vec) {
 			mat4.translate(this.lmatrix,vec);
 			this.flags |= medea._NODE_FLAG_DIRTY;
+			return this;
 		},
 		
 		Rotate: function(angle,axis) {
 			mat4.rotate(this.lmatrix,angle,axis);
 			this.flags |= medea._NODE_FLAG_DIRTY;
+			return this;
 		},
 		
-		ScaleUniform: function(s) {
-			mat4.scale(this.lmatrix,[s,s,s]);
+		Scale: function(s) {
+			mat4.scale(this.lmatrix, typeof s === 'number' ? [s,s,s] : s);
 			this.flags |= medea._NODE_FLAG_DIRTY;
-		},
-		
-		ScaleNonUniform: function(v) {
-			mat4.scale(this.lmatrix,v);
-			this.flags |= medea._NODE_FLAG_DIRTY;
+			return this;
 		},
 		
 		ResetTransform: function() {
 			this.lmatrix = mat4.identity(mat4.create());
 			this.flags |= medea._NODE_FLAG_DIRTY;
+			return this;
 		},
 		
 		_UpdateGlobalTransform: function() {

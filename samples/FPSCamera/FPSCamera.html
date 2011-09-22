@@ -28,26 +28,78 @@
 
 <script type="text/javascript">
 
+
+var default_map = 
+"XXXXXXXXXXXXXX XXXXXXXXXX\n" +
+"X XXXXXXX XXXX XXXXXXXXXX\n" +
+"X         XXX          XX\n" +
+"X  XXXXXX XXXXXXXXXXXX XX\n" +
+"XX XXXXXX         XXXX XX\n" +
+"X     XXX XXXXXXX XXX  XX\n" +
+"XXXXX XXX XXX XXX XXX XXX\n" +
+"X XXX XXXXXXX XXX XXX XXX\n" +
+"X             XXX XX    X\n" +
+"XXXXX XXX XXXXXXX XX XX X\n" +
+"XXXXX XXXXXXXXXXX XX XX X\n" +
+"XX           XX   XXXXX X\n" +
+"XX XXXXXXXXX XXXX       X\n" +
+"XXXXXXXXXXXX XXXXXXXXXXXX\n";
+
+function gen_labyrinth(src,root,mesh,height) {
+
+	height = height || 5;
+	
+	var x = -src.indexOf('\n')/2.0, xinit = x;
+	var z = -src.split('\n').length/2.0;
+
+	
+	for (var i = 0; i < src.length; ++i) {
+		var c = src[i];
+		if (c === '\n') {
+			z += 1;
+			x = xinit;
+			continue;
+		}
+		
+		if (c === 'X') {
+			for(var n = 0; n < height; ++n) { 
+				var ch = root.AddChild();
+				ch.AddEntity(mesh);
+				
+				ch.Translate([x,n,z]);
+				ch.Scale(0.5);
+			}
+		}
+		
+		x += 1;
+	}
+}
+
 function run() {
 
 	medea.Init("canvas",{dataroot:'../../data'});
 	var vp1 = medea.CreateViewport();
-	vp1.SetClearColor([0.5,0.5,0.5]);
+	vp1.SetClearColor([0.4,0.4,0.4]);
 	
-	var m = medea.CreateStandardMesh_Cube(medea.CreateSimpleMaterialFromTexture('test_texture.png'));
+	var root = medea.GetRootNode();
 	
-	// test child nodes
-	var root = medea.GetRootNode().AddChild();
-	root.AddEntity(m);
+	var mfloor = medea.CreateStandardMesh_Plane(medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/floor_texture.jpg'));
+	root.AddChild().Scale(300).AddEntity(mfloor);
 	
-	root.Translate(vec3.create([0,0,-5]));
+	var msky = medea.CreateStandardMesh_Plane(medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/sky_texture.jpg'));
+	root.AddChild().Translate([0,20,0]).Scale(300).AddEntity(msky);
+	
+	var m = medea.CreateStandardMesh_Cube(new medea.Material(medea.CreatePassFromShaderPair("remote:labyrinth_sample/wall-simple", {texture:'remote:labyrinth_sample/wall_texture.jpg'})));
+	gen_labyrinth(default_map,root,m,5);
 
 	var time = 0.0;
 	medea.SetTickCallback(function(dtime) {
 		time += dtime;
-		root.Rotate(dtime,vec3.create([1,1,0]));
+		
 		return true;
 	});	
+	
+	root.Translate(vec3.create([0,-10,-10]));
 
 	medea.SetDebugPanel(null,true);
 	medea.Start();

@@ -12,13 +12,14 @@ medea.stubs["mesh"] = (function(undefined) {
 		
 		distance: null,
 		
-		init : function(mesh,entity,viewport) {
+		init : function(mesh,entity,node,viewport) {
 			this.mesh = mesh;
 			this.entity = entity;
+			this.node = node;
 			this.viewport = viewport;
 			this.Draw = function(statepool) { 
 		
-				statepool.Set("W",entity.parent.GetGlobalTransform());
+				statepool.Set("W",node.GetGlobalTransform());
 				mesh.DrawNow(statepool); 
 			};
 		},
@@ -26,7 +27,7 @@ medea.stubs["mesh"] = (function(undefined) {
 		// required methods for automatic sorting of renderqueues
 		DistanceEstimate : function() {
 			if (this.distance === null) {
-				this.distance = vec3.lengthSquared(vec3.sub(this.viewport.GetCameraWorldPos(),this.entity.parent.GetWorldPos()));
+				this.distance = vec3.lengthSquared(vec3.sub(this.viewport.GetCameraWorldPos(),this.node.GetWorldPos()));
 			}
 			return this.distance;
 		},
@@ -61,9 +62,9 @@ medea.stubs["mesh"] = (function(undefined) {
 // #endif
 		},
 	
-		Render : function(viewport,entity,rqmanager) {
+		Render : function(viewport,entity,node,rqmanager) {
 			// construct a renderable capable of drawing this mesh upon request by the render queue manager
-			rqmanager.Push(medea.RENDERQUEUE_DEFAULT,new medea.RenderJob(this,entity,viewport));
+			rqmanager.Push(medea.RENDERQUEUE_DEFAULT,new medea.RenderJob(this,entity,node,viewport));
 		},
 		
 		Update : function() {

@@ -2,6 +2,32 @@
 medea.stubs["standardmesh"] = (function() {
 	var medea = this;
 	medea._Require("mesh");
+	
+	
+	medea.CreateStandardMesh_Plane = function(color_or_material) {
+		return medea.CreateSimpleMesh(
+		{ positions : [
+			  // Bottom face
+			  -1.0, 0.0, -1.0,
+			   1.0, 0.0, -1.0,
+			   1.0, 0.0,  1.0,
+			  -1.0, 0.0,  1.0,
+		], // !pos
+		
+		uvs: [[
+			 // Front
+			0.0,  0.0,
+			1.0,  0.0,
+			1.0,  1.0,
+			0.0,  1.0,
+			]]
+		},
+			 // indices
+			[ 	
+				0, 1, 2,     0, 2, 3,   // bottom  
+			],
+		color_or_material || [1.0,0.0,0.0,1.0]);
+	};
 
 	
 	medea.CreateStandardMesh_Cube = function(color_or_material) {
