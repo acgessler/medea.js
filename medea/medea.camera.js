@@ -53,8 +53,19 @@ medea.stubs["camera"] = (function() {
 		},
 		
 		OnSetParent : function(parent) {
+			if(this.parent) {
+				this.parent.RemoveListener("OnUpdateGlobalTransform",this);
+			}
+		
 			this._super(parent);
 			this.flags |= medea._CAMERA_DIRTY_VIEW;
+			
+			if(parent) {
+				var outer = this;
+				this.parent.AddListener("OnUpdateGlobalTransform",function() {
+					outer.flags |= medea._CAMERA_DIRTY_VIEW;
+				},this);
+			}
 		},
 		
 		OnSetViewport : function(vp) {
@@ -107,7 +118,15 @@ medea.stubs["camera"] = (function() {
 				return this.view;
 			}
 			
-			// XXX take camera node's transformation into account
+			// if the camera does not have a parent (which happens for example for the
+			// default camera that is initially assigned to a viewport), we just
+			// return the identity matrix for view transform.
+			if(!this.parent) {
+				return this.view = mat4.identity(mat4.create());
+			}
+			
+			
+			mat4.inverse(this.parent.GetGlobalTransform(),this.view);
 			
 			this.flags &= ~medea._CAMERA_DIRTY_VIEW;
 			return this.view;
@@ -135,6 +154,12 @@ medea.stubs["camera"] = (function() {
 			return this.proj;
 		},
 	});
+	
+	
+	medea.CreateCamera = function(name,fovy,aspect,znear,zfar,viewport) {
+		return new medea.Camera(name,fovy,aspect,znear,zfar,viewport);
+	};
+	
 	
 	medea.stubs["camera"] = null;
 });

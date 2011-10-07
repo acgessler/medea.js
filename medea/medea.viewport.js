@@ -13,7 +13,7 @@ medea.stubs["viewport"] = (function() {
 	
 		"VP": function(statepool) {
 			var m = mat4.create();
-			mat4.multiply(statepool.GetQuick("V"),statepool.GetQuick("P"),m);
+			mat4.multiply(statepool.GetQuick("P"),statepool.GetQuick("V"),m);
 			return m;
 		},
 	

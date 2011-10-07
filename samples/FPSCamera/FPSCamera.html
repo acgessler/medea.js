@@ -24,6 +24,8 @@
 <script type="text/javascript" src="../../medea/medea.indexbuffer.js"></script>
 <script type="text/javascript" src="../../medea/medea.material.js"></script>
 <script type="text/javascript" src="../../medea/medea.standardmesh.js"></script>
+<script type="text/javascript" src="../../medea/medea.camera.js"></script>
+<script type="text/javascript" src="../../medea/medea.camcontroller.js"></script>
 
 
 <script type="text/javascript">
@@ -90,7 +92,7 @@ function run() {
 	root.AddChild().Translate([0,20,0]).Scale(300).AddEntity(msky);
 	
 	var m = medea.CreateStandardMesh_Cube(new medea.Material(medea.CreatePassFromShaderPair("remote:labyrinth_sample/wall-simple", {texture:'remote:labyrinth_sample/wall_texture.jpg'})));
-	gen_labyrinth(default_map,root,m,5);
+	gen_labyrinth(default_map,root,m,1);
 
 	var time = 0.0;
 	medea.SetTickCallback(function(dtime) {
@@ -100,6 +102,16 @@ function run() {
 	});	
 	
 	root.Translate(vec3.create([0,-10,-10]));
+	
+	var cam = medea.CreateCamera();
+	root.AddChild().AddEntity(cam);
+	
+	vp1.SetCamera(cam);
+	
+	//cam.parent.Translate([1,5,0]);
+	
+	var cc = medea.CreateCamController(cam,'fps');
+	cc.Enable();
 
 	medea.SetDebugPanel(null,true);
 	medea.Start();

@@ -34,7 +34,7 @@ function run() {
 	var vp1 = medea.CreateViewport();
 	vp1.SetClearColor([0.5,0.5,0.5]);
 	
-	var m = medea.CreateStandardMesh_Cube(medea.CreateSimpleMaterialFromTexture('test_texture.png'));
+	var m = medea.CreateStandardMesh_Cube(medea.CreateSimpleMaterialFromTexture('remote:../samples/RotatingTexturedCube/test_texture.png'));
 	
 	// test child nodes
 	var root = medea.GetRootNode().AddChild();

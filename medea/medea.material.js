@@ -1,6 +1,6 @@
 
 
-medea.stubs["material"] = (function() {
+medea.stubs["material"] = (function(undefined) {
 	var medea = this, gl = medea.gl;
 	
 	medea.ShaderSetters = {
@@ -48,14 +48,22 @@ medea.stubs["material"] = (function() {
 			this._TryAssembleProgram();
 		},
 		
+		IsComplete : function() {
+			return this.program !== null;
+		},
+		
 		Begin : function(statepool) {
-			if (!this.program) {
+			if (this.program === null) {
 				this._TryAssembleProgram();
-				return;
+				if(!this.IsComplete()) {
+					return false;
+				}
 			}
 			
 			gl.useProgram(this.program);
 			this._SetAutoState(statepool);
+			
+			return true;
 		},
 		
 		End : function() {
@@ -73,7 +81,7 @@ medea.stubs["material"] = (function() {
 			var c = this.constants;
 			c[k] = val;	
 			
-			if (!this.program) {
+			if (this.program === null) {
 				// do the real work later when we have the actual program 
 				return;
 			}
@@ -186,10 +194,12 @@ medea.stubs["material"] = (function() {
 		
 		
 		_TryAssembleProgram : function() {
-			if (this.program || !this.vs.IsComplete() || !this.ps.IsComplete()) {
+			if (this.program !== null || !this.vs.IsComplete() || !this.ps.IsComplete()) {
+				// can't assemble this program yet, for we first need to wait for some dependent resources to load 
 				return;
 			}
 			var p = this.program = gl.createProgram();
+
 			gl.attachShader(p,this.vs.GetGlShader());
 			gl.attachShader(p,this.ps.GetGlShader());
 			
@@ -284,8 +294,13 @@ medea.stubs["material"] = (function() {
 		Use: function(drawfunc,statepool) {
 			// invoke the drawing callback once per pass
 			this.passes.forEach(function(pass) {
-				pass.Begin(statepool);
-					drawfunc(pass);
+	
+				if(!pass.Begin(statepool)) {
+					// XXX substitute a default material?
+					return;
+				}
+				
+				drawfunc(pass);
 				pass.End();
 			});
 		},

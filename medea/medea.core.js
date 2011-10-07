@@ -128,6 +128,7 @@ medea = new (function() {
 			, max_fps      : -1
 			, primitives_frame 	: 0
 			, vertices_frame 	: 0
+			, batches_frame : 0
 		};
 
 		this.dtacc = 0.0;
@@ -137,7 +138,7 @@ medea = new (function() {
 
 		this.default_zorder = 0;
 
-		this.tick_callback = null;
+		this.tick_callbacks = {};
 		this.stop_asap = false;
 
 		this.frame_flags = 0;
@@ -149,8 +150,37 @@ medea = new (function() {
 
 		this.viewports = [];
 		this.enabled_viewports = 0;
+		
+		this.key_state = {};
+		
+		// set event handlers on the canvas panel
+		window.addEventListener('keydown', function (event) { medea._HandleKeyDown(event); }, true);
+		window.addEventListener('keyup', function (event) { medea._HandleKeyUp(event);  }, true);
+		
+		canvas.onmousedown = function (event) { medea._HandleMouseDown(event); };
+		canvas.onmouseup   = function (event) { medea._HandleMouseUp(event);  };
+		canvas.onmousemove = function (event) { medea._HandleMouseMove(event); };
+		this.mouse_down = false;
+	
 		return this.context;
 	};
+	
+	this.IsMouseDown = function() {
+		return this.mouse_down;
+	};
+	
+	this.IsKeyDown = function(keycode) {
+		return this.key_state[keycode] || false;
+	};
+	
+	this.GetMouseDelta = function() {
+		return this.lastMouseDelta || [0,0,0];
+	};
+	
+	this.GetMousePosition = function() {
+		return this.lastMousePosition || [-1,-1];
+	};
+	
 	
 // #ifndef DEBUG
 	this.LogDebug = function(message) {
@@ -182,12 +212,14 @@ medea = new (function() {
 		return this.statistics;
 	};
 
-	this.GetTickCallback = function() {
-		return this.tick_callback;
+	this.SetTickCallback = function(clb,key) {
+		this.tick_callbacks[key] = clb;
 	};
-
-	this.SetTickCallback = function(clb) {
-		this.tick_callback = clb;
+	
+	this.RemoveTickCallback = function(key) {
+		try {
+			delete this.tick_callbacks[key];
+		} catch(e) {}
 	};
 
 	this.CreateNode = function(name,parent) {
@@ -307,9 +339,14 @@ medea = new (function() {
 
 		this._UpdateFrameStatistics(dtime);
 
-		// call user-defined logic
-		if (this.tick_callback) {
-			if(!this.tick_callback(dtime)) {
+		// call user-defined logic, operate on a copy of the dictionary just in case
+		// somebody changed its contents while we're iterating it.
+		var temp_callbacks = [];
+		for(var k in this.tick_callbacks) {
+			temp_callbacks.push(this.tick_callbacks[k]);
+		}
+		for(var i = 0; i < temp_callbacks.length; ++i) {
+			if(!temp_callbacks[i](dtime)) {
 				this.StopNextFrame();
 				return;
 			}
@@ -382,6 +419,34 @@ medea = new (function() {
 		});
 	};
 
+	this._HandleKeyDown = function(event) {
+		this.key_state[event.keyCode] = true;
+	};
+	
+	this._HandleKeyUp = function(event) {
+		this.key_state[event.keyCode] = false;
+	};
+	
+	
+	this._HandleMouseDown = function(event) {
+		this.mouse_down = true;
+	};
+	
+	this._HandleMouseUp = function(event) {
+		this.mouse_down = false;
+	};
+	
+	this._HandleMouseMove = function(event) {
+		// XXX use getCapture if available?
+		this.lastMouseDelta = this.lastMousePosition 
+			? [	event.clientX - this.lastMousePosition[0],
+				event.clientY - this.lastMousePosition[1],
+				this.lastMouseDelta[2]+1
+			] 
+			: [0,0,0];
+			
+		this.lastMousePosition = [event.clientX, event.clientY,this.lastMouseDelta[2]];
+	};
 
 	this._Require = function(whom,callback) {
 		var whom = whom instanceof Array ? whom : [whom];
@@ -453,7 +518,7 @@ medea = new (function() {
 			this.statistics.max_fps = this.dtmax_fps;
 		}
 		
-		this.statistics.vertices_frame = this.statistics.primitives_frame = 0;
+		this.statistics.vertices_frame = this.statistics.primitives_frame = this.statistics.batches_frame = 0;
 	};
 	
 	this._deps = {};
@@ -496,6 +561,9 @@ medea = new (function() {
 	this._SetFunctionStub("CreateSimpleMesh","mesh");
 	
 	this._SetFunctionStub("CreateRenderQueueManager","renderqueue");
+	
+	this._SetFunctionStub("CreateCamera","camera");
+	this._SetFunctionStub("CreateCamController","camcontroller");
 	
 	
 	this.sprintf = sprintf;

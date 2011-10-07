@@ -137,13 +137,14 @@ medea.stubs["debug"] = (function() {
 			ctx.fillText("Medea Debug Panel",xs,ys);
 
 			ctx.fillStyle = "blue";
- 			medea._CanvasUtilFillTextMultiline(ctx,sprintf("FPS cur: %.2f avg: %.2f min: %.2f max: %.2f\nPrimitives: %f\nVertices: %f",
+ 			medea._CanvasUtilFillTextMultiline(ctx,sprintf("FPS cur: %.2f avg: %.2f min: %.2f max: %.2f\nPrimitives: %f\nVertices: %f\nBatches: %f",
 				stats.exact_fps,
 				stats.smoothed_fps,
 				stats.min_fps,
 				stats.max_fps,
 				stats.primitives_frame,
-				stats.vertices_frame
+				stats.vertices_frame,
+				stats.batches_frame
 			),xs,ys+14);
 			
 			ctx.restore();

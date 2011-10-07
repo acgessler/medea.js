@@ -95,6 +95,7 @@ medea.stubs["mesh"] = (function(undefined) {
 			
 					// update statistics
 					st.vertices_frame += vboc;
+					++st.batches_frame;
 					
 					if (outer.ibo) {
 					
