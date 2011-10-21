@@ -1,9 +1,13 @@
 
+/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+ * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+ *
+ * medea is (c) 2011, Alexander Ċ. Gessler 
+ * licensed under the terms and conditions of a 3 clause BSD license.
+ */
 
-medea.stubs["camera"] = (function() {
+medea._addMod('camera',['entity'],function() {
 	var medea = this;
-	
-	medea._Require("entity");
 	
 	medea._CAMERA_DIRTY_VIEW = 0x1;
 	medea._CAMERA_DIRTY_PROJ = 0x2;
@@ -159,9 +163,6 @@ medea.stubs["camera"] = (function() {
 	medea.CreateCamera = function(name,fovy,aspect,znear,zfar,viewport) {
 		return new medea.Camera(name,fovy,aspect,znear,zfar,viewport);
 	};
-	
-	
-	medea.stubs["camera"] = null;
 });
 
 

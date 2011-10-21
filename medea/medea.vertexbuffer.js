@@ -1,7 +1,13 @@
 
-medea.stubs["vertexbuffer"] = (function(undefined) {
+/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+ * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+ *
+ * medea is (c) 2011, Alexander Ċ. Gessler 
+ * licensed under the terms and conditions of a 3 clause BSD license.
+ */
+
+medea._addMod('vertexbuffer',[],function(undefined) {
 	var medea = this, gl = medea.gl;
-	
 	
 	// constants for mappings of various vertex attributes
 	medea.ATTR_POSITION      = 0x10000;
@@ -91,6 +97,8 @@ medea.stubs["vertexbuffer"] = (function(undefined) {
 		
 		interleaved : null,
 		state_closure : [],
+		
+		minmax : null,
 	
 		init : function(data,flags) {
 		
@@ -135,6 +143,9 @@ medea.stubs["vertexbuffer"] = (function(undefined) {
 			var stride = 0, idx = 0;
 			var state_closure = this.state_closure = [];
 			
+			this.minmax = medea.CreateBB();
+			var mmin = this.minmax[0],mmax = this.minmax[1],min = Math.min, max = Math.max;
+			
 			// compute stride per vertex
 			if (this.positions) {
 				stride += 3*4;
@@ -176,9 +187,19 @@ medea.stubs["vertexbuffer"] = (function(undefined) {
 			if (this.positions) {
 				var view = new Float32Array(ab,offset);
 				for(var i = 0, end = this.itemcount, p = this.positions, mul = stride/4; i < end; ++i) {
-					view[i*mul+0] = p[i*3+0]; 
-					view[i*mul+1] = p[i*3+1];
-					view[i*mul+2] = p[i*3+2];
+					var i3 = i*3;
+					view[i*mul+0] = p[i3+0]; 
+					view[i*mul+1] = p[i3+1];
+					view[i*mul+2] = p[i3+2];
+					
+					// gather minimum and maximum vertex values, those will be used to derive a suitable BB
+					mmin[0] = min(p[i3+0],mmin[0]);
+					mmin[0] = min(p[i3+1],mmin[1]);
+					mmin[0] = min(p[i3+2],mmin[2]);
+					
+					mmax[0] = max(p[i3+0],mmax[0]);
+					mmax[0] = max(p[i3+1],mmax[1]);
+					mmax[0] = max(p[i3+2],mmax[2]);
 				}
 				
 				addStateEntry(medea.ATTR_POSITION,idx++);
@@ -255,6 +276,10 @@ medea.stubs["vertexbuffer"] = (function(undefined) {
 			return this.state_closure;
 		},
 		
+		GetMinMaxVerts : function() {
+			return this.minmax;
+		},
+		
 	});
 	
 	// class VertexBuffer
@@ -281,6 +306,8 @@ medea.stubs["vertexbuffer"] = (function(undefined) {
 			access.SetupGlData();
 			this.itemcount = access.GetItemCount();
 			this.state_closure = access.GetStateClosure();
+			
+			this.minmax = access.GetMinMaxVerts();
 		},
 		
 		GetBufferId : function() {
@@ -295,6 +322,10 @@ medea.stubs["vertexbuffer"] = (function(undefined) {
 			return this.itemcount;
 		},
 		
+		GetMinMaxVerts : function() {
+			return this.minmax;
+		},
+		
 		_Bind : function(attrMap) {
 			gl.bindBuffer(gl.ARRAY_BUFFER,this.GetBufferId());
 			this.state_closure.forEach(function(e) {
@@ -307,6 +338,4 @@ medea.stubs["vertexbuffer"] = (function(undefined) {
 	this.CreateVertexBuffer = function(init_data,flags) {
 		return new medea.VertexBuffer(init_data,flags);
 	}
-	
-	medea.stubs["vertexbuffer"] = null;
 });

@@ -1,8 +1,13 @@
 
-medea.stubs["standardmesh"] = (function() {
+/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+ * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+ *
+ * medea is (c) 2011, Alexander Ċ. Gessler 
+ * licensed under the terms and conditions of a 3 clause BSD license.
+ */
+
+medea._addMod('standardmesh',['mesh'],function(undefined) {
 	var medea = this;
-	medea._Require("mesh");
-	
 	
 	medea.CreateStandardMesh_Plane = function(color_or_material) {
 		return medea.CreateSimpleMesh(
@@ -115,8 +120,5 @@ medea.stubs["standardmesh"] = (function() {
 			],
 		color_or_material || [1.0,0.0,0.0,1.0]);
 	};
-
-
-	medea.stubs["standardmesh"] = null;
 });
 

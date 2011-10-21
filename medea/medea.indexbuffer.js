@@ -1,7 +1,12 @@
 
+/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+ * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+ *
+ * medea is (c) 2011, Alexander Ċ. Gessler 
+ * licensed under the terms and conditions of a 3 clause BSD license.
+ */
 
-medea.stubs["indexbuffer"] = (function(undefined) {
-
+medea._addMod('indexbuffer',[],function(undefined) {
 	var medea = this, gl = medea.gl;
 
 	// mark data in the buffer as frequently changing and hint the driver to optimize for this
@@ -63,6 +68,4 @@ medea.stubs["indexbuffer"] = (function(undefined) {
 	medea.CreateIndexBuffer = function(indices,flags) {
 		return new medea.IndexBuffer(indices,flags);
 	};
-	
-	medea.stubs["indexbuffer"] = null;
 });

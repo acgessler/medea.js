@@ -1,6 +1,12 @@
 
+/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+ * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+ *
+ * medea is (c) 2011, Alexander Ċ. Gessler 
+ * licensed under the terms and conditions of a 3 clause BSD license.
+ */
 
-medea.stubs["viewport"] = (function() {
+medea._addMod('viewport',[],function(undefined) {
 	var medea = this, gl = medea.gl;
 	
 	medea._DefaultStateDependencies = {
@@ -266,12 +272,29 @@ medea.stubs["viewport"] = (function() {
 
 			// and traverse all nodes in the graph, collecting their render jobs
 			var rq = this.rqManager;
-			medea.VisitGraph(medea.GetRootNode(),function(node) {
-				node.GetEntities().forEach(function(val,idx,outer) {
-					val.Render(this,val,node,rq);
+			medea.VisitGraph(medea.GetRootNode(),function(node,parent_visible) {
+			
+				var vis = medea.VISIBLE_ALL /*parent_visible == medea.VISIBLE_ALL ? medea.VISIBLE_ALL : node.Cull(frustum)*/, e = node.GetEntities();
+				if(vis == medea.VISIBLE_NONE) {
+					return medea.VISIBLE_NONE;
+				}
+				
+				if(vis == medea.VISIBLE_ALL || e.length === 1) {
+					node.GetEntities().forEach(function(val,idx,outer) {
+						val.Render(this,val,node,rq);
+					});
+					
+					return vis;
+				}
+			
+				// partial visibility and more than one entity, cull per entity
+				e.forEach(function(val,idx,outer) {
+					if(e.Cull(frustum) != medea.VISIBLE_NONE) {
+						val.Render(this,val,node,rq);
+					}
 				});
 				
-				return true;
+				return medea.VISIBLE_PARTIAL;
 			});
 			
 			// setup a fresh pool to easily pass global rendering states to all renderables
@@ -288,6 +311,4 @@ medea.stubs["viewport"] = (function() {
 			this.updated = false;
 		}
 	});
-	
-	medea.stubs["viewport"] = null;
 });

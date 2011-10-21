@@ -1,11 +1,18 @@
 
+/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+ * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+ *
+ * medea is (c) 2011, Alexander Ċ. Gessler 
+ * licensed under the terms and conditions of a 3 clause BSD license.
+ */
 
-medea.stubs["entity"] = (function() {
+medea._addMod('entity',[],function() {
 	var medea = this;
 
 	this.Entity = medea.Class.extend({
 		name : "",
 		parent : null,
+		bb : null,
 		
 		init : function(name) {	
 			if(name) {	
@@ -20,11 +27,32 @@ medea.stubs["entity"] = (function() {
 		Update : function(dtime) {
 		},
 		
+		BB : function(b) {
+			if(b === undefined) {
+				if(this.bb === null) {
+					this._AutoGenBB();
+				}
+				// #ifdef DEBUG
+				if(!this.bb) {
+					medea.DebugAssert('failed to generate BB for entity');
+				}
+				// #endif 
+				return this.bb;
+			}
+			this.bb = b;
+		},
+		
 		
 		OnSetParent : function(parent) {
 				this.parent = parent;
 		},
+		
+		
+		
+		_AutoGenBB : function() {
+			// deriving classes should supply a more meaningful implementation
+			this.bb = medea.BB_INFINITE;
+		},
 	});
-	
-	medea.stubs["entity"] = null;
 });
+

@@ -1,7 +1,9 @@
 
 // #include "sprintf-0.7.js"
 
-medea = new (function() {
+var scripts = document.getElementsByTagName('script');
+
+medea = new (function(sdom) {
 
 	// workaround if Array.forEach is not available
 	// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/array/foreach
@@ -107,9 +109,14 @@ medea = new (function() {
 	this.FRAME_CANVAS_SIZE_CHANGED = this.FRAME_VIEWPORT_UPDATED | 0x2;
 	
 	
+	this.VISIBLE_NONE = 0x0;
+	this.VISIBLE_ALL = 0x1;
+	this.VISIBLE_PARTIAL = 0x2;
+	
 	this.AssertionError = function(what) {this.what = what;};
 	this.FatalError = function(what) {this.what = what;};
 	
+	this.root = sdom.src.replace(/^(.*[\\\/])?(.*)/,'$1');
 
 	this.Init = function(where,settings) {
 		this.canvas  = document.getElementById(where); 
@@ -447,11 +454,28 @@ medea = new (function() {
 			
 		this.lastMousePosition = [event.clientX, event.clientY,this.lastMouseDelta[2]];
 	};
+	
+	this._addMod = function(name,deps,init) {
+		var init2 = function() {
+		
+			medea._Require(deps,function() {
+				init();
+				medea.stubs[name] = null;
+			});
+		};
+		
+		medea.stubs[name] = init2;
+	};
 
 	this._Require = function(whom,callback) {
 		var whom = whom instanceof Array ? whom : [whom];
-		var clb = function() {
 		
+		var cnt = 0;
+		var clb = function() {
+			if(--cnt === 0) {
+				medea._Require(whom);
+				callback();
+			}
 		};
 	
 		for(var i = 0; i < whom.length; ++i) {
@@ -465,12 +489,18 @@ medea = new (function() {
 					continue;
 				}
 				
+				++cnt;
+				this._AjaxFetch(this.root+'/'+whom+'.js',clb);
 			}
 			if (!init) {
 				continue;
 			}
 			
 			init.apply(this);
+		}
+		
+		if(cnt === 0 && callback) {
+			callback();
 		}
 	};
 
@@ -529,7 +559,9 @@ medea = new (function() {
 			var old = this[name];
 // #endif
 			
+			// we require the script to be present, but it may not been executed yet.
 			this._Require(module_dep);
+			
 // #ifdef DEBUG
 			if (old == this[name]) {
 				medea.DebugAssert("infinite recursion, something is wrong here, function stub should have been removed: " + name);
@@ -565,10 +597,14 @@ medea = new (function() {
 	this._SetFunctionStub("CreateCamera","camera");
 	this._SetFunctionStub("CreateCamController","camcontroller");
 	
+	this._SetFunctionStub("CreateBB","frustum");
+	this._SetFunctionStub("MergeBBs","frustum");
+	this._SetFunctionStub("TransformBB","frustum");
+	
 	
 	this.sprintf = sprintf;
 	
-} )();
+} )(scripts[scripts.length-1]);
 
 
 

@@ -1,6 +1,13 @@
 
+/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+ * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+ *
+ * medea is (c) 2011, Alexander Ċ. Gessler 
+ * licensed under the terms and conditions of a 3 clause BSD license.
+ */
 
-medea.stubs["material"] = (function(undefined) {
+medea._addMod('material',['texture'],function(undefined) {
+	"use strict";
 	var medea = this, gl = medea.gl;
 	
 	medea.ShaderSetters = {
@@ -43,7 +50,7 @@ medea.stubs["material"] = (function(undefined) {
 			if (!vs || !ps) {
 				medea.DebugAssert("need valid vertex and pixel shader");
 			}
-// #endif DEBUG
+// #endif 
 
 			this._TryAssembleProgram();
 		},
@@ -96,6 +103,16 @@ medea.stubs["material"] = (function(undefined) {
 			
 			var info = gl.getActiveUniform(this.program,pos), type = info.type;
 			var handler = null;
+
+			// this is a workaround for my secondary linux system on which the driver
+			// for the builtin Intel GMA unit is not only not on the whitelist of ff/chrome,
+			// but also keeps confusing sampler and matrix uniforms. The workaround
+			// doesn't make it much betteŗ, though, because the driver manages to get
+			// almost everything else wrong as well. Seems there is a reason that
+			// whitelists are used to determine if Webgl is to be supported or not.
+			if (type == gl.FLOAT_MAT4 && typeof val === 'string' && /.*\.(jpg|png|gif|bmp)/i.test(val) ) {
+				type = gl.SAMPLER_2D;
+			}
 			
 			switch(type) {
 				case gl.FLOAT_VEC4:
@@ -165,6 +182,9 @@ medea.stubs["material"] = (function(undefined) {
 					};
 					
 					if (typeof val === 'string') {
+						// #ifdef DEBUG
+						medea.LogDebug('create texture for shader uniform with string value: ' + k + ', ' + val);
+						// #endif
 						c[k] = medea.CreateTexture(val); 
 					}
 					break;
@@ -180,7 +200,13 @@ medea.stubs["material"] = (function(undefined) {
 					var value = c[k];
 					
 					if (typeof value === 'string') {
-						value = eval(value);
+						try {
+							value = eval(value);
+						} catch (e) {
+							// #ifdef DEBUG
+							medea.DebugAssert('eval()ing constant failed: ' + e + ' name: ' + k + ', type: ' + type);
+							// #endif
+						}
 					}
 					
 					handler(prog,pos,state,value);
@@ -238,7 +264,7 @@ medea.stubs["material"] = (function(undefined) {
 		_SetAutoState : function(statepool) {
 		
 			// update shader variables automatically
-			for(k in this.auto_setters) {
+			for(var k in this.auto_setters) {
 				var v = this.auto_setters[k];
 				v[1](this.program,v[0],statepool);
 			}
@@ -317,6 +343,9 @@ medea.stubs["material"] = (function(undefined) {
 	medea.CreatePassFromShaderPair = function(name, constants, attr_map) {
 		return new medea.Pass( medea.CreateShader(name+'.vs'), medea.CreateShader(name+'.ps'), constants, attr_map );
 	};
-	
-	medea.stubs["material"] = null;
 });
+
+
+
+
+

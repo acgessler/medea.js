@@ -1,21 +1,26 @@
 
+/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+ * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+ *
+ * medea is (c) 2011, Alexander Ċ. Gessler 
+ * licensed under the terms and conditions of a 3 clause BSD license.
+ */
 
-medea.stubs["node"] = (function(undefined) {
+medea._addMod('node',['frustum'],function(undefined) {
+	"use strict";
 
 	medea._NODE_FLAG_DIRTY = 0x1;
+	medea._NODE_FLAG_DIRTY_BB = 0x2;
+	
 
 	this.Node = medea.Class.extend({
-		name:"",
 		
 		// this is to allow subclasses to have their own flags set when the node's transformation
 		// matrix is altered. By default we only set DIRTY.
 		trafo_dirty_flag: medea._NODE_FLAG_DIRTY,
-		
 		parent:null,
 		
-		lmatrix:null,
-		gmatrix:null,
-		
+	
 		init : function(name) {		
 			this.children = [];
 			this.entities = [];
@@ -23,12 +28,16 @@ medea.stubs["node"] = (function(undefined) {
 			
 			this.listeners = {
 				'OnUpdateGlobalTransform' : {},
+				'OnUpdateBB' : {},
 			};
 			
 			this.lmatrix = mat4.identity(mat4.create());
 			this.gmatrix = mat4.identity(mat4.create());
 			
-			this.flags = medea._NODE_FLAG_DIRTY;
+			// min/max
+			this.bb = medea.CreateBB();;
+			
+			this.flags = medea._NODE_FLAG_DIRTY | medea._NODE_FLAG_DIRTY_BB;
 		},
 
 		GetEntities: function() {
@@ -38,11 +47,15 @@ medea.stubs["node"] = (function(undefined) {
 		AddEntity: function(ent) {
 			this.entities.push(ent);
 			ent.OnSetParent(this);
+			
+			this.flags |= medea._NODE_FLAG_DIRTY_BB;
 		},
 		
 		RemoveEntity: function(ent) {
 			ent.OnSetParent(null);
 			delete this.entities[ent];
+			
+			this.flags |= medea._NODE_FLAG_DIRTY_BB;
 		},
 
 		GetChildren: function() {
@@ -55,16 +68,24 @@ medea.stubs["node"] = (function(undefined) {
 			this.children.push(child);
 			child.parent = this;
 			
+			this.flags |= medea._NODE_FLAG_DIRTY_BB;
 			return child;
 		},
 		
 		RemoveChild: function(child) {
+			this.flags |= medea._NODE_FLAG_DIRTY_BB;
 			delete this.children[child];
 			child.parent = this;
 		},
 
 		Update: function(dtime) {
 			this._UpdateGlobalTransform();
+			this._UpdateBB();
+		},
+		
+		GetBB: function() {
+			this._UpdateBB();
+			return this.bb;
 		},
 		
 		GetLocalTransform: function() {
@@ -177,6 +198,33 @@ medea.stubs["node"] = (function(undefined) {
 			return this.gmatrix;
 		},
 		
+		_UpdateBB: function() {
+			if (!(this.flags & medea._NODE_FLAG_DIRTY_BB)) {
+				return;
+			}
+			this.flags &= ~medea._NODE_FLAG_DIRTY_BB;
+			var bbs = [];
+			
+			for(var i = 0; i < this.children.length; ++i) {
+				var c = this.children[i];
+				bbs.push(medea.TransformBB( c.GetBB(), c.GetLocalTransform() ));
+			}
+			
+			for(var i = 0; i < this.entities.length; ++i) {
+				bbs.push(this.entities[i].BB());
+			}
+			
+			this.bb = medea.MergeBBs(bbs);
+			// #ifdef DEBUG
+			if (!this.bb) {
+				medea.DebugAssert("bounding box computation failed, but it shouldn't have");
+			}
+			// #endif
+			
+			this._FireListener("OnUpdateBB");
+			return this.bb;
+		},
+		
 		_FireListener : function(what) {
 			var l = this.listeners[what];
 			if(l) {
@@ -187,6 +235,7 @@ medea.stubs["node"] = (function(undefined) {
 		},
 
 	});
-	
-	medea.stubs["node"] = null;
-});
+}));
+
+
+
