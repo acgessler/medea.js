@@ -3,54 +3,35 @@
 <head>
 <title></title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<script type="text/javascript" src="../../medea/webgl-debug.js"></script>
-<script type="text/javascript" src="../../medea/webgl-utils.js"></script>
-<script type="text/javascript" src="../../medea/glMatrix.js"></script>
-
-<script type="text/javascript" src="../../medea/sprintf-0.7.js"></script>
 <script type="text/javascript" src="../../medea/medea.core.js"></script>
-<script type="text/javascript" src="../../medea/medea.node.js"></script>
-<script type="text/javascript" src="../../medea/medea.camera.js"></script>
-<script type="text/javascript" src="../../medea/medea.viewport.js"></script>
-<script type="text/javascript" src="../../medea/medea.debug.js"></script>
-<script type="text/javascript" src="../../medea/medea.renderstate.js"></script>
-<script type="text/javascript" src="../../medea/medea.renderqueue.js"></script>
-<script type="text/javascript" src="../../medea/medea.entity.js"></script>
-<script type="text/javascript" src="../../medea/medea.mesh.js"></script>
-<script type="text/javascript" src="../../medea/medea.shader.js"></script>
-<script type="text/javascript" src="../../medea/medea.filesystem.js"></script>
-<script type="text/javascript" src="../../medea/medea.texture.js"></script>
-<script type="text/javascript" src="../../medea/medea.vertexbuffer.js"></script>
-<script type="text/javascript" src="../../medea/medea.indexbuffer.js"></script>
-<script type="text/javascript" src="../../medea/medea.material.js"></script>
-<script type="text/javascript" src="../../medea/medea.standardmesh.js"></script>
 
 
 <script type="text/javascript">
 
 function run() {
 
-	medea.Init("canvas",{dataroot:'../../data'});
-	var vp1 = medea.CreateViewport();
-	vp1.SetClearColor([0.5,0.5,0.5]);
-	
-	var m = medea.CreateStandardMesh_Cube(medea.CreateSimpleMaterialFromTexture('remote:../samples/RotatingTexturedCube/test_texture.png'));
-	
-	// test child nodes
-	var root = medea.GetRootNode().AddChild();
-	root.AddEntity(m);
-	
-	root.Translate(vec3.create([0,0,-5]));
+	medea.Ready("canvas",{dataroot:'../../data'},['debug','standardmesh'],function() {
+		var vp1 = medea.CreateViewport();
+		vp1.SetClearColor([0.5,0.5,0.5]);
+		
+		var m = medea.CreateStandardMesh_Cube(medea.CreateSimpleMaterialFromTexture('remote:../samples/RotatingTexturedCube/test_texture.png'));
+		
+		// test child nodes
+		var root = medea.GetRootNode().AddChild();
+		root.AddEntity(m);
+		
+		root.Translate(vec3.create([0,0,-5]));
 
-	var time = 0.0;
-	medea.SetTickCallback(function(dtime) {
-		time += dtime;
-		root.Rotate(dtime,vec3.create([1,1,0]));
-		return true;
-	});	
+		var time = 0.0;
+		medea.SetTickCallback(function(dtime) {
+			time += dtime;
+			root.Rotate(dtime,vec3.create([1,1,0]));
+			return true;
+		});	
 
-	medea.SetDebugPanel(null,true);
-	medea.Start();
+		medea.SetDebugPanel(null,true);
+		medea.Start();
+	});
 }
 
 </script>
