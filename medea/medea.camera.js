@@ -11,6 +11,8 @@ medea._addMod('camera',['entity'],function() {
 	
 	medea._CAMERA_DIRTY_VIEW = 0x1;
 	medea._CAMERA_DIRTY_PROJ = 0x2;
+	
+	medea._initMod('entity');
 
 	// class Camera
 	medea.Camera = medea.Entity.extend(

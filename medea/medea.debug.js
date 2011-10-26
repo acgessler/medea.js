@@ -155,6 +155,4 @@ medea._addMod('debug',[],function() {
 			ctx.restore();
 		}
 	});
-	
-	medea.stubs["debug"] = null;
 });

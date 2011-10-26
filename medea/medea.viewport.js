@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('viewport',[],function(undefined) {
+medea._addMod('viewport',['camera','renderqueue'],function(undefined) {
 	var medea = this, gl = medea.gl;
 	
 	medea._DefaultStateDependencies = {

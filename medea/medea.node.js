@@ -235,7 +235,12 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 
 	});
-}));
+	
+	//
+	medea.CreateNode = function(name) {
+		return new medea.Node(name);
+	};
+});
 
 
 

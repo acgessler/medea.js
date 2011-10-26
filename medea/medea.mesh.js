@@ -5,8 +5,10 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('material',['vertexbuffer','indexbuffer','material','entity'],function(undefined) {
+medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function(undefined) {
 	var medea = this, gl = medea.gl;
+	
+	medea._initMod('entity');
 	
 	// class RenderJob
 	this.RenderJob = medea.Class.extend({

@@ -11,7 +11,7 @@ medea._addMod('texture',['filesystem'],function(undefined) {
 	
 	medea.TEXTURE_TYPE_2D = gl.TEXTURE_2D;
 
-	
+	medea._initMod('filesystem');
 	medea.Texture = medea.Resource.extend( {
 	
 		init : function(src) {

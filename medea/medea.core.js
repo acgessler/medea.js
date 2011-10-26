@@ -4,6 +4,7 @@
 var scripts = document.getElementsByTagName('script');
 
 medea = new (function(sdom) {
+	var medea = this;
 
 	// workaround if Array.forEach is not available
 	// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/array/foreach
@@ -100,9 +101,6 @@ medea = new (function(sdom) {
 		return Class;
 	  };
 
-	// used to collect Init() functions for all delay-initialized modules
-	this.stubs = {};
-
 
 	// constants
 	this.FRAME_VIEWPORT_UPDATED = 0x1;
@@ -117,59 +115,77 @@ medea = new (function(sdom) {
 	this.FatalError = function(what) {this.what = what;};
 	
 	this.root = sdom.src.replace(/^(.*[\\\/])?(.*)/,'$1');
-
-	this.Init = function(where,settings) {
-		this.canvas  = document.getElementById(where); 
-		this.gl = WebGLUtils.setupWebGL(this.canvas);
-
-		this.cached_cw = this.canvas.width, this.cached_ch = this.canvas.height;
-		
-		this.settings = settings || {};
-		this.settings.fps = this.settings.fps || 60;
-
-		this.statistics = {
-			  count_frames : 0
-			, smoothed_fps : -1
-			, exact_fps    : -1	
-			, min_fps      : -1
-			, max_fps      : -1
-			, primitives_frame 	: 0
-			, vertices_frame 	: 0
-			, batches_frame : 0
-		};
-
-		this.dtacc = 0.0;
-		this.dtcnt = 0;
-		this.dtmin_fps = 1e6;
-		this.dtmax_fps = 0;
-
-		this.default_zorder = 0;
-
-		this.tick_callbacks = {};
-		this.stop_asap = false;
-
-		this.frame_flags = 0;
-		this.debug_panel = null;
-
-		// always allocate a default root node
-		this._Require("node");
-		this.root = new medea.Node("root");
-
-		this.viewports = [];
-		this.enabled_viewports = 0;
-		
-		this.key_state = {};
-		
-		// set event handlers on the canvas panel
-		window.addEventListener('keydown', function (event) { medea._HandleKeyDown(event); }, true);
-		window.addEventListener('keyup', function (event) { medea._HandleKeyUp(event);  }, true);
-		
-		canvas.onmousedown = function (event) { medea._HandleMouseDown(event); };
-		canvas.onmouseup   = function (event) { medea._HandleMouseUp(event);  };
-		canvas.onmousemove = function (event) { medea._HandleMouseMove(event); };
-		this.mouse_down = false;
 	
-		return this.context;
+	// collect initial dependencies - for example the scenegraph module is always needed
+	var _initial_deps = ['node','viewport'], _initial_pre_deps = ['webgl-utils.js','webgl-debug.js','sprintf-0.7.js','glMatrix.js'];
+	var _waiters = {}, _deps = {}, _stubs = {}, _callback = undefined, _callback_pre = undefined;
+	
+	this.Ready = function(where,settings,deps,callback) {
+		if(deps) {
+			_initial_deps = _initial_deps.concat(deps);
+		}
+		
+		// first initialization phase -- create webgl canvas and prepare environment
+		_callback_pre = function() {
+			this.sprintf = sprintf;
+			this.canvas  = document.getElementById(where); 
+			this.gl = WebGLUtils.setupWebGL(this.canvas);
+			
+			_callback_pre = _initial_pre_deps = undefined;
+		};
+		
+		// second phase of initialization -- prepare the rest and invoke the Ready() callback
+		// to pass control to the user.
+		_callback = function() {
+			this.cached_cw = this.canvas.width, this.cached_ch = this.canvas.height;
+			
+			this.settings = settings || {};
+			this.settings.fps = this.settings.fps || 60;
+
+			this.statistics = {
+				  count_frames : 0
+				, smoothed_fps : -1
+				, exact_fps    : -1	
+				, min_fps      : -1
+				, max_fps      : -1
+				, primitives_frame 	: 0
+				, vertices_frame 	: 0
+				, batches_frame : 0
+			};
+
+			this.dtacc = 0.0;
+			this.dtcnt = 0;
+			this.dtmin_fps = 1e6;
+			this.dtmax_fps = 0;
+
+			this.default_zorder = 0;
+
+			this.tick_callbacks = {};
+			this.stop_asap = false;
+
+			this.frame_flags = 0;
+			this.debug_panel = null;
+
+			// always allocate a default root node
+			this.root = medea.CreateNode("root");
+
+			this.viewports = [];
+			this.enabled_viewports = 0;
+			
+			this.key_state = {};
+			
+			// set event handlers on the canvas panel
+			window.addEventListener('keydown', function (event) { medea._HandleKeyDown(event); }, true);
+			window.addEventListener('keyup', function (event) { medea._HandleKeyUp(event);  }, true);
+			
+			canvas.onmousedown = function (event) { medea._HandleMouseDown(event); };
+			canvas.onmouseup   = function (event) { medea._HandleMouseUp(event);  };
+			canvas.onmousemove = function (event) { medea._HandleMouseMove(event); };
+			this.mouse_down = false;
+		
+			_callback = _initial_deps = undefined;
+			callback();
+		};
 	};
 	
 	this.IsMouseDown = function() {
@@ -456,55 +472,150 @@ medea = new (function(sdom) {
 	};
 	
 	this._addMod = function(name,deps,init) {
-		var init2 = function() {
+		if(_stubs[name] !== undefined) {
+			medea.DebugAssert('module already present: ' + name);
+			return;
+		}
 		
-			medea._Require(deps,function() {
-				init();
-				medea.stubs[name] = null;
-			});
-		};
+		// #ifdef LOG
+		medea.LogDebug("addmod: " + name + (deps.length ? ', deps: ' + deps : ''));
+		// #endif
 		
-		medea.stubs[name] = init2;
+		var w = _waiters[name];
+		
+		// fetch all dependencies first 
+		medea._Fetch(deps,function() {
+			// #ifdef LOG
+			medea.LogDebug('modready: ' + name);
+			// #endif
+			
+			_stubs[name] = init;
+			for(var i = 0; i < w.length; ++i) {
+				w[i]();
+			}
+			
+			delete _waiters[name];
+		});
+	};
+	
+	this._initMod = function(name) {
+		var s = _stubs[name];
+		if(!s) {
+			return;
+		}
+		
+		// #ifdef LOG
+		medea.LogDebug("initmod: " + name);
+		// #endif
+		
+		s.apply(medea);
+		_stubs[name] = null;
 	};
 
-	this._Require = function(whom,callback) {
+	this._Fetch = function(whom,callback) {
+		callback = callback || function() {};
 		var whom = whom instanceof Array ? whom : [whom];
+		var cnt = 0, nodelay = true;
 		
-		var cnt = 0;
-		var clb = function() {
+		if(!whom.length) {
+			callback();
+			return;
+		}
+		
+		var proxy = function() {
 			if(--cnt === 0) {
-				medea._Require(whom);
 				callback();
-			}
+			};
 		};
 	
 		for(var i = 0; i < whom.length; ++i) {
-			var init = this.stubs[whom[i]];
+			var n=whom[i], init = _stubs[n];
+			
+			// see if the file has already been loaded, in which case `init` should be either
+			// null or a function.
 			if (init === undefined) {
-				// no stub present, try to fetch the corresponding file
-				if (!callback) {
-					// #ifdef DEBUG
-					medea.DebugAssert('missing stub, forgot to add <script>? ' + whom[i]);
-					// #endif
+				var is_medea_mod = !/\.js$/i.test(whom[i]);
+				
+				++cnt;
+				nodelay = false;
+				
+				var b = false;
+				if (!(n in _waiters)) {
+					_waiters[n] = [];
+					b = true;
+				}
+				
+				_waiters[n].push(proxy);
+					
+				if(!b) {
 					continue;
 				}
 				
-				++cnt;
-				this._AjaxFetch(this.root+'/'+whom+'.js',clb);
+				(function(n,is_medea_mod) {
+				medea._AjaxFetch(medea.root+'/'+(is_medea_mod ? 'medea.' +n + '.js' : n),function(text,status) {
+					if(status !== 200) {
+						medea.DebugAssert('failure loading script ' + n);
+						return;
+					}
+					
+					// #ifdef LOG
+					medea.LogDebug("run: " + n);
+					// #endif LOG
+					
+					var sc = document.createElement( 'script' );
+					sc.type = 'text/javascript';
+					
+					// make sure to enclose the script source in CDATA blocks 
+					// to make XHTML parsers happy.
+					sc.innerHTML = '//<![CDATA[\n' + text  + '\n//]]>';                      
+					document.body.appendChild(sc);  
+					
+					// non medea modules won't call _addMod, so we need to mimic parts of its behaviour
+					// to satisfy all listeners and to keep the file from being loaded twice.
+					if(!is_medea_mod) {
+						var w = _waiters[n];
+						
+						_stubs[n] = null;
+						for(var i = 0; i < w.length; ++i) {
+							w[i]();
+						}
+						delete _waiters[n];
+					}
+					
+				});
+				}(n,is_medea_mod));
+			}
+		}
+		
+		if(nodelay) {
+			callback();
+		}
+	};
+	
+	this._Require = function(whom,callback) {
+		var whom = whom instanceof Array ? whom : [whom];
+		var cnt = 0;
+	
+		for(var i = 0; i < whom.length; ++i) {
+			var init = _stubs[whom[i]];
+			if (init === undefined) {
+				medea.DebugAssert('init stub missing for file ' + whom[i] + ', maybe not loaded yet?');
+				continue;
 			}
 			if (!init) {
 				continue;
 			}
 			
-			init.apply(this);
-		}
-		
-		if(cnt === 0 && callback) {
-			callback();
+			medea._initMod(whom[i]);
 		}
 	};
 
-	this._AjaxFetch = function(url, callback) {
+	this._AjaxFetch = function(url, callback, no_client_cache) {
+		// #ifdef DEBUG
+		if (no_client_cache === undefined) {
+			no_client_cache = true;
+		}
+		// #endif
 
 		var ajax;
   		if (window.XMLHttpRequest) {              
@@ -518,6 +629,10 @@ medea = new (function(sdom) {
           			callback(ajax.responseText,ajax.status);                                             
        			}       
 		}               
+		
+		if (no_client_cache) {
+			url += '?nocache='+(new Date()).getTime();
+		}
 
 		ajax.open("GET",url,true);
 		ajax.send(null);    
@@ -551,15 +666,14 @@ medea = new (function(sdom) {
 		this.statistics.vertices_frame = this.statistics.primitives_frame = this.statistics.batches_frame = 0;
 	};
 	
-	this._deps = {};
+
 	this._SetFunctionStub = function(name,module_dep) {
-		this._deps[name] = module_dep = module_dep instanceof Array ? module_dep : [module_dep];
+		_deps[name] = module_dep = module_dep instanceof Array ? module_dep : [module_dep];
 		this[name] = function() {
 // #ifdef DEBUG
 			var old = this[name];
 // #endif
 			
-			// we require the script to be present, but it may not been executed yet.
 			this._Require(module_dep);
 			
 // #ifdef DEBUG
@@ -572,7 +686,7 @@ medea = new (function(sdom) {
 		};
 	};
 	
-
+	this._SetFunctionStub("CreateNode","node");
 	
 	this._SetFunctionStub("MakeResource","filesystem");
 	this._SetFunctionStub("Fetch","filesystem");
@@ -582,7 +696,7 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("CreateSimpleMaterialFromTexture","material");
 	this._SetFunctionStub("CreatePassFromShaderPair","material");
 	
-	this._SetFunctionStub("CreateVertexBuffer","vertexBuffer");
+	this._SetFunctionStub("CreateVertexBuffer","vertexbuffer");
 	this._SetFunctionStub("CreateIndexBuffer","indexbuffer");
 	
 	this._SetFunctionStub("CreateShader","shader");
@@ -592,6 +706,7 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("CreateStandardMesh_Cube","standardmesh");
 	this._SetFunctionStub("CreateSimpleMesh","mesh");
 	
+	this._SetFunctionStub("SetState","renderstate");
 	this._SetFunctionStub("CreateRenderQueueManager","renderqueue");
 	
 	this._SetFunctionStub("CreateCamera","camera");
@@ -602,7 +717,15 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("TransformBB","frustum");
 	
 	
-	this.sprintf = sprintf;
+	// Initialization has two phases, the first of which is used to load utility libraries
+	// that all medea modules may depend upon. This also involves creating a webgl canvas
+	// (which is accessible through the medea.gl namespace)
+	this._Fetch(_initial_pre_deps, function() {
+		_callback_pre.apply(medea);
+		medea._Fetch(_initial_deps, function() {
+			_callback.apply(medea);
+		});
+	});
 	
 } )(scripts[scripts.length-1]);
 

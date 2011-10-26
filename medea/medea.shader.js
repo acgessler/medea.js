@@ -11,6 +11,8 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 	medea.SHADER_TYPE_PIXEL = gl.FRAGMENT_SHADER;
 	medea.SHADER_TYPE_VERTEX = gl.VERTEX_SHADER; 
 	
+	medea._initMod('filesystem');
+	
 	medea.Shader = medea.Resource.extend( {
 	
 		init : function(src) {

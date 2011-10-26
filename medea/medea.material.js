@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('material',['texture'],function(undefined) {
+medea._addMod('material',['shader','texture'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 	
@@ -170,7 +170,6 @@ medea._addMod('material',['texture'],function(undefined) {
 					
 				case gl.SAMPLER_2D:
 				case gl.SAMPLER_CUBE:
-					medea._Require("texture");
 					
 					// explicitly bound texture
 					handler = function(prog, pos, state, curval) {
@@ -343,6 +342,7 @@ medea._addMod('material',['texture'],function(undefined) {
 	medea.CreatePassFromShaderPair = function(name, constants, attr_map) {
 		return new medea.Pass( medea.CreateShader(name+'.vs'), medea.CreateShader(name+'.ps'), constants, attr_map );
 	};
+
 });
 
 
