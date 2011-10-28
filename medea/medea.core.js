@@ -484,7 +484,7 @@ medea = new (function(sdom) {
 		var w = _waiters[name];
 		
 		// fetch all dependencies first 
-		medea._Fetch(deps,function() {
+		medea._FetchDeps(deps,function() {
 			// #ifdef LOG
 			medea.LogDebug('modready: ' + name);
 			// #endif
@@ -512,7 +512,7 @@ medea = new (function(sdom) {
 		_stubs[name] = null;
 	};
 
-	this._Fetch = function(whom,callback) {
+	this._FetchDeps = function(whom,callback) {
 		callback = callback || function() {};
 		var whom = whom instanceof Array ? whom : [whom];
 		var cnt = 0, nodelay = true;
@@ -530,6 +530,10 @@ medea = new (function(sdom) {
 	
 		for(var i = 0; i < whom.length; ++i) {
 			var n=whom[i], init = _stubs[n];
+			
+			if(!n) {
+				continue;
+			}
 			
 			// see if the file has already been loaded, in which case `init` should be either
 			// null or a function.
@@ -716,13 +720,16 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("MergeBBs","frustum");
 	this._SetFunctionStub("TransformBB","frustum");
 	
+	this._SetFunctionStub("LoadScene","sceneloader");
+	this._SetFunctionStub("LoadSceneFromResource","sceneloader");
+	
 	
 	// Initialization has two phases, the first of which is used to load utility libraries
 	// that all medea modules may depend upon. This also involves creating a webgl canvas
 	// (which is accessible through the medea.gl namespace)
-	this._Fetch(_initial_pre_deps, function() {
+	this._FetchDeps(_initial_pre_deps, function() {
 		_callback_pre.apply(medea);
-		medea._Fetch(_initial_deps, function() {
+		medea._FetchDeps(_initial_deps, function() {
 			_callback.apply(medea);
 		});
 	});

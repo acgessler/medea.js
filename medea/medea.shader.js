@@ -1,3 +1,4 @@
+
 /* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
  * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
  *
@@ -6,6 +7,7 @@
  */
 
 medea._addMod('shader',['filesystem'],function(undefined) {
+	"use strict";
 	var medea = this, gl = medea.gl;
 	
 	medea.SHADER_TYPE_PIXEL = gl.FRAGMENT_SHADER;
