@@ -14,7 +14,7 @@ medea._addMod('texture',['filesystem'],function(undefined) {
 	medea._initMod('filesystem');
 	medea.Texture = medea.Resource.extend( {
 	
-		init : function(src) {
+		init : function(src, no_client_cache) {
 			this.texture = gl.createTexture();
 			
 			this.img = new Image();
@@ -25,13 +25,29 @@ medea._addMod('texture',['filesystem'],function(undefined) {
 			};
 			
 			this.src = src;
+            
+            // #ifdef DEBUG
+    		if (no_client_cache === undefined) {
+    			no_client_cache = true;
+    		}
+    		// #endif
+
+		
+            // image caches are terribly sturdy, so we really need this or some browsers
+            // will cache images forever
+    		if (no_client_cache) {
+    			src += '?nocache='+(new Date()).getTime();
+    		}
+        
 			this.img.src = medea.FixURL(src);
 		},
 		
 		OnDelayedInit : function() {
 			gl.bindTexture(gl.TEXTURE_2D, this.texture);
 			
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.img);  
+            
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);  
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);  
 			gl.generateMipmap(gl.TEXTURE_2D);  

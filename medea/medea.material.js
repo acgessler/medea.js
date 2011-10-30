@@ -332,6 +332,9 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	});
 	
 	medea.CreateSimpleMaterialFromColor = function(color) {
+        if(color.length === 3) {
+            color = [color[0],color[1],color[2],1.0];
+        }
 		return new medea.Material(medea.CreatePassFromShaderPair("remote:mcore/shaders/simple-color",{color:color}));
 	};
 	

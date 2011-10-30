@@ -63,7 +63,13 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 
 		AddChild: function(child) {
-			child = child || new medea.Node();
+            if(typeof child !== 'object' || !( child instanceof medea.Node )) {
+                child = new medea.Node(child);
+            }
+            
+            if(child.parent === this) {
+                return;
+            }
 		
 			this.children.push(child);
 			child.parent = this;
@@ -73,9 +79,18 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 		
 		RemoveChild: function(child) {
-			this.flags |= medea._NODE_FLAG_DIRTY_BB;
-			delete this.children[child];
-			child.parent = this;
+            var idx = this.children.indexOf(child);
+            if(idx !== -1) {
+                // #ifdef DEBUG
+                if (child.parent !== this) {
+                    medea.DebugAssert('inconsistent value for child.parent');
+                }
+                // #endif
+            
+                this.flags |= medea._NODE_FLAG_DIRTY_BB;
+                this.children.splice(idx,1);
+                child.parent = null;
+            }
 		},
 
 		Update: function(dtime) {
@@ -88,8 +103,18 @@ medea._addMod('node',['frustum'],function(undefined) {
 			return this.bb;
 		},
 		
+        // pure getter, nowadays deprecated
 		GetLocalTransform: function() {
 			return this.lmatrix;
+		},
+        
+        LocalTransform: function(l) {
+            if(l === undefined) {
+                return this.lmatrix;
+            }
+            
+            this.flags |= this.trafo_dirty_flag;
+            this.lmatrix = l;
 		},
 		
 		GetGlobalTransform: function() {
@@ -114,6 +139,16 @@ medea._addMod('node',['frustum'],function(undefined) {
 			this.flags |= this.trafo_dirty_flag;
 			return this;
 		},
+        
+        ScaleToFit : function(s) {          
+            var bb = this.GetBB(), m = Math.max, e;
+            e = m(-bb[0][0],bb[1][0]);
+            e = m(e,m(-bb[0][1],bb[1][1]));
+            e = m(e,m(-bb[0][2],bb[1][2]));
+            if(e > 1e-6) {
+                this.Scale((s===undefined?1.0:s)/e);
+            }
+        },
 		
 		ResetTransform: function() {
 			this.lmatrix = mat4.identity(mat4.create());
@@ -185,9 +220,10 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 		
 		_UpdateGlobalTransform: function() {
-			if (!(this.flags & medea._NODE_FLAG_DIRTY)) {
-				return;
-			}
+			// XXX need a solution for proper propagation of the dirty flag downwards the node hierarchy
+            //if (!(this.flags & medea._NODE_FLAG_DIRTY)) {
+			//	return;
+			//}
 			this.flags &= ~medea._NODE_FLAG_DIRTY;
 			if (this.parent) {
 				mat4.multiply(this.parent.GetGlobalTransform(),this.lmatrix,this.gmatrix);

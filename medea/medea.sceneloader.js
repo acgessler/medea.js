@@ -6,44 +6,43 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('sceneloader',['mesh','filesystem', typeof JSON === undefined ? 'json2.js' : null],function(undefined) {
+medea._addMod('sceneloader',['filesystem'],function(undefined) {
 	"use strict";
 	var medea = this;
-	
-	
-	
-	var LoadAssimpScene = function(scene, anchor, callback) {
-		
-	};
-	
+    
+    
+    var DefaultMaterialResolver = function(mat_params, root) {
+        // for now, just distinguish between textured and non-textured materials and leave more sophisticated stuff for later
+        if(mat_params.diffuse_texture) {
+            return medea.CreateSimpleMaterialFromTexture(root+'/'+ mat_params.diffuse_texture.replace(/^\.(\\|\/)(.*)/,'$2'));
+        }
+    
+        return mat_params.diffuse || [0.2,0.2,0.2,1.0];
+    };
+    
+	var CreateDefaultMaterialResolver = function(url) {
+        url = url || medea.root_url;
+        return function(p) {
+            return DefaultMaterialResolver(p,url);
+        };
+    };
 
 	//
-	medea.LoadScene = function(src,anchor,format_hint,callback) {
+	medea.LoadScene = function(src,anchor,format_hint,callback, material_resolver,url_root) {
 		format_hint = format_hint || 'assimp2json';
-		try {
-		alert(src);
-			var scene = JSON.parse(src);
-		}
-		catch(e) {
-			// #ifdef DEBUG
-			medea.DebugAssert("Failed to read scene from JSON, JSON input is malformed: " + e);
-			// #endif
-		}
-		
-		// assimp2json output format
-		if(format_hint === 'assimp2json') {
-			return LoadAssimpScene(scene,anchor,callback);
-		}
-		
-		// #ifdef DEBUG
-		medea.DebugAssert("Unrecognized scene format: " + format_hint);
-		// #endif
+        material_resolver = material_resolver || CreateDefaultMaterialResolver(url_root);
+        
+        // XXX we need better (read: some) error handling here
+        medea._FetchDeps('sceneloader_'+format_hint,function() {
+                medea['_LoadScene_'+format_hint](src,anchor,callback, material_resolver);
+        });
 	};
 	
 	//
-	medea.LoadSceneFromResource = function(src,anchor,format_hint,callback) {
+	medea.LoadSceneFromResource = function(src,anchor,format_hint,callback, material_resolver) {
+        material_resolver = material_resolver || CreateDefaultMaterialResolver(src.replace(/^(.*[\\\/])?(.*)/,'$1'));
 		medea.Fetch(src,function(data) {
-			medea.LoadScene(data,anchor,format_hint,callback);
+			medea.LoadScene(data,anchor,format_hint,callback, material_resolver);
 		}, function() {
 			// XXX handle error
 		});

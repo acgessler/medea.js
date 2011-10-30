@@ -194,17 +194,20 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 					
 					// gather minimum and maximum vertex values, those will be used to derive a suitable BB
 					mmin[0] = min(p[i3+0],mmin[0]);
-					mmin[0] = min(p[i3+1],mmin[1]);
-					mmin[0] = min(p[i3+2],mmin[2]);
+					mmin[1] = min(p[i3+1],mmin[1]);
+					mmin[2] = min(p[i3+2],mmin[2]);
 					
 					mmax[0] = max(p[i3+0],mmax[0]);
-					mmax[0] = max(p[i3+1],mmax[1]);
-					mmax[0] = max(p[i3+2],mmax[2]);
+					mmax[1] = max(p[i3+1],mmax[1]);
+					mmax[2] = max(p[i3+2],mmax[2]);
+                    
+                    
 				}
 				
 				addStateEntry(medea.ATTR_POSITION,idx++);
 				offset += 3*4;
 			}
+            
 			
 			if (this.normals) {
 				var view = new Float32Array(ab,offset);
@@ -218,11 +221,25 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 				offset += 3*4;
 			}
 			
-			// XXX
+		
 			if (this.tangents) {
+                var view = new Float32Array(ab,offset);
+				for(var i = 0, end = this.itemcount, p = this.tangents, mul = stride/4; i < end; ++i) {
+					view[i*mul+0] = p[i*3+0]; 
+					view[i*mul+1] = p[i*3+1];
+					view[i*mul+2] = p[i*3+2];
+				}
+                
 				addStateEntry(medea.ATTR_TANGENT,idx++);
 				offset += 3*4;
 				if (bitangents) {
+                    view = new Float32Array(ab,offset);
+    				for(var i = 0, end = this.itemcount, p = this.bitangents, mul = stride/4; i < end; ++i) {
+    					view[i*mul+0] = p[i*3+0]; 
+    					view[i*mul+1] = p[i*3+1];
+    					view[i*mul+2] = p[i*3+2];
+    				}
+                
 					addStateEntry(medea.ATTR_BITANGENT,idx++);
 					offset += 3*4;
 				}

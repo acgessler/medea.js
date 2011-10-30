@@ -61,7 +61,7 @@ function run() {
 		var vp1 = medea.CreateViewport();
 		vp1.SetClearColor([0.4,0.4,0.4]);
 		
-		var root = medea.GetRootNode();
+		var root = medea.RootNode();
 		
 		var mfloor = medea.CreateStandardMesh_Plane(medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/floor_texture.jpg'));
 		root.AddChild().Translate([0,-1,0]).Scale(300).AddEntity(mfloor);

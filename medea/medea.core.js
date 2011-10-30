@@ -114,7 +114,7 @@ medea = new (function(sdom) {
 	this.AssertionError = function(what) {this.what = what;};
 	this.FatalError = function(what) {this.what = what;};
 	
-	this.root = sdom.src.replace(/^(.*[\\\/])?(.*)/,'$1');
+	this.root_url = sdom.src.replace(/^(.*[\\\/])?(.*)/,'$1');
 	
 	// collect initial dependencies - for example the scenegraph module is always needed
 	var _initial_deps = ['node','viewport'], _initial_pre_deps = ['webgl-utils.js','webgl-debug.js','sprintf-0.7.js','glMatrix.js'];
@@ -166,8 +166,8 @@ medea = new (function(sdom) {
 			this.frame_flags = 0;
 			this.debug_panel = null;
 
-			// always allocate a default root node
-			this.root = medea.CreateNode("root");
+			// always allocate a default root node for the visual scene
+			this.scene_root = medea.CreateNode("root");
 
 			this.viewports = [];
 			this.enabled_viewports = 0;
@@ -194,6 +194,11 @@ medea = new (function(sdom) {
 	
 	this.IsKeyDown = function(keycode) {
 		return this.key_state[keycode] || false;
+	};
+    
+    this.IsKeyDownWasUp = function(keycode, state) {
+		var old = state[keycode] || false, now = state[keycode] = this.IsKeyDown(keycode);
+        return now && !old;
 	};
 	
 	this.GetMouseDelta = function() {
@@ -223,12 +228,11 @@ medea = new (function(sdom) {
 		return this.settings;
 	};
 
-	this.GetRootNode = function() {
-		return this.root;
-	};
-
-	this.SetRootNode = function(node) {
-		this.root = node;
+	this.RootNode = function(s) {
+        if(s === undefined) {
+            return this.scene_root;
+        }
+        this.scene_root = s;
 	};
 
 	this.GetStatistics = function() {
@@ -376,7 +380,7 @@ medea = new (function(sdom) {
 		}
 
 		// perform update
-		this.VisitGraph(this.root,function(node) {
+		this.VisitGraph(this.scene_root,function(node) {
 			var e = node.GetEntities();
 			for(var i = 0; i < e.length; ++i) {
 				e[i].Update(dtime);
@@ -471,11 +475,17 @@ medea = new (function(sdom) {
 		this.lastMousePosition = [event.clientX, event.clientY,this.lastMouseDelta[2]];
 	};
 	
-	this._addMod = function(name,deps,init) {
+	this._addMod = function(name,deps,init,symbols) {
 		if(_stubs[name] !== undefined) {
 			medea.DebugAssert('module already present: ' + name);
 			return;
 		}
+        
+        if(symbols) {
+            for(var i = 0; i < symbols.length; ++i) {
+                medea._SetFunctionStub(symbols[i],name);
+            }
+        }
 		
 		// #ifdef LOG
 		medea.LogDebug("addmod: " + name + (deps.length ? ', deps: ' + deps : ''));
@@ -556,7 +566,7 @@ medea = new (function(sdom) {
 				}
 				
 				(function(n,is_medea_mod) {
-				medea._AjaxFetch(medea.root+'/'+(is_medea_mod ? 'medea.' +n + '.js' : n),function(text,status) {
+				medea._AjaxFetch(medea.root_url+'/'+(is_medea_mod ? 'medea.' +n + '.js' : n),function(text,status) {
 					if(status !== 200) {
 						medea.DebugAssert('failure loading script ' + n);
 						return;

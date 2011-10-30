@@ -272,7 +272,7 @@ medea._addMod('viewport',['camera','renderqueue'],function(undefined) {
 
 			// and traverse all nodes in the graph, collecting their render jobs
 			var rq = this.rqManager;
-			medea.VisitGraph(medea.GetRootNode(),function(node,parent_visible) {
+			medea.VisitGraph(medea.RootNode(),function(node,parent_visible) {
 			
 				var vis = medea.VISIBLE_ALL /*parent_visible == medea.VISIBLE_ALL ? medea.VISIBLE_ALL : node.Cull(frustum)*/, e = node.GetEntities();
 				if(vis == medea.VISIBLE_NONE) {

@@ -17,7 +17,7 @@ function run() {
 		var m = medea.CreateStandardMesh_Cube(medea.CreateSimpleMaterialFromTexture('remote:../samples/RotatingTexturedCube/test_texture.png'));
 		
 		// test child nodes
-		var root = medea.GetRootNode().AddChild();
+		var root = medea.RootNode().AddChild();
 		root.AddEntity(m);
 		
 		root.Translate(vec3.create([0,0,-5]));

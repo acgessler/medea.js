@@ -16,20 +16,16 @@ medea._addMod('frustum',[],function(undefined) {
 		return [vmin || [1e10,1e10,1e10], vmax || [-1e10,-1e10,-1e10]];
 	};
 	
-	medea.TransformBB = function(b,mat,dest) {
-		if(dest === undefined) {
-			dest = b;
-		}
-		
+	medea.TransformBB = function(b,mat) {
 		if(b === medea.BB_INFINITE || b === medea.BB_EMPTY) {
-			dest[0] = b[0];
-			dest[1] = b[1];
-			return dest;
+			return b;
 		}
+        
+        var bout = medea.CreateBB();
 			
-		mat4.multiplyVec3(mat,b[0],dest[0]);
-		mat4.multiplyVec3(mat,b[1],dest[1]);
-		return dest;
+		mat4.multiplyVec3(mat,b[0],bout[0]);
+		mat4.multiplyVec3(mat,b[1],bout[1]);
+		return bout;
 	};
 	
 	medea.IsValidBB = function(bb) {
@@ -37,8 +33,13 @@ medea._addMod('frustum',[],function(undefined) {
 	};
 	
 	medea.MergeBBs = function(bbs) {
-		var bout = medea.CreateBB();
+        if(!bbs.length) {
+            return medea.BB_EMPTY;
+        }
+        
+        var bout = medea.CreateBB();
 		var bmin = bout[0], bmax = bout[1];
+        
 		for(var i = 0; i < bbs.length; ++i) {
 			var b = bbs[i];
 			
