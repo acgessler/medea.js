@@ -278,9 +278,8 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 			}
 			
 			this.stride = stride;
-			// HACK: WebGlInspector currently throws errors if it encounters a raw ArrayBuffer ---
 	
-			gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(ab,0), this.flags & medea.VERTEXBUFFER_USAGE_DYNAMIC ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
+			gl.bufferData(gl.ARRAY_BUFFER,ab, this.flags & medea.VERTEXBUFFER_USAGE_DYNAMIC ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
 			this.interleaved = ab;
 		},
 
