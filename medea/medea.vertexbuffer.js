@@ -115,16 +115,16 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 					this.normals = medea._GLUtilGetFlatData( data.normals );
 				}
 				if ("tangents" in data) {
-					this.tangents = this._GetFlatData( data.tangents );
+					this.tangents = medea._GLUtilGetFlatData( data.tangents );
 					if ("bitangents" in data) {
 						this.bitangents = medea._GLUtilGetFlatData( data.bitangents );
 					}
 				}
-				if ("colors" in data) {
+				if (data.colors) {
 					// XXX 'pack' color values
 					this.colors =  data.colors.map(medea._GLUtilGetFlatData); 
 				}
-				if ("uvs" in data) {
+				if (data.uvs) {
 					this.uvs = data.uvs.map(medea._GLUtilGetFlatData); 
 				}
 			}
@@ -232,7 +232,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
                 
 				addStateEntry(medea.ATTR_TANGENT,idx++);
 				offset += 3*4;
-				if (bitangents) {
+				if (this.bitangents) {
                     view = new Float32Array(ab,offset);
     				for(var i = 0, end = this.itemcount, p = this.bitangents, mul = stride/4; i < end; ++i) {
     					view[i*mul+0] = p[i*3+0]; 
@@ -269,6 +269,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 					for(var i = 0, end = this.itemcount, mul = stride/4; i < end; ++i) {
 						for(var n = 0; n < elems; ++n) {
 							view[i*mul+n] = u[i*elems+n]; 
+                            
 						}
 					}
 				

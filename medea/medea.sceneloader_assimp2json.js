@@ -91,11 +91,10 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', typeof JSON === un
         
         // note: this modifies the input mesh, but copying would be too expensive
         // and would bring no extra value, after all we access each mesh only once.
-        var vertices = inmesh.vertices;
-        vertices['positions'] = vertices['vertices'];
-        vertices['uvs'] = vertices['texturecoords'];
+        inmesh['positions'] = inmesh['vertices'];
+        inmesh['uvs'] = inmesh['texturecoords'];
         
-        var outmesh = medea.CreateSimpleMesh(vertices,indices,LoadMaterial(w,inmesh.materialindex));
+        var outmesh = medea.CreateSimpleMesh(inmesh,indices,LoadMaterial(w,inmesh.materialindex));
         
         w.meshes[mesh_idx] = outmesh;
         return outmesh;
