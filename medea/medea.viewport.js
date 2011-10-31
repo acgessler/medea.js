@@ -10,7 +10,7 @@ medea._addMod('viewport',['camera','renderqueue'],function(undefined) {
 	var medea = this, gl = medea.gl;
 	
 	medea._DefaultStateDependencies = {
-		W : ["WVP","WV"],
+		W : ["WVP","WV","WIT"],
 		V : ["WVP","WV","VP"],
 		P : ["WVP","VP"],
 	};

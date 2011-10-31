@@ -110,7 +110,8 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			// doesn't make it much betteŗ, though, because the driver manages to get
 			// almost everything else wrong as well. Seems there is a reason that
 			// whitelists are used to determine if Webgl is to be supported or not.
-			if (type == gl.FLOAT_MAT4 && typeof val === 'string' && /.*\.(jpg|png|gif|bmp)/i.test(val) ) {
+            // XXX SAME trouble on a GF 9600M. Hmpf.
+			if (typeof val === 'string' && /.*\.(jpg|png|gif|bmp)/i.test(val) ) {
 				type = gl.SAMPLER_2D;
 			}
 			
@@ -346,15 +347,32 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		},
 	});
 	
-	medea.CreateSimpleMaterialFromColor = function(color) {
-        if(color.length === 3) {
-            color = [color[0],color[1],color[2],1.0];
+	medea.CreateSimpleMaterialFromColor = function(color, dummy_light) {
+        if(color.length === 4) { // drop alpha. this is not a transparency effect.
+            color = [color[0],color[1],color[2]];
         }
-		return new medea.Material(medea.CreatePassFromShaderPair("remote:mcore/shaders/simple-color",{color:color}));
+        var name = "remote:mcore/shaders/simple-color", constants = {
+            color:color
+        };
+        
+        if(dummy_light) {
+            constants['lightdir'] = [0.0,0.709,0.709];
+            name += '-lit';
+        }
+		return new medea.Material(medea.CreatePassFromShaderPair(name,constants));
 	};
 	
-	medea.CreateSimpleMaterialFromTexture = function(texture) {
-		return new medea.Material(medea.CreatePassFromShaderPair("remote:mcore/shaders/simple-textured",{texture:texture}));
+	medea.CreateSimpleMaterialFromTexture = function(texture, dummy_light) {
+        var name = "remote:mcore/shaders/simple-textured", constants = {
+            texture:texture
+        };
+        
+        if(dummy_light) {
+            constants['lightdir'] = [0.0,0.709,0.709];
+            name += '-lit';
+        }
+        
+		return new medea.Material(medea.CreatePassFromShaderPair(name,constants));
 	};
 	
 	medea.CreatePassFromShaderPair = function(name, constants, attr_map) {
