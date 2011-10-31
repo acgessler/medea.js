@@ -266,6 +266,12 @@ medea._addMod('material',['shader','texture'],function(undefined) {
                 for(var i = 0, n; n = gl.getActiveAttrib(p,i); ++i) {
                     a[n.name] = i;
                 }
+                
+                // #ifdef DEBUG
+                if(a['POSITION'] === undefined) {
+                    medea.LogDebug('failed to derive automatic attribute mapping table, at least there is no POSITION input defind.');
+                }
+                // #endif
             }
 		},
 		

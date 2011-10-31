@@ -1,6 +1,6 @@
 
-attribute vec3 POSIN;
-attribute vec2 TEXIN0;
+attribute vec3 POSITION;
+attribute vec2 TEXCOORD0;
 
 uniform mat4 WVP;
 
@@ -9,8 +9,8 @@ varying highp vec3 va_Normal;
 
 void main()
 {
-	gl_Position = WVP * vec4(POSIN,1.0);
-	va_Normal = normalize( POSIN ).xyz;
-	va_TexCoord = TEXIN0;
+	gl_Position = WVP * vec4(POSITION,1.0);
+	va_Normal = normalize( POSITION ).xyz;
+	va_TexCoord = TEXCOORD0;
 }
 
