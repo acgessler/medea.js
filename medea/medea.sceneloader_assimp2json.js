@@ -94,6 +94,16 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', typeof JSON === un
         inmesh['positions'] = inmesh['vertices'];
         inmesh['uvs'] = inmesh['texturecoords'];
         
+        // flip v component of UV coordinates
+        if(inmesh['uvs']) {
+            for(var i = 0; i < inmesh['uvs'].length; ++i) {
+                var uv = inmesh['uvs'][i], c = inmesh['numuvcomponents'][i];
+                for(var n = 0; n < uv.length/c; ++n) {
+                    uv[n*c+1] = 1.0-uv[n*c+1];
+                }
+            }
+        }
+        
         var outmesh = medea.CreateSimpleMesh(inmesh,indices,LoadMaterial(w,inmesh.materialindex));
         
         w.meshes[mesh_idx] = outmesh;

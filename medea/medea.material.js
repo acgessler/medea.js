@@ -43,7 +43,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			this.ps = ps;
 			this.constants = constants;
 			this.auto_setters = {};
-			this.attr_map = attr_map || {};
+			this.attr_map = attr_map;
 			this.state = state;
 			
 // #ifdef DEBUG
@@ -228,7 +228,6 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			gl.attachShader(p,this.vs.GetGlShader());
 			gl.attachShader(p,this.ps.GetGlShader());
 			
-			//gl.bindAttribLocation(this.program,0,"POSIN");
 			
 			gl.linkProgram(p);
 			if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
@@ -258,6 +257,16 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			for(var k in old) {
 				this.Set(k,old[k]);
 			}
+            
+            // if the user didn't supply an attribute mapping (i.e. which pre-defined
+            // attribute type maps to which attribute in the shader), derive it 
+            // from the attribute names, assuming their names are recognized.
+            if(!this.attr_map) {
+                var a = this.attr_map = {};
+                for(var i = 0, n; n = gl.getActiveAttrib(p,i); ++i) {
+                    a[n.name] = i;
+                }
+            }
 		},
 		
 		_SetAutoState : function(statepool) {
