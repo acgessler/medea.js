@@ -1,0 +1,16 @@
+#ifdef GL_ES
+precision highp float;
+#endif
+
+uniform sampler2D texture;
+uniform vec3 lightdir;
+
+varying highp vec2 va_TexCoord;
+varying highp vec3 va_Normal;
+
+void main()
+{
+    gl_FragColor.a = 1.0;
+	gl_FragColor.rgb = texture2D(texture, va_TexCoord ).rgb * (dot(normalize(lightdir), normalize(va_Normal))+1.0) * 0.5;
+}
+

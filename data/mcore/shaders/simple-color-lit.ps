@@ -1,0 +1,15 @@
+#ifdef GL_ES
+precision highp float;
+#endif
+
+uniform vec3 color;
+uniform vec3 lightdir;
+
+varying highp vec3 va_Normal;
+
+void main()
+{
+	gl_FragColor.a = 1.0;
+	gl_FragColor.rgb = color * dot(normalize(lightdir), normalize(va_Normal));
+}
+
