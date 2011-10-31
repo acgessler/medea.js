@@ -23,7 +23,7 @@ medea._addMod('camera',['entity'],function() {
 			this.view = mat4.identity(mat4.create());
 			this.proj = mat4.identity(mat4.create());
 			
-			this.fovy = fovy || 100;
+			this.fovy = fovy || 45;
 			this.aspect = aspect;
 			this.znear = znear || 0.1;
 			this.zfar = zfar || 1000;
