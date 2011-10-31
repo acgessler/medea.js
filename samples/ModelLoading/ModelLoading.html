@@ -9,7 +9,7 @@
 
 function run() {
 
-	medea.Ready("canvas",{dataroot:'../../data'},['debug','sceneloader'],function() {
+	medea.Ready("canvas",{dataroot:'../../data'},['debug','sceneloader','keycodes'],function() {
 		var vp1 = medea.CreateViewport();
 		vp1.SetClearColor([0.5,0.5,0.5]);
         
@@ -42,7 +42,7 @@ function run() {
 			time += dtime;
 			root.Rotate(dtime,vec3.create([1,1,0]));
             
-            if(medea.IsKeyDownWasUp(13,input_state)) {
+            if(medea.IsKeyDownWasUp(medea.KeyCode.ENTER,input_state)) {
                 next();
             }
 			return true;
