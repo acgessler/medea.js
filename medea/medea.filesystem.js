@@ -99,26 +99,52 @@ medea._addMod('filesystem',[],function() {
 	});
 	
 	// class LocalFileSystemHandler
+    var _http_cache = {};
 	medea.HTTPRemoteFileSystemHandler = medea.FileSystemHandler.extend({
 	
 		CanHandle : function(prefix) {
 			return prefix == "remote";
 		},
 		
-		Load : function(what,callback,onerror) {
+		Load : function(what,callback,onerror,no_session_cache) {
 		
 			what = medea.FixURL(what);
+            
+            if (!no_session_cache) {
+                var c = _http_cache[what];
+                if(c) {
+                    if(Array.isArray(c)) {
+                        c.push(callback);
+                    }
+                    else {
+                        callback(c);
+                    }
+                    return;
+                }
+                else {
+                    _http_cache[what] = [];
+                }
+            }
 		
 			medea.LogDebug("begin loading: " + what + " via HTTP");
 			medea._AjaxFetch(what,function(response,status) {
 			
-				medea.LogDebug(medea.sprintf("end loading %s, got response with HTTP status %s",what,status));
+				medea.LogDebug(medea.sprintf("end loading %s, got HTTP status %s",what,status));
 				if (status >= 300 || status < 200) {
 					if (onerror) {
 						onerror(status);
 					}
 					return;
 				}
+                if (!no_session_cache) {
+                    var c = _http_cache[what];
+                    if(Array.isArray(c)) {
+                        for(var i = 0; i < c.length; ++i) {
+                            c[i](response);
+                        }
+                    }
+                    _http_cache[what] = response;
+                }
 				callback(response);
 			});
 			return true;

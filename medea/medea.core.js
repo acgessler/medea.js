@@ -630,25 +630,22 @@ medea = new (function(sdom) {
 			no_client_cache = true;
 		}
 		// #endif
-
+   
 		var ajax;
   		if (window.XMLHttpRequest) {              
-      			ajax = new XMLHttpRequest();              
-    		} else {                                  
-      			ajax = new ActiveXObject("Microsoft.XMLHTTP");
-    		}       
+      		ajax = new XMLHttpRequest();              
+    	} 
+        else {                                  
+      		ajax = new ActiveXObject("Microsoft.XMLHTTP");
+    	}       
 
 		ajax.onreadystatechange = function() {  
-        		if (ajax.readyState==4) {                          
-          			callback(ajax.responseText,ajax.status);                                             
-       			}       
+            if (ajax.readyState==4) {               
+                callback(ajax.responseText,ajax.status);                                             
+            }       
 		}               
-		
-		if (no_client_cache) {
-			url += '?nocache='+(new Date()).getTime();
-		}
 
-		ajax.open("GET",url,true);
+		ajax.open("GET",url + (no_client_cache ?  '?nocache='+(new Date()).getTime() : ''),true);
 		ajax.send(null);    
 	};
 
