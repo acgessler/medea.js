@@ -19,6 +19,10 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WIT"));
 		},
 		
+		"VP" :  function(prog, pos, state) {
+			gl.uniformMatrix4fv(pos, false, state.Get("VP"));
+		},
+		
 		"W" :  function(prog, pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("W"));
 		},
@@ -78,6 +82,13 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		
 		GetAttributeMap : function() {
 			return this.attr_map;
+		},
+		
+		State : function(state) {
+			if (state === undefined) {
+				return this.state;
+			}
+			this.state = state;
 		},
 		
 		Set : function(k,val) {
@@ -373,6 +384,14 @@ medea._addMod('material',['shader','texture'],function(undefined) {
         }
         
 		return new medea.Material(medea.CreatePassFromShaderPair(name,constants));
+	};
+	
+	medea.CreateMaterial = function(passes, name) {
+		return new medea.Material(passes, name);
+	};
+	
+	medea.CreateSimpleMaterialFromShaderPair = function(name, constants, attr_map) {
+		return new medea.Material(medea.CreatePassFromShaderPair(name,constants, attr_map));
 	};
 	
 	medea.CreatePassFromShaderPair = function(name, constants, attr_map) {

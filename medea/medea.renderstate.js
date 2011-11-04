@@ -12,8 +12,25 @@ medea._addMod('renderstate',[],function(undefined) {
 		(v ? gl.enable : gl.disable)(what);
 	};
 	
+	var df_table = {
+		'never' 		: gl.NEVER,
+		'less' 			: gl.LESS,
+		'equal' 		: gl.EQUAL,
+		'less_equal' 	: gl.LEQUAL,
+		'greater' 		: gl.GREATER,
+		'greater_equal' : gl.GEQUAL,
+		'not_equal' 	: gl.NOTEQUAL,
+		'always'		: gl.ALWAYS,
+	};
+	
 	var action_map = {
-		'depth_test' :  function(v) { setsimple(gl.DEPTH_TEST,v); },
+		'depth_test'  :  function(v) { setsimple(gl.DEPTH_TEST,v); },
+		'depth_write' :  function(v) { 
+			gl.depthMask(!!v);
+		},
+		'depth_func'  :  function(v) { 
+			gl.depthFunc(df_table[v]);
+		},
 	}; 
 	
 	this.SetState = function(s,pool) {

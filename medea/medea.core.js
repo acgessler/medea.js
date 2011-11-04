@@ -118,13 +118,10 @@ medea = new (function(sdom) {
 	
 	// collect initial dependencies - for example the scenegraph module is always needed
 	var _initial_deps = ['node','viewport'], _initial_pre_deps = ['webgl-utils.js','webgl-debug.js','sprintf-0.7.js','glMatrix.js'];
-	var _waiters = {}, _deps = {}, _stubs = {}, _callback = undefined, _callback_pre = undefined;
+	var _waiters = {}, _deps = {}, _stubs = {}, _callback = undefined, _callback_pre = undefined, readyness = 0;
 	
 	this.Ready = function(where,settings,deps,callback) {
-		if(deps) {
-			_initial_deps = _initial_deps.concat(deps);
-		}
-		
+
 		// first initialization phase -- create webgl canvas and prepare environment
 		_callback_pre = function() {
 			this.sprintf = sprintf;
@@ -186,6 +183,22 @@ medea = new (function(sdom) {
 			_callback = _initial_deps = undefined;
 			callback();
 		};
+		
+		if(deps) {
+			var old = _callback;
+			_callback = function() {
+				medea._FetchDeps(deps, function() {
+					old.apply(medea);
+				});
+			}
+		}
+		
+		if(readyness > 0) {
+			_callback_pre.apply(medea);
+			if(readyness > 1) {
+				_callback.apply(medea);
+			}
+		}
 	};
 	
 	this.IsMouseDown = function() {
@@ -522,7 +535,7 @@ medea = new (function(sdom) {
 		_stubs[name] = null;
 	};
 
-	this._FetchDeps = function(whom,callback) {
+	this.FetchMods = this._FetchDeps = function(whom,callback) {
 		callback = callback || function() {};
 		var whom = whom instanceof Array ? whom : [whom];
 		var cnt = 0, nodelay = true;
@@ -703,15 +716,19 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("Fetch","filesystem");
 	this._SetFunctionStub("FetchMultiple","filesystem");
 	
+	this._SetFunctionStub("CreatePassFromShaderPair","material");
+	this._SetFunctionStub("CreateMaterial","material");
+	
+	this._SetFunctionStub("CreateSimpleMaterialFromShaderPair","material");
 	this._SetFunctionStub("CreateSimpleMaterialFromColor","material");
 	this._SetFunctionStub("CreateSimpleMaterialFromTexture","material");
-	this._SetFunctionStub("CreatePassFromShaderPair","material");
 	
 	this._SetFunctionStub("CreateVertexBuffer","vertexbuffer");
 	this._SetFunctionStub("CreateIndexBuffer","indexbuffer");
 	
 	this._SetFunctionStub("CreateShader","shader");
 	this._SetFunctionStub("CreateTexture","texture");
+	this._SetFunctionStub("CreateCubeTexture","cubetexture");
 	
 	this._SetFunctionStub("CreateStandardMesh_Plane","standardmesh");
 	this._SetFunctionStub("CreateStandardMesh_Cube","standardmesh");
@@ -730,14 +747,21 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("LoadScene","sceneloader");
 	this._SetFunctionStub("LoadSceneFromResource","sceneloader");
 	
+	this._SetFunctionStub("CreateSkyboxNode","skybox");
 	
 	// Initialization has two phases, the first of which is used to load utility libraries
 	// that all medea modules may depend upon. This also involves creating a webgl canvas
 	// (which is accessible through the medea.gl namespace)
 	this._FetchDeps(_initial_pre_deps, function() {
-		_callback_pre.apply(medea);
+		++readyness;
+		if (_callback_pre) {
+			_callback_pre.apply(medea);
+		}
 		medea._FetchDeps(_initial_deps, function() {
-			_callback.apply(medea);
+			++readyness;
+			if (_callback) {
+				_callback.apply(medea);
+			}
 		});
 	});
 	

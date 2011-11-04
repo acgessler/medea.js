@@ -6,8 +6,6 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('keycodes',[],function() {}); // this is just a dummy module
-
 medea.KeyCode = {
   ENTER: 13,
   SPACE: 32,
@@ -56,3 +54,5 @@ medea.KeyCode = {
 
   PERIOD: 190
 };
+
+medea._addMod('keycodes',[],function() {}); // this is just a dummy module

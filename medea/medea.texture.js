@@ -9,14 +9,19 @@
 medea._addMod('texture',['filesystem'],function(undefined) {
 	var medea = this, gl = medea.gl;
 	
-	medea.TEXTURE_TYPE_2D = gl.TEXTURE_2D;
+	var TEX = medea.TEXTURE_TYPE_2D = gl.TEXTURE_2D;
 
 	medea._initMod('filesystem');
 	medea.Texture = medea.Resource.extend( {
 	
 		init : function(src, no_client_cache) {
-			this.texture = gl.createTexture();
+			// #ifdef DEBUG
+    		if (no_client_cache === undefined) {
+    			no_client_cache = true;
+    		}
+    		// #endif
 			
+			this.texture = gl.createTexture();
 			this.img = new Image();
 			
 			var outer = this;
@@ -25,43 +30,28 @@ medea._addMod('texture',['filesystem'],function(undefined) {
 			};
 			
 			this.src = src;
-            
-            // #ifdef DEBUG
-    		if (no_client_cache === undefined) {
-    			no_client_cache = true;
-    		}
-    		// #endif
-
-		
-            // image caches are terribly sturdy, so we really need this or some browsers
-            // will cache images forever
-    		if (no_client_cache) {
-    			src += '?nocache='+(new Date()).getTime();
-    		}
-        
-			this.img.src = medea.FixURL(src);
+			this.img.src = medea.FixURL(src,no_client_cache);
 		},
 		
 		OnDelayedInit : function() {
-			gl.bindTexture(gl.TEXTURE_2D, this.texture);
+			gl.bindTexture(TEX, this.texture);
 			
             
-			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.img);  
+			gl.texImage2D(TEX, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.img);  
             
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);  
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);  
+            gl.texParameteri(TEX, gl.TEXTURE_WRAP_S, gl.REPEAT);  
+            gl.texParameteri(TEX, gl.TEXTURE_WRAP_T, gl.REPEAT);  
             
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);  
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);  
-			gl.generateMipmap(gl.TEXTURE_2D);  
+			gl.texParameteri(TEX, gl.TEXTURE_MAG_FILTER, gl.LINEAR);  
+			gl.texParameteri(TEX, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);  
+			gl.generateMipmap(TEX);  
 			
 			// #ifdef DEBUG
-			gl.bindTexture(gl.TEXTURE_2D, null); 
+			gl.bindTexture(TEX, null); 
 			// #endif
 		
 			// mark this resource as complete
 			this._super();
-			
 			medea.LogDebug("successfully loaded texture " + this.src);
 		},
 		
@@ -72,7 +62,7 @@ medea._addMod('texture',['filesystem'],function(undefined) {
 		
 		_Bind : function() {
 			gl.activeTexture(gl.TEXTURE0);
-			gl.bindTexture(gl.TEXTURE_2D,this.texture);
+			gl.bindTexture(TEX,this.texture);
 			return 0;
 		},
 	});
@@ -81,3 +71,4 @@ medea._addMod('texture',['filesystem'],function(undefined) {
 		return new medea.Texture(res);
 	}
 });
+

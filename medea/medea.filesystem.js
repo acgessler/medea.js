@@ -15,9 +15,12 @@ medea._addMod('filesystem',[],function() {
 		root += '/';
 	}
 	
-	medea.FixURL = function(s) {
+	medea.FixURL = function(s, no_client_cache) {
 		if (s.slice(0,7) === 'remote:') {
 			s = s.slice(7);
+		}
+		if (no_client_cache) {
+			s += '?nocache='+(new Date()).getTime();
 		}
 		return root + s;
 	};

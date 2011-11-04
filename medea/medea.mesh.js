@@ -44,10 +44,11 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 	// class Mesh
 	this.Mesh = medea.Entity.extend(
 	{
-		init : function(vbo,ibo,material) {
+		init : function(vbo,ibo,material,rq) {
 			this.vbo = vbo;
 			this.ibo = ibo;
 			this.material = material;
+			this.rq_idx = rq === undefined ? medea.RENDERQUEUE_DEFAULT : rq;
 			
 // #ifdef DEBUG
 			if (!this.vbo) {
@@ -67,7 +68,7 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 	
 		Render : function(viewport,entity,node,rqmanager) {
 			// construct a renderable capable of drawing this mesh upon request by the render queue manager
-			rqmanager.Push(medea.RENDERQUEUE_DEFAULT,new medea.RenderJob(this,entity,node,viewport));
+			rqmanager.Push(this.rq_idx,new medea.RenderJob(this,entity,node,viewport));
 		},
 		
 		Update : function() {
@@ -78,6 +79,13 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 				return this.material;
 			}
 			this.material = m;
+		},
+		
+		RenderQueue : function(m) {
+			if (m === undefined) {
+				return this.rq_idx;
+			}
+			this.rq_idx = m;
 		},
 		
 		DrawNow : function(statepool) {

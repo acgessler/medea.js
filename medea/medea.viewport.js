@@ -267,6 +267,7 @@ medea._addMod('viewport',['camera','renderqueue'],function(undefined) {
 
 			// clear the viewport
 			if (this.clearFlags) {
+				gl.depthMask(true);
 				gl.clear(this.clearFlags);
 			}
 

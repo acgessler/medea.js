@@ -6,7 +6,8 @@
  */
 
 medea._addMod('renderqueue',['renderstate'],function(undefined) {
-
+	var medea = this;
+	
 	//
 	this.RENDERQUEUE_FIRST = 0;
 	
@@ -18,13 +19,14 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 	this.RENDERQUEUE_ALPHA = 15;
 	this.RENDERQUEUE_ALPHA_LATE = 16;
 	
+	this.RENDERQUEUE_BACKGROUND = 18;
+	
 	this.RENDERQUEUE_LAST = 19;
-	var medea = this;
 	
 	
 	this._initial_state_depth_test_enabled = {
 		'depth_test' : true,
-		'depth_func' : 'less',
+		'depth_func' : 'less_equal',
 	};
 	
 	this._initial_state_depth_test_disabled = {
