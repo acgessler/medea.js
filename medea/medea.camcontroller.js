@@ -79,30 +79,34 @@ medea._addMod('camcontroller',['camera'],function(undefined) {
 			var d = medea.GetMouseDelta(), n = this.camera_node;
 			if(d[2] !== this.last_processed_mdelta) {
 			
-				// "First-Person-Shooter" view control style
-				if(this.kind === 'fps') {
+				// do not process mouse movements while the CTRL key is pressed
+				if (!medea.IsKeyDown(17)) {
+			
+					// "First-Person-Shooter" view control style
+					if(this.kind === 'fps') {
+					
+						// process mouse movement on the y axis
+						if(d[1]) {
+							var mrot = mat4.rotate(mat4.identity(mat4.create()),-d[1]*this.turn_speed,n.LocalXAxis());
+							n.LocalYAxis(mat4.multiplyVec3(mrot,n.LocalYAxis()));
+							n.LocalZAxis(mat4.multiplyVec3(mrot,n.LocalZAxis()));
+						}
+						
+						// process mouse movement on the x axis
+						if(d[0]) {
+							var mrot = mat4.rotate(mat4.identity(mat4.create()),-d[0]*this.turn_speed,[0,1,0]);
+							n.LocalYAxis(mat4.multiplyVec3(mrot,n.LocalYAxis()));
+							n.LocalZAxis(mat4.multiplyVec3(mrot,n.LocalZAxis()));
+							n.LocalXAxis(vec3.cross(n.LocalYAxis(),n.LocalZAxis()));
+						}
+					}
+					// #ifdef DEBUG
+					else {
+						medea.DebugAssert("Camera mode not recognized: " + this.kind);
+					}
+					// #endif
+				}
 				
-					// process mouse movement on the y axis
-					if(d[1]) {
-						var mrot = mat4.rotate(mat4.identity(mat4.create()),-d[1]*this.turn_speed,n.LocalXAxis());
-						n.LocalYAxis(mat4.multiplyVec3(mrot,n.LocalYAxis()));
-						n.LocalZAxis(mat4.multiplyVec3(mrot,n.LocalZAxis()));
-					}
-					
-					// process mouse movement on the x axis
-					if(d[0]) {
-						var mrot = mat4.rotate(mat4.identity(mat4.create()),-d[0]*this.turn_speed,[0,1,0]);
-						n.LocalYAxis(mat4.multiplyVec3(mrot,n.LocalYAxis()));
-						n.LocalZAxis(mat4.multiplyVec3(mrot,n.LocalZAxis()));
-						n.LocalXAxis(vec3.cross(n.LocalYAxis(),n.LocalZAxis()));
-					}
-				}
-				// #ifdef DEBUG
-				else {
-					medea.DebugAssert("Camera mode not recognized: " + this.kind);
-				}
-				// #endif
-					
 				this.last_processed_mdelta = d[2];
 			}
 			
