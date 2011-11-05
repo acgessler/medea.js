@@ -132,7 +132,7 @@ medea._addMod('camcontroller',['camera'],function(undefined) {
 				}
 				// D
 				if(medea.IsKeyDown(68)) {
-					n.Translate([this.ws * dtime,0,0]);
+					n.Translate([ws * dtime,0,0]);
 				}
 			}
 		},
