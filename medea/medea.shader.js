@@ -34,14 +34,14 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 	
 	medea.Shader = medea.Resource.extend( {
 	
-		init : function(src, defines) {
+		init : function(src, defines, callback) {
 	
 			this.type = src.split('.').pop() == 'ps' ? medea.SHADER_TYPE_PIXEL : medea.SHADER_TYPE_VERTEX;
 			this.shader = 0;
 			this.defines = defines;
 			
 			// trigger deferred loading
-			this._super(src);
+			this._super(src, callback);
 		},
 		
 		OnDelayedInit : function(data) {
@@ -80,7 +80,7 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 		}
 	});
 	
-	medea.CreateShader = function(res) {
-		return new medea.Shader(res);
+	medea.CreateShader = function(res, defines, callback) {
+		return new medea.Shader(res, defines, callback);
 	}
 });

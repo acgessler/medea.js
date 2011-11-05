@@ -29,7 +29,8 @@ medea._addMod('filesystem',[],function() {
 	// class Resource
 	medea.Resource = medea.Class.extend({
 	
-		init : function(src) {
+		init : function(src, callback) {
+			this.callback = callback;
 			this.complete = false;
 			this.src = src;
 			
@@ -50,6 +51,10 @@ medea._addMod('filesystem',[],function() {
 		
 		OnDelayedInit : function() {
 			this.complete = true;
+			
+			if(this.callback) {
+				this.callback(this);
+			}
 		}
 	});
 	

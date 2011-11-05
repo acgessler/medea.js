@@ -15,7 +15,7 @@ medea._addMod('texture',['filesystem'],function(undefined) {
 	medea._initMod('filesystem');
 	medea.Texture = medea.Resource.extend( {
 	
-		init : function(src, no_client_cache) {
+		init : function(src, callback, no_client_cache) {
 			// #ifdef DEBUG
     		if (no_client_cache === undefined) {
     			no_client_cache = true;
@@ -24,6 +24,7 @@ medea._addMod('texture',['filesystem'],function(undefined) {
 			
 			this.texture = gl.createTexture();
 			this.img = new Image();
+			this.callback = callback;
 			
 			var outer = this;
 			this.img.onload = function() {
@@ -37,7 +38,6 @@ medea._addMod('texture',['filesystem'],function(undefined) {
 		OnDelayedInit : function() {
 			gl.bindTexture(TEX, this.texture);
 			
-            
 			gl.texImage2D(TEX, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.img);  
             
             gl.texParameteri(TEX, gl.TEXTURE_WRAP_S, gl.REPEAT);  
@@ -54,6 +54,9 @@ medea._addMod('texture',['filesystem'],function(undefined) {
 			// mark this resource as complete
 			this._super();
 			medea.LogDebug("successfully loaded texture " + this.src);
+			
+			// this hopefully frees some memory
+			this.img = null;
 		},
 		
 		GetGlTexture : function() {
@@ -68,8 +71,8 @@ medea._addMod('texture',['filesystem'],function(undefined) {
 		},
 	});
 	
-	medea.CreateTexture = function(res) {
-		return new medea.Texture(res);
+	medea.CreateTexture = function(res, callback) {
+		return new medea.Texture(res, callback);
 	}
 });
 

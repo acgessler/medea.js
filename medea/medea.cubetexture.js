@@ -19,7 +19,7 @@ medea._addMod('cubetexture',['filesystem'],function(undefined) {
 	medea._initMod('filesystem');
 	medea.CubeTexture = medea.Resource.extend( {
 	
-		init : function(src, no_client_cache) {
+		init : function(src, callback, no_client_cache) {
 			// #ifdef DEBUG
 			if (no_client_cache === undefined) {
 				no_client_cache = true;
@@ -27,6 +27,7 @@ medea._addMod('cubetexture',['filesystem'],function(undefined) {
 			// #endif
 				
 			this.texture = gl.createTexture();
+			this.callback = callback;
 			
 			this.img = new Array(6);
 			
@@ -90,8 +91,8 @@ medea._addMod('cubetexture',['filesystem'],function(undefined) {
 		},
 	});
 	
-	medea.CreateCubeTexture = function(res) {
-		return new medea.CubeTexture(res);
+	medea.CreateCubeTexture = function(res, callback) {
+		return new medea.CubeTexture(res, callback);
 	}
 });
 
