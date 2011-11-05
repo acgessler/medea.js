@@ -1,0 +1,97 @@
+<html>
+
+<head>
+<title></title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script type="text/javascript" src="../../medea/medea.core.js"></script>
+<script type="text/javascript">
+
+function run() {
+
+	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes'],function() {
+		var vp1 = medea.CreateViewport();
+		vp1.SetClearColor([1.0,1.0,1.0]);
+        
+        var files = ['remote:assimp_import_sample/TexturedSpider.obj.json',
+            'remote:assimp_import_sample/Collada.dae.json',
+            'remote:assimp_import_sample/Animated.x.json'
+        ];
+		
+		var nodes = new Array(files.length), cur = files.length-1, root = medea.RootNode();
+		for( var i = 0; i < files.length; ++i) {
+			nodes[i] = medea.CreateNode();
+		}
+		
+		medea.FetchMods('sceneloader',function() {
+			for( var i = 0; i < files.length; ++i) {
+				(function(i) {
+					medea.LoadSceneFromResource(files[i],nodes[i], null, function() {
+						// called as soon as the scene hierarchy is fully loaded (dependent data, i.e. textures, may still be pending)
+						nodes[i].ScaleToFit();
+					});
+				} (i));
+			}
+		
+			next();
+		});
+        
+		medea.FetchMods(['standardmesh','material'], function() {
+			var mfloor = medea.CreateStandardMesh_Plane(medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/floor_texture.jpg'));
+			root.AddChild().Translate([0,-1,0]).Scale(300).AddEntity(mfloor);
+		});
+        
+        var next = function() {
+            root.RemoveChild(nodes[cur]);
+            cur = (cur + 1) % files.length;
+            root.AddChild(nodes[cur]);
+        };
+
+		var time = 0.0, input_state = {};
+		medea.SetTickCallback(function(dtime) {
+			time += dtime;
+			nodes[cur].Rotate(dtime,vec3.create([1,1,0]));
+            
+            if(medea.IsKeyDownWasUp(medea.KeyCode.ENTER,input_state)) {
+                next();
+            }
+			return true;
+		});	
+		
+		// add the skybox
+		medea.FetchMods('skydome',function() {
+			root.AddChild(medea.CreateSkydomeNode('remote:skydome_sample/midmorning/midmorning.png',0.2));
+        });
+		
+		// and a plain camera controller
+		medea.FetchMods('camcontroller',function() {
+			var cam = medea.CreateCamera();
+			root.AddChild().AddEntity(cam);
+			vp1.SetCamera(cam);
+			
+			cam.parent.Translate(vec3.create([0,0,5]));
+			
+			var cc = medea.CreateCamController(cam,'fps');
+			cc.Enable();
+		});
+        
+		medea.SetDebugPanel(null,true);
+		medea.Start();
+	});
+}
+
+</script>
+
+</head>
+
+
+<body onload="run();">
+Press ENTER to toggle scene.   (Skydome from  http://www.tutorialsforblender3d.com/Textures/Skys/Sky_Dome_1.html, free for non-commercial use)
+
+    <canvas id="canvas" style="border: none;" width="1024" height="768"></canvas>
+
+    <br/>
+    
+
+</body>
+
+</html>
