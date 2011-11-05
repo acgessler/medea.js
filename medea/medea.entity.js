@@ -7,6 +7,7 @@
  */
 
 medea._addMod('entity',[],function() {
+	"use strict";
 	var medea = this;
 
 	this.Entity = medea.Class.extend({

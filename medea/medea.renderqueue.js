@@ -6,6 +6,7 @@
  */
 
 medea._addMod('renderqueue',['renderstate'],function(undefined) {
+	"use strict";
 	var medea = this;
 	
 	//

@@ -7,6 +7,7 @@
  */
 
 medea._addMod('debug',[],function() {
+	"use strict";
 	var medea = this;
 
 	medea._CanvasUtilFillTextMultiline = function(context,text,x,y,lineheight) {

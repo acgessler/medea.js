@@ -7,6 +7,7 @@
  */
 
 medea._addMod('camera',['entity'],function() {
+	"use strict";
 	var medea = this;
 	
 	medea._CAMERA_DIRTY_VIEW = 0x1;

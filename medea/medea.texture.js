@@ -7,6 +7,7 @@
  */
 
 medea._addMod('texture',['filesystem'],function(undefined) {
+	"use strict";
 	var medea = this, gl = medea.gl;
 	
 	var TEX = medea.TEXTURE_TYPE_2D = gl.TEXTURE_2D;

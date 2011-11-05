@@ -6,6 +6,7 @@
  */
 
 medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function(undefined) {
+	"use strict";
 	var medea = this, gl = medea.gl;
 	
 	medea._initMod('entity');

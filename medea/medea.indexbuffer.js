@@ -6,7 +6,8 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('indexbuffer',[],function(undefined) {
+medea._addMod('indexbuffer',[],function(undefined) {	
+	"use strict";
 	var medea = this, gl = medea.gl;
 
 	// mark data in the buffer as frequently changing and hint the driver to optimize for this

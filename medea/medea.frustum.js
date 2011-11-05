@@ -7,6 +7,7 @@
  */
 
 medea._addMod('frustum',[],function(undefined) {
+	"use strict";
 	var medea = this, min = Math.min, max = Math.max;
 	
 	medea.BB_INFINITE = 'i';

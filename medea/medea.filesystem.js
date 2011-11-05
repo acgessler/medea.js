@@ -7,6 +7,7 @@
  */
 
 medea._addMod('filesystem',[],function() {
+	"use strict";
 	var medea = this, gl = medea.gl;
 	
 	// find root location for remote files

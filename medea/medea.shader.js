@@ -15,12 +15,30 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 	
 	medea._initMod('filesystem');
 	
+	// cache for compiled shader objects.
+	var sh_cache = {
+	};
+	
+	var GetCacheName = function(src, defines) {
+		var out = src;
+		
+		if (defines) {
+			out += '#';
+			for(k,v in defines) {
+				out += k+'='+v;
+			}
+		}
+		
+		return out;
+	};
+	
 	medea.Shader = medea.Resource.extend( {
 	
-		init : function(src) {
+		init : function(src, defines) {
 	
 			this.type = src.split('.').pop() == 'ps' ? medea.SHADER_TYPE_PIXEL : medea.SHADER_TYPE_VERTEX;
-			this.shader = gl.createShader(this.type);
+			this.shader = 0;
+			this.defines = defines;
 			
 			// trigger deferred loading
 			this._super(src);
@@ -34,7 +52,15 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 			}
 // #endif
 
-			var s = this.shader;
+			var c = GetCacheName(this.src, this.defines);
+			var s = sh_cache[c];
+			if(s !== undefined) {
+				this.shader = s;
+				this._super();
+				return;
+			}
+
+			s = this.shader = sh_cache[c] = gl.createShader(this.type);
 			gl.shaderSource(s,data);
 			
 			gl.compileShader(s);

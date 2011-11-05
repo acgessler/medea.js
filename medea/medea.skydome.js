@@ -7,6 +7,7 @@
  */
 
 medea._addMod('skydome',['texture','material','mesh'],function(undefined) {
+	"use strict";
 	var medea = this;
 	
 	// based on my old engine code, which itself took this algorithm from

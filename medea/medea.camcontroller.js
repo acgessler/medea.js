@@ -7,6 +7,7 @@
  */
 
 medea._addMod('camcontroller',['camera'],function(undefined) {
+	"use strict";
 	var medea = this;
 	
 	// class CamController

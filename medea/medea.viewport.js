@@ -7,6 +7,7 @@
  */
 
 medea._addMod('viewport',['camera','renderqueue'],function(undefined) {
+	"use strict";
 	var medea = this, gl = medea.gl;
 	
 	medea._DefaultStateDependencies = {

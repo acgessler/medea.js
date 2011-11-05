@@ -7,6 +7,7 @@
  */
 
 medea._addMod('vertexbuffer',[],function(undefined) {
+	"use strict";
 	var medea = this, gl = medea.gl;
 	
 	// constants for mappings of various vertex attributes, these map 1 one by one

@@ -7,6 +7,7 @@
  */
 
 medea._addMod('standardmesh',['mesh'],function(undefined) {
+	"use strict";
 	var medea = this;
 	
 	medea.CreateStandardMesh_Plane = function(color_or_material) {

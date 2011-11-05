@@ -6,6 +6,7 @@
  */
 
 medea._addMod('renderstate',[],function(undefined) {
+	"use strict";
 	var medea = this, gl = medea.gl;
 	
 	var setsimple = function(what,v) {

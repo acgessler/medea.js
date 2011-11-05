@@ -7,6 +7,7 @@
  */
 
 medea._addMod('skybox',['material','standardmesh','cubetexture'],function(undefined) {
+	"use strict";
 	var medea = this;
 	
 	

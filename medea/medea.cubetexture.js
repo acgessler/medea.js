@@ -7,6 +7,7 @@
  */
 
 medea._addMod('cubetexture',['filesystem'],function(undefined) {
+	"use strict";
 	var medea = this, gl = medea.gl;
 	
 	var CUBE = medea.TEXTURE_TYPE_CUBE = gl.TEXTURE_CUBE_MAP;
