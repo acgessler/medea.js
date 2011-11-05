@@ -6,33 +6,19 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('texture',['filesystem'],function(undefined) {
+medea._addMod('texture',['image','filesystem'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 	
 	var TEX = medea.TEXTURE_TYPE_2D = gl.TEXTURE_2D;
 
 	medea._initMod('filesystem');
-	medea.Texture = medea.Resource.extend( {
+	medea._initMod('image');
+	medea.Texture = medea.Image.extend( {
 	
-		init : function(src, callback, no_client_cache) {
-			// #ifdef DEBUG
-    		if (no_client_cache === undefined) {
-    			no_client_cache = true;
-    		}
-    		// #endif
-			
+		init : function(src_or_img, callback, no_client_cache) {
 			this.texture = gl.createTexture();
-			this.img = new Image();
-			this.callback = callback;
-			
-			var outer = this;
-			this.img.onload = function() {
-				outer.OnDelayedInit();
-			};
-			
-			this.src = src;
-			this.img.src = medea.FixURL(src,no_client_cache);
+			this._super(src_or_img, callback, no_client_cache);
 		},
 		
 		OnDelayedInit : function() {
@@ -71,8 +57,8 @@ medea._addMod('texture',['filesystem'],function(undefined) {
 		},
 	});
 	
-	medea.CreateTexture = function(res, callback) {
-		return new medea.Texture(res, callback);
+	medea.CreateTexture = function(src_or_image, callback) {
+		return new medea.Texture(src_or_image, callback);
 	}
 });
 
