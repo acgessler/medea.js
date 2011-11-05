@@ -769,6 +769,8 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("CreateSkyboxNode","skybox");
 	this._SetFunctionStub("CreateSkydomeNode","skydome");
 	
+	this._SetFunctionStub("CreateTerrainTileMesh","terraintile");
+	
 	// Initialization has two phases, the first of which is used to load utility libraries
 	// that all medea modules may depend upon. This also involves creating a webgl canvas
 	// (which is accessible through the medea.gl namespace)
