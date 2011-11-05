@@ -138,6 +138,7 @@ medea = new (function(sdom) {
 			
 			this.settings = settings || {};
 			this.settings.fps = this.settings.fps || 60;
+			this.wireframe = false;
 
 			this.statistics = {
 				  count_frames : 0
@@ -351,6 +352,18 @@ medea = new (function(sdom) {
 
 	this.CanRender = function() {
 		return this.gl && this.viewports.length;
+	};
+	
+	this.Wireframe = function(wf) {
+		if (wf === undefined) {
+			return this.wireframe;
+		}
+		this.wireframe = wf;
+		// this would be nice: this.gl.polygonMode( this.gl.FRONT_AND_BACK, wf?this.gl.LINE:this.gl.FILL );
+		// .. but unfortunately we don't have glPolygonMode in WebGL. So leave the
+		// implementation to the mesh drawing routines, which might use GL_LINES
+		// to achieve the same effect.
+		// http://stackoverflow.com/questions/3539205/is-there-a-substitute-for-glpolygonmode-in-open-gl-es-webgl
 	};
 
 	this.DoSingleFrame = function(dtime) {
@@ -748,6 +761,7 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("LoadSceneFromResource","sceneloader");
 	
 	this._SetFunctionStub("CreateSkyboxNode","skybox");
+	this._SetFunctionStub("CreateSkydomeNode","skydome");
 	
 	// Initialization has two phases, the first of which is used to load utility libraries
 	// that all medea modules may depend upon. This also involves creating a webgl canvas

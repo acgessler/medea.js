@@ -40,6 +40,7 @@ medea._addMod('debug',[],function() {
 		init : function(where,win) {
 			this.where = where;
 			this.win = win;
+			this.input = {};
 			this.TryInit();
 		},
 		
@@ -153,6 +154,14 @@ medea._addMod('debug',[],function() {
 			),xs,ys+14);
 			
 			ctx.restore();
+			
+			// P to toggle wireframe mode
+			if(medea.IsKeyDownWasUp(80,this.input)) {
+                medea.Wireframe(!medea.Wireframe());
+            }
 		}
 	});
 });
+
+
+
