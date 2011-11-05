@@ -8,6 +8,7 @@
 
 medea.KeyCode = {
   ENTER: 13,
+  SHIFT: 16,
   CTRL: 17,
   
   SPACE: 32,

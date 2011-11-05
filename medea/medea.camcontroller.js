@@ -111,23 +111,28 @@ medea._addMod('camcontroller',['camera'],function(undefined) {
 				this.last_processed_mdelta = d[2];
 			}
 			
+			var ws = this.walk_speed;
+			if(medea.IsKeyDown(16)) {
+				ws *= 20;
+			}
+			
 			// process movements
 			if(this.kind === 'fps') {
 				// W
 				if(medea.IsKeyDown(87)) {
-					n.Translate([0,0,-this.walk_speed * dtime]);
+					n.Translate([0,0,-ws * dtime]);
 				}
 				// A
 				if(medea.IsKeyDown(65)) {
-					n.Translate([-this.walk_speed * dtime,0,0]);
+					n.Translate([-ws * dtime,0,0]);
 				}
 				// S
 				if(medea.IsKeyDown(83)) {
-					n.Translate([0,0,this.walk_speed * dtime]);
+					n.Translate([0,0,ws * dtime]);
 				}
 				// D
 				if(medea.IsKeyDown(68)) {
-					n.Translate([this.walk_speed * dtime,0,0]);
+					n.Translate([this.ws * dtime,0,0]);
 				}
 			}
 		},
