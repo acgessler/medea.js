@@ -10,6 +10,7 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 	var medea = this, gl = medea.gl;
 	
 	medea._initMod('entity');
+	medea._initMod('renderqueue');
 	
 	// class RenderJob
 	this.RenderJob = medea.Class.extend({
