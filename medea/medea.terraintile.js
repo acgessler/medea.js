@@ -79,10 +79,80 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 	
 	var GenVerticesFromPow2Plus1Image = function(tex) {
 		// TODO
-	}
+	};
 	
-	var ComputeTangentSpace = function(pos, w,h, nor, tan, bit) {
-		// TODO
+	var ComputeTangentSpace = function(pos, wv,hv, nor, tan, bit) {
+		var sqrt = Math.sqrt;
+	
+		// first pass: compute dx, dy derivates for all cells and duplicate
+		// the vert last row/column since we have cell_count+1 vertices
+		// on each axis.
+		for(var y = 0, c = 0; y < hv-1; ++y) {
+			for(var x = 0; x < wv-1; ++x) {
+				tan[c+0] = pos[c+1] - pos[c+3+1];
+				tan[c+1] = 1.0;
+				tan[c+2] = 1.0;
+				
+				bit[c+0] = 1.0;
+				bit[c+1] = 1.0;
+				bit[c+2] = pos[c+1] - pos[c+3*wv+1];
+				c += 3;
+			}
+			c += 3;
+		}
+		
+		for(var y = 0, c = 0; y < hv; ++y, c+= 6) {
+			c += (wv-2)*3;
+			
+			for(var v = 0; v < 3; ++v) {
+				tan[c+v] = tan[c+3+v];
+				bit[c+v] = bit[c+3+v];
+			}
+		}
+		
+		for(var x = 0, w3 = wv*3, c = w3*(hv-1); x < wv; ++x) {
+			for(var v = 0; v < 3; ++v) {
+				tan[c+v] = tan[c-w3+v];
+				bit[c+v] = bit[c-w3+v];
+			}
+		}
+		
+		// second pass: weight two neighboring derivates to compute proper
+		// derivates for singular vertices
+		for(var y = hv, c = (hv * wv)*3-3; y > 0; --y) {
+			for(var x = wv; x > 0; --x) {
+				tan[c+0] = 0.5 * (tan[c] + tan[c-3]);
+				bit[c+2] = 0.5 * (bit[c+2] + bit[c+2-3*wv]);
+				c -= 3;
+			}
+		}
+		
+		// third pass: normalize tangents and bitangents and derive normals
+		// using the cross product of the two former vectors
+		for(var y = 0, c = 0; y < hv; ++y) {
+			for(var x = 0; x < wv; ++x, c+= 3) {
+			
+				var txx = tan[c+0], tyy = tan[c+1], l = sqrt(txx*txx+1);
+				txx /= l;
+				tyy /= l;
+				
+				tan[c+0] = txx;
+				tan[c+1] = tyy;
+				tan[c+2] = tyy;
+				
+				var bzz = bit[c+2], byy = bit[c+1], l = sqrt(bzz*bzz+1);
+				bzz /= l;
+				byy /= l;
+				
+				bit[c+0] = byy;
+				bit[c+1] = byy;
+				bit[c+2] = bzz;
+				
+				nor[c+0] = tyy*bzz - tyy*byy;
+				nor[c+1] = tyy*byy - txx*bzz;
+				nor[c+2] = txx*byy - tyy*byy;
+			}
+		}
 	};
 	
 	var ComputeUVs = function(uv, wv, hv) {
