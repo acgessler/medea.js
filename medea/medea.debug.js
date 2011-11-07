@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('debug',[],function() {
+medea._addMod('debug',['visualizer'],function() {
 	"use strict";
 	var medea = this;
 
@@ -42,6 +42,8 @@ medea._addMod('debug',[],function() {
 			this.where = where;
 			this.win = win;
 			this.input = {};
+			this.vis = {};
+			
 			this.TryInit();
 		},
 		
@@ -158,9 +160,61 @@ medea._addMod('debug',[],function() {
 			
 			// P to toggle wireframe mode
 			if(medea.IsKeyDownWasUp(80,this.input)) {
+				// #ifdef LOG
+				medea.LogDebug("debugview: toggle wireframe");
+				// #endif LOG
                 medea.Wireframe(!medea.Wireframe());
             }
-		}
+			
+			// N to show normals
+			if(medea.IsKeyDownWasUp(78,this.input)) {
+				this.ToggleVisualizer('ShowNormals');
+            }
+		},
+		
+		ToggleVisualizer : function(name) {
+			if (this.vis[name] === false) {
+				return;
+			}
+			
+			// #ifdef LOG
+			medea.LogDebug("debugview: toggle visualizer: " + name);
+			// #endif LOG
+				
+			if (!this.vis[name]) {
+				this.vis[name] = false;
+				
+				var outer = this;
+				medea.CreateVisualizer(name,'debug_panel_visualizer:'+name,function(vis) {
+					outer.vis[name] = vis;
+					outer._AddVisualizer(name);
+				});
+			}
+			if (this.vis[name]) {
+				if (this.vis[name].GetViewports().length) {
+					this._RemoveVisualizer(name);
+				}
+				else {
+					this._AddVisualizer(name);
+				}
+			}
+		},
+		
+		_AddVisualizer : function(name) {
+			var vps = medea.GetViewports();
+			for(var i = 0; i < vps.length; ++i) {
+				vps[i].AddVisualizer(this.vis[name]);
+			}
+		},
+		
+		_RemoveVisualizer : function(name) {
+			var vps = this.vis[name].GetViewports().slice(0);
+			for(var i = 0; i < vps.length; ++i) {
+				vps[i].RemoveVisualizer(this.vis[name]);
+			}
+			
+			this.vis[name] = null;
+		},
 	});
 });
 
