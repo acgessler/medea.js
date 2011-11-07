@@ -160,6 +160,46 @@ medea._addMod('camera',['entity'],function() {
 			this.flags &= ~medea._CAMERA_DIRTY_PROJ;
 			return this.proj;
 		},
+		
+		_Render : function(rq) {
+	
+			// traverse all nodes in the graph and collect their render jobs
+			medea.VisitGraph(medea.RootNode(),function(node,parent_visible) {
+			
+				var vis = medea.VISIBLE_ALL /*parent_visible == medea.VISIBLE_ALL ? medea.VISIBLE_ALL : node.Cull(frustum)*/, e = node.GetEntities();
+				if(vis == medea.VISIBLE_NONE) {
+					return medea.VISIBLE_NONE;
+				}
+				
+				if(vis == medea.VISIBLE_ALL || e.length === 1) {
+					node.GetEntities().forEach(function(val,idx,outer) {
+						val.Render(this,val,node,rq);
+					});
+					
+					return vis;
+				}
+			
+				// partial visibility and more than one entity, cull per entity
+				e.forEach(function(val,idx,outer) {
+					if(e.Cull(frustum) != medea.VISIBLE_NONE) {
+						val.Render(this,val,node,rq);
+					}
+				});
+				
+				return medea.VISIBLE_PARTIAL;
+			});
+			
+			// setup a fresh pool to easily pass global rendering states to all renderables
+			// eventually these states will be automatically transferred to shaders.
+			var statepool = new medea.StatePool();
+			
+			statepool.Set("V",this.GetViewMatrix());
+			statepool.Set("P",this.GetProjectionMatrix());
+			statepool.Set("W",mat4.identity(mat4.create()));
+			
+			rq.Flush(statepool);
+			medea.gl.flush();
+		}
 	});
 	
 	
