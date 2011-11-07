@@ -13,7 +13,7 @@ medea._addMod('indexbuffer',[],function(undefined) {
 	// mark data in the buffer as frequently changing and hint the driver to optimize for this
 	medea.INDEXBUFFER_USAGE_DYNAMIC = 0x1;
 	
-	// enable 32 bit indices
+	// enable 32 bit indices - NOT CURRENTLY SUPPORTED BY WEBGL!
 	medea.INDEXBUFFER_LARGE_MESH = 0x2;
 	
 	
@@ -33,9 +33,15 @@ medea._addMod('indexbuffer',[],function(undefined) {
 		gltype : 0,
 		
 		init : function(init_data,flags) {	
-			this.flags = flags | 0;
-			
 			this.itemcount = init_data.length;
+			this.flags = flags || 0;
+			
+			// #ifdef DEBUG
+			if (this.flags & medea.INDEXBUFFER_LARGE_MESH) {
+				medea.DebugAssert('32 bit indices not currently supported');
+			}
+			// #endif
+			
 			this.buffer = gl.createBuffer();
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.buffer);
 			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new (this.flags & medea.INDEXBUFFER_LARGE_MESH ? Uint32Array : Uint16Array)(init_data),

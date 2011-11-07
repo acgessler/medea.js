@@ -27,7 +27,7 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 		var t = 0;
 		
 		// height scaling
-		scale = scale || 1/16;
+		scale = scale || w/(16*16*16);
 		var scale2 = scale/2, scale4 = scale2/2;
 		
 		// a vertex is the average height of all surrounding quads,
@@ -151,6 +151,9 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 				nor[c+0] = tyy*bzz - tyy*byy;
 				nor[c+1] = tyy*byy - txx*bzz;
 				nor[c+2] = txx*byy - tyy*byy;
+				
+				nor[c+0] *= 0.5;
+				nor[c+2] *= 0.5;
 			}
 		}
 	};
