@@ -93,7 +93,7 @@ medea._addMod('visualizer_shownormals',[ 'visualizer','material'],function() {
 							
 							var col = color_palette[c = (c+1) % color_palette.length];
 							
-							for(var n = 0; n < pos.length/3; n+=3) {
+							for(var n = 0; n < pos.length; n+=3) {
 								var v = vec3.create();
 								
 								mat4.multiplyVec3(world,[pos[n],pos[n+1],pos[n+2]],v);
