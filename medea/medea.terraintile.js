@@ -34,37 +34,37 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 		// a 4x4 heightmap yields a 5x5 point field, so LOD works
 		// by leaving out indices.
 		var pitch = w*4, opitch = (w+1) * 3;
-		for (var y = 1, yb = 0, oyb = 0; y < h; ++y, yb += pitch, oyb += opitch) {
-			for(var x = 1; x < w; ++x) {
-				var b = yb+x*4, ob = oyb + x*3;
+		for (var y = 1, yb = pitch, oyb = opitch; y < h; ++y, yb += pitch, oyb += opitch) {
+			for(var x = 1, ob = oyb + 3; x < w; ++x, ob += 3) {
+				var b = yb+x*4;
 
-				pos[ob+v] = scale4 * ( data[b+v] + data[b-4+t] + data[b-pitch+t] + data[b-pitch-4+t] );
+				pos[ob+v] = scale4 * ( data[b+t] + data[b-4+t] + data[b-pitch+t] + data[b-pitch-4+t] );
 			}
 		}
 		
 		// y == 0 || y == h
-		for(var x = 1, lasty = opitch*h; x < w; ++x) {
+		for(var x = 1, lasty = opitch*h, lastyin = pitch*(h-1); x < w; ++x) {
 			pos[x*3+v] = scale2 * ( data[x*4+t] + data[x*4-4+t] );
-			pos[lasty+x*3+v] = scale2 * ( data[x*4-pitch+t] + data[x*4-pitch-4+t] );
+			pos[lasty+x*3+v] = scale2 * ( data[lastyin+x*4-pitch+t] + data[lastyin+x*4-pitch-4+t] );
 		}
 		
 		// x == 0 || x == w
-		for (var y = 1, yb = 0, oyb = 0; y < h; ++y, yb += pitch, oyb += opitch) {
+		for (var y = 1, yb = pitch, oyb = opitch; y < h; ++y, yb += pitch, oyb += opitch) {
 			pos[oyb+v] = scale2 * ( data[yb+t] + data[yb-pitch+t] );
-			pos[oyb+w*3+v] = scale2 * ( data[yb-4+t] + data[yb-4-pitch+t] );
+			pos[oyb+(opitch-3)+v] = scale2 * ( data[yb-4+t] + data[yb-4-pitch+t] );
 		}
 		
 		// x == 0 && y == 0
 		pos[v] = scale*data[t];
 		
 		// x == w && y == 0
-		pos[v + w*3] = scale*data[t + (w-1)*4];
+		pos[v + w*3] = scale*data[t + pitch-4];
 		
 		// x == 0 && y == h
 		pos[v + h*opitch] = scale*data[t + (h-1)*pitch];
 		
 		// x == w && y == h
-		pos[v + h*opitch + w*3] = scale*data[t + (h-1)*pitch + (w-1)*4];
+		pos[v + h*opitch + w*3] = scale*data[t + (h*pitch)-4];
 		
 		// populate the two other components
 		for (var y = 0, c = 0; y <= h; ++y) {
@@ -74,6 +74,14 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 			}
 		}
 		
+		// #ifdef DEBUG
+		for (var i = 0; i < pos.length; ++i) {
+			if (pos[i] === undefined) {
+				medea.DebugAssert("position array has undefined elements: " + i);
+			}
+		}
+		// #endif DEBUG
+		
 		return [pos,w+1,h+1];
 	};
 	
@@ -82,78 +90,68 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 	};
 	
 	var ComputeTangentSpace = function(pos, wv,hv, nor, tan, bit) {
-		var sqrt = Math.sqrt;
+		var sqrt = Math.sqrt, w3 = wv*3;
 	
 		// first pass: compute dx, dy derivates for all cells and duplicate
 		// the vert last row/column since we have cell_count+1 vertices
 		// on each axis.
-		for(var y = 0, c = 0; y < hv-1; ++y) {
-			for(var x = 0; x < wv-1; ++x) {
+		for(var y = 0, c = 0; y < hv; ++y, c += 3) {
+			for(var x = 0; x < wv-1; ++x, c += 3) {
 				tan[c+0] = pos[c+1] - pos[c+3+1];
-				tan[c+1] = 1.0;
-				tan[c+2] = 1.0;
-				
-				bit[c+0] = 1.0;
-				bit[c+1] = 1.0;
-				bit[c+2] = pos[c+1] - pos[c+3*wv+1];
-				c += 3;
-			}
-			c += 3;
-		}
-		
-		for(var y = 0, c = 0; y < hv; ++y, c+= 6) {
-			c += (wv-2)*3;
-			
-			for(var v = 0; v < 3; ++v) {
-				tan[c+v] = tan[c+3+v];
-				bit[c+v] = bit[c+3+v];
 			}
 		}
 		
-		for(var x = 0, w3 = wv*3, c = w3*(hv-1); x < wv; ++x) {
-			for(var v = 0; v < 3; ++v) {
-				tan[c+v] = tan[c-w3+v];
-				bit[c+v] = bit[c-w3+v];
+		for(var y = 0, c = 0; y < hv-1; ++y) {
+			for(var x = 0; x < wv; ++x, c += 3) {
+				bit[c+2] = pos[c+1] - pos[c+w3+1];
 			}
+		}
+		
+		for(var y = 0, c = w3-3; y < hv; ++y, c += w3) {
+			tan[c] = tan[c-3];
+		}
+		
+		for(var x = 0, c = w3*hv-1; x < wv; ++x,c -= 3) {
+			bit[c] = bit[c-w3];
 		}
 		
 		// second pass: weight two neighboring derivates to compute proper
 		// derivates for singular vertices
-		for(var y = hv, c = (hv * wv)*3-3; y > 0; --y) {
-			for(var x = wv; x > 0; --x) {
-				tan[c+0] = 0.5 * (tan[c] + tan[c-3]);
-				bit[c+2] = 0.5 * (bit[c+2] + bit[c+2-3*wv]);
-				c -= 3;
+		for(var y = hv, c = (hv * wv)*3-3; y > 0; --y, c -= 3) {
+			for(var x = wv; x > 1; --x, c -= 3) {
+				tan[c] = 0.5 * (tan[c] + tan[c-3]);
+			}
+		}
+		
+		for(var y = hv, c = (hv * wv)*3-1; y > 1; --y) {
+			for(var x = wv; x > 0; --x, c -= 3) {
+				bit[c] = 0.5 * (bit[c] + bit[c-w3]);
 			}
 		}
 		
 		// third pass: normalize tangents and bitangents and derive normals
 		// using the cross product of the two former vectors
 		for(var y = 0, c = 0; y < hv; ++y) {
-			for(var x = 0; x < wv; ++x, c+= 3) {
-			
-				var txx = tan[c+0], tyy = tan[c+1], l = sqrt(txx*txx+1);
+			for(var x = 0; x < wv; ++x, c += 3) {
+				var txx = 1.0, tyy = tan[c+0], l = sqrt(tyy*tyy+1);
 				txx /= l;
 				tyy /= l;
 				
 				tan[c+0] = txx;
 				tan[c+1] = tyy;
-				tan[c+2] = tyy;
+				tan[c+2] = 0.0;
 				
-				var bzz = bit[c+2], byy = bit[c+1], l = sqrt(bzz*bzz+1);
+				var bzz = 1.0, byy = bit[c+2], l = sqrt(byy*byy+1);
 				bzz /= l;
 				byy /= l;
 				
-				bit[c+0] = byy;
+				bit[c+0] = 0.0;
 				bit[c+1] = byy;
 				bit[c+2] = bzz;
 				
-				nor[c+0] = tyy*bzz - tyy*byy;
-				nor[c+1] = tyy*byy - txx*bzz;
-				nor[c+2] = txx*byy - tyy*byy;
-				
-				nor[c+0] *= 0.5;
-				nor[c+2] *= 0.5;
+				nor[c+0] = -tyy*bzz;
+				nor[c+1] = txx*bzz;
+				nor[c+2] = -txx*byy;
 			}
 		}
 	};
