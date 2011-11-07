@@ -27,6 +27,9 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 	// mark data in the buffer as frequently changing and hint the driver to optimize for this
 	medea.VERTEXBUFFER_USAGE_DYNAMIC = 0x1;
 	
+	// enable GetSourceData()
+	medea.VERTEXBUFFER_PRESERVE_CREATION_DATA = 0x2;
+	
 	// some global utilities. IndexBuffer relies on those as well.
 	medea._GLUtilGetFlatData = function(i,pack_dense) {
 		pack_dense = pack_dense || false;
@@ -207,8 +210,6 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 					mmax[0] = max(p[i3+0],mmax[0]);
 					mmax[1] = max(p[i3+1],mmax[1]);
 					mmax[2] = max(p[i3+2],mmax[2]);
-                    
-                    
 				}
 				
 				addStateEntry(medea.ATTR_POSITION,idx++);
@@ -317,20 +318,40 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 		// initial flags
 		flags: 0,
 		
+		// only present if the PRESERVE_CREATION_DATA flag is set
+		init_data : null,
+		
 		state_closure : [],
 		
 		init : function(init_data,flags) {	
 			this.flags = flags | 0;
-			var access = new medea._VBOInitDataAccessor(init_data,this.flags);
 			
-			this.buffer = gl.createBuffer();
+			// #ifdef DEBUG
+			this.flags |= medea.VERTEXBUFFER_PRESERVE_CREATION_DATA;
+			// #endif 
+			
+			this.Fill(init_data);
+		},
+		
+		// medea.VERTEXBUFFER_USAGE_DYNAMIC recommended if this function is used
+		Fill : function(init_data) {
+		
+			if (this.buffer === -1) {
+				this.buffer = gl.createBuffer();
+			}
+			
 			gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);
 			
+			var access = new medea._VBOInitDataAccessor(init_data,this.flags);
 			access.SetupGlData();
+			
 			this.itemcount = access.GetItemCount();
 			this.state_closure = access.GetStateClosure();
-			
 			this.minmax = access.GetMinMaxVerts();
+			
+			if (this.flags & medea.VERTEXBUFFER_PRESERVE_CREATION_DATA) {
+				this.init_data = init_data;
+			}
 		},
 		
 		GetBufferId : function() {
@@ -347,6 +368,10 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 		
 		GetMinMaxVerts : function() {
 			return this.minmax;
+		},
+		
+		GetSourceData : function() {
+			return this.init_data;
 		},
 		
 		_Bind : function(attrMap) {
