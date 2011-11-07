@@ -31,10 +31,11 @@ medea._addMod('visualizer_shownormals',[ 'visualizer','material'],function() {
 	medea._initMod('visualizer');
 	this.VisualizerShowNormals = medea.Visualizer.extend({
 		
-		init : function(name, draw_range) {	
+		init : function(name, draw_range, full_ts) {	
 			this._super(name);
 			this.ordinal = ordinal;
 			this.draw_range = draw_range || 50;
+			this.full_ts = full_ts || false;
 			
 			this.material = medea.CreateSimpleMaterialFromShaderPair("remote:mcore_debug/shaders/show-normals");
 			this.cached_mesh = null;
@@ -45,6 +46,13 @@ medea._addMod('visualizer_shownormals',[ 'visualizer','material'],function() {
 				return this.draw_range;
 			}
 			this.draw_range = fr;
+		},
+		
+		DrawFullTangentSpace : function(fr) {
+			if (fr === undefined) {
+				return this.full_ts;
+			}
+			this.full_ts = fr;
 		},
 		
 		Apply : function(render_stub,original_render_stub,rq, viewport) {
@@ -74,7 +82,7 @@ medea._addMod('visualizer_shownormals',[ 'visualizer','material'],function() {
 					var cp = viewport.GetCamera().GetParent().GetWorldPos();
 					var sqr = outer.draw_range * outer.draw_range;
 			
-					var pout = new Float32Array(count*6), cout = new Float32Array(count*8), ip = 0, ic = 0, c = 0;
+					var pout = new Float32Array(count*6*(outer.full_ts ?3:1)), cout = new Float32Array(count*8*(outer.full_ts ?3:1)), ip = 0, ic = 0, c = 0;
 					for (var i = medea.RENDERQUEUE_DEFAULT_EARLY; i < medea.RENDERQUEUE_BACKGROUND; ++i) {
 			
 						var entries = queues[i].GetEntries();
@@ -86,26 +94,27 @@ medea._addMod('visualizer_shownormals',[ 'visualizer','material'],function() {
 								continue;
 							}
 								
-							var pos = data.positions, nor = data.normals;
+							var pos = data.positions, nor = data.normals, tan = data.tangents, bit = data.bitangents;
 							if (!pos || !nor || pos.length != nor.length || pos.length % 3) {
 								continue;
 							}
 							
 							var col = color_palette[c = (c+1) % color_palette.length];
+							var do_ts = outer.full_ts && tan && bit;
 							
 							for(var n = 0; n < pos.length; n+=3) {
-								var v = vec3.create();
+								var v = vec3.create(), w = vec3.create();
 								
-								mat4.multiplyVec3(world,[pos[n],pos[n+1],pos[n+2]],v);
+								mat4.multiplyVec3(world,[pos[n],pos[n+1],pos[n+2]],w);
 								
-								var d0 = v[0]-cp[0], d1 = v[1]-cp[1], d2 = v[2]-cp[2];
+								var d0 = w[0]-cp[0], d1 = w[1]-cp[1], d2 = w[2]-cp[2];
 								if ( d0*d0 + d1*d1 + d2*d2 > sqr) {
 									continue;
 								}
 								
-								pout[ip++] = v[0];
-								pout[ip++] = v[1];
-								pout[ip++] = v[2];
+								pout[ip++] = w[0];
+								pout[ip++] = w[1];
+								pout[ip++] = w[2];
 								
 								mat4.multiplyVec3(world,[pos[n]+nor[n],pos[n+1]+nor[n+1],pos[n+2]+nor[n+2]],v);
 								pout[ip++] = v[0];
@@ -117,6 +126,34 @@ medea._addMod('visualizer_shownormals',[ 'visualizer','material'],function() {
 									cout[ic++] = col[s];
 								}
 								ic += 4;
+								
+								if (do_ts) {
+									pout[ip++] = w[0];
+									pout[ip++] = w[1];
+									pout[ip++] = w[2];
+								
+									mat4.multiplyVec3(world,[pos[n]+tan[n],pos[n+1]+tan[n+1],pos[n+2]+tan[n+2]],v);
+									pout[ip++] = v[0];
+									pout[ip++] = v[1];
+									pout[ip++] = v[2];
+									
+									pout[ip++] = w[0];
+									pout[ip++] = w[1];
+									pout[ip++] = w[2];
+									
+									mat4.multiplyVec3(world,[pos[n]+bit[n],pos[n+1]+bit[n+1],pos[n+2]+bit[n+2]],v);
+									pout[ip++] = v[0];
+									pout[ip++] = v[1];
+									pout[ip++] = v[2];
+									
+									for( var n = 0; n < 2; ++n) {
+										for(var s = 0; s < 4; ++s) {
+											cout[ic+4] = 1.0-col[s];
+											cout[ic++] = 1.0-col[s];
+										}
+										ic += 4;
+									}
+								}
 							}
 						}
 					}
