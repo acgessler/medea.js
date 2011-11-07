@@ -200,6 +200,26 @@ medea._addMod('node',['frustum'],function(undefined) {
 			this.flags |= this.trafo_dirty_flag;
 		},
 		
+		GetWorldPos : function() {
+			this._UpdateGlobalTransform();
+			return [this.gmatrix[12],this.gmatrix[13],this.gmatrix[14]];
+		},
+		
+		GetWorldXAxis : function() {
+			this._UpdateGlobalTransform();
+			return [this.gmatrix[0],this.gmatrix[1],this.gmatrix[2]];
+		},
+		
+		GetWorldYAxis : function() {
+			this._UpdateGlobalTransform();
+			return [this.gmatrix[4],this.gmatrix[5],this.gmatrix[6]];
+		},
+		
+		GetWorldZAxis : function() {
+			this._UpdateGlobalTransform();
+			return [this.gmatrix[8],this.gmatrix[9],this.gmatrix[10]];
+		},
+		
 		AddListener : function(what,l, key) {
 			// #ifdef DEBUG
 			if(!(what in this.listeners)) {
