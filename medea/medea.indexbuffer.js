@@ -16,6 +16,9 @@ medea._addMod('indexbuffer',[],function(undefined) {
 	// enable 32 bit indices - NOT CURRENTLY SUPPORTED BY WEBGL!
 	medea.INDEXBUFFER_LARGE_MESH = 0x2;
 	
+	// enable GetSourceData()
+	medea.VERTEXBUFFER_PRESERVE_CREATION_DATA = 0x2;
+	
 	
 	// class IndexBuffer
 	medea.IndexBuffer = medea.Class.extend({
@@ -29,6 +32,10 @@ medea._addMod('indexbuffer',[],function(undefined) {
 		// original flags
 		flags: 0,
 		
+		// only present if the PRESERVE_CREATION_DATA flag is set
+		init_data : null,
+		
+		
 		//
 		gltype : 0,
 		
@@ -37,17 +44,37 @@ medea._addMod('indexbuffer',[],function(undefined) {
 			this.flags = flags || 0;
 			
 			// #ifdef DEBUG
+			this.flags |= medea.INDEXBUFFER_PRESERVE_CREATION_DATA;
+			// #endif 
+			
+			// #ifdef DEBUG
 			if (this.flags & medea.INDEXBUFFER_LARGE_MESH) {
 				medea.DebugAssert('32 bit indices not currently supported');
 			}
 			// #endif
 			
-			this.buffer = gl.createBuffer();
+			this.Fill(init_data);
+			this.gltype = this.flags & medea.INDEXBUFFER_LARGE_MESH ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+		},
+		
+		// medea.VERTEXBUFFER_USAGE_DYNAMIC recommended if this function is used
+		Fill : function(init_data) {
+		
+			if (this.buffer === -1) {
+				this.buffer = gl.createBuffer();
+			}
+			
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.buffer);
 			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new (this.flags & medea.INDEXBUFFER_LARGE_MESH ? Uint32Array : Uint16Array)(init_data),
-				this.flags & medea.VERTEXBUFFER_USAGE_DYNAMIC ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
-				
-			this.gltype = this.flags & medea.INDEXBUFFER_LARGE_MESH ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+				this.flags & medea.INDEXBUFFER_USAGE_DYNAMIC ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
+			
+			if (this.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA) {
+				this.init_data = init_data;
+			}
+		},
+		
+		GetSourceData : function() {
+			return this.init_data;
 		},
 		
 		GetBufferId : function() {
