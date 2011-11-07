@@ -98,6 +98,10 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 			}
 			this.default_state = default_state;
 		},
+		
+		GetEntries : function() {
+			return this.entries;
+		},
 	});
 	
 
@@ -150,7 +154,11 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 		// supply a custom queue implementation
 		SetQueueImpl : function(idx,queue) {
 			this.queues[idx] = queue;
-		}
+		},
+		
+		GetQueues : function() {
+			return this.queues;
+		},
 	});
 	
 	

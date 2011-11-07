@@ -24,11 +24,17 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 	medea.ATTR_COLOR = function(n) { return medea.ATTR_COLOR_BASE + n; };
 	
 	
+	
+	// NOTE: the constants below may not overlap with any of the IBuffer flags
+	
 	// mark data in the buffer as frequently changing and hint the driver to optimize for this
-	medea.VERTEXBUFFER_USAGE_DYNAMIC = 0x1;
+	medea.VERTEXBUFFER_USAGE_DYNAMIC = 0x1000;
 	
 	// enable GetSourceData()
-	medea.VERTEXBUFFER_PRESERVE_CREATION_DATA = 0x2;
+	medea.VERTEXBUFFER_PRESERVE_CREATION_DATA = 0x2000;
+	
+	
+	
 	
 	// some global utilities. IndexBuffer relies on those as well.
 	medea._GLUtilGetFlatData = function(i,pack_dense) {

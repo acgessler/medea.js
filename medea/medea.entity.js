@@ -43,6 +43,10 @@ medea._addMod('entity',[],function() {
 			this.bb = b;
 		},
 		
+		GetParent : function() {
+			return this.parent;
+		},
+		
 		
 		OnSetParent : function(parent) {
 				this.parent = parent;

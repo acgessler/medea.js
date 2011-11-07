@@ -246,6 +246,10 @@ medea = new (function(sdom) {
 	this.GetSettings = function() {
 		return this.settings;
 	};
+	
+	this.GetViewports = function() {
+		return this.viewports;
+	};
 
 	this.RootNode = function(s) {
         if(s === undefined) {
@@ -531,11 +535,11 @@ medea = new (function(sdom) {
 			// #endif
 			
 			_stubs[name] = init;
+			delete _waiters[name];
+			
 			for(var i = 0; i < w.length; ++i) {
 				w[i]();
 			}
-			
-			delete _waiters[name];
 		});
 	};
 	
@@ -619,12 +623,12 @@ medea = new (function(sdom) {
 					// to satisfy all listeners and to keep the file from being loaded twice.
 					if(!is_medea_mod) {
 						var w = _waiters[n];
+						delete _waiters[n];
 						
 						_stubs[n] = null;
 						for(var i = 0; i < w.length; ++i) {
 							w[i]();
 						}
-						delete _waiters[n];
 					}
 					
 				});
@@ -770,6 +774,11 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("CreateSkydomeNode","skydome");
 	
 	this._SetFunctionStub("CreateTerrainTileMesh","terraintile");
+	this._SetFunctionStub("CreateTerrain","terrain");
+	
+	this._SetFunctionStub("CreateVisualizer","visualizer");
+	this._SetFunctionStub("CreateVisualizer_ShowNormals","visualizer_shownormals");
+	this._SetFunctionStub("CreateCompositor","compositor");
 	
 	// Initialization has two phases, the first of which is used to load utility libraries
 	// that all medea modules may depend upon. This also involves creating a webgl canvas

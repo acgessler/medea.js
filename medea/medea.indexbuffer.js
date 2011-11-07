@@ -10,6 +10,9 @@ medea._addMod('indexbuffer',[],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
+	
+	// NOTE: the constants below may not overlap with any of the VBO flags
+	
 	// mark data in the buffer as frequently changing and hint the driver to optimize for this
 	medea.INDEXBUFFER_USAGE_DYNAMIC = 0x1;
 	
@@ -18,6 +21,7 @@ medea._addMod('indexbuffer',[],function(undefined) {
 	
 	// enable GetSourceData()
 	medea.VERTEXBUFFER_PRESERVE_CREATION_DATA = 0x2;
+	
 	
 	
 	// class IndexBuffer

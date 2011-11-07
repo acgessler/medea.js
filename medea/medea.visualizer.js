@@ -16,6 +16,7 @@ medea._addMod('visualizer',[],function() {
 		
 		init : function(name) {	
 			this.name = name || "";
+			this.viewports = [];
 		},
 		
 		GetName : function() {
@@ -31,6 +32,31 @@ medea._addMod('visualizer',[],function() {
 			// function chain over to the next visualizer, if any.
 			return render_stub;
 		},
+		
+		GetViewports : function() {
+			return this.viewports;
+		},
+		
+		_AddViewport : function(vp) {
+			if (this.viewports.indexOf(vp) === -1) {
+				this.viewports.push(vp);
+			}
+		},
+		
+		_RemoveViewport : function(vis) {
+			var idx = this.viewports.indexOf(vis);
+            if(idx !== -1) {
+                this.viewports.splice(idx,1);
+            }
+		},
 	});
+	
+	medea.CreateVisualizer = function(type, name, callback) {
+	
+		var modname = 'visualizer_'+type.toLowerCase();
+		medea.FetchMods([modname],function() {
+			callback(medea['CreateVisualizer_' + type](name));
+		});
+	};
 });
 

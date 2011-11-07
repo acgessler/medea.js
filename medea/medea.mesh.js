@@ -12,6 +12,12 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 	medea._initMod('entity');
 	medea._initMod('renderqueue');
 	
+	// primitive types supported by the medea.Mesh class
+	medea.PT_TRIANGLES = gl.TRIANGLES;
+	medea.PT_LINES = gl.LINES;
+	medea.PT_TRIANGLE_STRIPS = gl.TRIANGLE_STRIPS;
+	medea.PT_LINE_STRIPS = gl.LINE_STRIPS;
+	
 	// class RenderJob
 	this.RenderJob = medea.Class.extend({
 		
@@ -46,11 +52,12 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 	// class Mesh
 	this.Mesh = medea.Entity.extend(
 	{
-		init : function(vbo,ibo,material,rq) {
+		init : function(vbo,ibo,material,rq, pt) {
 			this.vbo = vbo;
 			this.ibo = ibo;
 			this.material = material;
 			this.rq_idx = rq === undefined ? medea.RENDERQUEUE_DEFAULT : rq;
+			this.pt = pt | medea.PT_TRIANGLES;
 			
 // #ifdef DEBUG
 			if (!this.vbo) {
@@ -90,6 +97,27 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 			this.rq_idx = m;
 		},
 		
+		PrimitiveType : function(pt) {
+			if (pt === undefined) {
+				return this.pt;
+			}
+			this.pt = pt;
+		},
+		
+		VB : function(vbo) {
+			if (vbo === undefined) {
+				return this.vbo;
+			}
+			this.vbo = vbo;
+		},
+		
+		IB : function(ibo) {
+			if (ibo === undefined) {
+				return this.ibo;
+			}
+			this.ibo = ibo;
+		},
+		
 		DrawNow : function(statepool) {
 	
 			var st = medea.GetStatistics();
@@ -114,13 +142,13 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 					if(!wf) {
 						if (outer.ibo) {
 						
-							gl.drawElements(gl.TRIANGLES,iboc,outer.ibo.GetGlType(),0);
-							st.primitives_frame += iboc/3;
+							gl.drawElements(outer.pt,iboc,outer.ibo.GetGlType(),0);
+							st.primitives_frame += outer._Calc_pt(iboc);
 						}
 						else {
 							
-							gl.drawArrays(gl.TRIANGLES,vboc);
-							st.primitives_frame += vboc/3;
+							gl.drawArrays(outer.pt,0,vboc);
+							st.primitives_frame += outer._Calc_pt(vboc);
 						}	
 					}
 					// since we don't have glPolygonMode in WebGL, we need to do it manually. 
@@ -130,12 +158,12 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 						if (outer.ibo) {
 						
 							gl.drawElements(gl.LINES,iboc,outer.ibo.GetGlType(),0);
-							st.primitives_frame += iboc/3;
+							st.primitives_frame += outer._Calc_pt(iboc);
 						}
 						else {
 							
-							gl.drawArrays(gl.LINES,vboc);
-							st.primitives_frame += vboc/3;
+							gl.drawArrays(gl.LINES,0,vboc);
+							st.primitives_frame += outer._Calc_pt(vboc);
 						}	
 					}
 			},statepool);	
@@ -143,17 +171,33 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 		},
 		
 		
+		_Calc_pt : function(v) {
+			switch(this.pt) {
+				case medea.PT_TRIANGLES:
+					return v/3;
+				case medea.PT_LINES:
+					return v/2;
+				case medea.PT_TRIANGLE_STRIPS:
+					return v-2;
+				case medea.PT_LINE_STRIPS:
+					return v-1;
+			};
+			
+			// #ifdef DEBUG
+			medea.DebugAssert('unrecognized primitive type: ' + this.pt);
+			// #endif
+		},
 		
 		_AutoGenBB : function() {
 			this.bb = this.vbo.GetMinMaxVerts();
 		},
 	});
 	
-	// 
-	medea.CreateSimpleMesh = function(vertices,indices,material_or_color) {
+	// - supports both index- and vertexbuffer specific flags
+	medea.CreateSimpleMesh = function(vertices,indices,material_or_color,flags) {
 	
-		return new medea.Mesh(medea.CreateVertexBuffer(vertices),
-			indices ? medea.CreateIndexBuffer(indices) : null, 
+		return new medea.Mesh(medea.CreateVertexBuffer(vertices,flags),
+			indices ? medea.CreateIndexBuffer(indices,flags) : null, 
 			
 			material_or_color instanceof Array 
 				? medea.CreateSimpleMaterialFromColor(material_or_color) 
