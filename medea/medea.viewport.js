@@ -105,6 +105,7 @@ medea._addMod('viewport',['camera','renderqueue'],function(undefined) {
 			this.w = w || 1.0;
 			this.h = h || 1.0;
 			this.zorder = zorder || 0;
+			this.visualizers = [];
 			
 			medea._Require("camera");
 			this.SetCamera(camera || new medea.Camera());
@@ -113,6 +114,26 @@ medea._addMod('viewport',['camera','renderqueue'],function(undefined) {
 			// users will most likely want.
 			this.Enable();
 		},
+		
+		
+		AddVisualizer : function(vis) {
+			var ord = vis.GetOrdinal();
+			for (var i = 0; i < this.visualizers.length; ++i) {
+				if (ord > this.visualizers[i].GetOrdinal()) {
+					this.visualizers.insert(i,vis);
+					return;
+				}
+			}
+			this.visualizers.push(vis);
+		},
+		
+		RemoveVisualizer : function(vis) {
+			var idx = this.visualizers.indexOf(vis);
+            if(idx !== -1) {
+                this.visualizers.splice(idx,1);
+            }
+		},
+		
 		
 		GetName: function() {
 			return this.name;
@@ -249,6 +270,8 @@ medea._addMod('viewport',['camera','renderqueue'],function(undefined) {
 				this.rqManager = medea.CreateRenderQueueManager(); 
 			}
 			
+			var rq = this.rqManager;
+			
 			// setup the viewport - we usually only need to do this if we're competing with other viewports
 			if (medea.enabled_viewports>1 || medea.frame_flags & medea.FRAME_VIEWPORT_UPDATED || this.updated) {
 				var cw = medea.canvas.width, ch = medea.canvas.height;
@@ -272,8 +295,27 @@ medea._addMod('viewport',['camera','renderqueue'],function(undefined) {
 				gl.clear(this.clearFlags);
 			}
 			
-			this.camera._Render(this.rqManager);		
+			// let the camera class decide which items to render
+			var statepool = this.camera._Render(rq);
+			
+			// ... and the default behaviour is to simply dispatch all render queues to the GPU
+			var RenderProxy = function() {
+				rq.Flush(statepool);
+				
+			}, RenderWithVisualizers = RenderProxy;
+			
+			// ... but we invoke all visualizers in the right order to have them inject their custom logic, if they wish
+			for( var i = 0; i < this.visualizers.length; ++i) {
+				RenderWithVisualizers = his.visualizers[i].Apply(RenderWithVisualizers,RenderProxy,rq);
+			}
+			
+			RenderWithVisualizers();
+			
+			gl.flush();
 			this.updated = false;
 		}
 	});
 });
+
+
+

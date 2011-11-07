@@ -196,9 +196,9 @@ medea._addMod('camera',['entity'],function() {
 			statepool.Set("V",this.GetViewMatrix());
 			statepool.Set("P",this.GetProjectionMatrix());
 			statepool.Set("W",mat4.identity(mat4.create()));
-			
-			rq.Flush(statepool);
-			medea.gl.flush();
+		
+			// rq.Flush() is left to the caller
+			return statepool;
 		}
 	});
 	
