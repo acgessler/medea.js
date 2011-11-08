@@ -617,8 +617,8 @@ medea = new (function(sdom) {
 					// make sure to enclose the script source in CDATA blocks 
 					// to make XHTML parsers happy.
 					sc.innerHTML = '//<![CDATA[\n' + text  + '\n//]]>';                      
-					document.body.appendChild(sc);  
-					
+					document.getElementsByTagName('head')[0].appendChild(sc);
+										
 					// non medea modules won't call _addMod, so we need to mimic parts of its behaviour
 					// to satisfy all listeners and to keep the file from being loaded twice.
 					if(!is_medea_mod) {
