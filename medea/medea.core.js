@@ -178,12 +178,12 @@ medea = new (function(sdom) {
 			this.key_state = {};
 			
 			// set event handlers on the canvas panel
-			window.addEventListener('keydown', function (event) { medea._HandleKeyDown(event); }, true);
-			window.addEventListener('keyup', function (event) { medea._HandleKeyUp(event);  }, true);
+			window.addEventListener('keydown', function (ev) { medea._HandleKeyDown(ev); }, true);
+			window.addEventListener('keyup', function (ev) { medea._HandleKeyUp(ev);  }, true);
 			
-			canvas.onmousedown = function (event) { medea._HandleMouseDown(event); };
-			canvas.onmouseup   = function (event) { medea._HandleMouseUp(event);  };
-			canvas.onmousemove = function (event) { medea._HandleMouseMove(event); };
+			this.canvas.onmousedown = function (ev) { medea._HandleMouseDown(ev); };
+			this.canvas.onmouseup   = function (ev) { medea._HandleMouseUp(ev);  };
+			this.canvas.onmousemove = function (ev) { medea._HandleMouseMove(ev); };
 			this.mouse_down = false;
 		
 			_callback = _initial_deps = undefined;
