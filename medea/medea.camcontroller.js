@@ -72,6 +72,7 @@ medea._addMod('camcontroller',['camera'],function(undefined) {
 		},
 		
 		
+		
 		_Update : function(dtime) {
 			if(medea.IsMouseDown()) {
 				return;
@@ -133,6 +134,16 @@ medea._addMod('camcontroller',['camera'],function(undefined) {
 				// D
 				if(medea.IsKeyDown(68)) {
 					n.Translate([ws * dtime,0,0]);
+				}
+				
+			
+				// PAGE UP
+				if(medea.IsKeyDown(33)) {
+					n.Translate([0,ws * dtime,0]);
+				}
+				// PAGE DOWN
+				if(medea.IsKeyDown(34)) {
+					n.Translate([0,-ws * dtime,0]);
 				}
 			}
 		},

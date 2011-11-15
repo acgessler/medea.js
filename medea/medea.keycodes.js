@@ -12,6 +12,8 @@ medea.KeyCode = {
   CTRL: 17,
   
   SPACE: 32,
+  PAGE_UP: 33,
+  PAGE_DOWN: 34,
   UP: 38,
   DOWN: 40,
   LEFT: 37,
