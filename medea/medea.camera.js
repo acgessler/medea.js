@@ -26,8 +26,8 @@ medea._addMod('camera',['entity'],function() {
 			
 			this.fovy = fovy || 45;
 			this.aspect = aspect;
-			this.znear = znear || 0.1;
-			this.zfar = zfar || 1000;
+			this.znear = znear || 1;
+			this.zfar = zfar || 10000;
 			
 			this.viewport = null;
 			if (viewport) {
