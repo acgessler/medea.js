@@ -1,0 +1,39 @@
+{
+	"unitbase" : 128,
+	"size" : [32, 32],
+	"scale" : [2.0,1.0],
+
+	"maps" : [
+		{
+			"size" : [32,32],
+			"img" : "out_0.png"
+		},
+		
+		{
+			"size" : [16,16],
+			"img" : "out_1.png"
+		},
+		
+		{
+			"size" : [8,8],
+			"img" : "out_2.png"
+		},
+		
+		{
+			"size" : [4,4],
+			"img" : "out_3.png"
+		},
+		
+		{
+			"size" : [2,2],
+			"img" : "out_4.png"
+		},
+		
+		{
+			"size" : [1,1],
+			"img" : "out_5.png"
+		}
+	],
+	
+	"default_fetch_order" : [3,0]
+}

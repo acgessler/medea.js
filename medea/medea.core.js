@@ -322,10 +322,17 @@ medea = new (function(sdom) {
 	this.DebugAssert = function(what) {
 	};
 // #else
-	this.DebugAssert = function(what) {
-		what = "Medea DEBUG ASSERTION: " + what;
-		alert(what);
-		throw new medea.AssertionError(what);
+	this.DebugAssert = function(cond,what) {
+		if (what === undefined) {
+			what = cond;
+			cond = false;
+		}
+		
+		if (!cond) {
+			what = "Medea DEBUG ASSERTION: " + what;
+			alert(what);
+			throw new medea.AssertionError(what);
+		}
 	};
 // #endif
 
@@ -774,11 +781,16 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("CreateSkydomeNode","skydome");
 	
 	this._SetFunctionStub("CreateTerrainTileMesh","terraintile");
-	this._SetFunctionStub("CreateTerrain","terrain");
+	
+	this._SetFunctionStub("CreateDefaultTerrainDataProviderFromResource","terrain");
+	this._SetFunctionStub("CreateDefaultTerrainDataProvider","terrain");
+	this._SetFunctionStub("CreateTerrainNode","terrain");
 	
 	this._SetFunctionStub("CreateVisualizer","visualizer");
 	this._SetFunctionStub("CreateVisualizer_ShowNormals","visualizer_shownormals");
 	this._SetFunctionStub("CreateCompositor","compositor");
+	
+	
 	
 	// Initialization has two phases, the first of which is used to load utility libraries
 	// that all medea modules may depend upon. This also involves creating a webgl canvas
