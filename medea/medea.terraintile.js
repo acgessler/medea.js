@@ -239,7 +239,8 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 		// using the cross product of the two former vectors
 		for(var y = 0, c = 0; y < hv; ++y) {
 			for(var x = 0; x < wv; ++x, c += 3) {
-				var txx = 1.0, tyy = -tan[c+0], l = sqrt(tyy*tyy+1);
+                // *0.5 to get less hard and edgy results
+				var txx = 1.0, tyy = tan[c+0]/2, l = sqrt(tyy*tyy+1);
 				txx /= l;
 				tyy /= l;
 				
@@ -247,7 +248,7 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 				tan[c+1] = tyy;
 				tan[c+2] = 0.0;
 				
-				var bzz = 1.0, byy = bit[c+2], l = sqrt(byy*byy+1);
+				var bzz = 1.0, byy = bit[c+2]/2, l = sqrt(byy*byy+1);
 				bzz /= l;
 				byy /= l;
 				

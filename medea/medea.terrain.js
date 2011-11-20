@@ -214,7 +214,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 				var pos = v[0], wv = v[1], hv = v[2], w = wv-1, h = hv-1;
 				
 				// center the heightfield and scale it according to its LOD
-				outer._MoveHeightfield(pos, ilod, 16.0,-w/2, -h/2, ppos[0], ppos[2]);
+				outer._MoveHeightfield(pos, ilod, 13.5,-w/2, -h/2, ppos[0], ppos[2]);
                 
 				
 				var nor = new Array(pos.length), tan = new Array(pos.length), bit = new Array(pos.length);
@@ -234,7 +234,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
                     }
                     else {
                         indices = new Array(w*h*2*3*0.25);
-                        var c = (outer.lod === d.GetLODCount()-1 ? medea._GenHeightfieldIndicesWithHole : medea._GenHeightfieldIndicesWithHole)(indices,w,h,w/4,h/4,w/2,h/2);
+                        var c = (outer.lod === d.GetLODCount()-1 ? medea._GenHeightfieldIndicesWithHole : medea._GenHeightfieldIndicesWithHoleLOD)(indices,w,h,w/4,h/4,w/2,h/2);
                     
                         // #ifdef DEBUG
                         medea.DebugAssert(c == indices.length, 'unexpected number of indices');
