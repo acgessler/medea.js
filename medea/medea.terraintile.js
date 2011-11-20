@@ -14,17 +14,18 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 		return n !== 0 && (n & (n - 1)) === 0;
 	};
 	
-	medea._HeightfieldFromEvenSidedHeightmap = function(tex, scale, xz_scale) {
+	medea._HeightfieldFromEvenSidedHeightmap = function(tex, scale, xz_scale, t, v) {
 		var data = tex.GetData(), w = tex.GetWidth(), h = tex.GetHeight();
 		
 		var c = (w+1)*(h+1);
 		var pos = new Array(c*3);
 		
 		// this is the index of the "up" output component, left flexible for now.
-		var v = 1, v2 = (v+1) % 3, v3 = (v2+1) % 3;
+		v = v === undefined ? 1 : v;
+        var v2 = (v+1) % 3, v3 = (v2+1) % 3;
 		
 		// this is the index of the RGBA component that contains the color data
-		var t = 0;
+		t = t === undefined ? 0 : t;
 		
 		// height scaling
 		scale = scale || w/(16*16*16);
@@ -86,7 +87,7 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 		return [pos,w+1,h+1];
 	};
 	
-	medea._HeightfieldFromEvenSidedHeightmapPart = function(tex, xs, ys, w, h, scale, xz_scale) {
+	medea._HeightfieldFromEvenSidedHeightmapPart = function(tex, xs, ys, w, h, scale, xz_scale, t, v) {
 		var data = tex.GetData(), fullw = tex.GetWidth(), fullh = tex.GetHeight();
 		
 		// #ifdef DEBUG
@@ -97,10 +98,11 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 		var pos = new Array(c*3);
 		
 		// this is the index of the "up" output component, left flexible for now.
-		var v = 1, v2 = (v+1) % 3, v3 = (v2+1) % 3;
+		v = v === undefined ? 1 : v;
+        var v2 = (v+1) % 3, v3 = (v2+1) % 3;
 		
 		// this is the index of the RGBA component that contains the color data
-		var t = 0;
+		t = t === undefined ? 0 : t;
 		
 		// height scaling
 		scale = scale || w/(16*16*16);
@@ -160,8 +162,37 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 		return [pos,w+1,h+1];
 	};
 	
-	medea._HeightfieldFromOddSidedHeightmap = function(tex) {
-		// TODO
+	medea._HeightfieldFromOddSidedHeightmapPart = function(tex, xs, ys, w, h, scale, xz_scale, t, v) {
+		var data = tex.GetData(), fullw = tex.GetWidth(), fullh = tex.GetHeight();
+		
+		// #ifdef DEBUG
+		medea.DebugAssert(!(xs + w > fullw || w <= 0 || xs < 0 || ys + h > fullh || h <= 0 || ys < 0),"invalid input rectangle");
+		// #endif DEBUG
+		
+		var c = w*h;
+		var pos = new Array(c*3);
+        
+        // this is the index of the "up" output component, left flexible for now.
+		v = v === undefined ? 1 : v;
+        var v2 = (v+1) % 3, v3 = (v2+1) % 3;
+		
+		// this is the index of the RGBA component that contains the color data
+		t = t === undefined ? 0 : t;
+        
+        scale = scale || w/(16*16*16);
+        xz_scale = xz_scale || 1.0;
+        
+        var pitch = fullw*4;
+		for (var y = 0, c = 0, inb = ys*pitch + xs*4; y < h; ++y, inb += pitch) {
+			for (var x = 0; x < w; ++x, c+=3) {
+            
+                pos[c+v ] = data[inb + x*4 + t] * scale;               
+				pos[c+v2] = y * xz_scale;
+				pos[c+v3] = x * xz_scale;
+			}
+		}
+        
+        return [pos,w,h];
 	};
 	
 	medea._GenHeightfieldTangentSpace = function(pos, wv,hv, nor, tan, bit) {
@@ -208,7 +239,7 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 		// using the cross product of the two former vectors
 		for(var y = 0, c = 0; y < hv; ++y) {
 			for(var x = 0; x < wv; ++x, c += 3) {
-				var txx = 1.0, tyy = tan[c+0], l = sqrt(tyy*tyy+1);
+				var txx = 1.0, tyy = -tan[c+0], l = sqrt(tyy*tyy+1);
 				txx /= l;
 				tyy /= l;
 				

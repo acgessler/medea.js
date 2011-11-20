@@ -33,7 +33,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			
 			var w = Math.min(this.desc.size[0],this.desc.size[1]), cnt = 0;
 			for (; w >= 1; ++cnt, w /= 2);
-			this.lod_count = cnt;
+			this.lod_count = cnt+1;
 		},
 		
 		GetSize : function() {
@@ -51,6 +51,10 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		GetLODCount : function() {
 			return this.lod_count;
 		},
+        
+        GetUnitBase : function() {
+            return this.desc.unitbase;
+        },
 		
 		// request a given rectangle on the terrain for a particular 'wanthave' LOD
 		// callback is invoked as soon as this LOD level is available.
@@ -111,7 +115,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			var want_scale = 1/(1 << lod);
 			
 			var ub = this.desc.unitbase * real_scale;
-			var xx = x*ub, yy = y*ub, ww = w*ub, hh = h*ub;
+			var xx = Math.floor(x*ub), yy = Math.floor(y*ub), ww = Math.floor(w*ub), hh = Math.floor(h*ub);
 			
 			var sbase = real_scale/want_scale;
 			return this._CreateHeightField(match._cached_img, xx, yy, ww, hh, sbase*this.desc.scale[1], sbase*this.desc.scale[0] );
@@ -149,7 +153,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		},
 		
 		_CreateHeightField : function(img, x,y,w,h) {
-			return medea._HeightfieldFromEvenSidedHeightmapPart(img, x,y,w,h, 1.0/16);
+			return medea._HeightfieldFromOddSidedHeightmapPart(img, x,y,w+1,h+1, 1.0/16);
 		},
 	});
 	
@@ -176,62 +180,107 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		init : function(terrain,lod) {
 			this.terrain = terrain;
 			this.lod = lod;
-			this.half_scale = 0.5*(1<<this.lod);
+			this.half_scale = 0.5*(1<<lod);
+
+            this.startx = this.starty = 1e-10;            
 		},
 		
 		Update : function(ppos) {
-			var newx = ppos[0] - this.half_scale + this.terrain.data.GetWidth() * 0.5;
-			var newy = ppos[2] - this.half_scale + this.terrain.data.GetHeight() * 0.5;
+        
+            this.ppos = ppos;
+        
+            var ub = this.terrain.data.GetUnitBase(), w = this.terrain.data.GetWidth(), h = this.terrain.data.GetHeight();
+			var newx = ppos[0]/ub - this.half_scale + w * 0.5;
+			var newy = ppos[2]/ub - this.half_scale + h * 0.5;
+            
+            newx = Math.min(w-(1<<this.lod),Math.max(0,newx));
+            newy = Math.min(h-(1<<this.lod),Math.max(0,newy));
 			
-			this.startx = newx;
-			this.starty = newy;
-			
-			this._BuildMesh();
+            var dx = newx - this.startx, dy = newy - this.starty;
+            if (dx*dx + dy*dy > 0.3) {
+      
+    			this.startx = newx;
+    			this.starty = newy;   
+
+                this._BuildMesh();
+            }
 		},
 		
 		_BuildMesh : function() {
-			var t = this.terrain, d = t.data, ilod = 1<<this.lod, outer = this;
+			var t = this.terrain, d = t.data, ilod = 1<<this.lod, outer = this, ppos = this.ppos;
 		
 			d.RequestLOD( this.startx, this.starty,1*ilod,1*ilod,this.lod, function(tup) {
 				var v = d.SampleLOD(tup);
 				var pos = v[0], wv = v[1], hv = v[2], w = wv-1, h = hv-1;
 				
 				// center the heightfield and scale it according to its LOD
-				outer._CenterHeightfield(pos, ilod, 16.0,w/2, h/2 );
+				outer._MoveHeightfield(pos, ilod, 16.0,-w/2, -h/2, ppos[0], ppos[2]);
+                
 				
 				var nor = new Array(pos.length), tan = new Array(pos.length), bit = new Array(pos.length);
 				medea._GenHeightfieldTangentSpace(pos, wv, hv, nor, tan, bit);
 				
 				var uv = new Array(wv*hv*2);
 				medea._GenHeightfieldUVs(uv,wv,hv);
+                
+                var m, vertices = { positions: pos, normals: nor, uvs: [uv]};
+                
+                if(!outer.cached_mesh) {
+                    var indices;
 				
-				var indices ;
-				
-				if (outer.lod === 0) {
-					indices = new Array(w*h*2*3);
-					medea._GenHeightfieldIndicesLOD(indices,w,h);
-				}
-				else {
-					indices = new Array(w*h*2*3*0.25);
-					var c = (outer.lod === d.GetLODCount()-1 ? medea._GenHeightfieldIndicesWithHole : medea._GenHeightfieldIndicesWithHoleLOD)(indices,w,h,w/4,h/4,w/2,h/2);
-				
-					// #ifdef DEBUG
-					medea.DebugAssert(c == indices.length, 'unexpected number of indices');
-					// #endif 
-				}
-				
-				t.AddEntity(medea.CreateSimpleMesh({ positions: pos, normals: nor, uvs: [uv]}, indices, 
-					medea.CreateSimpleMaterialFromColor([0.8,0.8*(outer.lod/d.GetLODCount()),0.8,1.0], true)
-				));
+                    if (outer.lod === 0) {
+                        indices = new Array(w*h*2*3);
+                        medea._GenHeightfieldIndicesLOD(indices,w,h);
+                    }
+                    else {
+                        indices = new Array(w*h*2*3*0.25);
+                        var c = (outer.lod === d.GetLODCount()-1 ? medea._GenHeightfieldIndicesWithHole : medea._GenHeightfieldIndicesWithHole)(indices,w,h,w/4,h/4,w/2,h/2);
+                    
+                        // #ifdef DEBUG
+                        medea.DebugAssert(c == indices.length, 'unexpected number of indices');
+                        // #endif 
+                    }
+                
+                    m = outer.cached_mesh = medea.CreateSimpleMesh(vertices, indices, 
+                        medea.CreateSimpleMaterialFromColor([0.8,0.8*(outer.lod/d.GetLODCount()),0.8,1.0], true),
+                        
+                        medea.VERTEXBUFFER_USAGE_DYNAMIC
+                    );
+                }
+                else {
+                    m = outer.cached_mesh;
+                    m.VB().Fill(vertices);
+                }
+                
+                // #ifdef LOG
+                medea.LogDebug('(re-)generate TerrainTile: lod=' + outer.lod + ', startx=' + outer.startx + ', starty=' + outer.starty + ', posx=' + ppos[0] + ', posy=' + ppos[2]);
+                // #endif 
+                        
+                outer._SetMesh(m);
 			});
 		},
+        
+        _SetMesh : function(m) {
+            if (m === this.cur_mesh) {
+                return;
+            }
+            
+            if (this.cur_mesh) {
+                this.terrain.RemoveEntity(this.cur_mesh);
+            }
+            
+            this.cur_mesh = m;
+            if(m) {
+                this.terrain.AddEntity(m);           
+            }
+        },
 		
 		
-		_CenterHeightfield : function(pos, xz_scale, yscale, xofs, yofs) {
+		_MoveHeightfield : function(pos, xz_scale, yscale, xofs, yofs, abs_xofs, abs_yofs) {
 			for(var i = 0, i3 = 0; i < pos.length/3; ++i, i3 += 3) {
-				pos[i3+0] = (pos[i3+0]-xofs) * xz_scale;
+				pos[i3+0] = (pos[i3+0]+xofs) * xz_scale + abs_xofs;
 				pos[i3+1] *= yscale;
-				pos[i3+2] = (pos[i3+2]-yofs) * xz_scale;
+				pos[i3+2] = (pos[i3+2]+yofs) * xz_scale + abs_yofs;
 			}
 		}
 	});
