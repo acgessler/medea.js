@@ -33,7 +33,9 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			
 			var w = Math.min(this.desc.size[0],this.desc.size[1]), cnt = 0;
 			for (; w >= 1; ++cnt, w /= 2);
-			this.lod_count = cnt+1;
+			this.lod_count = cnt;
+            
+            this.fetch_queue = [];
 		},
 		
 		GetSize : function() {
@@ -133,6 +135,44 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			k = this.maps_bysize[k];
 			return k || this._FindLOD(w/2,h/2);
 		},
+        
+        Update : function(ppos) {
+            // never try to fetch more than one map a frame, and always start with smaller maps
+            var smallest = 1e10, match = -1;
+            for( var i = 0; i < this.fetch_queue.length; ++i) {
+                if (this.fetch_queue[i][2]) {
+                    continue;
+                }
+                
+                var map = this.fetch_queue[i][0], size = map.size[0] * map.size[1];
+                
+                if (size < smallest) {
+                    match = i;
+                    smallest = size;
+                }
+            }
+            
+            if (match !== -1) {
+                var outer = this, map = this.fetch_queue[match][0], clbs = this.fetch_queue[match][1];
+                
+                this.fetch_queue[match][2] = true;
+    			medea.CreateImage(this.url_root + '/' + map.img, function(img) {
+    				map._cached_img = img;
+    				outer._RegisterMap(map);
+    				
+    				for( var i = 0; i < clbs.length; ++i) {
+                        clbs[i]();
+                    }
+                    
+                    for( var i = 0; i < outer.fetch_queue.length; ++i) {
+                        if (outer.fetch_queue[i][0] == map) {
+                            outer.fetch_queue.splice(i);
+                            break;
+                        }
+                    }
+    			});
+            }
+        },
 	
 		_RegisterMap : function(map) {
 			// #ifdef DEBUG
@@ -143,13 +183,14 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		},
 		
 		_FetchMap : function(map,callback) {
-			var outer = this;
-			medea.CreateImage(this.url_root + '/' + map.img, function(img) {
-				map._cached_img = img;
-				outer._RegisterMap(map);
-				
-				callback();
-			});
+            
+            for( var i = 0; i < this.fetch_queue.length; ++i) {
+                if (this.fetch_queue[i][0] == map) {
+                    this.fetch_queue[i][1].push(callback);
+                    return;
+                }
+            }
+            this.fetch_queue.push([map,[callback],false]);
 		},
 		
 		_CreateHeightField : function(img, x,y,w,h) {
@@ -182,8 +223,23 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			this.lod = lod;
 			this.half_scale = 0.5*(1<<lod);
 
-            this.startx = this.starty = 1e-10;            
+            this.startx = this.starty = 1e-10;  
+            this.present = false;
+            this.substituted = false;
+            this.present_listeners = [];
 		},
+        
+        IsPresent : function() {
+            return this.present;
+        },
+        
+        IsSubstituted : function() {
+            return this.substituted;
+        },
+        
+        GetOnPresentListeners : function() {
+            return this.present_listeners;
+        },
 		
 		Update : function(ppos) {
         
@@ -197,7 +253,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
             newy = Math.min(h-(1<<this.lod),Math.max(0,newy));
 			
             var dx = newx - this.startx, dy = newy - this.starty;
-            if (dx*dx + dy*dy > 0.3) {
+            if (dx*dx + dy*dy > 0.3 && this.lod > 1) {
       
     			this.startx = newx;
     			this.starty = newy;   
@@ -226,25 +282,12 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
                 var m, vertices = { positions: pos, normals: nor, uvs: [uv]};
                 
                 if(!outer.cached_mesh) {
-                    var indices;
-				
-                    if (outer.lod === 0) {
-                        indices = new Array(w*h*2*3);
-                        medea._GenHeightfieldIndicesLOD(indices,w,h);
-                    }
-                    else {
-                        indices = new Array(w*h*2*3*0.25);
-                        var c = (outer.lod === d.GetLODCount()-1 ? medea._GenHeightfieldIndicesWithHole : medea._GenHeightfieldIndicesWithHoleLOD)(indices,w,h,w/4,h/4,w/2,h/2);
-                    
-                        // #ifdef DEBUG
-                        medea.DebugAssert(c == indices.length, 'unexpected number of indices');
-                        // #endif 
-                    }
-                
+                    var indices = outer._GetIndices(w,h);
+             
                     m = outer.cached_mesh = medea.CreateSimpleMesh(vertices, indices, 
-                        medea.CreateSimpleMaterialFromColor([0.8,0.8*(outer.lod/d.GetLODCount()),0.8,1.0], true),
+                        medea.CreateSimpleMaterialFromColor([0.7,0.5,0.5,1.0], true),
                         
-                        medea.VERTEXBUFFER_USAGE_DYNAMIC
+                        medea.VERTEXBUFFER_USAGE_DYNAMIC | medea.INDEXBUFFER_USAGE_DYNAMIC
                     );
                 }
                 else {
@@ -257,8 +300,78 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
                 // #endif 
                         
                 outer._SetMesh(m);
+                outer._SetPresent();
 			});
 		},
+        
+        _GetIndices : function(w,h) {      
+            var indices, t = this.terrain;
+            
+            if (this.lod === 0) {
+                indices = new Array(w*h*2*3);
+                medea._GenHeightfieldIndicesLOD(indices,w,h);
+            }
+            else {
+                var whs = w/4, hhs = h/4, n = this.lod-1;
+                
+                // see if higher LODs are not present yet, in this case we
+                // make the hole larger to cover their area as well.
+                for( var dt = 8; n >= 0 && !t.LOD(n).IsPresent(); --n, whs += w/dt, hhs += h/dt, dt*=2 );
+                
+                if(n === -1) {
+                    ++n;
+                    whs = hhs = w/2;
+                }
+                whs = Math.floor(whs), hhs = Math.floor(hhs);
+                
+                // .. but make sure we get notified when those higher LODs
+                // finish loading so we can shrink again.
+                if (n !== this.lod-1) {
+                    // #ifdef LOG
+                    medea.LogDebug('extending indices for lod ' + this.lod + ' down to cover lod ' + n + ' as well');
+                    // #endif 
+                    
+                    for( var nn = n; nn < this.lod; ++nn) {
+                        t.LOD(nn).substituted = true;
+                        (function(nn, outer) {
+                            t.LOD(nn).GetOnPresentListeners().push(function() {
+                            
+                                for( var m = outer.lod-1; m >= 0 && !t.LOD(m).IsPresent(); --m );     
+                                if(m === -1) {
+                                    ++m;
+                                }                    
+                                if (m === nn) {
+                                    // #ifdef LOG
+                                    medea.LogDebug('shrinking indices for ' + outer.lod + ' again now that lod ' + nn + ' is present');
+                                    // #endif 
+                                    
+                                    outer.cached_mesh.IB().Fill(outer._GetIndices(w,h));
+                                }
+                            });
+                        } (nn, this));
+                    }
+                }
+                
+                var wh = w-whs*2, hh = h-hhs*2;
+                indices = new Array((w-wh)*(h-hh)*2*3);            
+
+                if (!wh && !hh) {
+                    medea._GenHeightfieldIndicesLOD(indices,w,h);
+                }
+                else {
+                    var c = (this.lod === t.data.GetLODCount()-1 
+                        ? medea._GenHeightfieldIndicesWithHole 
+                        : medea._GenHeightfieldIndicesWithHoleLOD)
+                        (indices,w,h,whs,hhs,wh,hh);
+                        
+                    // #ifdef DEBUG
+                    medea.DebugAssert(c == indices.length, 'unexpected number of indices');
+                    // #endif 
+                }       
+            }
+            
+            return indices;
+        },
         
         _SetMesh : function(m) {
             if (m === this.cur_mesh) {
@@ -272,6 +385,14 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
             this.cur_mesh = m;
             if(m) {
                 this.terrain.AddEntity(m);           
+            }
+        },
+        
+        _SetPresent : function() {
+            this.present = true;
+            this.substituted = false;
+            for (var i = 0; i < this.present_listeners.length; ++i) {
+                this.present_listeners[i]();
             }
         },
 		
@@ -304,7 +425,13 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			for( var i = 0; i < this.rings.length; ++i) {
 				this.rings[i].Update(ppos);
 			}
+            
+            this.data.Update(ppos);
 		},
+        
+        LOD : function(i) {
+            return this.rings[i];
+        },
 		
 		_InitRings : function() {
 			var lods = this.data.GetLODCount();
