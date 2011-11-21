@@ -15,7 +15,7 @@ medea._addMod('camcontroller',['camera'],function(undefined) {
 	
 		enabled: false,
 		turn_speed : 0.005,
-		walk_speed : 8.5,
+		walk_speed : 5.5,
 		
 		terrain_entity : null,
 		last_processed_mdelta : -1,
