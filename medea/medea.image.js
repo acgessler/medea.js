@@ -78,17 +78,25 @@ medea._addMod('image',['filesystem'],function(undefined) {
 		},
 		
 		Pixel : function(x,y, rgba) {
+			var v = this.GetData(), n = (this.img.width*y+x) * 4;
 			if (rgba === undefined) {
-				return GetData() [(this.img.width*y+x) * 4];
+				return [v[n+0],v[n+1],v[n+2],v[n+3]];
 			}
 			
 			// XXX this only changes the data copy, not the original image, nor the canvas
-			var v = GetData(), n = (this.img.width*y+x) * 4;
 			v[n+0] = rgba[0];
 			v[n+1] = rgba[1];
 			v[n+2] = rgba[2];
 			v[n+3] = rgba[3];
 		},
+		
+		PixelComponent : function(x,y, which, value) {
+			var v = this.GetData(), n = (this.img.width*y+x) * 4 + which;
+			if (value === undefined) {
+				return v[n];
+			}
+			v[n] = value;
+		}
 	});
 	
 	medea.CreateImage = function(res, callback) {

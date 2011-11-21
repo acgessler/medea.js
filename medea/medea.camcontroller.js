@@ -15,8 +15,9 @@ medea._addMod('camcontroller',['camera'],function(undefined) {
 	
 		enabled: false,
 		turn_speed : 0.005,
-		walk_speed : 1.0,
+		walk_speed : 8.5,
 		
+		terrain_entity : null,
 		last_processed_mdelta : -1,
 		
 		init : function(camera,kind,enabled) {
@@ -71,7 +72,12 @@ medea._addMod('camcontroller',['camera'],function(undefined) {
 			this.walk_speed = t;
 		},
 		
-		
+		TerrainEntity : function(t) {
+			if(t === undefined) {
+				return this.terrain_entity;
+			}
+			this.terrain_entity = t;
+		},
 		
 		_Update : function(dtime) {
 			if(medea.IsMouseDown()) {
@@ -114,7 +120,7 @@ medea._addMod('camcontroller',['camera'],function(undefined) {
 			
 			var ws = this.walk_speed;
 			if(medea.IsKeyDown(16)) {
-				ws *= 20;
+				ws *= 10;
 			}
 			
 			// process movements
@@ -139,11 +145,21 @@ medea._addMod('camcontroller',['camera'],function(undefined) {
 			
 				// PAGE UP
 				if(medea.IsKeyDown(33)) {
-					n.Translate([0,ws * dtime,0]);
+					if (this.terrain_entity) {
+						this.terrain_entity.HeightOffset(this.terrain_entity.HeightOffset()+ws * dtime);
+					}
+					else {
+						n.Translate([0,ws * dtime,0]);
+					}
 				}
 				// PAGE DOWN
 				if(medea.IsKeyDown(34)) {
-					n.Translate([0,-ws * dtime,0]);
+					if (this.terrain_entity) {
+						this.terrain_entity.HeightOffset(this.terrain_entity.HeightOffset()-ws * dtime);
+					}
+					else {
+						n.Translate([0,-ws * dtime,0]);
+					}
 				}
 			}
 		},

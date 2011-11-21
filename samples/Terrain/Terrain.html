@@ -8,14 +8,30 @@
 
 function run() {
 
-	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes'],function() {
+	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes','camcontroller'],function() {
 		var vp1 = medea.CreateViewport();
 		vp1.SetClearColor([1.0,1.0,1.0]);
      
         var root = medea.RootNode(), cam_node = root.AddChild();
+		
+		var cam = medea.CreateCamera();
+		cam_node.AddEntity(cam);
+		vp1.SetCamera(cam);
+		
+		cam.parent.Translate(vec3.create([0,0,40]));
+		
+		var cc = medea.CreateCamController(cam,'fps');
+		cc.Enable();
+			
 		medea.FetchMods(['terrain'], function() {
 			medea.CreateDefaultTerrainDataProviderFromResource('remote:terrain_sample/terrain.json', function(p) {
-				root.AddChild(medea.CreateTerrainNode(p, cam_node));
+			
+				var ter = medea.CreateTerrainNode(p, cam_node);
+				root.AddChild(ter);
+				
+				var tp = medea.CreateSimpleTerrainPhysicsController(ter,2.0);
+				cam_node.AddEntity(tp);
+				cc.TerrainEntity(tp);
 			});
 		});
         
@@ -24,18 +40,6 @@ function run() {
 			root.AddChild(medea.CreateSkydomeNode('remote:skydome_sample/midmorning/midmorning.png',0.4));
         });
 		
-		// and a plain camera controller
-		medea.FetchMods('camcontroller',function() {
-			var cam = medea.CreateCamera();
-			cam_node.AddEntity(cam);
-			vp1.SetCamera(cam);
-			
-			cam.parent.Translate(vec3.create([0,45,40]));
-			
-			var cc = medea.CreateCamController(cam,'fps');
-			cc.Enable();
-		});
-        
 		medea.SetDebugPanel(null,true);
 		medea.Start();
 	});

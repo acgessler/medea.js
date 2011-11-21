@@ -12,6 +12,8 @@ medea._addMod('node',['frustum'],function(undefined) {
 	medea._NODE_FLAG_DIRTY = 0x1;
 	medea._NODE_FLAG_DIRTY_BB = 0x2;
 	
+	medea.NODE_FLAG_NO_ROTATION = 0x4;
+	medea.NODE_FLAG_NO_SCALING = 0x8;
 
 	this.Node = medea.Class.extend({
 		
@@ -21,7 +23,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 		parent:null,
 		
 	
-		init : function(name) {		
+		init : function(name, flags) {		
 			this.children = [];
 			this.entities = [];
 			this.name = name || "";
@@ -37,7 +39,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 			// min/max
 			this.bb = medea.CreateBB();;
 			
-			this.flags = medea._NODE_FLAG_DIRTY | medea._NODE_FLAG_DIRTY_BB;
+			this.flags = medea._NODE_FLAG_DIRTY | medea._NODE_FLAG_DIRTY_BB | (flags || 0);
 		},
 
 		GetEntities: function() {
@@ -122,6 +124,13 @@ medea._addMod('node',['frustum'],function(undefined) {
 			return this.gmatrix;
 		},
 		
+		GetInverseGlobalTransform: function() {
+			if (this.gimatrix) {
+				return this.gimatrix;
+			}
+			return this.gimatrix = mat4.inverse(this.gmatrix,mat4.create());
+		},
+		
 		Translate: function(vec) {
 			mat4.translate(this.lmatrix,vec);
 			this.flags |= this.trafo_dirty_flag;
@@ -129,12 +138,20 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 		
 		Rotate: function(angle,axis) {
+			// #ifdef DEBUG
+			medea.DebugAssert(!(this.flags & medea.NODE_FLAG_NO_ROTATION),'node cannot be rotated');
+			// #endif
+		
 			mat4.rotate(this.lmatrix,angle,axis);
 			this.flags |= this.trafo_dirty_flag;
 			return this;
 		},
 		
 		Scale: function(s) {
+			// #ifdef DEBUG
+			medea.DebugAssert(!(this.flags & medea.NODE_FLAG_NO_SCALING),'node cannot be scaled');
+			// #endif
+			
 			mat4.scale(this.lmatrix, typeof s === 'number' ? [s,s,s] : s);
 			this.flags |= this.trafo_dirty_flag;
 			return this;
@@ -249,6 +266,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 				mat4.multiply(this.parent.GetGlobalTransform(),this.lmatrix,this.gmatrix);
 			}
 			else this.gmatrix = this.lmatrix;
+			this.gimatrix = null;
 			
 			this._FireListener("OnUpdateGlobalTransform");
 			return this.gmatrix;
@@ -293,8 +311,8 @@ medea._addMod('node',['frustum'],function(undefined) {
 	});
 	
 	//
-	medea.CreateNode = function(name) {
-		return new medea.Node(name);
+	medea.CreateNode = function(name, flags) {
+		return new medea.Node(name, flags);
 	};
 });
 

@@ -13,6 +13,12 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 
 	medea._initMod('terraintile');
 	
+	var sample_3x3_weights = [
+		[0.05, 0.1, 0.05],
+		[0.1, 0.4, 0.1],
+		[0.05, 0.1, 0.05]
+	];
+	
 	var DefaultTerrainDataProvider = medea.Class.extend({
 	
 		desc : null,
@@ -34,7 +40,8 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			var w = Math.min(this.desc.size[0],this.desc.size[1]), cnt = 0;
 			for (; w >= 1; ++cnt, w /= 2);
 			this.lod_count = cnt;
-            
+			
+			this.desc.base_hscale = this.desc.base_hscale || 1.0/255.0;
             this.fetch_queue = [];
 		},
 		
@@ -57,6 +64,33 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
         GetUnitBase : function() {
             return this.desc.unitbase;
         },
+		
+		GetScale : function() {
+			return this.desc.scale;
+		},
+		
+		TryGetHeightAtPos : function(x,y) {
+			var map = this._FindLOD(this.desc.size[0],this.desc.size[1]);
+			if(!map) {
+				return null;
+			}
+			
+			var iw = map._cached_img.GetWidth(), ih = map._cached_img.GetHeight();
+			var xx = Math.floor(iw * x/this.desc.size[0]), yy = Math.floor(ih * y/this.desc.size[1]);
+			
+			// sample the 9 surrounding pixels using a (pseudo) gaussian filter
+			var h = 0.0;
+			for( var n = -1; n <= 1; ++n) {
+				for( var m = -1; m <= 1; ++m) {
+					h += map._cached_img.PixelComponent(xx+n, yy+m,0) * this.desc.base_hscale * sample_3x3_weights[n+1][m+1];
+				}
+			}
+			
+			// #ifdef DEBUG
+			medea.DebugAssert(h !== undefined,'out of bounds access');
+			// #endif
+			return h * this.desc.scale[1];
+		},
 		
 		// request a given rectangle on the terrain for a particular 'wanthave' LOD
 		// callback is invoked as soon as this LOD level is available.
@@ -120,7 +154,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			var xx = Math.floor(x*ub), yy = Math.floor(y*ub), ww = Math.floor(w*ub), hh = Math.floor(h*ub);
 			
 			var sbase = real_scale/want_scale;
-			return this._CreateHeightField(match._cached_img, xx, yy, ww, hh, sbase*this.desc.scale[1], sbase*this.desc.scale[0] );
+			return this._CreateHeightField(match._cached_img, xx, yy, ww, hh, sbase*this.desc.scale[1]*this.desc.base_hscale, sbase*this.desc.scale[0] );
 		},
 		
 		
@@ -193,8 +227,8 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
             this.fetch_queue.push([map,[callback],false]);
 		},
 		
-		_CreateHeightField : function(img, x,y,w,h) {
-			return medea._HeightfieldFromOddSidedHeightmapPart(img, x,y,w+1,h+1, 1.0/16);
+		_CreateHeightField : function(img, x,y,w,h, ys, xzs) {
+			return medea._HeightfieldFromOddSidedHeightmapPart(img, x,y,w+1,h+1,ys, xzs);
 		},
 	});
 	
@@ -263,14 +297,14 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		},
 		
 		_BuildMesh : function() {
-			var t = this.terrain, d = t.data, ilod = 1<<this.lod, outer = this, ppos = this.ppos;
+			var t = this.terrain, d = t.data, ilod = 1<<this.lod, outer = this, ppos = this.ppos, sc = d.GetScale();
 		
 			d.RequestLOD( this.startx, this.starty,1*ilod,1*ilod,this.lod, function(tup) {
 				var v = d.SampleLOD(tup);
 				var pos = v[0], wv = v[1], hv = v[2], w = wv-1, h = hv-1;
 				
 				// center the heightfield and scale it according to its LOD
-				outer._MoveHeightfield(pos, ilod, 13.5,-w/2, -h/2, ppos[0], ppos[2]);
+				outer._MoveHeightfield(pos, ilod, 1.0,-w*sc[0]/2, -h*sc[0]/2, ppos[0], ppos[2]);
                 
 				
 				var nor = new Array(pos.length), tan = new Array(pos.length), bit = new Array(pos.length);
@@ -410,7 +444,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 	var TerrainNode = medea.Node.extend({
 	
 		init : function(name, data, cam_node) {
-			this._super(name);
+			this._super(name, medea.NODE_FLAG_NO_ROTATION | medea.NODE_FLAG_NO_SCALING);
 			
 			this.data = data;
 			this.cam_node = cam_node;
@@ -428,6 +462,23 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
             
             this.data.Update(ppos);
 		},
+		
+		GetWorldHeightForWorldPos : function(wx,wz) {
+			var mypos = this.GetWorldPos();
+			
+			if (wz === undefined) {
+				wz = wx[2];
+				wx = wx[0];
+			}
+			
+			var ub = this.data.GetUnitBase();
+			
+			wx -= mypos[0]; 
+			wz -= mypos[2]; 
+			
+			var h = this.data.TryGetHeightAtPos(this.data.GetWidth()*0.5 + wx/ub,this.data.GetHeight()*0.5 + wz/ub);
+			return h === null ? null : h - mypos[1];
+		},
         
         LOD : function(i) {
             return this.rings[i];
@@ -444,7 +495,56 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 	});
 	
 	
+
+	var SimpleTerrainPhysicsController = medea.Entity.extend(
+	{
+		init : function(terrain, height_offset) {
+			this.terrain = terrain;
+			this.height_offset = height_offset === undefined ? 2.0 : height_offset;
+			
+// #ifdef DEBUG
+			medea.DebugAssert(this.terrain instanceof TerrainNode, "need valid terrain node");
+// #endif
+
+
+		},
+	
+		Render : function(viewport,entity,node,rqmanager) {
+			// nothing to be done
+		},
+		
+		Update : function(dtime) {
+			var ppos = this.parent.GetWorldPos();
+			var h = this.terrain.GetWorldHeightForWorldPos(ppos[0],ppos[2]);
+			
+			if (h === null) {
+				// outside the terrain or terrain not present yet, do not touch.
+			}
+			else {
+				ppos[1] = this.height_offset + h;
+				
+				var t = vec3.create();
+				mat4.multiplyVec3(this.parent.parent.GetInverseGlobalTransform(),ppos,t);
+				this.parent.LocalPos(t);
+			}
+		},
+		
+		HeightOffset : function(h) {
+			if (h === undefined) {
+				return this.height_offset;
+			}
+			this.height_offset = h;
+		},
+	});
+	
+	
 	medea.CreateTerrainNode = function(data_provider, cam_node) {
 		return new TerrainNode('terrain', data_provider, cam_node);
 	};
+	
+	medea.CreateSimpleTerrainPhysicsController = function(terrain, ho) {
+		return new SimpleTerrainPhysicsController(terrain, ho);
+	};
 });
+
+
