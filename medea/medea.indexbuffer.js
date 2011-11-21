@@ -44,7 +44,6 @@ medea._addMod('indexbuffer',[],function(undefined) {
 		gltype : 0,
 		
 		init : function(init_data,flags) {	
-			this.itemcount = init_data.length;
 			this.flags = flags || 0;
 			
 			// #ifdef DEBUG
@@ -67,6 +66,8 @@ medea._addMod('indexbuffer',[],function(undefined) {
 			if (this.buffer === -1) {
 				this.buffer = gl.createBuffer();
 			}
+			
+			this.itemcount = init_data.length;
 			
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.buffer);
 			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new (this.flags & medea.INDEXBUFFER_LARGE_MESH ? Uint32Array : Uint16Array)(init_data),

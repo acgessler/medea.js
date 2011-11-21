@@ -253,7 +253,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
             newy = Math.min(h-(1<<this.lod),Math.max(0,newy));
 			
             var dx = newx - this.startx, dy = newy - this.starty;
-            if (dx*dx + dy*dy > 0.3 && this.lod > 1) {
+            if (dx*dx + dy*dy > 0.3) {
       
     			this.startx = newx;
     			this.starty = newy;   
@@ -285,7 +285,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
                     var indices = outer._GetIndices(w,h);
              
                     m = outer.cached_mesh = medea.CreateSimpleMesh(vertices, indices, 
-                        medea.CreateSimpleMaterialFromColor([0.7,0.5,0.5,1.0], true),
+                        medea.CreateSimpleMaterialFromColor([0.7,0.7,0.5,1.0], true),
                         
                         medea.VERTEXBUFFER_USAGE_DYNAMIC | medea.INDEXBUFFER_USAGE_DYNAMIC
                     );
@@ -312,11 +312,11 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
                 medea._GenHeightfieldIndicesLOD(indices,w,h);
             }
             else {
-                var whs = w/4, hhs = h/4, n = this.lod-1;
+                var whs = w/4, hhs = h/4, n = this.lod-1, extend = false;
                 
                 // see if higher LODs are not present yet, in this case we
                 // make the hole larger to cover their area as well.
-                for( var dt = 8; n >= 0 && !t.LOD(n).IsPresent(); --n, whs += w/dt, hhs += h/dt, dt*=2 );
+                for( var dt = 8; n >= 0 && !t.LOD(n).IsPresent(); --n, whs += w/dt, hhs += h/dt, dt*=2, extend = true );
                 
                 if(n === -1) {
                     ++n;
@@ -326,7 +326,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
                 
                 // .. but make sure we get notified when those higher LODs
                 // finish loading so we can shrink again.
-                if (n !== this.lod-1) {
+                if (extend) {
                     // #ifdef LOG
                     medea.LogDebug('extending indices for lod ' + this.lod + ' down to cover lod ' + n + ' as well');
                     // #endif 

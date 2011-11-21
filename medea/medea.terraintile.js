@@ -303,8 +303,8 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 		var min = Math.min;
 		
 		// index the terrain patch in groups of 4x4 quads to improve vertex cache locality
-		for (var ty = 1, out = 0; ty < (qty+3)/4 - 1; ++ty) {
-			for (var tx = 1; tx < (qtx+3)/4 - 1; ++tx) {
+		for (var ty = 0, out = 0; ty < (qty+3)/4; ++ty) {
+			for (var tx = 0; tx < (qtx+3)/4; ++tx) {
 				var fullx = tx*4, fully = ty*4;
 
 				for (var y = fully,bc=fully*(qtx+1)+fullx; y < min(fully+4,qty); ++y,bc+=(qtx+1)-4) {
