@@ -19,6 +19,20 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		[0.05, 0.1, 0.05]
 	];
 	
+	var FixTexturePaths = function(constants, url_root) {
+		for(var k in constants) {
+			var v = constants[k];
+			if (typeof v === 'string') {
+				if (v[0] === '.' && v[1] === '/') {
+					constants[k] = url_root + v.slice(1);
+				}
+			}
+			else if (typeof v === 'object') {
+				FixTexturePaths(v, url_root);
+			}
+		}
+	};
+	
 	var DefaultTerrainDataProvider = medea.Class.extend({
 	
 		desc : null,
@@ -224,13 +238,8 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			
 			var name = this.url_root + '/' + mat.effect, constants = mat.constants;
 			
-			//{
-			//	texture : this.url_root + '/' + mat.color_map,
-			//	normalMap this.url_root + '/' + mat.normal_map
-			//};
-			
-			//constants['lightdir'] = [0.0,0.709,0.709];
-			
+			// make texture paths absolute
+			FixTexturePaths(constants, this.url_root);
 			return this.materials[lod] = new medea.Material(medea.CreatePassFromShaderPair(name,constants));
 		},
 	

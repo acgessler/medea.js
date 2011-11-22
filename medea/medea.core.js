@@ -758,6 +758,7 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("CreateShader","shader");
 	this._SetFunctionStub("CreateImage","image");
 	this._SetFunctionStub("CreateTexture","texture");
+	this._SetFunctionStub("CreateLODTexture","lodtexture");
 	this._SetFunctionStub("CreateCubeTexture","cubetexture");
 	
 	this._SetFunctionStub("CreateStandardMesh_Plane","standardmesh");

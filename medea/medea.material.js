@@ -185,7 +185,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 					
 					// explicitly bound texture
 					handler = function(prog, pos, state, curval) {
-						if (typeof curval === 'string') {
+						if (!(curval instanceof medea.Resource)) {
 							//curval = medea.GetDefaultTexture();
 							return;
 						}
@@ -194,13 +194,13 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 						
 						// check if this texture is already active, if not get rid of the
 						// oldest texture in the sampler cache.
-						var slots = state.tex_slots || new Array(6), oldest = state.texage+1, oldesti = 0;
+						var slots = state.tex_slots || new Array(6), oldest = state.texage+1, oldesti = 0, curgl = curval.GetGlTexture();
 						for(var i = 0; i < slots.length; ++i) {		
 							if (!slots[i]) {
 								oldest = state.texage+2;
 								oldesti = i;
 							}
-							else if (slots[i][1] === curval) {
+							else if (slots[i][1].GetGlTexture() === curgl) {
 								slots[i][0] = state.texage++;
 								gl.uniform1i(pos,i);
 								return;
@@ -221,7 +221,18 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 						// #ifdef DEBUG
 						medea.LogDebug('create texture for shader uniform with string value: ' + k + ', ' + val);
 						// #endif
-						c[k] = medea.CreateTexture(val); 
+						medea.FetchMods(['texture'], function() {
+							c[k] = medea.CreateTexture(val); 
+						});
+						
+					}
+					else if (typeof val === 'object' && val.low) {
+						// #ifdef DEBUG
+						medea.LogDebug('create lod texture for shader uniform with string value: ' + k + ', ' + val);
+						// #endif
+						medea.FetchMods(['lodtexture'], function() {
+							c[k] = medea.CreateLODTexture(val); 
+						});
 					}
 					break;
 					

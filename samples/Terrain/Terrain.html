@@ -29,7 +29,7 @@ function run() {
 				var ter = medea.CreateTerrainNode(p, cam_node);
 				root.AddChild(ter);
 				
-				var tp = medea.CreateSimpleTerrainPhysicsController(ter,2.0);
+				var tp = medea.CreateSimpleTerrainPhysicsController(ter,3.0);
 				cam_node.AddEntity(tp);
 				cc.TerrainEntity(tp);
 			});

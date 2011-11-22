@@ -39,10 +39,23 @@
 		{
 			"effect" : "simple",
 			"constants" : {
-				"texture" : "remote:terrain_sample/ground3.png",
-				"texture2" : "remote:terrain_sample/ground4.png",
+				"texture" : {
+					"neutral" : [1.0,0.85,0.4],
+					"low" : "./ground3_low.jpg",
+					"high" : "./ground3.jpg"
+				},
 				
-				"normal_map" : "remote:terrain_sample/ground3_NRM.png"
+				"texture2" : {
+					"neutral" : [1.0,0.8,0.65],
+					"low" : "./ground4_low.jpg",
+					"high" : "./ground4.jpg"
+				},
+				
+				"normal_map" : {
+					"neutral" : "normals",
+					"low" : "./ground3_NRM_low.png",
+					"high" : "./ground3_NRM.png"
+				}
 			}
 		},
 		{
