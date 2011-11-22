@@ -43,6 +43,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			
 			this.desc.base_hscale = this.desc.base_hscale || 1.0/255.0;
             this.fetch_queue = [];
+			this.materials = new Array(this.lod_count);
 		},
 		
 		GetSize : function() {
@@ -95,7 +96,6 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		// request a given rectangle on the terrain for a particular 'wanthave' LOD
 		// callback is invoked as soon as this LOD level is available.
 		RequestLOD : function(x,y,w,h,lod,callback)  {
-			
 			var wx = this.desc.size[0] / (1 << lod), hx = this.desc.size[1] / (1 << lod);
 			var match = this._FindLOD(wx,hx);
 	
@@ -207,6 +207,32 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
     			});
             }
         },
+		
+		GetMaterial : function(lod) {
+			if (this.materials[lod]) {
+				return this.materials[lod];
+			}
+			
+			if (!this.desc.materials[lod]) {
+				return null;
+			}
+			
+			var mat = this.desc.materials[lod];
+			if(mat.clonefrom !== undefined) {
+				return this.GetMaterial(mat.clonefrom);
+			}
+			
+			var name = this.url_root + '/' + mat.effect, constants = mat.constants;
+			
+			//{
+			//	texture : this.url_root + '/' + mat.color_map,
+			//	normalMap this.url_root + '/' + mat.normal_map
+			//};
+			
+			//constants['lightdir'] = [0.0,0.709,0.709];
+			
+			return this.materials[lod] = new medea.Material(medea.CreatePassFromShaderPair(name,constants));
+		},
 	
 		_RegisterMap : function(map) {
 			// #ifdef DEBUG
@@ -255,9 +281,9 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		init : function(terrain,lod) {
 			this.terrain = terrain;
 			this.lod = lod;
-			this.half_scale = 0.5*(1<<lod);
+			this.half_scale = 0.5*(1<<lod); 
 
-            this.startx = this.starty = 1e-10;  
+            this.startx = this.starty = 1e10;  
             this.present = false;
             this.substituted = false;
             this.present_listeners = [];
@@ -313,13 +339,13 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 				var uv = new Array(wv*hv*2);
 				medea._GenHeightfieldUVs(uv,wv,hv);
                 
-                var m, vertices = { positions: pos, normals: nor, uvs: [uv]};
+                var m, vertices = { positions: pos, normals: nor, tangents: tan, bitangents: bit, uvs: [uv]};
                 
                 if(!outer.cached_mesh) {
                     var indices = outer._GetIndices(w,h);
              
                     m = outer.cached_mesh = medea.CreateSimpleMesh(vertices, indices, 
-                        medea.CreateSimpleMaterialFromColor([0.7,0.7,0.5,1.0], true),
+                        d.GetMaterial(outer.lod) || medea.CreateSimpleMaterialFromColor([0.7,0.7,0.5,1.0], true),
                         
                         medea.VERTEXBUFFER_USAGE_DYNAMIC | medea.INDEXBUFFER_USAGE_DYNAMIC
                     );

@@ -35,5 +35,38 @@
 		}
 	],
 	
+	"materials" : [
+		{
+			"effect" : "simple",
+			"constants" : {
+				"texture" : "remote:terrain_sample/ground3.png",
+				"texture2" : "remote:terrain_sample/ground4.png",
+				
+				"normal_map" : "remote:terrain_sample/ground3_NRM.png"
+			}
+		},
+		{
+			"clonefrom" : 0
+		},
+		{
+			"clonefrom" : 0
+		},
+		{
+			"clonefrom" : 0
+		},
+		{
+			"clonefrom" : 0
+		},
+		{
+			"clonefrom" : 0
+		},
+		{
+			"clonefrom" : 0
+		},
+		{
+			"clonefrom" : 0
+		}
+	],
+	
 	"default_fetch_order" : [3,0]
 }

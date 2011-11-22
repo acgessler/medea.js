@@ -1,0 +1,23 @@
+#ifdef GL_ES
+precision highp float;
+#endif
+
+uniform sampler2D normal_map;
+uniform sampler2D texture;
+uniform sampler2D texture2;
+
+varying highp vec2 va_TexCoord;
+varying highp vec3 va_Normal;
+varying highp vec3 va_TSLightDir;
+
+void main()
+{
+	vec3 bumpNor = (texture2D(normal_map, va_TexCoord ).rgb - 0.5) * 2.0;
+	
+    gl_FragColor.a = 1.0;
+	gl_FragColor.rgb = ( mix( texture2D(texture, va_TexCoord ).rgb, texture2D(texture2, va_TexCoord ).rgb, va_Normal.y ) 
+	  
+		)
+		* dot(normalize(va_TSLightDir), normalize(bumpNor));
+}
+

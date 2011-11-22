@@ -189,7 +189,32 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 							//curval = medea.GetDefaultTexture();
 							return;
 						}
-						gl.uniform1i(pos, curval._Bind());
+						
+						state.texage = state.texage || 0;
+						
+						// check if this texture is already active, if not get rid of the
+						// oldest texture in the sampler cache.
+						var slots = state.tex_slots || new Array(6), oldest = state.texage+1, oldesti = 0;
+						for(var i = 0; i < slots.length; ++i) {		
+							if (!slots[i]) {
+								oldest = state.texage+2;
+								oldesti = i;
+							}
+							else if (slots[i][1] === curval) {
+								slots[i][0] = state.texage++;
+								gl.uniform1i(pos,i);
+								return;
+							}
+							else if ( slots[i][0] < oldest && oldest !== state.texage+2) {
+								oldest = slots[i][0];
+								oldesti = i;
+							}
+						}
+						
+						slots[oldesti] = [state.texage++,curval];
+						gl.uniform1i(pos, curval._Bind(oldesti));
+						
+						state.tex_slots = slots;
 					};
 					
 					if (typeof val === 'string') {

@@ -85,9 +85,11 @@ medea._addMod('cubetexture',['filesystem'],function(undefined) {
 		
 		
 		_Bind : function() {
-			gl.activeTexture(gl.TEXTURE0);
+			slot = slot || 0;
+
+			gl.activeTexture(gl.TEXTURE0 + slot);
 			gl.bindTexture(CUBE,this.texture);
-			return 0;
+			return slot;
 		},
 	});
 	

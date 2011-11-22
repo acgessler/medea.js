@@ -50,10 +50,12 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 		},
 		
 		
-		_Bind : function() {
-			gl.activeTexture(gl.TEXTURE0);
+		_Bind : function(slot) {
+			slot = slot || 0;
+
+			gl.activeTexture(gl.TEXTURE0 + slot);
 			gl.bindTexture(TEX,this.texture);
-			return 0;
+			return slot;
 		},
 	});
 	
