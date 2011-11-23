@@ -164,11 +164,17 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 				
 			var want_scale = 1/(1 << lod);
 			
-			var ub = this.desc.unitbase * real_scale;
-			var xx = Math.floor(x*ub), yy = Math.floor(y*ub), ww = Math.floor(w*ub), hh = Math.floor(h*ub);
+			x = Math.floor(x*2.0)*0.5;
+			y = Math.floor(y*2.0)*0.5;
+			w = Math.floor(w);
+			h = Math.floor(h);
+			
+			var ub = Math.floor(this.desc.unitbase * real_scale);
+			var xx = x*ub, yy = y*ub, ww = w*ub, hh = h*ub;
 			
 			var sbase = real_scale/want_scale;
-			return this._CreateHeightField(match._cached_img, xx, yy, ww, hh, sbase*this.desc.scale[1]*this.desc.base_hscale, sbase*this.desc.scale[0] );
+			medea.LogDebug('rect: ' + lod + " " + xx + " " + yy + " " + ww + " " + hh);
+			return this._CreateHeightField(match._cached_img, xx, yy, ww, hh, sbase*this.desc.scale[1]*this.desc.base_hscale, sbase*this.desc.scale[0]);
 		},
 		
 		
@@ -346,7 +352,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 				medea._GenHeightfieldTangentSpace(pos, wv, hv, nor, tan, bit);
 				
 				var uv = new Array(wv*hv*2);
-				medea._GenHeightfieldUVs(uv,wv,hv);
+				medea._GenHeightfieldUVs(uv,wv,hv, Math.ceil(ilod/2));
                 
                 var m, vertices = { positions: pos, normals: nor, tangents: tan, bitangents: bit, uvs: [uv]};
                 
@@ -424,19 +430,12 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
                 var wh = w-whs*2, hh = h-hhs*2;
                 indices = new Array((w-wh)*(h-hh)*2*3);            
 
-                if (!wh && !hh) {
-                    medea._GenHeightfieldIndicesLOD(indices,w,h);
-                }
-                else {
-                    var c = (this.lod === t.data.GetLODCount()-1 
-                        ? medea._GenHeightfieldIndicesWithHole 
-                        : medea._GenHeightfieldIndicesWithHoleLOD)
-                        (indices,w,h,whs,hhs,wh,hh);
-                        
-                    // #ifdef DEBUG
-                    medea.DebugAssert(c == indices.length, 'unexpected number of indices');
-                    // #endif 
-                }       
+				var c = (this.lod === t.data.GetLODCount()-1 
+					? medea._GenHeightfieldIndicesWithHole 
+					: medea._GenHeightfieldIndicesWithHoleLOD)
+					(indices,w,h,whs,hhs,wh,hh);
+					
+				indices.length = c;     
             }
             
             return indices;

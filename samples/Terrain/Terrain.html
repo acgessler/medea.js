@@ -18,7 +18,7 @@ function run() {
 		cam_node.AddEntity(cam);
 		vp1.SetCamera(cam);
 		
-		cam.parent.Translate(vec3.create([0,0,40]));
+		cam.parent.Translate(vec3.create([0,0,0]));
 		
 		var cc = medea.CreateCamController(cam,'fps');
 		cc.Enable();

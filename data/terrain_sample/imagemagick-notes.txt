@@ -1,0 +1,4 @@
+Use 
+$ convert <infile> -flip -flop -sample '50%' -flip -flop <outfile>
+to generate downscaled terrain maps. This is needed to force IM to sample
+the right sub-pixels.

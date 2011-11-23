@@ -139,7 +139,7 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 					++st.batches_frame;
 					
 					// regular drawing
-					if(!wf) {
+					if(!wf || outer.pt != medea.PT_TRIANGLES && outer.pt != medea.PT_TRIANGLES_STRIPS) {
 						if (outer.ibo) {
 						
 							gl.drawElements(outer.pt,iboc,outer.ibo.GetGlType(),0);
@@ -153,18 +153,27 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 					}
 					// since we don't have glPolygonMode in WebGL, we need to do it manually. 
 					// of course, substituting gl.LINES does *not* give correct results, but
-					// it is relatively fast.
+					// it is relatively fast so it is enabled by default.
 					else {
-						if (outer.ibo) {
-						
-							gl.drawElements(gl.LINES,iboc,outer.ibo.GetGlType(),0);
-							st.primitives_frame += outer._Calc_pt(iboc);
+						if (true) {
+							if (outer.ibo) {
+							
+								gl.drawElements(gl.LINES,iboc,outer.ibo.GetGlType(),0);
+								st.primitives_frame += outer._Calc_pt(iboc);
+							}
+							else {
+								
+								gl.drawArrays(gl.LINES,0,vboc);
+								st.primitives_frame += outer._Calc_pt(vboc);
+							}	
 						}
 						else {
-							
-							gl.drawArrays(gl.LINES,0,vboc);
-							st.primitives_frame += outer._Calc_pt(vboc);
-						}	
+							if (outer.pt == medea.PT_TRIANGLES) {
+								for (var i = 0; i < iboc/3; ++i) {
+									gl.drawElements(gl.LINE_STRIPS,3,outer.ibo.GetGlType(),i*3);
+								}
+							}
+						}
 					}
 			},statepool);	
 		

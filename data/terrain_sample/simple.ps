@@ -15,7 +15,7 @@ void main()
 	vec3 bumpNor = (texture2D(normal_map, va_TexCoord ).rgb - 0.5) * 2.0;
 	
     gl_FragColor.a = 1.0;
-	gl_FragColor.rgb = ( mix( texture2D(texture, va_TexCoord ).rgb, texture2D(texture2, va_TexCoord ).rgb, va_Normal.y ) 
+	gl_FragColor.rgb = ( mix( texture2D(texture, va_TexCoord ).rgb, texture2D(texture2, va_TexCoord ).rgb, va_Normal.y * va_Normal.y ) 
 	  
 		)
 		* dot(normalize(va_TSLightDir), normalize(bumpNor));

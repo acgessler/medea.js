@@ -240,7 +240,7 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 		for(var y = 0, c = 0; y < hv; ++y) {
 			for(var x = 0; x < wv; ++x, c += 3) {
                 // *0.5 to get less hard and edgy results
-				var txx = 1.0, tyy = tan[c+0]/2, l = sqrt(tyy*tyy+1);
+				var txx = 1.0, tyy = tan[c+0], l = sqrt(tyy*tyy+1);
 				txx /= l;
 				tyy /= l;
 				
@@ -248,7 +248,7 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 				tan[c+1] = tyy;
 				tan[c+2] = 0.0;
 				
-				var bzz = 1.0, byy = bit[c+2]/2, l = sqrt(byy*byy+1);
+				var bzz = 1.0, byy = bit[c+2], l = sqrt(byy*byy+1);
 				bzz /= l;
 				byy /= l;
 				
@@ -263,12 +263,13 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 		}
 	};
 	
-	medea._GenHeightfieldUVs = function(uv, wv, hv) {
+	medea._GenHeightfieldUVs = function(uv, wv, hv, scale) {
+		scale = scale || 1.0;
 		for(var y = 0, c = 0; y < hv; ++y) {
 			var yd = y/(hv-1);
 			for(var x = 0; x < wv; ++x) {
-				uv[c++] = x/(wv-1);
-				uv[c++] = yd;
+				uv[c++] = x/(wv-1) * scale;
+				uv[c++] = yd * scale;
 			}
 		}
 	};
@@ -276,50 +277,11 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 	
 	
 	medea._GenHeightfieldIndices = function(ind, qtx, qty) {
-		var min = Math.min;
-		
-		// index the terrain patch in groups of 4x4 quads to improve vertex cache locality
-		for (var ty = 0, out = 0; ty < (qty+3)/4; ++ty) {
-			for (var tx = 0; tx < (qtx+3)/4; ++tx) {
-				var fullx = tx*4, fully = ty*4;
-
-				for (var y = fully,bc=fully*(qtx+1)+fullx; y < min(fully+4,qty); ++y,bc+=(qtx+1)-4) {
-					for (var x = fullx; x < min(fullx+4,qtx); ++x,++bc) {
-						
-						ind[out++] = bc;
-						ind[out++] = bc+qtx+1;
-						ind[out++] = bc+1;
-
-						ind[out++] = bc+qtx+1;
-						ind[out++] = bc+qtx+2;
-						ind[out++] = bc+1;
-					}
-				}
-			}
-		}
+		return medea._GenHeightfieldIndicesWithHole(ind, qtx, qty, 0, 0, 0, 0);
 	};
 	
 	medea._GenHeightfieldIndicesLOD = function(ind, qtx, qty) {
-		var min = Math.min;
-		
-		// index the terrain patch in groups of 4x4 quads to improve vertex cache locality
-		for (var ty = 0, out = 0; ty < (qty+3)/4; ++ty) {
-			for (var tx = 0; tx < (qtx+3)/4; ++tx) {
-				var fullx = tx*4, fully = ty*4;
-
-				for (var y = fully,bc=fully*(qtx+1)+fullx; y < min(fully+4,qty); ++y,bc+=(qtx+1)-4) {
-					for (var x = fullx; x < min(fullx+4,qtx); ++x,++bc) {
-						ind[out++] = bc;
-						ind[out++] = bc+qtx+1;
-						ind[out++] = bc+1;
-
-						ind[out++] = bc+qtx+1;
-						ind[out++] = bc+qtx+2;
-						ind[out++] = bc+1;
-					}
-				}
-			}
-		}
+		return medea._GenHeightfieldIndicesWithHoleLOD(ind, qtx, qty, 0, 0, 0, 0);
 	};
 	
 	medea._GenHeightfieldIndicesWithHole = function(ind, qtx, qty, holex, holey, holew, holeh) {
@@ -382,19 +344,120 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 						}
 						
 						if (!x) {
-							if ((fully % 2) || fully >= qty-5) {
-								for(var i = 0; i < 6; ++i) {
-									ind[out++] = bc;
-								}
-							}
-							else {
+							if (!y) {
 								ind[out++] = bc;
 								ind[out++] = bc+qtx+1+qtx+1;
-								ind[out++] = bc+1;
-
+								ind[out++] = bc+2;
+								
+								ind[out++] = bc+qtx+1+qtx+1;
+								ind[out++] = bc+qtx+1+qtx+2;
+								ind[out++] = bc+qtx+2;
+								
+								ind[out++] = bc+qtx+1+qtx+2;
+								ind[out++] = bc+qtx+1+qtx+3;
+								ind[out++] = bc+2;;
+							}
+							else if (!(y % 2) && y < qty-1) {
+								if (y === qty-2) {
+									ind[out++] = bc;
+									ind[out++] = bc+qtx+1+qtx+1;
+									ind[out++] = bc+qtx+1+qtx+3;
+									
+									ind[out++] = bc+qtx+2;
+									ind[out++] = bc+qtx+1+qtx+3;
+									ind[out++] = bc+qtx+3;
+									
+									ind[out++] = bc;
+									ind[out++] = bc+qtx+2;
+									ind[out++] = bc+1;
+								}
+							
+								ind[out++] = bc+qtx+1+qtx+1;
+								ind[out++] = bc+qtx+2;
+								ind[out++] = bc;
+							
 								ind[out++] = bc+qtx+1+qtx+1;
 								ind[out++] = bc+qtx+2+qtx+1;
+								ind[out++] = bc+qtx+2;
+								
+								ind[out++] = bc;
+								ind[out++] = bc+qtx+2;
 								ind[out++] = bc+1;
+							}
+							continue;
+						}
+						else if (x === qtx-1) {
+							if (!y) {
+								ind[out++] = bc-1;
+								ind[out++] = bc+qtx+1+qtx+3-1;
+								ind[out++] = bc+2-1;
+								
+								ind[out++] = bc-1;
+								ind[out++] = bc+qtx+1-1;
+								ind[out++] = bc+qtx+2-1;
+								
+								ind[out++] = bc+qtx+2-1;
+								ind[out++] = bc+qtx+1+qtx+2-1;
+								ind[out++] = bc+qtx+1+qtx+3-1;
+							}
+							else if (!(y % 2) && y < qty-1) {
+								 if (y === qty-2) {
+									ind[out++] = bc+qtx+1+qtx+1-1;
+									ind[out++] = bc+qtx+1+qtx+3-1;
+									ind[out++] = bc+2-1;
+									
+									ind[out++] = bc+qtx+1-1;
+									ind[out++] = bc+qtx+1+qtx+1-1;
+									ind[out++] = bc+qtx+2-1;
+									
+									ind[out++] = bc+1-1;
+									ind[out++] = bc+qtx+2-1;
+									ind[out++] = bc+2-1;
+								}
+							
+								ind[out++] = bc;
+								ind[out++] = bc+qtx+1;
+								ind[out++] = bc+1;
+								
+								ind[out++] = bc+qtx+1;
+								ind[out++] = bc+qtx+1+qtx+1;
+								ind[out++] = bc+qtx+1+qtx+2;
+								
+								ind[out++] = bc+qtx+1;
+								ind[out++] = bc+qtx+1+qtx+2;
+								ind[out++] = bc+1;
+							}
+							continue;
+						}
+						else if (!y) {
+							if (!(x % 2) && x < qtx-1) {
+								ind[out++] = bc+qtx+1;
+								ind[out++] = bc+qtx+2;
+								ind[out++] = bc;
+							
+								ind[out++] = bc;
+								ind[out++] = bc+qtx+2;
+								ind[out++] = bc+2;
+								
+								ind[out++] = bc+qtx+2;
+								ind[out++] = bc+qtx+3;
+								ind[out++] = bc+2;
+							}
+							continue;
+						}
+						else if (y === qty-1) {
+							if (!(x % 2) && x < qtx-1) {
+								ind[out++] = bc;
+								ind[out++] = bc+qtx+1;
+								ind[out++] = bc+1;
+								
+								ind[out++] = bc+qtx+1;
+								ind[out++] = bc+qtx+3;
+								ind[out++] = bc+1;
+								
+								ind[out++] = bc+1;
+								ind[out++] = bc+qtx+3;
+								ind[out++] = bc+2;
 							}
 							continue;
 						}
