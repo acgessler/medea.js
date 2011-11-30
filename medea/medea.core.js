@@ -2,7 +2,7 @@
 /* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
  * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
  *
- * medea is (c) 2011, Alexander C. Gessler 
+ * medea is (c) 2011, Alexander C. Gessler
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
@@ -35,74 +35,74 @@ medea = new (function(sdom) {
 		}
 	  };
 	}
-	
+
 	// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
 	if (typeof Array.isArray != 'function') {
 	  Array.isArray = function (obj) {
 		return Object.prototype.toString.call(obj) == '[object Array]';
 	  };
 	}
-	
+
 	/* Simple JavaScript Inheritance
 	 * By John Resig http://ejohn.org/
 	 * MIT Licensed.
 	 */
 	// Inspired by base2 and Prototype
-	
+
 	  var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
 	  // The base Class implementation (does nothing)
 	  this.Class = function(){};
-	  
+
 	  // Create a new Class that inherits from this class
 	  this.Class.extend = function(prop) {
 		var _super = this.prototype;
-		
+
 		// Instantiate a base class (but only create the instance,
 		// don't run the init constructor)
 		initializing = true;
 		var prototype = new this();
 		initializing = false;
-		
+
 		// Copy the properties over onto the new prototype
 		for (var name in prop) {
 		  // Check if we're overwriting an existing function
-		  prototype[name] = typeof prop[name] == "function" && 
+		  prototype[name] = typeof prop[name] == "function" &&
 			typeof _super[name] == "function" && fnTest.test(prop[name]) ?
 			(function(name, fn){
 			  return function() {
 				var tmp = this._super;
-				
+
 				// Add a new ._super() method that is the same method
 				// but on the super-class
 				this._super = _super[name];
-				
+
 				// The method only need to be bound temporarily, so we
 				// remove it when we're done executing
-				var ret = fn.apply(this, arguments);        
+				var ret = fn.apply(this, arguments);
 				this._super = tmp;
-				
+
 				return ret;
 			  };
 			})(name, prop[name]) :
 			prop[name];
 		}
-		
+
 		// The dummy class constructor
 		function Class() {
 		  // All construction is actually done in the init method
 		  if ( !initializing && this.init )
 			this.init.apply(this, arguments);
 		}
-		
+
 		// Populate our constructed prototype object
 		Class.prototype = prototype;
-		
+
 		// Enforce the constructor to be what we expect
 		Class.constructor = Class;
 
 		// And make this class extendable
 		Class.extend = arguments.callee;
-		
+
 		return Class;
 	  };
 
@@ -110,37 +110,37 @@ medea = new (function(sdom) {
 	// constants
 	this.FRAME_VIEWPORT_UPDATED = 0x1;
 	this.FRAME_CANVAS_SIZE_CHANGED = this.FRAME_VIEWPORT_UPDATED | 0x2;
-	
-	
+
+
 	this.VISIBLE_NONE = 0x0;
 	this.VISIBLE_ALL = 0x1;
 	this.VISIBLE_PARTIAL = 0x2;
-	
+
 	this.AssertionError = function(what) {this.what = what;};
 	this.FatalError = function(what) {this.what = what;};
-	
+
 	this.root_url = sdom.src.replace(/^(.*[\\\/])?(.*)/,'$1');
-	
+
 	// collect initial dependencies - for example the scenegraph module is always needed
 	var _initial_deps = ['node','viewport'], _initial_pre_deps = ['webgl-utils.js','webgl-debug.js','sprintf-0.7.js','glMatrix.js'];
 	var _waiters = {}, _deps = {}, _stubs = {}, _callback = undefined, _callback_pre = undefined, readyness = 0;
-	
+
 	this.Ready = function(where,settings,deps,callback) {
 
 		// first initialization phase -- create webgl canvas and prepare environment
 		_callback_pre = function() {
 			this.sprintf = sprintf;
-			this.canvas  = document.getElementById(where); 
+			this.canvas  = document.getElementById(where);
 			this.gl = WebGLUtils.setupWebGL(this.canvas);
-			
+
 			_callback_pre = _initial_pre_deps = undefined;
 		};
-		
+
 		// second phase of initialization -- prepare the rest and invoke the Ready() callback
 		// to pass control to the user.
 		_callback = function() {
 			this.cached_cw = this.canvas.width, this.cached_ch = this.canvas.height;
-			
+
 			this.settings = settings || {};
 			this.settings.fps = this.settings.fps || 60;
 			this.wireframe = false;
@@ -148,7 +148,7 @@ medea = new (function(sdom) {
 			this.statistics = {
 				  count_frames : 0
 				, smoothed_fps : -1
-				, exact_fps    : -1	
+				, exact_fps    : -1
 				, min_fps      : -1
 				, max_fps      : -1
 				, primitives_frame 	: 0
@@ -174,22 +174,22 @@ medea = new (function(sdom) {
 
 			this.viewports = [];
 			this.enabled_viewports = 0;
-			
+
 			this.key_state = {};
-			
+
 			// set event handlers on the canvas panel
 			window.addEventListener('keydown', function (ev) { medea._HandleKeyDown(ev); }, true);
 			window.addEventListener('keyup', function (ev) { medea._HandleKeyUp(ev);  }, true);
-			
+
 			this.canvas.onmousedown = function (ev) { medea._HandleMouseDown(ev); };
 			this.canvas.onmouseup   = function (ev) { medea._HandleMouseUp(ev);  };
 			this.canvas.onmousemove = function (ev) { medea._HandleMouseMove(ev); };
 			this.mouse_down = false;
-		
+
 			_callback = _initial_deps = undefined;
 			callback();
 		};
-		
+
 		if(deps) {
 			var old = _callback;
 			_callback = function() {
@@ -198,7 +198,7 @@ medea = new (function(sdom) {
 				});
 			}
 		}
-		
+
 		if(readyness > 0) {
 			_callback_pre.apply(medea);
 			if(readyness > 1) {
@@ -206,29 +206,29 @@ medea = new (function(sdom) {
 			}
 		}
 	};
-	
+
 	this.IsMouseDown = function() {
 		return this.mouse_down;
 	};
-	
+
 	this.IsKeyDown = function(keycode) {
 		return this.key_state[keycode] || false;
 	};
-    
-    this.IsKeyDownWasUp = function(keycode, state) {
+
+	this.IsKeyDownWasUp = function(keycode, state) {
 		var old = state[keycode] || false, now = state[keycode] = this.IsKeyDown(keycode);
-        return now && !old;
+		return now && !old;
 	};
-	
+
 	this.GetMouseDelta = function() {
 		return this.lastMouseDelta || [0,0,0];
 	};
-	
+
 	this.GetMousePosition = function() {
 		return this.lastMousePosition || [-1,-1];
 	};
-	
-	
+
+
 // #ifndef DEBUG
 	this.LogDebug = function(message) {
 	};
@@ -237,25 +237,25 @@ medea = new (function(sdom) {
 		console.log('DEBUG: ' + message);
 	};
 // #endif
-	
+
 	this.LogError = function(message) {
 		console.log('ERROR: ' + message);
 	};
-	
+
 
 	this.GetSettings = function() {
 		return this.settings;
 	};
-	
+
 	this.GetViewports = function() {
 		return this.viewports;
 	};
 
 	this.RootNode = function(s) {
-        if(s === undefined) {
-            return this.scene_root;
-        }
-        this.scene_root = s;
+		if(s === undefined) {
+			return this.scene_root;
+		}
+		this.scene_root = s;
 	};
 
 	this.GetStatistics = function() {
@@ -265,7 +265,7 @@ medea = new (function(sdom) {
 	this.SetTickCallback = function(clb,key) {
 		this.tick_callbacks[key] = clb;
 	};
-	
+
 	this.RemoveTickCallback = function(key) {
 		try {
 			delete this.tick_callbacks[key];
@@ -289,14 +289,14 @@ medea = new (function(sdom) {
 		var vp = new this.Viewport(name,x,y,w,h,zorder);
 
 		zorder = vp.GetZOrder();
-		var vps = this.viewports;		
+		var vps = this.viewports;
 
 		for(var i = 0; i < vps.length; ++i) {
 			if (vps[i].GetZOrder() >= zorder) {
 				vps.slice(i,0,vp);
 				vps = null;
 				break;
-			}			
+			}
 		}
 
 		if (vps) {
@@ -305,7 +305,7 @@ medea = new (function(sdom) {
 
 		return vp;
 	};
-	
+
 
 	this.SetDebugPanel = function(where) {
 		this._Require("debug");
@@ -317,7 +317,7 @@ medea = new (function(sdom) {
 		alert(what);
 		throw new medea.FatalError(what);
 	};
-	
+
 // #ifndef DEBUG
 	this.DebugAssert = function(what) {
 	};
@@ -327,7 +327,7 @@ medea = new (function(sdom) {
 			what = cond;
 			cond = false;
 		}
-		
+
 		if (!cond) {
 			what = "Medea DEBUG ASSERTION: " + what;
 			alert(what);
@@ -344,7 +344,7 @@ medea = new (function(sdom) {
 				//setTimeout(function(){medea.debug_panel.Update();},1000);
 			}
 		}
-		
+
 		// commented due to Chrome swallowing the stacktrace
 	//	try {
 			this.DoSingleFrame();
@@ -369,7 +369,7 @@ medea = new (function(sdom) {
 	this.CanRender = function() {
 		return this.gl && this.viewports.length;
 	};
-	
+
 	this.Wireframe = function(wf) {
 		if (wf === undefined) {
 			return this.wireframe;
@@ -454,7 +454,7 @@ medea = new (function(sdom) {
 		}
 
 		this.frame_flags = 0;
-	};	
+	};
 
 
 	this.VisitGraph = function(node,visitor) {
@@ -471,18 +471,18 @@ medea = new (function(sdom) {
 
 		return true;
 	};
-	
-	
+
+
 	this.Invoke = function(func) {
 		// #ifdef DEBUG
 		if (typeof func !== 'string') {
 			medea.DebugAssert('Invoke expects a string');
 		}
 		// #endif
-					
+
 		func = this[func];
 		var outer_arguments = arguments;
-		
+
 		this._Require(deps[func],function() {
 			func.apply(this,Array.prototype.slice.apply(outer_arguments,1));
 		});
@@ -491,75 +491,75 @@ medea = new (function(sdom) {
 	this._HandleKeyDown = function(event) {
 		this.key_state[event.keyCode] = true;
 	};
-	
+
 	this._HandleKeyUp = function(event) {
 		this.key_state[event.keyCode] = false;
 	};
-	
-	
+
+
 	this._HandleMouseDown = function(event) {
 		this.mouse_down = true;
 	};
-	
+
 	this._HandleMouseUp = function(event) {
 		this.mouse_down = false;
 	};
-	
+
 	this._HandleMouseMove = function(event) {
 		// XXX use getCapture if available?
-		this.lastMouseDelta = this.lastMousePosition 
+		this.lastMouseDelta = this.lastMousePosition
 			? [	event.clientX - this.lastMousePosition[0],
 				event.clientY - this.lastMousePosition[1],
 				this.lastMouseDelta[2]+1
-			] 
+			]
 			: [0,0,0];
-			
+
 		this.lastMousePosition = [event.clientX, event.clientY,this.lastMouseDelta[2]];
 	};
-	
+
 	this._addMod = function(name,deps,init,symbols) {
 		if(_stubs[name] !== undefined) {
 			medea.DebugAssert('module already present: ' + name);
 			return;
 		}
-        
-        if(symbols) {
-            for(var i = 0; i < symbols.length; ++i) {
-                medea._SetFunctionStub(symbols[i],name);
-            }
-        }
-		
+
+		if(symbols) {
+			for(var i = 0; i < symbols.length; ++i) {
+				medea._SetFunctionStub(symbols[i],name);
+			}
+		}
+
 		// #ifdef LOG
 		medea.LogDebug("addmod: " + name + (deps.length ? ', deps: ' + deps : ''));
 		// #endif
-		
+
 		var w = _waiters[name];
-		
-		// fetch all dependencies first 
+
+		// fetch all dependencies first
 		medea._FetchDeps(deps,function() {
 			// #ifdef LOG
 			medea.LogDebug('modready: ' + name);
 			// #endif
-			
+
 			_stubs[name] = init;
 			delete _waiters[name];
-			
+
 			for(var i = 0; i < w.length; ++i) {
 				w[i]();
 			}
 		});
 	};
-	
+
 	this._initMod = function(name) {
 		var s = _stubs[name];
 		if(!s) {
 			return;
 		}
-		
+
 		// #ifdef LOG
 		medea.LogDebug("initmod: " + name);
 		// #endif
-		
+
 		s.apply(medea);
 		_stubs[name] = null;
 	};
@@ -568,90 +568,90 @@ medea = new (function(sdom) {
 		callback = callback || function() {};
 		var whom = whom instanceof Array ? whom : [whom];
 		var cnt = 0, nodelay = true;
-		
+
 		if(!whom.length) {
 			callback();
 			return;
 		}
-		
+
 		var proxy = function() {
 			if(--cnt === 0) {
 				callback();
 			};
 		};
-	
+
 		for(var i = 0; i < whom.length; ++i) {
 			var n=whom[i], init = _stubs[n];
-			
+
 			if(!n) {
 				continue;
 			}
-			
+
 			// see if the file has already been loaded, in which case `init` should be either
 			// null or a function.
 			if (init === undefined) {
 				var is_medea_mod = !/\.js$/i.test(whom[i]);
-				
+
 				++cnt;
 				nodelay = false;
-				
+
 				var b = false;
 				if (!(n in _waiters)) {
 					_waiters[n] = [];
 					b = true;
 				}
-				
+
 				_waiters[n].push(proxy);
-					
+
 				if(!b) {
 					continue;
 				}
-				
+
 				(function(n,is_medea_mod) {
 				medea._AjaxFetch(medea.root_url+'/'+(is_medea_mod ? 'medea.' +n + '.js' : n),function(text,status) {
 					if(status !== 200) {
 						medea.DebugAssert('failure loading script ' + n);
 						return;
 					}
-					
+
 					// #ifdef LOG
 					medea.LogDebug("run: " + n);
 					// #endif LOG
-					
+
 					var sc = document.createElement( 'script' );
 					sc.type = 'text/javascript';
-					
-					// make sure to enclose the script source in CDATA blocks 
+
+					// make sure to enclose the script source in CDATA blocks
 					// to make XHTML parsers happy.
-					sc.innerHTML = '//<![CDATA[\n' + text  + '\n//]]>';                      
+					sc.innerHTML = '//<![CDATA[\n' + text  + '\n//]]>';
 					document.getElementsByTagName('head')[0].appendChild(sc);
-										
+
 					// non medea modules won't call _addMod, so we need to mimic parts of its behaviour
 					// to satisfy all listeners and to keep the file from being loaded twice.
 					if(!is_medea_mod) {
 						var w = _waiters[n];
 						delete _waiters[n];
-						
+
 						_stubs[n] = null;
 						for(var i = 0; i < w.length; ++i) {
 							w[i]();
 						}
 					}
-					
+
 				});
 				}(n,is_medea_mod));
 			}
 		}
-		
+
 		if(nodelay) {
 			callback();
 		}
 	};
-	
+
 	this._Require = function(whom,callback) {
 		var whom = whom instanceof Array ? whom : [whom];
 		var cnt = 0;
-	
+
 		for(var i = 0; i < whom.length; ++i) {
 			var init = _stubs[whom[i]];
 			if (init === undefined) {
@@ -661,7 +661,7 @@ medea = new (function(sdom) {
 			if (!init) {
 				continue;
 			}
-			
+
 			medea._initMod(whom[i]);
 		}
 	};
@@ -672,23 +672,23 @@ medea = new (function(sdom) {
 			no_client_cache = true;
 		}
 		// #endif
-   
-		var ajax;
-  		if (window.XMLHttpRequest) {              
-      		ajax = new XMLHttpRequest();              
-    	} 
-        else {                                  
-      		ajax = new ActiveXObject("Microsoft.XMLHTTP");
-    	}       
 
-		ajax.onreadystatechange = function() {  
-            if (ajax.readyState==4) {               
-                callback(ajax.responseText,ajax.status);                                             
-            }       
-		}               
+		var ajax;
+  		if (window.XMLHttpRequest) {
+	  		ajax = new XMLHttpRequest();
+		}
+		else {
+	  		ajax = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+
+		ajax.onreadystatechange = function() {
+			if (ajax.readyState==4) {
+				callback(ajax.responseText,ajax.status);
+			}
+		}
 
 		ajax.open("GET",url + (no_client_cache ?  '?nocache='+(new Date()).getTime() : ''),true);
-		ajax.send(null);    
+		ajax.send(null);
 	};
 
 	this._UpdateFrameStatistics = function(dtime) {
@@ -697,7 +697,7 @@ medea = new (function(sdom) {
 
 		this.dtmin_fps = Math.min(this.dtmin_fps,e);
 		this.dtmax_fps = Math.max(this.dtmin_fps,e);
-		
+
 		this.dtacc += dtime;
 		++this.dtcnt;
 
@@ -715,10 +715,10 @@ medea = new (function(sdom) {
 			this.statistics.min_fps = this.dtmin_fps;
 			this.statistics.max_fps = this.dtmax_fps;
 		}
-		
+
 		this.statistics.vertices_frame = this.statistics.primitives_frame = this.statistics.batches_frame = 0;
 	};
-	
+
 
 	this._SetFunctionStub = function(name,module_dep) {
 		_deps[name] = module_dep = module_dep instanceof Array ? module_dep : [module_dep];
@@ -726,9 +726,9 @@ medea = new (function(sdom) {
 // #ifdef DEBUG
 			var old = this[name];
 // #endif
-			
+
 			this._Require(module_dep);
-			
+
 // #ifdef DEBUG
 			if (old == this[name]) {
 				medea.DebugAssert("infinite recursion, something is wrong here, function stub should have been removed: " + name);
@@ -738,61 +738,61 @@ medea = new (function(sdom) {
  			return this[name].apply(this,arguments);
 		};
 	};
-	
+
 	this._SetFunctionStub("CreateNode","node");
-	
+
 	this._SetFunctionStub("MakeResource","filesystem");
 	this._SetFunctionStub("Fetch","filesystem");
 	this._SetFunctionStub("FetchMultiple","filesystem");
-	
+
 	this._SetFunctionStub("CreatePassFromShaderPair","material");
 	this._SetFunctionStub("CreateMaterial","material");
-	
+
 	this._SetFunctionStub("CreateSimpleMaterialFromShaderPair","material");
 	this._SetFunctionStub("CreateSimpleMaterialFromColor","material");
 	this._SetFunctionStub("CreateSimpleMaterialFromTexture","material");
-	
+
 	this._SetFunctionStub("CreateVertexBuffer","vertexbuffer");
 	this._SetFunctionStub("CreateIndexBuffer","indexbuffer");
-	
+
 	this._SetFunctionStub("CreateShader","shader");
 	this._SetFunctionStub("CreateImage","image");
 	this._SetFunctionStub("CreateTexture","texture");
 	this._SetFunctionStub("CreateLODTexture","lodtexture");
 	this._SetFunctionStub("CreateCubeTexture","cubetexture");
-	
+
 	this._SetFunctionStub("CreateStandardMesh_Plane","standardmesh");
 	this._SetFunctionStub("CreateStandardMesh_Cube","standardmesh");
 	this._SetFunctionStub("CreateSimpleMesh","mesh");
-	
+
 	this._SetFunctionStub("SetState","renderstate");
 	this._SetFunctionStub("CreateRenderQueueManager","renderqueue");
-	
+
 	this._SetFunctionStub("CreateCamera","camera");
 	this._SetFunctionStub("CreateCamController","camcontroller");
-	
+
 	this._SetFunctionStub("CreateBB","frustum");
 	this._SetFunctionStub("MergeBBs","frustum");
 	this._SetFunctionStub("TransformBB","frustum");
-	
+
 	this._SetFunctionStub("LoadScene","sceneloader");
 	this._SetFunctionStub("LoadSceneFromResource","sceneloader");
-	
+
 	this._SetFunctionStub("CreateSkyboxNode","skybox");
 	this._SetFunctionStub("CreateSkydomeNode","skydome");
-	
+
 	this._SetFunctionStub("CreateTerrainTileMesh","terraintile");
-	
+
 	this._SetFunctionStub("CreateDefaultTerrainDataProviderFromResource","terrain");
 	this._SetFunctionStub("CreateDefaultTerrainDataProvider","terrain");
 	this._SetFunctionStub("CreateTerrainNode","terrain");
-	
+
 	this._SetFunctionStub("CreateVisualizer","visualizer");
 	this._SetFunctionStub("CreateVisualizer_ShowNormals","visualizer_shownormals");
 	this._SetFunctionStub("CreateCompositor","compositor");
-	
-	
-	
+
+
+
 	// Initialization has two phases, the first of which is used to load utility libraries
 	// that all medea modules may depend upon. This also involves creating a webgl canvas
 	// (which is accessible through the medea.gl namespace)
@@ -808,7 +808,7 @@ medea = new (function(sdom) {
 			}
 		});
 	});
-	
+
 } )(scripts[scripts.length-1]);
 
 

@@ -2,7 +2,7 @@
 /* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
  * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
  *
- * medea is (c) 2011, Alexander C. Gessler 
+ * medea is (c) 2011, Alexander C. Gessler
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
@@ -18,7 +18,7 @@ medea._addMod('debug',['visualizer'],function() {
 			context.fillText(lines[i], x, y + (i*lineheight) );
 		}
 	}
-	
+
 
 	this.DebugPanel = medea.Class.extend({
 
@@ -37,16 +37,16 @@ medea._addMod('debug',['visualizer'],function() {
 		dimx_full : 700,
 		dimy_full : 500,
 
-		
+
 		init : function(where,win) {
 			this.where = where;
 			this.win = win;
 			this.input = {};
 			this.vis = {};
-			
+
 			this.TryInit();
 		},
-		
+
 
 		TryInit : function() {
 
@@ -54,7 +54,7 @@ medea._addMod('debug',['visualizer'],function() {
 			var doc = win.document;
 
 			if(this.where) {
-				
+
 				this.canvas = doc.getElementById(this.where);
 				if (!this.canvas) {
 					return;
@@ -67,13 +67,13 @@ medea._addMod('debug',['visualizer'],function() {
 				// can cause trouble with some page layouts.
 				var parent = doc.createElement("div");
 				parent.style.paddingTop = 10;
-				
+
 				var where = doc.createElement("canvas");
 				where.width = this.dimx_small;
 				where.height = this.dimy_small;
-				
+
 				parent.appendChild(where);
-				
+
 				/*
 				var but = doc.createElement("input");
 				parent.appendChild(but);
@@ -88,12 +88,12 @@ medea._addMod('debug',['visualizer'],function() {
 						}
 
 						var w = window.open('', '', sprintf("width= %d,height= %d,scrollbars=0,resizeable=0,location=0",outer.dimx_full+25,outer.dimy_full+25));
-    						
+
 						this.fetching = true;
 						medea._AjaxFetch('./../../medea/debug/base.html',function(e) {
 
 							w.document.write(e);
-							w.document.close(); 
+							w.document.close();
 
 							outer.canvas = null;
 							outer.where = 'dd';
@@ -110,11 +110,11 @@ medea._addMod('debug',['visualizer'],function() {
 
 						outer.canvas = null;
 					};
-			
+
 					but.value = "Close Full Debugger";
 				}
 				*/
-				
+
 				doc.body.appendChild(parent);
 				this.canvas = where;
 			}
@@ -124,7 +124,7 @@ medea._addMod('debug',['visualizer'],function() {
 				medea.NotifyFatal("Could not obtain 2d drawing context");
 			}
 		},
-		
+
 		Update: function() {
 			// switch windows if needed
 			if(!this.canvas) {
@@ -135,7 +135,7 @@ medea._addMod('debug',['visualizer'],function() {
 			}
 
 			var ctx = this.ctx, canvas = this.canvas;
-			var stats = medea.GetStatistics();		
+			var stats = medea.GetStatistics();
 
 			ctx.save();
 			ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -155,35 +155,35 @@ medea._addMod('debug',['visualizer'],function() {
 				stats.vertices_frame,
 				stats.batches_frame
 			),xs,ys+14);
-			
+
 			ctx.restore();
-			
+
 			// P to toggle wireframe mode
 			if(medea.IsKeyDownWasUp(80,this.input)) {
 				// #ifdef LOG
 				medea.LogDebug("debugview: toggle wireframe");
 				// #endif LOG
-                medea.Wireframe(!medea.Wireframe());
-            }
-			
+				medea.Wireframe(!medea.Wireframe());
+			}
+
 			// N to show normals
 			if(medea.IsKeyDownWasUp(78,this.input)) {
 				this.ToggleVisualizer('ShowNormals');
-            }
+			}
 		},
-		
+
 		ToggleVisualizer : function(name) {
 			if (this.vis[name] === false) {
 				return;
 			}
-			
+
 			// #ifdef LOG
 			medea.LogDebug("debugview: toggle visualizer: " + name);
 			// #endif LOG
-				
+
 			if (!this.vis[name]) {
 				this.vis[name] = false;
-				
+
 				var outer = this;
 				medea.CreateVisualizer(name,'debug_panel_visualizer:'+name,function(vis) {
 					outer.vis[name] = vis;
@@ -199,20 +199,20 @@ medea._addMod('debug',['visualizer'],function() {
 				}
 			}
 		},
-		
+
 		_AddVisualizer : function(name) {
 			var vps = medea.GetViewports();
 			for(var i = 0; i < vps.length; ++i) {
 				vps[i].AddVisualizer(this.vis[name]);
 			}
 		},
-		
+
 		_RemoveVisualizer : function(name) {
 			var vps = this.vis[name].GetViewports().slice(0);
 			for(var i = 0; i < vps.length; ++i) {
 				vps[i].RemoveVisualizer(this.vis[name]);
 			}
-			
+
 			this.vis[name] = null;
 		},
 	});

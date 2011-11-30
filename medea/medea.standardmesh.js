@@ -2,14 +2,14 @@
 /* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
  * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
  *
- * medea is (c) 2011, Alexander C. Gessler 
+ * medea is (c) 2011, Alexander C. Gessler
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
 medea._addMod('standardmesh',['mesh'],function(undefined) {
 	"use strict";
 	var medea = this;
-	
+
 	medea.CreateStandardMesh_Plane = function(color_or_material) {
 		return medea.CreateSimpleMesh(
 		{ positions : [
@@ -19,7 +19,7 @@ medea._addMod('standardmesh',['mesh'],function(undefined) {
 			   1.0, 0.0,  1.0,
 			  -1.0, 0.0,  1.0,
 		], // !pos
-		
+
 		uvs: [[
 			 // Front
 			0.0,  0.0,
@@ -29,13 +29,13 @@ medea._addMod('standardmesh',['mesh'],function(undefined) {
 			]]
 		},
 			 // indices
-			[ 	
-				0, 1, 2,     0, 2, 3,   // bottom  
+			[
+				0, 1, 2,     0, 2, 3,   // bottom
 			],
 		color_or_material || [1.0,0.0,0.0,1.0]);
 	};
 
-	
+
 	medea.CreateStandardMesh_Cube = function(color_or_material) {
 		return medea.CreateSimpleMesh(
 		{ positions :
@@ -74,9 +74,9 @@ medea._addMod('standardmesh',['mesh'],function(undefined) {
 			  -1.0, -1.0, -1.0,
 			  -1.0, -1.0,  1.0,
 			  -1.0,  1.0,  1.0,
-			  -1.0,  1.0, -1.0, 
+			  -1.0,  1.0, -1.0,
 		], // !pos
-		
+
 		uvs: [[
 			 // Front
 			0.0,  0.0,
@@ -110,13 +110,13 @@ medea._addMod('standardmesh',['mesh'],function(undefined) {
 			0.0,  1.0
 		]], // !uvs
 		},
-			 
+
 			 // indices
-			[ 	0,  1,  2,      0,  2,  3,    // front  
-				4,  5,  6,      4,  6,  7,    // back  
-				8,  9,  10,     8,  10, 11,   // top  
-				12, 13, 14,     12, 14, 15,   // bottom  
-				16, 17, 18,     16, 18, 19,   // right  
+			[ 	0,  1,  2,      0,  2,  3,    // front
+				4,  5,  6,      4,  6,  7,    // back
+				8,  9,  10,     8,  10, 11,   // top
+				12, 13, 14,     12, 14, 15,   // bottom
+				16, 17, 18,     16, 18, 19,   // right
 				20, 21, 22,     20, 22, 23    // left
 			],
 		color_or_material || [1.0,0.0,0.0,1.0]);

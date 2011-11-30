@@ -2,7 +2,7 @@
 /* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
  * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
  *
- * medea is (c) 2011, Alexander C. Gessler 
+ * medea is (c) 2011, Alexander C. Gessler
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
@@ -10,7 +10,7 @@ medea.KeyCode = {
   ENTER: 13,
   SHIFT: 16,
   CTRL: 17,
-  
+
   SPACE: 32,
   PAGE_UP: 33,
   PAGE_DOWN: 34,
@@ -29,7 +29,7 @@ medea.KeyCode = {
   NUM7: 55,
   NUM8: 56,
   NUM9: 57,
-  
+
   A: 65,
   B: 66,
   C: 67,

@@ -1,18 +1,18 @@
 /* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
  * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
  *
- * medea is (c) 2011, Alexander C. Gessler 
+ * medea is (c) 2011, Alexander C. Gessler
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
 medea._addMod('renderstate',[],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
-	
+
 	var setsimple = function(what,v) {
 		(v ? gl.enable : gl.disable)(what);
 	};
-	
+
 	var df_table = {
 		'never' 		: gl.NEVER,
 		'less' 			: gl.LESS,
@@ -23,32 +23,32 @@ medea._addMod('renderstate',[],function(undefined) {
 		'not_equal' 	: gl.NOTEQUAL,
 		'always'		: gl.ALWAYS,
 	};
-	
+
 	var cfm_table = {
 		'front' 		: gl.FRONT,
 		'back' 			: gl.BACK,
 		'both' 			: gl.FRONT_AND_BACK
 	};
-	
+
 	var action_map = {
 		'depth_test'  :  function(v) { setsimple(gl.DEPTH_TEST,v); },
-		'depth_write' :  function(v) { 
+		'depth_write' :  function(v) {
 			gl.depthMask(!!v);
 		},
-		'depth_func'  :  function(v) { 
+		'depth_func'  :  function(v) {
 			gl.depthFunc(df_table[v]);
 		},
-		
+
 		'cull_face'  :  function(v) { setsimple(gl.CULL_FACE,v); },
-		'cull_face_mode'  :  function(v) { 
+		'cull_face_mode'  :  function(v) {
 			gl.cullFace(cfm_table[v]);
 		},
-	}; 
-	
+	};
+
 	this.SetState = function(s,pool) {
 		for (var k in s) {
 			var v = s[k];
-			
+
 			var mapped = action_map[k];
 			if(mapped !== undefined) {
 				mapped(v);
