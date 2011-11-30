@@ -48,7 +48,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			this.constants = constants;
 			this.auto_setters = {};
 			this.attr_map = attr_map;
-			this.state = state;
+			this.state = state || {};
 			
 // #ifdef DEBUG
 			if (!vs || !ps) {
@@ -375,6 +375,13 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			this.passes[n] = p;
 		},
 		
+		Passes : function(p) {
+			if (p === undefined) {
+				return this.passes;
+			}
+			this.passes = p;
+		},
+		
 		GetId: function() {
 			return 0;
 		},
@@ -433,7 +440,6 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	medea.CreatePassFromShaderPair = function(name, constants, attr_map) {
 		return new medea.Pass( medea.CreateShader(name+'.vs'), medea.CreateShader(name+'.ps'), constants, attr_map );
 	};
-
 });
 
 

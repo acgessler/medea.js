@@ -24,6 +24,12 @@ medea._addMod('renderstate',[],function(undefined) {
 		'always'		: gl.ALWAYS,
 	};
 	
+	var cfm_table = {
+		'front' 		: gl.FRONT,
+		'back' 			: gl.BACK,
+		'both' 			: gl.FRONT_AND_BACK
+	};
+	
 	var action_map = {
 		'depth_test'  :  function(v) { setsimple(gl.DEPTH_TEST,v); },
 		'depth_write' :  function(v) { 
@@ -31,6 +37,11 @@ medea._addMod('renderstate',[],function(undefined) {
 		},
 		'depth_func'  :  function(v) { 
 			gl.depthFunc(df_table[v]);
+		},
+		
+		'cull_face'  :  function(v) { setsimple(gl.CULL_FACE,v); },
+		'cull_face_mode'  :  function(v) { 
+			gl.cullFace(cfm_table[v]);
 		},
 	}; 
 	

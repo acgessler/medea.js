@@ -246,7 +246,21 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			
 			// make texture paths absolute
 			FixTexturePaths(constants, this.url_root);
-			return this.materials[lod] = new medea.Material(medea.CreatePassFromShaderPair(name,constants));
+			var m = this.materials[lod] = new medea.Material(medea.CreatePassFromShaderPair(name,constants));
+			
+			// enable culling unless the user disables it explicitly
+			var p = m.Passes();
+			for(var i = 0; i < p.length; ++i) {
+				var s = p[i].State();
+
+				if ( ('cull_face' in s) || ('cull_face_mode' in s)) {
+					continue;
+				}
+				s.cull_face = true;
+				s.cull_face_mode = 'back';
+			}
+			
+			return m;
 		},
 	
 		_RegisterMap : function(map) {
