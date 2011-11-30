@@ -331,144 +331,97 @@ medea._addMod('terraintile',['image','mesh'],function(undefined) {
 		holew += holex;
 		holeh += holey;
 		
+		var row = qtx+1;
+
 		// index the terrain patch in groups of 4x4 quads to improve vertex cache locality
 		for (var ty = 0, out = 0; ty < (qty+3)/4; ++ty) {
-			for (var tx = 0; tx < (qtx+3)/4; ++tx) {
+			for (var tx = 0; tx < (row+2)/4; ++tx) {
 				var fullx = tx*4, fully = ty*4;
 
-				for (var y = fully,bc=fully*(qtx+1)+fullx; y < min(fully+4,qty); ++y,bc+=(qtx+1)-4) {
-					for (var x = fullx; x < min(fullx+4,qtx); ++x,++bc) {
+				for (var y = fully,cur=fully*(qtx+1)+fullx; y < min(fully+4,qty); ++y,cur+=(qtx+1)-4) {
+					for (var x = fullx; x < min(fullx+4,qtx); ++x,++cur) {
 						
 						if (x >= holex && x < holew && y >= holey && y < holeh) {
 							continue;
 						}
-						
+								
+						// XXX this code leaves small overlap region in all corners, also
+						// some profiling may be required to see how to squeeze the most
+						// out of V8/Gecko
+						var reg = true;
 						if (!x) {
-							if (!y) {
-								ind[out++] = bc;
-								ind[out++] = bc+qtx+1+qtx+1;
-								ind[out++] = bc+2;
-								
-								ind[out++] = bc+qtx+1+qtx+1;
-								ind[out++] = bc+qtx+1+qtx+2;
-								ind[out++] = bc+qtx+2;
-								
-								ind[out++] = bc+qtx+1+qtx+2;
-								ind[out++] = bc+qtx+1+qtx+3;
-								ind[out++] = bc+2;;
-							}
-							else if (!(y % 2) && y < qty-1) {
-								if (y === qty-2) {
-									ind[out++] = bc;
-									ind[out++] = bc+qtx+1+qtx+1;
-									ind[out++] = bc+qtx+1+qtx+3;
-									
-									ind[out++] = bc+qtx+2;
-									ind[out++] = bc+qtx+1+qtx+3;
-									ind[out++] = bc+qtx+3;
-									
-									ind[out++] = bc;
-									ind[out++] = bc+qtx+2;
-									ind[out++] = bc+1;
-								}
+							reg = false;
+							if (!(y % 2) && y < qty-1) {							
+								ind[out++] = cur+row+row;
+								ind[out++] = cur+row+1;
+								ind[out++] = cur;
 							
-								ind[out++] = bc+qtx+1+qtx+1;
-								ind[out++] = bc+qtx+2;
-								ind[out++] = bc;
-							
-								ind[out++] = bc+qtx+1+qtx+1;
-								ind[out++] = bc+qtx+2+qtx+1;
-								ind[out++] = bc+qtx+2;
+								ind[out++] = cur+row+row;
+								ind[out++] = cur+row+1+row;
+								ind[out++] = cur+row+1;
 								
-								ind[out++] = bc;
-								ind[out++] = bc+qtx+2;
-								ind[out++] = bc+1;
+								ind[out++] = cur;
+								ind[out++] = cur+row+1;
+								ind[out++] = cur+1;
 							}
-							continue;
 						}
 						else if (x === qtx-1) {
-							if (!y) {
-								ind[out++] = bc-1;
-								ind[out++] = bc+qtx+1+qtx+3-1;
-								ind[out++] = bc+2-1;
+							reg = false;
+							if (!(y % 2) && y < qty-1) {	
+								ind[out++] = cur;
+								ind[out++] = cur+row;
+								ind[out++] = cur+1;
 								
-								ind[out++] = bc-1;
-								ind[out++] = bc+qtx+1-1;
-								ind[out++] = bc+qtx+2-1;
+								ind[out++] = cur+row;
+								ind[out++] = cur+row+row;
+								ind[out++] = cur+row+row+1;
 								
-								ind[out++] = bc+qtx+2-1;
-								ind[out++] = bc+qtx+1+qtx+2-1;
-								ind[out++] = bc+qtx+1+qtx+3-1;
+								ind[out++] = cur+row;
+								ind[out++] = cur+row+row+1;
+								ind[out++] = cur+1;
 							}
-							else if (!(y % 2) && y < qty-1) {
-								 if (y === qty-2) {
-									ind[out++] = bc+qtx+1+qtx+1-1;
-									ind[out++] = bc+qtx+1+qtx+3-1;
-									ind[out++] = bc+2-1;
-									
-									ind[out++] = bc+qtx+1-1;
-									ind[out++] = bc+qtx+1+qtx+1-1;
-									ind[out++] = bc+qtx+2-1;
-									
-									ind[out++] = bc+1-1;
-									ind[out++] = bc+qtx+2-1;
-									ind[out++] = bc+2-1;
-								}
-							
-								ind[out++] = bc;
-								ind[out++] = bc+qtx+1;
-								ind[out++] = bc+1;
-								
-								ind[out++] = bc+qtx+1;
-								ind[out++] = bc+qtx+1+qtx+1;
-								ind[out++] = bc+qtx+1+qtx+2;
-								
-								ind[out++] = bc+qtx+1;
-								ind[out++] = bc+qtx+1+qtx+2;
-								ind[out++] = bc+1;
-							}
-							continue;
 						}
-						else if (!y) {
+						
+						if (!y) {
 							if (!(x % 2) && x < qtx-1) {
-								ind[out++] = bc+qtx+1;
-								ind[out++] = bc+qtx+2;
-								ind[out++] = bc;
+								ind[out++] = cur+row;
+								ind[out++] = cur+row+1;
+								ind[out++] = cur;
 							
-								ind[out++] = bc;
-								ind[out++] = bc+qtx+2;
-								ind[out++] = bc+2;
+								ind[out++] = cur;
+								ind[out++] = cur+row+1;
+								ind[out++] = cur+2;
 								
-								ind[out++] = bc+qtx+2;
-								ind[out++] = bc+qtx+3;
-								ind[out++] = bc+2;
+								ind[out++] = cur+row+1;
+								ind[out++] = cur+row+2;
+								ind[out++] = cur+2;
 							}
-							continue;
 						}
 						else if (y === qty-1) {
 							if (!(x % 2) && x < qtx-1) {
-								ind[out++] = bc;
-								ind[out++] = bc+qtx+1;
-								ind[out++] = bc+1;
+								ind[out++] = cur;
+								ind[out++] = cur+row;
+								ind[out++] = cur+1;
 								
-								ind[out++] = bc+qtx+1;
-								ind[out++] = bc+qtx+3;
-								ind[out++] = bc+1;
+								ind[out++] = cur+row;
+								ind[out++] = cur+row+2;
+								ind[out++] = cur+1;
 								
-								ind[out++] = bc+1;
-								ind[out++] = bc+qtx+3;
-								ind[out++] = bc+2;
+								ind[out++] = cur+1;
+								ind[out++] = cur+row+2;
+								ind[out++] = cur+2;
 							}
-							continue;
 						}
 						
-						ind[out++] = bc;
-						ind[out++] = bc+qtx+1;
-						ind[out++] = bc+1;
+						else if (reg) {
+							ind[out++] = cur;
+							ind[out++] = cur+row;
+							ind[out++] = cur+1;
 
-						ind[out++] = bc+qtx+1;
-						ind[out++] = bc+qtx+2;
-						ind[out++] = bc+1;
+							ind[out++] = cur+row;
+							ind[out++] = cur+row+1;
+							ind[out++] = cur+1;
+						}
 					}
 				}
 			}
