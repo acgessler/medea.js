@@ -163,18 +163,19 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			// #endif
 
 			var want_scale = 1/(1 << lod);
-
+			
 			x = Math.floor(x*2.0)*0.5;
 			y = Math.floor(y*2.0)*0.5;
 			w = Math.floor(w);
 			h = Math.floor(h);
-
+			
 			var ub = Math.floor(this.desc.unitbase * real_scale);
 			var xx = x*ub, yy = y*ub, ww = w*ub, hh = h*ub;
 
 			var sbase = real_scale/want_scale;
-			medea.LogDebug('rect: ' + lod + " " + xx + " " + yy + " " + ww + " " + hh);
-			return this._CreateHeightField(match._cached_img, xx, yy, ww, hh, sbase*this.desc.scale[1]*this.desc.base_hscale, sbase*this.desc.scale[0]);
+			//medea.LogDebug('terrain rect: ' + lod + " " + xx + " " + yy + " " + ww + " " + hh);
+			var hf = this._CreateHeightField(match._cached_img, xx, yy, ww, hh, sbase*this.desc.scale[1]*this.desc.base_hscale, sbase*this.desc.scale[0]);
+			return [hf[0],hf[1],hf[2],x,y];
 		},
 
 
@@ -272,7 +273,6 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		},
 
 		_FetchMap : function(map,callback) {
-
 			for( var i = 0; i < this.fetch_queue.length; ++i) {
 				if (this.fetch_queue[i][0] == map) {
 					this.fetch_queue[i][1].push(callback);
@@ -283,7 +283,71 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		},
 
 		_CreateHeightField : function(img, x,y,w,h, ys, xzs) {
-			return medea._HeightfieldFromOddSidedHeightmapPart(img, x,y,w+1,h+1,ys, xzs);
+			var def = this.desc.default_height || 0.0;
+
+			++w;
+			++h;
+
+			var xofs = 0, yofs = 0, xofsr = 0, yofsr = 0, ow = w, oh = h;
+			if (x < 0) {
+				xofs = -x;
+				w += x;
+				x = 0;
+			}
+			if (y < 0) {
+				yofs = -y;
+				h += y;
+				y = 0;
+			}
+
+			if (x + w > img.GetWidth()) {
+				xofsr = x + w - img.GetWidth();
+				w -= xofsr;
+			}
+
+			if (y + h > img.GetHeight()) {
+				yofsr = y + h - img.GetHeight();
+				h -= yofsr;
+			}
+
+			if (h <= 0 || w <= 0 || yofsr >= oh || xofsr >= ow) {
+				// completely out of range, return dummy data
+				var pos = new Array(oh*ow*3);
+				for (var yy = 0, c = 0; yy < oh; ++yy) {
+					for (var xx = 0; xx < ow; ++xx) {
+						pos[c++] = xx * xzs;
+						pos[c++] = def;
+						pos[c++] = yy * xzs;
+					}
+				}
+				return [pos, ow, oh];
+			}
+
+			var hf = medea._HeightfieldFromOddSidedHeightmapPart(img, x,y,w,h,ys, xzs);
+			if (xofs || yofs || yofsr || xofsr) {
+				// #ifdef LOG
+				medea.LogDebug('Out of range: xofs=' + xofs + ', yofs=' + yofs + ', xofsr=' + xofsr+ ', yofsr=' + yofsr);
+				// #endif
+
+				// partly out of range, move the height field and pad with dummy data
+				var pos = new Array(oh*ow*3);
+				for (var yy = 0, c = 0; yy < oh; ++yy) {
+					for (var xx = 0; xx < ow; ++xx) {
+						pos[c++] = xx * xzs;
+						pos[c++] = def;
+						pos[c++] = yy * xzs;
+					}
+				}
+
+				for (var yy = 0, c = (yofs*ow + xofs) * 3 + 1, ci = 1; yy < h; ++yy, c += ow*3 ) {
+					for (var xx = 0; xx < w; ++xx, ci+=3) {
+						pos[c + xx*3] = hf[0][ci];
+					}
+				}
+				return [pos, ow, oh];
+			}
+
+			return hf;
 		},
 	});
 
@@ -338,9 +402,6 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			var newx = ppos[0]/ub - this.half_scale + w * 0.5;
 			var newy = ppos[2]/ub - this.half_scale + h * 0.5;
 
-			newx = Math.min(w-(1<<this.lod),Math.max(0,newx));
-			newy = Math.min(h-(1<<this.lod),Math.max(0,newy));
-
 			var dx = newx - this.startx, dy = newy - this.starty;
 			if (dx*dx + dy*dy > 0.3) {
 
@@ -354,19 +415,21 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		_BuildMesh : function() {
 			var t = this.terrain, d = t.data, ilod = 1<<this.lod, outer = this, ppos = this.ppos, sc = d.GetScale();
 
-			d.RequestLOD( this.startx, this.starty,1*ilod,1*ilod,this.lod, function(tup) {
+			d.RequestLOD( this.startx, this.starty,ilod,ilod,this.lod, function(tup) {
 				var v = d.SampleLOD(tup);
-				var pos = v[0], wv = v[1], hv = v[2], w = wv-1, h = hv-1;
+				var pos = v[0], wv = v[1], hv = v[2], w = wv-1, h = hv-1, realx = v[3], realy = v[4], ub = d.GetUnitBase();
 
 				// center the heightfield and scale it according to its LOD
-				outer._MoveHeightfield(pos, ilod, 1.0,-w*sc[0]/2, -h*sc[0]/2, ppos[0], ppos[2]);
-
+				outer._MoveHeightfield(pos, ilod, 1.0,-w*sc[0]/2, -h*sc[0]/2,
+					ppos[0] + (realx-outer.startx)*ub , 
+					ppos[2] + (realy-outer.starty)*ub
+				);
 
 				var nor = new Array(pos.length), tan = new Array(pos.length), bit = new Array(pos.length);
 				medea._GenHeightfieldTangentSpace(pos, wv, hv, nor, tan, bit);
 
 				var uv = new Array(wv*hv*2);
-				medea._GenHeightfieldUVs(uv,wv,hv, Math.ceil(ilod/2));
+				medea._GenHeightfieldUVs(uv,wv,hv, ilod);
 
 				var m, vertices = { positions: pos, normals: nor, tangents: tan, bitangents: bit, uvs: [uv]};
 
@@ -423,7 +486,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 					for( var nn = n; nn < this.lod; ++nn) {
 						t.LOD(nn).substituted = true;
 						(function(nn, outer) {
-							t.LOD(nn).GetOnPresentListeners().push(function() {
+							var pf = function() {
 
 								for( var m = outer.lod-1; m >= 0 && !t.LOD(m).IsPresent(); --m );
 								if(m === -1) {
@@ -435,8 +498,13 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 									// #endif
 
 									outer.cached_mesh.IB().Fill(outer._GetIndices(w,h));
+
+									// remove the listener
+									var pl = t.LOD(nn).GetOnPresentListeners();
+									pl.splice(pl.indexOf(pf));
 								}
-							});
+							};
+							t.LOD(nn).GetOnPresentListeners().push(pf);
 						} (nn, this));
 					}
 				}
