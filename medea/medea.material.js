@@ -11,6 +11,10 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	var medea = this, gl = medea.gl;
 
 	medea.ShaderSetters = {
+		"CAM_POS" :  function(prog, pos, state) {
+			gl.uniform3fv(pos, state.Get("CAM_POS"));
+		},
+		
 		"WVP" :  function(prog, pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WVP"));
 		},
