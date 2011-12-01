@@ -197,7 +197,7 @@ medea._addMod('camera',['entity'],function() {
 			statepool.Set("P",this.GetProjectionMatrix());
 			statepool.Set("W",mat4.identity(mat4.create()));
 			
-			statepool.Set("CAM_POS",this.parent.GetWorldPos());
+			statepool.Set("CAM_POS", (this.parent ? this.parent.GetWorldPos() : [0.0,0.0,0.0]));
 
 			// rq.Flush() is left to the caller
 			return statepool;
