@@ -205,13 +205,19 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 	// - supports both index- and vertexbuffer specific flags
 	medea.CreateSimpleMesh = function(vertices,indices,material_or_color,flags) {
 
-		return new medea.Mesh(medea.CreateVertexBuffer(vertices,flags),
-			indices ? medea.CreateIndexBuffer(indices,flags) : null,
-
-			material_or_color instanceof Array
-				? medea.CreateSimpleMaterialFromColor(material_or_color)
-				: material_or_color
-			);
+		if (indices && Array.isArray(indices)) {
+			indices = medea.CreateIndexBuffer(indices,flags);
+		}
+		
+		if (typeof vertices === 'object' && !(vertices instanceof medea.Class)) {
+			vertices = medea.CreateVertexBuffer(vertices,flags);
+		}
+		
+		if (material_or_color instanceof Array) {
+			material_or_color = medea.CreateSimpleMaterialFromColor(material_or_color);
+		}
+		
+		return new medea.Mesh(vertices,indices,material_or_color);
 	};
 });
 

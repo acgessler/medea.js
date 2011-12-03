@@ -12,6 +12,9 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 	var medea = this;
 
 	medea._initMod('terraintile');
+	
+	var terrain_ib_cache = {
+	};
 
 	var sample_3x3_weights = [
 		[0.05, 0.1, 0.05],
@@ -439,7 +442,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 					m = outer.cached_mesh = medea.CreateSimpleMesh(vertices, indices,
 						d.GetMaterial(outer.lod) || medea.CreateSimpleMaterialFromColor([0.7,0.7,0.5,1.0], true),
 
-						medea.VERTEXBUFFER_USAGE_DYNAMIC | medea.INDEXBUFFER_USAGE_DYNAMIC
+						medea.VERTEXBUFFER_USAGE_DYNAMIC
 					);
 				}
 				else {
@@ -457,70 +460,90 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		},
 
 		_GetIndices : function(w,h) {
-			var indices, t = this.terrain;
+			var indices, t = this.terrain, ib;
 
 			if (this.lod === 0) {
-				indices = new Array(w*h*2*3);
+				var ib_key = this._GetIBCacheKey(w,h,0,0,0,0,true);
+				var ib_cached = terrain_ib_cache[ib_key];
+				if (ib_cached) {
+					return ib_cached;
+				}
+				
+				var indices = new Array(w*h*2*3);
 				medea._GenHeightfieldIndicesLOD(indices,w,h);
+				
+				return terrain_ib_cache[ib_key] = medea.CreateIndexBuffer(indices, 0);
 			}
-			else {
-				var whs = w/4, hhs = h/4, n = this.lod-1, extend = false;
+			
+			var whs = w/4, hhs = h/4, n = this.lod-1, extend = false;
 
-				// see if higher LODs are not present yet, in this case we
-				// make the hole larger to cover their area as well.
-				for( var dt = 8; n >= 0 && !t.LOD(n).IsPresent(); --n, whs += w/dt, hhs += h/dt, dt*=2, extend = true );
+			// see if higher LODs are not present yet, in this case we
+			// make the hole larger to cover their area as well.
+			for( var dt = 8; n >= 0 && !t.LOD(n).IsPresent(); --n, whs += w/dt, hhs += h/dt, dt*=2, extend = true );
 
-				if(n === -1) {
-					++n;
-					whs = hhs = w/2;
+			if(n === -1) {
+				++n;
+				whs = hhs = w/2;
+			}
+			whs = Math.floor(whs), hhs = Math.floor(hhs);
+
+			// .. but make sure we get notified when those higher LODs
+			// finish loading so we can shrink again.
+			if (extend) {
+				// #ifdef LOG
+				medea.LogDebug('extending indices for lod ' + this.lod + ' down to cover lod ' + n + ' as well');
+				// #endif
+
+				for( var nn = n; nn < this.lod; ++nn) {
+					t.LOD(nn).substituted = true;
+					(function(nn, outer) {
+						var pf = function() {
+
+							for( var m = outer.lod-1; m >= 0 && !t.LOD(m).IsPresent(); --m );
+							if(m === -1) {
+								++m;
+							}
+							if (m === nn) {
+								// #ifdef LOG
+								medea.LogDebug('shrinking indices for ' + outer.lod + ' again now that lod ' + nn + ' is present');
+								// #endif
+
+								outer.cached_mesh.IB(outer._GetIndices(w,h));
+
+								// remove the listener
+								var pl = t.LOD(nn).GetOnPresentListeners();
+								pl.splice(pl.indexOf(pf));
+							}
+						};
+						t.LOD(nn).GetOnPresentListeners().push(pf);
+					} (nn, this));
 				}
-				whs = Math.floor(whs), hhs = Math.floor(hhs);
-
-				// .. but make sure we get notified when those higher LODs
-				// finish loading so we can shrink again.
-				if (extend) {
-					// #ifdef LOG
-					medea.LogDebug('extending indices for lod ' + this.lod + ' down to cover lod ' + n + ' as well');
-					// #endif
-
-					for( var nn = n; nn < this.lod; ++nn) {
-						t.LOD(nn).substituted = true;
-						(function(nn, outer) {
-							var pf = function() {
-
-								for( var m = outer.lod-1; m >= 0 && !t.LOD(m).IsPresent(); --m );
-								if(m === -1) {
-									++m;
-								}
-								if (m === nn) {
-									// #ifdef LOG
-									medea.LogDebug('shrinking indices for ' + outer.lod + ' again now that lod ' + nn + ' is present');
-									// #endif
-
-									outer.cached_mesh.IB().Fill(outer._GetIndices(w,h));
-
-									// remove the listener
-									var pl = t.LOD(nn).GetOnPresentListeners();
-									pl.splice(pl.indexOf(pf));
-								}
-							};
-							t.LOD(nn).GetOnPresentListeners().push(pf);
-						} (nn, this));
-					}
-				}
-
-				var wh = w-whs*2, hh = h-hhs*2;
-				indices = new Array((w-wh)*(h-hh)*2*3);
-
-				var c = (this.lod === t.data.GetLODCount()-1
-					? medea._GenHeightfieldIndicesWithHole
-					: medea._GenHeightfieldIndicesWithHoleLOD)
-					(indices,w,h,whs,hhs,wh,hh);
-
-				indices.length = c;
 			}
 
-			return indices;
+			var wh = w-whs*2, hh = h-hhs*2;
+			
+			var ib_key = this._GetIBCacheKey(w,h,whs,hhs,wh,hh, this.lod !== t.data.GetLODCount()-1);
+			var ib_cached = terrain_ib_cache[ib_key];
+			if (ib_cached) {
+				return ib_cached;
+			}
+			
+			var indices = new Array((w-wh)*(h-hh)*2*3);
+			var c = (this.lod === t.data.GetLODCount()-1
+				? medea._GenHeightfieldIndicesWithHole
+				: medea._GenHeightfieldIndicesWithHoleLOD)
+				(indices,w,h,whs,hhs,wh,hh);
+				
+			// #ifdef LOG
+			medea.LogDebug('populate terrain IB cache: ' + ib_key);
+			// #endif
+
+			indices.length = c;
+			return terrain_ib_cache[ib_key] = medea.CreateIndexBuffer(indices);
+		},
+		
+		_GetIBCacheKey : function(w,h,whs,hhs,wh,hh,lod) {
+			return Array.prototype.join.call(arguments,'-');
 		},
 
 		_SetMesh : function(m) {
