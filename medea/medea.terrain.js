@@ -397,22 +397,13 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			return this.present_listeners;
 		},
 
-		Update : function(ppos) {
+		Update : function(ppos, startx, starty) {
 
 			this.ppos = ppos;
-
-			var ub = this.terrain.data.GetUnitBase(), w = this.terrain.data.GetWidth(), h = this.terrain.data.GetHeight();
-			var newx = ppos[0]/ub - this.half_scale + w * 0.5;
-			var newy = ppos[2]/ub - this.half_scale + h * 0.5;
-
-			var dx = newx - this.startx, dy = newy - this.starty;
-			if (dx*dx + dy*dy > 0.3) {
-
-				this.startx = newx;
-				this.starty = newy;
-
-				this._BuildMesh();
-			}
+			this.startx = startx - this.half_scale;
+			this.starty = starty - this.half_scale;
+			
+			this._BuildMesh();
 		},
 
 		_BuildMesh : function() {
@@ -585,18 +576,38 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		init : function(name, data, cam_node) {
 			this._super(name, medea.NODE_FLAG_NO_ROTATION | medea.NODE_FLAG_NO_SCALING);
 
+			this.startx = this.starty = 1e10;
+			this.update_treshold = 0.4;
+			
 			this.data = data;
 			this.cam_node = cam_node;
 			this._InitRings();
 		},
 
+		UpdateTreshold : function(ts) {
+			if (ts === undefined) {
+				return ts;
+			}
+			this.update_treshold = ts;
+		},
 
 		Update: function(dtime) {
 			this._super(dtime);
 
 			var ppos = this.cam_node.GetWorldPos();
-			for( var i = 0; i < this.rings.length; ++i) {
-				this.rings[i].Update(ppos);
+			
+			var ub = this.data.GetUnitBase(), w = this.data.GetWidth(), h = this.data.GetHeight();
+			var newx = ppos[0]/ub + w * 0.5;
+			var newy = ppos[2]/ub + h * 0.5;
+
+			var dx = newx - this.startx, dy = newy - this.starty;
+			if (Math.abs(dx) > this.update_treshold || Math.abs(dy) > this.update_treshold) {
+				for( var i = 0; i < this.rings.length; ++i) {
+					this.rings[i].Update(ppos, newx, newy);
+				}
+			
+				this.startx = newx;
+				this.starty = newy;
 			}
 
 			this.data.Update(ppos);
