@@ -19,18 +19,6 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 	var sh_cache = {
 	};
 
-	var GetCacheName = function(src, defines) {
-		var out = src;
-
-		if (defines) {
-			out += '#';
-			for(k,v in defines) {
-				out += k+'='+v;
-			}
-		}
-
-		return out;
-	};
 
 	medea.Shader = medea.Resource.extend( {
 
@@ -52,7 +40,7 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 			}
 // #endif
 
-			var c = GetCacheName(this.src, this.defines);
+			var c = this._GetCacheName(this.src, this.defines);
 			var s = sh_cache[c];
 			if(s !== undefined) {
 				this.shader = s;
@@ -77,7 +65,20 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 
 		GetGlShader : function(gl) {
 			return this.shader;
-		}
+		},
+		
+		_GetCacheName : function(src, defines) {
+			var o = src;
+
+			if (defines) {
+				o += '#';
+				for(k in defines) {
+					o += k+'='+defines[k];
+				}
+			}
+
+			return o;
+		},
 	});
 
 	medea.CreateShader = function(res, defines, callback) {

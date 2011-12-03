@@ -530,16 +530,38 @@ medea = new (function(sdom) {
 		}
 
 		// #ifdef LOG
-		medea.LogDebug("addmod: " + name + (deps.length ? ', deps: ' + deps : ''));
+		var s = '';
+		if (deps.length) {
+			s = ', deps: ';
+			for (var i = 0; i < deps.length; ++i) {
+				var d = deps[i];
+				if (!d) {
+					continue;
+				}
+				s += d;
+				if (_waiters[d]) {
+					// dependency pending
+					s += '~';
+				}
+				else if (_stubs[d] === undefined) {
+					// dependency not loaded yet
+					s += '!';
+				}
+				if (i !== deps.length-1) {
+					s += ', ';
+				}
+			}
+		}
+		medea.LogDebug("addmod: " + name + s);
 		// #endif
-
-		var w = _waiters[name];
 
 		// fetch all dependencies first
 		medea._FetchDeps(deps,function() {
 			// #ifdef LOG
 			medea.LogDebug('modready: ' + name);
 			// #endif
+			
+			var w = _waiters[name];
 
 			_stubs[name] = init;
 			delete _waiters[name];
@@ -617,7 +639,13 @@ medea = new (function(sdom) {
 					// #ifdef LOG
 					medea.LogDebug("run: " + n);
 					// #endif LOG
-
+					
+					// global eval() is best for debugging
+					
+					// http://perfectionkills.com/global-eval-what-are-the-options/
+					window.eval(text);
+					
+					/*
 					var sc = document.createElement( 'script' );
 					sc.type = 'text/javascript';
 
@@ -625,7 +653,8 @@ medea = new (function(sdom) {
 					// to make XHTML parsers happy.
 					sc.innerHTML = '//<![CDATA[\n' + text  + '\n//]]>';
 					document.getElementsByTagName('head')[0].appendChild(sc);
-
+					*/
+					
 					// non medea modules won't call _addMod, so we need to mimic parts of its behaviour
 					// to satisfy all listeners and to keep the file from being loaded twice.
 					if(!is_medea_mod) {
