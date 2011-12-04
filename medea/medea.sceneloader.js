@@ -42,7 +42,12 @@ medea._addMod('sceneloader',['filesystem'],function(undefined) {
 	medea.LoadSceneFromResource = function(src,anchor,format_hint,callback, material_resolver) {
 		material_resolver = material_resolver || CreateDefaultMaterialResolver(src.replace(/^(.*[\\\/])?(.*)/,'$1'));
 		medea.Fetch(src,function(data) {
-			medea.LoadScene(data,anchor,format_hint,callback, material_resolver);
+			medea.LoadScene(data,anchor,format_hint,function() {
+				// #ifdef LOG
+				medea.LogDebug("sceneloader: scene hierarchy is present, but dependent resources may still be pending: " + src);
+				// #endif
+				callback();
+			}, material_resolver);
 		}, function() {
 			// XXX handle error
 		});
