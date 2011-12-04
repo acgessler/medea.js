@@ -57,9 +57,14 @@ function gen_labyrinth(src,root,mesh,height) {
 
 function run() {
 
-	medea.Ready("canvas",{dataroot:'../../data'},['standardmesh','camcontroller','debug'],function() {
+	medea.Ready("canvas",{dataroot:'../../data'},['standardmesh','camcontroller','debug','visualizer_showbbs'],function() {
 		var vp1 = medea.CreateViewport();
 		vp1.SetClearColor([0.4,0.4,0.4]);
+		
+		var vis = medea.CreateVisualizer_ShowBBs();
+		vis.DrawNodes(true);
+		vis.ShowCullState(true);
+		vp1.AddVisualizer(vis);
 		
 		var root = medea.RootNode();
 		
