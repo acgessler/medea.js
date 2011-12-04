@@ -94,6 +94,50 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			}
 			this.state = state;
 		},
+		
+		
+		// some shortcuts to simplify common state handling
+		CullFace : function(c) {
+			if (c === undefined) {
+				return this.state.cull_face;
+			}
+			
+			this.state.cull_face = c;
+		},
+		
+		CullFaceMode : function(c) {
+			if (c === undefined) {
+				return this.state.cull_face_mode;
+			}
+			
+			this.state.cull_face_mode = c;
+		},
+		
+		DepthWrite : function(c) {
+			if (c === undefined) {
+				return this.state.depth_write;
+			}
+			
+			this.state.depth_write = c;
+		},
+		
+		DepthTest : function(c) {
+			if (c === undefined) {
+				return this.state.depth_test;
+			}
+			
+			this.state.depth_test = c;
+		},
+		
+		DepthFunc : function(c) {
+			if (c === undefined) {
+				return this.state.depth_func;
+			}
+			
+			this.state.depth_func = c;
+		},
+		
+		
 
 		Set : function(k,val) {
 			if (val === undefined) {
