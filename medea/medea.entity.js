@@ -12,7 +12,6 @@ medea._addMod('entity',[],function() {
 
 	this.Entity = medea.Class.extend({
 		name : "",
-		parent : null,
 		bb : null,
 
 		init : function(name) {
@@ -42,16 +41,25 @@ medea._addMod('entity',[],function() {
 			}
 			this.bb = b;
 		},
-
-		GetParent : function() {
-			return this.parent;
+		
+		GetWorldBB : function(parent) {
+			return medea.TransformBB(this.bb, parent.GetGlobalTransform());
+		},
+		
+		Cull : function(parent,frustum) {
+			return medea.BBInFrustum(frustum, this.GetWorldBB(parent));
 		},
 
+		
 
-		OnSetParent : function(parent) {
-				this.parent = parent;
+		// note that entities can be attached to multiple nodes by default.
+		// deriving classes which do NOT want this, should assert this
+		// case in OnAttach().
+		OnAttach : function(node) {
 		},
-
+		
+		OnDetach : function(node) {
+		},
 
 
 		_AutoGenBB : function() {

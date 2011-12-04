@@ -10,31 +10,36 @@ medea._addMod('camera',['entity'],function() {
 	"use strict";
 	var medea = this;
 
-	medea._CAMERA_DIRTY_VIEW = 0x1;
-	medea._CAMERA_DIRTY_PROJ = 0x2;
+	medea._CAMERA_DIRTY_FRUSTUM = 0x1;
+	medea._CAMERA_DIRTY_VIEW = 0x2;
+	medea._CAMERA_DIRTY_PROJ = 0x4; 
 
 	medea._initMod('entity');
 
 	// class Camera
 	medea.Camera = medea.Entity.extend(
 	{
-		init : function(name,fovy,aspect,znear,zfar,viewport) {
+		init : function(name,fovy,aspect,znear,zfar,viewport,culling) {
 			this._super(name);
 
 			this.view = mat4.identity(mat4.create());
 			this.proj = mat4.identity(mat4.create());
+			this.frustum = null;
 
 			this.fovy = fovy || 45;
 			this.aspect = aspect;
 			this.znear = znear || 1;
 			this.zfar = zfar || 10000;
+			this.culling = culling === undefined ? true: culling;
+			
+			this.parent = null;
 
 			this.viewport = null;
 			if (viewport) {
 				viewport.SetCamera(this);
 			}
 
-			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_VIEW;
+			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_VIEW | medea._CAMERA_DIRTY_FRUSTUM;
 		},
 
 
@@ -58,27 +63,55 @@ medea._addMod('camera',['entity'],function() {
 			this._UpdateProjectionMatrix();
 			return this.proj;
 		},
-
-		OnSetParent : function(parent) {
-			if(this.parent) {
-				this.parent.RemoveListener("OnUpdateGlobalTransform",this);
+		
+		GetFrustum : function() {
+			this._UpdateFrustum();
+			return this.frustum;
+		},
+		
+		Culling : function(c) {
+			if (c === undefined) {
+				return this.culling;
 			}
+			this.culling = c;
+		},
 
+		OnAttach : function(parent) {
+			// #ifdef DEBUG
+			medea.DebugAssert(!this.parent,'camera entities can only be attached to one node');
+			// #endif
+			
+			this.parent = parent;
+			
 			this._super(parent);
 			this.flags |= medea._CAMERA_DIRTY_VIEW;
 
 			if(parent) {
 				var outer = this;
 				this.parent.AddListener("OnUpdateGlobalTransform",function() {
-					outer.flags |= medea._CAMERA_DIRTY_VIEW;
+					outer.flags |= medea._CAMERA_DIRTY_VIEW | medea._CAMERA_DIRTY_FRUSTUM;
 				},this);
 			}
+		},
+		
+		OnDetach : function(parent) {
+			this._super(parent);
+			
+			// #ifdef DEBUG
+			medea.DebugAssert(this.parent === parent,'camera entities can only be attached to one node');
+			// #endif
+			
+			this.parent.RemoveListener("OnUpdateGlobalTransform",this);
+			this.parent = null;
 		},
 
 		OnSetViewport : function(vp) {
 			this.viewport = vp;
 		},
 
+		GetParent : function() {
+			return this.parent;
+		},
 
 
 		GetZNear : function() {
@@ -99,26 +132,37 @@ medea._addMod('camera',['entity'],function() {
 
 
 		SetZNear : function(v) {
-			this.flags |= medea._CAMERA_DIRTY_PROJ;
+			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
 			this.znear = v;
 		},
 
 		SetZFar : function(v) {
-			this.flags |= medea._CAMERA_DIRTY_PROJ;
+			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
 			this.zfar = v;
 		},
 
 		// aspect may be set to null to have the camera implementation take it from the viewport
 		SetAspect : function(v) {
-			this.flags |= medea._CAMERA_DIRTY_PROJ;
+			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
 			this.aspect = v;
 		},
 
 		SetFOV : function(v) {
-			this.flags |= medea._CAMERA_DIRTY_PROJ;
+			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
 			this.fovy = v;
 		},
-
+		
+		_UpdateFrustum : function() {
+			if (!(this.flags & medea._CAMERA_DIRTY_FRUSTUM)) {
+				return this.frustum;
+			}
+			
+			this.frustum = medea.ExtractFrustum(this.GetViewMatrix(), this.GetProjectionMatrix());
+			
+			this.flags &= ~medea._CAMERA_DIRTY_FRUSTUM;
+			return this.frustum;
+		},
+		
 
 		_UpdateViewMatrix : function() {
 			if (!(this.flags & medea._CAMERA_DIRTY_VIEW)) {
@@ -162,32 +206,33 @@ medea._addMod('camera',['entity'],function() {
 		},
 
 		_Render : function(rq) {
+			var frustum = this.GetFrustum();
 
 			// traverse all nodes in the graph and collect their render jobs
 			medea.VisitGraph(medea.RootNode(),function(node,parent_visible) {
 
-				var vis = medea.VISIBLE_ALL /*parent_visible == medea.VISIBLE_ALL ? medea.VISIBLE_ALL : node.Cull(frustum)*/, e = node.GetEntities();
-				if(vis == medea.VISIBLE_NONE) {
+				var vis = parent_visible === medea.VISIBLE_ALL ? medea.VISIBLE_ALL : node.Cull(frustum), e = node.GetEntities();
+				if(vis === medea.VISIBLE_NONE) {
 					return medea.VISIBLE_NONE;
 				}
 
-				if(vis == medea.VISIBLE_ALL || e.length === 1) {
+				if(vis === medea.VISIBLE_ALL || e.length === 1) {
 					node.GetEntities().forEach(function(val,idx,outer) {
 						val.Render(this,val,node,rq);
 					});
 
-					return vis;
+					return medea.VISIBLE_PARTIAL;
 				}
 
 				// partial visibility and more than one entity, cull per entity
 				e.forEach(function(val,idx,outer) {
-					if(e.Cull(frustum) != medea.VISIBLE_NONE) {
+					if(val.Cull(node, frustum) !== medea.VISIBLE_NONE) {
 						val.Render(this,val,node,rq);
 					}
 				});
 
 				return medea.VISIBLE_PARTIAL;
-			});
+			}, this.culling ? medea.VISIBLE_PARTIAL : medea.VISIBLE_ALL);
 
 			// setup a fresh pool to easily pass global rendering states to all renderables
 			// eventually these states will be automatically transferred to shaders.

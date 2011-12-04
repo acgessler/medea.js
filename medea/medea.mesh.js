@@ -178,6 +178,11 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 			},statepool);
 
 		},
+		
+		// updating BBs is well-defined for meshes, so make this functionality public
+		UpdateBB : function() {
+			this._AutoGenBB();
+		},
 
 
 		_Calc_pt : function(v) {
@@ -205,7 +210,7 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 	// - supports both index- and vertexbuffer specific flags
 	medea.CreateSimpleMesh = function(vertices,indices,material_or_color,flags) {
 
-		if (indices && Array.isArray(indices)) {
+		if (indices && (Array.isArray(indices) || typeof indices === 'object' && !(indices instanceof medea.Class))) {
 			indices = medea.CreateIndexBuffer(indices,flags);
 		}
 		

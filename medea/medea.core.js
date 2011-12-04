@@ -425,7 +425,7 @@ medea = new (function(sdom) {
 		this.VisitGraph(this.scene_root,function(node) {
 			var e = node.GetEntities();
 			for(var i = 0; i < e.length; ++i) {
-				e[i].Update(dtime);
+				e[i].Update(dtime,node);
 			}
 
 			node.Update(dtime);
@@ -457,16 +457,15 @@ medea = new (function(sdom) {
 	};
 
 
-	this.VisitGraph = function(node,visitor) {
-		if (!visitor(node)) {
+	this.VisitGraph = function(node,visitor,status_in) {
+		var status = visitor(node,status_in);
+		if (!status) {
 			return false;
 		}
 
 		var c = node.children;
 		for(var i = 0; i < c.length; ++i) {
-			if(!this.VisitGraph(c[i],visitor)) {
-				return false;
-			}
+			this.VisitGraph(c[i],visitor,status);
 		}
 
 		return true;
@@ -795,6 +794,7 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("CreateSimpleMesh","mesh");
 
 	this._SetFunctionStub("SetState","renderstate");
+	this._SetFunctionStub("SetDefaultState","renderstate");
 	this._SetFunctionStub("CreateRenderQueueManager","renderqueue");
 
 	this._SetFunctionStub("CreateCamera","camera");
@@ -818,6 +818,7 @@ medea = new (function(sdom) {
 
 	this._SetFunctionStub("CreateVisualizer","visualizer");
 	this._SetFunctionStub("CreateVisualizer_ShowNormals","visualizer_shownormals");
+	this._SetFunctionStub("CreateVisualizer_ShowBBs","visualizer_showbbs");
 	this._SetFunctionStub("CreateCompositor","compositor");
 
 
