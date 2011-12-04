@@ -44,6 +44,21 @@ medea._addMod('renderstate',[],function(undefined) {
 			gl.cullFace(cfm_table[v]);
 		},
 	};
+	
+	
+	var cur_default = {};
+	
+	this.SetDefaultState = function(s,pool) {
+		cur_default = s;
+		for (var k in s) {
+			var v = s[k];
+
+			var mapped = action_map[k];
+			if(mapped !== undefined) {
+				mapped(v);
+			}
+		}
+	};
 
 	this.SetState = function(s,pool) {
 		for (var k in s) {
@@ -54,5 +69,17 @@ medea._addMod('renderstate',[],function(undefined) {
 				mapped(v);
 			}
 		}
+		
+		for (var k in cur_default) {
+			if (k in s) {
+				continue;
+			}
+			
+			var mapped = action_map[k];
+			if(mapped !== undefined) {
+				mapped(cur_default[k]);
+			}
+		}
 	};
 });
+

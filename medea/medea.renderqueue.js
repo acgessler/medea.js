@@ -28,10 +28,18 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 	this._initial_state_depth_test_enabled = {
 		'depth_test' : true,
 		'depth_func' : 'less_equal',
+		
+		// culling is turned on by default
+		'cull_face' : true,
+		'cull_face_mode' : 'back'
 	};
 
 	this._initial_state_depth_test_disabled = {
 		'depth_test' : false,
+		
+		// culling is turned on by default
+		'cull_face' : true,
+		'cull_face_mode' : 'back'
 	};
 
 
@@ -72,7 +80,7 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 
 		Flush: function(statepool) {
 			if (this.default_state) {
-				medea.SetState(this.default_state,statepool);
+				medea.SetDefaultState(this.default_state,statepool);
 			}
 
 			if (this.sorter) {
