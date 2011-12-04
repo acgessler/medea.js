@@ -170,9 +170,16 @@ medea._addMod('debug',['visualizer'],function() {
 			if(medea.IsKeyDownWasUp(78,this.input)) {
 				this.ToggleVisualizer('ShowNormals');
 			}
+			// B to show bounding boxes
+			if(medea.IsKeyDownWasUp(66,this.input)) {
+				this.ToggleVisualizer('ShowBBs', function(vis) {
+					vis.DrawNodes(true);
+					vis.ShowCullState(true);
+				});
+			}
 		},
 
-		ToggleVisualizer : function(name) {
+		ToggleVisualizer : function(name, clb) {
 			if (this.vis[name] === false) {
 				return;
 			}
@@ -188,6 +195,7 @@ medea._addMod('debug',['visualizer'],function() {
 				medea.CreateVisualizer(name,'debug_panel_visualizer:'+name,function(vis) {
 					outer.vis[name] = vis;
 					outer._AddVisualizer(name);
+					clb(vis);
 				});
 			}
 			if (this.vis[name]) {
