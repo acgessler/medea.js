@@ -224,7 +224,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 
 					for( var i = 0; i < outer.fetch_queue.length; ++i) {
 						if (outer.fetch_queue[i][0] == map) {
-							outer.fetch_queue.splice(i);
+							outer.fetch_queue.splice(i,1);
 							break;
 						}
 					}
