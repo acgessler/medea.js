@@ -439,6 +439,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 				else {
 					m = outer.cached_mesh;
 					m.VB().Fill(vertices);
+					m.UpdateBB();
 				}
 
 				// #ifdef LOG
@@ -663,8 +664,8 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			// nothing to be done
 		},
 
-		Update : function(dtime) {
-			var ppos = this.parent.GetWorldPos();
+		Update : function(dtime,node) {
+			var ppos = node.GetWorldPos();
 			var h = this.terrain.GetWorldHeightForWorldPos(ppos[0],ppos[2]);
 
 			if (h === null) {
@@ -674,8 +675,8 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 				ppos[1] = this.height_offset + h;
 
 				var t = vec3.create();
-				mat4.multiplyVec3(this.parent.parent.GetInverseGlobalTransform(),ppos,t);
-				this.parent.LocalPos(t);
+				mat4.multiplyVec3(node.parent.GetInverseGlobalTransform(),ppos,t);
+				node.LocalPos(t);
 			}
 		},
 
