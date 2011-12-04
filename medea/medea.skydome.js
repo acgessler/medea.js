@@ -175,12 +175,16 @@ medea._addMod('skydome',['mesh'],function(undefined) {
 		var mesh = CreateDomeMesh(medea.CreateSimpleMaterialFromShaderPair('remote:mcore/shaders/skydome',{
 			texture : medea.CreateTexture( texbase )
 		}), lower_amount, rings);
+		
+		mesh.BB(medea.BB_INFINITE);
 
 		medea._initMod('renderqueue');
 		mesh.RenderQueue(medea.RENDERQUEUE_BACKGROUND);
 		mesh.Material().Pass(0).State({
 			'depth_test'  : true,
 			'depth_write' : false,
+			'cull_face' : true,
+			'cull_face_mode' : 'back'
 		});
 
 		nd.AddEntity(mesh);
