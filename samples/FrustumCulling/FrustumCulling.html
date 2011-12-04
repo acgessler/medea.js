@@ -66,6 +66,8 @@ function run() {
 		var mfloor = medea.CreateStandardMesh_Plane(medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/floor_texture.jpg'));
 		root.AddChild().Translate([0,-1,0]).Scale(300).AddEntity(mfloor);
 		
+		mfloor.Material().Pass(0).CullFace(false);
+		
 		var msky = medea.CreateStandardMesh_Plane(medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/sky_texture.jpg'));
 		root.AddChild().Translate([0,20,0]).Scale(300).AddEntity(msky);
 		
