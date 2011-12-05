@@ -1,0 +1,66 @@
+<html>
+
+<head>
+<title></title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script type="text/javascript" src="../../medea/medea.core.js"></script>
+<script type="text/javascript">
+
+function run() {
+
+	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes','camcontroller'],function() {
+		var vp1 = medea.CreateViewport();
+		vp1.SetClearColor([1.0,1.0,1.0]);
+     
+        var root = medea.RootNode(), cam_node = root.AddChild();
+		
+		var cam = medea.CreateCamera();
+		cam_node.AddEntity(cam);
+		vp1.SetCamera(cam);
+		
+		cam.parent.Translate(vec3.create([0,0,0]));
+			
+		medea.FetchMods(['terrain'], function() {
+			medea.CreateDefaultTerrainDataProviderFromResource('remote:terrain_sample/terrain.json', function(p) {
+			
+				var ter = medea.CreateTerrainNode(p, cam_node);
+				root.AddChild(ter);
+				
+				
+					
+				medea.FetchMods('splinepath', function() {
+					var an = medea.CreateSplinePathAnimator([[-1000,0.0,-1000],[600,0.0,-400],[900.0,0.0,1220.0], [-320,0.0,900]],180.0);
+					cam_node.AddEntity(an);
+					
+					var tp = medea.CreateSimpleTerrainPhysicsController(ter,15.0);
+					cam_node.AddEntity(tp);
+				});
+			});
+		});
+        
+		// add the skydome, as in the previous sample
+		medea.FetchMods('skydome',function() {
+			root.AddChild(medea.CreateSkydomeNode('remote:skydome_sample/midmorning/midmorning.png',0.4));
+        });
+		
+		medea.SetDebugPanel(null,true);
+		medea.Start();
+	});
+}
+
+</script>
+
+</head>
+
+
+<body onload="run();">
+Press ENTER to toggle scene.   (Skydome from  http://www.tutorialsforblender3d.com/Textures/Skys/Sky_Dome_1.html, free for non-commercial use; Heightmap from Wikipedia, Public Domain)
+
+    <canvas id="canvas" style="border: none;" width="1280" height="720"></canvas>
+
+    <br/>
+    
+
+</body>
+
+</html>
