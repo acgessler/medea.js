@@ -414,15 +414,18 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 				var pos = v[0], wv = v[1], hv = v[2], w = wv-1, h = hv-1, realx = v[3], realy = v[4], ub = d.GetUnitBase();
 
 				// center the heightfield and scale it according to its LOD
-				outer._MoveHeightfield(pos, ilod, 1.0,-w*sc[0]/2, -h*sc[0]/2,
-					ppos[0] + (realx-outer.startx)*ub , 
-					ppos[2] + (realy-outer.starty)*ub
+				outer._MoveHeightfield(pos, ilod, 1.0,
+					ppos[0] + (realx-outer.startx)*ub -w*ilod*sc[0]/2, 
+					ppos[2] + (realy-outer.starty)*ub -h*ilod*sc[0]/2
 				);
 
-				var nor = new Array(pos.length), tan = new Array(pos.length), bit = new Array(pos.length);
+				// in the absence of proper multitheading, these arrays can be shared for all LOD rings.
+				var nor = t._nor_cached = t._nor_cached || new Float32Array(pos.length); 
+				var bit = t._bit_cached = t._bit_cached || new Float32Array(pos.length); 
+				var tan = t._tan_cached = t._tan_cached || new Float32Array(pos.length); 
+				var uv  = t._uv_cached  = t._uv_cached  || new Float32Array(wv*hv*2); 
+				
 				medea._GenHeightfieldTangentSpace(pos, wv, hv, nor, tan, bit);
-
-				var uv = new Array(wv*hv*2);
 				medea._GenHeightfieldUVs(uv,wv,hv, ilod);
 
 				var m, vertices = { positions: pos, normals: nor, tangents: tan, bitangents: bit, uvs: [uv]};
@@ -438,7 +441,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 				}
 				else {
 					m = outer.cached_mesh;
-					m.VB().Fill(vertices);
+					m.VB().Fill(vertices, true);
 					m.UpdateBB();
 				}
 
@@ -562,11 +565,11 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		},
 
 
-		_MoveHeightfield : function(pos, xz_scale, yscale, xofs, yofs, abs_xofs, abs_yofs) {
-			for(var i = 0, i3 = 0; i < pos.length/3; ++i, i3 += 3) {
-				pos[i3+0] = (pos[i3+0]+xofs) * xz_scale + abs_xofs;
+		_MoveHeightfield : function(pos, xz_scale, yscale, abs_xofs, abs_yofs) {
+			for(var i = 0, i3 = 0; i3 < pos.length; ++i, i3 += 3) {
+				pos[i3+0] = pos[i3+0] * xz_scale + abs_xofs;
 				pos[i3+1] *= yscale;
-				pos[i3+2] = (pos[i3+2]+yofs) * xz_scale + abs_yofs;
+				pos[i3+2] = pos[i3+2] * xz_scale + abs_yofs;
 			}
 		}
 	});

@@ -27,10 +27,9 @@ function run() {
 				var ter = medea.CreateTerrainNode(p, cam_node);
 				root.AddChild(ter);
 				
-				
 					
 				medea.FetchMods('splinepath', function() {
-					an = medea.CreateSplinePathAnimator([[-1000,0.0,-1000],[600,0.0,-400],[900.0,0.0,1220.0], [-320,0.0,900]],50.0);
+					an = medea.CreateSplinePathAnimator([[-1000,0.0,-1000],[600,0.0,-400],[900.0,0.0,-600]],30.0);
 					cam_node.AddEntity(an);
 					an.Finished(true);
 					

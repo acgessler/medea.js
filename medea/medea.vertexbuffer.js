@@ -40,7 +40,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 	medea._GLUtilGetFlatData = function(i,pack_dense) {
 		pack_dense = pack_dense || false;
 
-		if (i instanceof ArrayBuffer) {
+		if (i instanceof Float32Array) {
 			return i;
 		}
 
@@ -111,9 +111,11 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 
 		minmax : null,
 
-		init : function(data,flags) {
+		init : function(data,flags, state_closure) {
 
 			this.flags = flags;
+			this.state_closure = state_closure || [];
+			
 			if (data instanceof Array) {
 				this.positions = data;
 
@@ -152,7 +154,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 		SetupGlData : function() {
 
 			var stride = 0, idx = 0;
-			var state_closure = this.state_closure = [];
+			var state_closure = this.state_closure;
 
 			this.minmax = medea.CreateBB();
 			var mmin = this.minmax[0],mmax = this.minmax[1],min = Math.min, max = Math.max;
@@ -182,7 +184,15 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 			}
 
 			var ab = new ArrayBuffer(this.itemcount * stride);
-			var addStateEntry = function(attr_type,idx,elems,type) { (function(idx,stride,offset) {
+			
+			// this is used to build the state_closure array, which is later used during rendering
+			// to prepare the OpenGL pipeline for drawing this VBO. However, if the calling code
+			// did already supply us with it, we make this a no-op.
+			var addStateEntry = !state_closure.length ? function(attr_type,idx,elems,type) { 
+				type = type || gl.FLOAT;
+				elems = elems || 3;
+				
+				(function(idx,stride,offset) {
 					state_closure.push(function(in_map) {
 						var real_idx = idx;
 						if(in_map) {
@@ -193,20 +203,19 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 						}
 
 						gl.enableVertexAttribArray(real_idx);
-						gl.vertexAttribPointer(real_idx,elems || 3, type || gl.FLOAT,false,stride,offset);
+						gl.vertexAttribPointer(real_idx,elems, type,false,stride,offset);
 					});
 				}) (idx,stride,offset);
-			};
+			} : function() {};
 
 			// now setup vertex attributes accordingly
-			var offset = 0;
+			var offset = 0,  end = this.itemcount, mul = stride/4;
 			if (this.positions) {
 				var view = new Float32Array(ab,offset);
-				for(var i = 0, end = this.itemcount, p = this.positions, mul = stride/4; i < end; ++i) {
-					var i3 = i*3;
-					view[i*mul+0] = p[i3+0];
-					view[i*mul+1] = p[i3+1];
-					view[i*mul+2] = p[i3+2];
+				for(var i = 0, i3 = 0,im = 0, p = this.positions; i < end; ++i, i3 += 3, im += mul) {
+					view[im+0] = p[i3+0];
+					view[im+1] = p[i3+1];
+					view[im+2] = p[i3+2];
 
 					// gather minimum and maximum vertex values, those will be used to derive a suitable BB
 					mmin[0] = min(p[i3+0],mmin[0]);
@@ -225,10 +234,10 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 
 			if (this.normals) {
 				var view = new Float32Array(ab,offset);
-				for(var i = 0, end = this.itemcount, p = this.normals, mul = stride/4; i < end; ++i) {
-					view[i*mul+0] = p[i*3+0];
-					view[i*mul+1] = p[i*3+1];
-					view[i*mul+2] = p[i*3+2];
+				for(var i = 0, i3 = 0, im = 0, p = this.normals; i < end; ++i, i3 += 3, im += mul) {
+					view[im+0] = p[i3+0];
+					view[im+1] = p[i3+1];
+					view[im+2] = p[i3+2];
 				}
 
 				addStateEntry(medea.ATTR_NORMAL,idx++);
@@ -238,20 +247,20 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 
 			if (this.tangents) {
 				var view = new Float32Array(ab,offset);
-				for(var i = 0, end = this.itemcount, p = this.tangents, mul = stride/4; i < end; ++i) {
-					view[i*mul+0] = p[i*3+0];
-					view[i*mul+1] = p[i*3+1];
-					view[i*mul+2] = p[i*3+2];
+				for(var i = 0, i3 = 0, im = 0, p = this.tangents; i < end; ++i, i3 += 3, im += mul) {
+					view[im+0] = p[i3+0];
+					view[im+1] = p[i3+1];
+					view[im+2] = p[i3+2];
 				}
 
 				addStateEntry(medea.ATTR_TANGENT,idx++);
 				offset += 3*4;
 				if (this.bitangents) {
 					view = new Float32Array(ab,offset);
-					for(var i = 0, end = this.itemcount, p = this.bitangents, mul = stride/4; i < end; ++i) {
-						view[i*mul+0] = p[i*3+0];
-						view[i*mul+1] = p[i*3+1];
-						view[i*mul+2] = p[i*3+2];
+					for(var i = 0, i3 = 0, im = 0, p = this.bitangents; i < end; ++i, i3 += 3, im += mul) {
+						view[im+0] = p[i3+0];
+						view[im+1] = p[i3+1];
+						view[im+2] = p[i3+2];
 					}
 
 					addStateEntry(medea.ATTR_BITANGENT,idx++);
@@ -264,7 +273,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 					var elems = Math.floor(u.length / this.itemcount), type = medea._GLUtilIDForArrayType(u);
 
 					var view = new Float32Array(ab,offset);
-					for(var i = 0, end = this.itemcount, mul = stride/4; i < end; ++i) {
+					for(var i = 0; i < end; ++i) {
 						for(var n = 0; n < elems; ++n) {
 							view[i*mul+n] = u[i*elems+n];
 						}
@@ -280,9 +289,9 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 					var elems = Math.floor(u.length / this.itemcount), type = medea._GLUtilIDForArrayType(u);
 
 					var view = new Float32Array(ab,offset);
-					for(var i = 0, end = this.itemcount, mul = stride/4; i < end; ++i) {
+					for(var i = 0, im = 0; i < end; ++i, im += mul) {
 						for(var n = 0; n < elems; ++n) {
-							view[i*mul+n] = u[i*elems+n];
+							view[im+n] = u[i*elems+n];
 						}
 					}
 
@@ -340,7 +349,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 		},
 
 		// medea.VERTEXBUFFER_USAGE_DYNAMIC recommended if this function is used
-		Fill : function(init_data) {
+		Fill : function(init_data, same_layout) {
 
 			if (this.buffer === -1) {
 				this.buffer = gl.createBuffer();
@@ -348,7 +357,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 
 			gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);
 
-			var access = new medea._VBOInitDataAccessor(init_data,this.flags);
+			var access = new medea._VBOInitDataAccessor(init_data,this.flags, same_layout ? this.state_closure : null );
 			access.SetupGlData();
 
 			this.itemcount = access.GetItemCount();
