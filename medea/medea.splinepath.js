@@ -27,6 +27,10 @@ medea._addMod('splinepath',['entity'],function(undefined) {
 		},
 
 		Update : function(dtime,node) {
+			if (this.finished) {
+				return;
+			}
+			
 			this.time += dtime;
 			
 			// this is based on Irrlicht's CSceneNodeAnimatorFollowSpline::animateNode
@@ -88,6 +92,13 @@ medea._addMod('splinepath',['entity'],function(undefined) {
 			}
 		
 			node.LocalPos(out);
+		},
+		
+		Finished : function(h) {
+			if (h === undefined) {
+				return this.finished;
+			}
+			this.finished = h;
 		},
 
 		Points : function(h) {
