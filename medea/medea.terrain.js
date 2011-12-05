@@ -579,6 +579,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 
 			this.startx = this.starty = 1e10;
 			this.update_treshold = 0.4;
+			this.no_mens = 0.1;
 			
 			this.data = data;
 			this.cam_node = cam_node;
@@ -587,9 +588,16 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 
 		UpdateTreshold : function(ts) {
 			if (ts === undefined) {
-				return ts;
+				return this.update_treshold;
 			}
 			this.update_treshold = ts;
+		},
+		
+		NoMensLandBorder : function(ts) {
+			if (ts === undefined) {
+				return this.no_mens;
+			}
+			this.no_mens = ts;
 		},
 
 		Update: function(dtime) {
@@ -615,19 +623,23 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		},
 
 		GetWorldHeightForWorldPos : function(wx,wz) {
-			var mypos = this.GetWorldPos();
+			var mypos = this.GetWorldPos(), w = this.data.GetWidth(), h = this.data.GetHeight();
 
-			if (wz === undefined) {
+			if (wx.length === 3) {
 				wz = wx[2];
 				wx = wx[0];
 			}
 
-			var ub = this.data.GetUnitBase();
+			var ub = this.data.GetUnitBase(), b = this.no_mens;
+			
+			wx = w*0.5 + (wx-mypos[0])/ub;
+			wz = h*0.5 + (wz-mypos[2])/ub;
 
-			wx -= mypos[0];
-			wz -= mypos[2];
-
-			var h = this.data.TryGetHeightAtPos(this.data.GetWidth()*0.5 + wx/ub,this.data.GetHeight()*0.5 + wz/ub);
+			if (wx < b || wx >= w-b || wz < b || wz >= h-b) {
+				return null;
+			}
+			
+			var h = this.data.TryGetHeightAtPos(wx, wz);
 			return h === null ? null : h - mypos[1];
 		},
 
