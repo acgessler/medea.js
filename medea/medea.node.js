@@ -34,6 +34,11 @@ medea._addMod('node',['frustum'],function(undefined) {
 			this.entities = [];
 			this.name = name || "";
 			this.id = id_source++;
+			
+			// for culling purposes, saves the index of the frustun plane
+			// that caused this node to be culled recently. This exploits
+			// temporal coherence in the scene.
+			this.plane_hint = [0];
 
 			this.listeners = {
 				'OnUpdateGlobalTransform' : {},
@@ -118,7 +123,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 			
 		Cull : function(frustum) {
-			return medea.BBInFrustum(frustum, this.GetBB());
+			return medea.BBInFrustum(frustum, this.GetBB(), this.plane_hint);
 		},
 
 		// pure getter, nowadays deprecated

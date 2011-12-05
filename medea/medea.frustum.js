@@ -126,22 +126,6 @@ medea._addMod('frustum',[],function(undefined) {
 			 vp[15] - vp[12]
 			],
 			
-			// top plane
-			[
-			 vp[3] - vp[1],
-			 vp[7] - vp[5],
-			 vp[11] - vp[9],
-			 vp[15] - vp[13]
-			],
-			
-			// bottom plane
-			[
-			 vp[3] + vp[1],
-			 vp[7] + vp[5],
-			 vp[11] + vp[9],
-			 vp[15] + vp[13]
-			],
-			
 			// near plane
 			[
 			 vp[3] + vp[2],
@@ -156,7 +140,23 @@ medea._addMod('frustum',[],function(undefined) {
 			 vp[7] - vp[6],
 			 vp[11] - vp[10],
 			 vp[15] - vp[14]
-			]
+			],
+			
+			// bottom plane
+			[
+			 vp[3] + vp[1],
+			 vp[7] + vp[5],
+			 vp[11] + vp[9],
+			 vp[15] + vp[13]
+			],
+			
+			// top plane
+			[
+			 vp[3] - vp[1],
+			 vp[7] - vp[5],
+			 vp[11] - vp[9],
+			 vp[15] - vp[13]
+			],
 		];
 		
 		for (var i = 0; i < 6; ++i) {
@@ -176,7 +176,7 @@ medea._addMod('frustum',[],function(undefined) {
 		return true;
 	};
 	
-	medea.BBInFrustum = function(f, bb) {
+	medea.BBInFrustum = function(f, bb, plane_hint) {
 		if (bb === medea.BB_INFINITE) {
 			return medea.VISIBLE_ALL;
 		}
@@ -184,12 +184,19 @@ medea._addMod('frustum',[],function(undefined) {
 		if (bb === medea.BB_EMPTY) {
 			return medea.VISIBLE_NONE;
 		}
+		
+		if (!plane_hint) {
+			plane_hint = [0];
+		}
 	
 		var min = bb[0], max = bb[1], t = 0;
 		
 		// AABB
 		if (bb.length === 2) {
-			for (var i = 0; i < 6; ++i) {
+			for (var i = plane_hint[0], ii = 0; ii < 6; ++ii, ++i) {
+				if (i === 6) {
+					i = 0;
+				}
 				var ff = f[i], c = 0;
 				if (ff[0] * min[0] + ff[1] * min[1] + ff[2] * min[2] + ff[3] > 0) {
 					++c;
@@ -217,6 +224,7 @@ medea._addMod('frustum',[],function(undefined) {
 				}
 				
 				if (!c) {
+					plane_hint[0] = i;
 					return medea.VISIBLE_NONE;
 				}
 				if (c === 8) {
@@ -227,7 +235,10 @@ medea._addMod('frustum',[],function(undefined) {
 		// OBB
 		else {
 			var mat = bb[2], vt = vec3.create();
-			for (var i = 0; i < 6; ++i) {
+			for (var i = plane_hint[0], ii = 0; ii < 6; ++ii, ++i) {
+				if (i === 6) {
+					i = 0;
+				}
 				var ff = f[i], c = 0;
 				
 				mat4.multiplyVec3(mat,[min[0],min[1],min[2]], vt);
@@ -271,6 +282,7 @@ medea._addMod('frustum',[],function(undefined) {
 				}
 				
 				if (!c) {
+					plane_hint[0] = i;
 					return medea.VISIBLE_NONE;
 				}
 				if (c === 8) {
