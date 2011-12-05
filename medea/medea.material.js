@@ -12,7 +12,11 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 	medea.ShaderSetters = {
 		"CAM_POS" :  function(prog, pos, state) {
-			gl.uniform3fv(pos, state.Get("CAM_POS"));
+			gl.uniform3fv(pos, state.GetQuick("CAM_POS"));
+		},
+		
+		"CAM_POS_LOCAL" :  function(prog, pos, state) {
+			gl.uniform3fv(pos, state.Get("CAM_POS_LOCAL"));
 		},
 		
 		"WVP" :  function(prog, pos, state) {
@@ -22,21 +26,25 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		"WIT" :  function(prog, pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WIT"));
 		},
+		
+		"WI" :  function(prog, pos, state) {
+			gl.uniformMatrix4fv(pos, false, state.Get("WI"));
+		},
 
 		"VP" :  function(prog, pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("VP"));
 		},
 
 		"W" :  function(prog, pos, state) {
-			gl.uniformMatrix4fv(pos, false, state.Get("W"));
+			gl.uniformMatrix4fv(pos, false, state.GetQuick("W"));
 		},
 
 		"V" :  function(prog, pos, state) {
-			gl.uniformMatrix4fv(pos, false, state.Get("V"));
+			gl.uniformMatrix4fv(pos, false, state.GetQuick("V"));
 		},
 
 		"P" :  function(prog, pos, state) {
-			gl.uniformMatrix4fv(pos, false, state.Get("P"));
+			gl.uniformMatrix4fv(pos, false, state.GetQuick("P"));
 		},
 	};
 

@@ -177,7 +177,7 @@ medea._addMod('camera',['entity'],function() {
 			}
 
 
-			mat4.inverse(this.parent.GetGlobalTransform(),this.view);
+			this.view = mat4.create(this.parent.GetInverseGlobalTransform());
 
 			this.flags &= ~medea._CAMERA_DIRTY_VIEW;
 			return this.view;

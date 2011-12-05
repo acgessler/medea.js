@@ -11,31 +11,32 @@ medea._addMod('viewport',['camera','renderqueue'],function(undefined) {
 	var medea = this, gl = medea.gl;
 
 	medea._DefaultStateDependencies = {
-		W : ["WVP","WV","WIT"],
+		W : ["WVP","WV","WI","WIT",'CAM_POS_LOCAL'],
 		V : ["WVP","WV","VP"],
 		P : ["WVP","VP"],
+		CAM_POS : ['CAM_POS_LOCAL']
 	};
 
 	medea._DefaultDerivedStates = {
+	
+		"CAM_POS_LOCAL": function(statepool) {
+			return mat4.multiplyVec3(statepool.Get("WI"),statepool.GetQuick("CAM_POS"),vec3.create());
+		},
 
 		"VP": function(statepool) {
-			var m = mat4.create();
-			mat4.multiply(statepool.GetQuick("P"),statepool.GetQuick("V"),m);
-			return m;
+			return mat4.multiply(statepool.GetQuick("P"),statepool.GetQuick("V"),mat4.create());
 		},
 
 		"WVP": function(statepool) {
-			var m = mat4.create();
-			mat4.multiply(statepool.Get("VP"),statepool.GetQuick("W"),m);
-			return m;
+			return mat4.multiply(statepool.Get("VP"),statepool.GetQuick("W"),mat4.create());
 		},
 
 		"WIT": function(statepool) {
-			var m = mat4.create();
-			// XXX inverse() does not actually exist.
-			mat4.inverse(statepool.GetQuick("W"),m);
-			mat4.transpose(m,m);
-			return m;
+			return mat4.transpose(statepool.Get("WI"),mat4.create());
+		},
+		
+		"WI": function(statepool) {
+			return mat4.inverse(statepool.GetQuick("W"),mat4.create());
 		},
 	};
 

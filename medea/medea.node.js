@@ -15,9 +15,10 @@ medea._addMod('node',['frustum'],function(undefined) {
 
 	medea._NODE_FLAG_DIRTY = 0x1;
 	medea._NODE_FLAG_DIRTY_BB = 0x2;
+	medea._NODE_FLAG_DIRTY_GI = 0x4;
 
-	medea.NODE_FLAG_NO_ROTATION = 0x4;
-	medea.NODE_FLAG_NO_SCALING = 0x8;
+	medea.NODE_FLAG_NO_ROTATION = 0x40;
+	medea.NODE_FLAG_NO_SCALING = 0x80;
 	
 	var id_source = 0;
 
@@ -25,7 +26,10 @@ medea._addMod('node',['frustum'],function(undefined) {
 
 		// this is to allow subclasses to have their own flags set when the node's transformation
 		// matrix is altered. By default we only set DIRTY.
-		trafo_dirty_flag: medea._NODE_FLAG_DIRTY,
+		trafo_dirty_flag: medea._NODE_FLAG_DIRTY | 
+			medea._NODE_FLAG_DIRTY_GI | 
+			medea._NODE_FLAG_DIRTY_BB,
+			
 		parent:null,
 
 
@@ -46,12 +50,12 @@ medea._addMod('node',['frustum'],function(undefined) {
 			};
 
 			this.lmatrix = mat4.identity(mat4.create());
-			this.gmatrix = mat4.identity(mat4.create());
-
-			// min/max
+			this.gmatrix = mat4.create();
+			this.gimatrix = mat4.create();
+			
 			this.bb = medea.CreateBB();
 
-			this.flags = medea._NODE_FLAG_DIRTY | medea._NODE_FLAG_DIRTY_BB | (flags || 0);
+			this.flags = this.trafo_dirty_flag | (flags || 0);
 		},
 
 		GetEntities: function() {
@@ -96,6 +100,8 @@ medea._addMod('node',['frustum'],function(undefined) {
 			child.parent = this;
 
 			this._SetBBDirty();
+			child._SetTrafoDirty();
+			
 			return child;
 		},
 
@@ -107,13 +113,15 @@ medea._addMod('node',['frustum'],function(undefined) {
 				// #endif
 
 				this._SetBBDirty();
+				child._SetTrafoDirty();
+				
 				this.children.splice(idx,1);
 				child.parent = null;
 			}
 		},
 
 		Update: function(dtime) {
-			// all regular updates are carried out lazily
+			// all regular updates are carried out lazily, so this is a no-op
 		},
 		
 		GetWorldBB: function() {
@@ -150,10 +158,12 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 
 		GetInverseGlobalTransform: function() {
-			if (this.gimatrix) {
-				return this.gimatrix;
-			}
-			return this.gimatrix = mat4.inverse(this.gmatrix,mat4.create());
+			this._UpdateInverseGlobalTransform();
+			return this.gimatrix;
+		},
+		
+		TryGetInverseGlobalTransform: function() {
+			return this.flags & medea._NODE_FLAG_DIRTY_GI ? null : this.gimatrix;
 		},
 
 		Translate: function(vec) {
@@ -283,10 +293,9 @@ medea._addMod('node',['frustum'],function(undefined) {
 		
 
 		_UpdateGlobalTransform: function() {
-			// XXX need a solution for proper propagation of the dirty flag downwards the node hierarchy
-			//if (!(this.flags & medea._NODE_FLAG_DIRTY)) {
-			//	return;
-			//}
+			if (!(this.flags & medea._NODE_FLAG_DIRTY)) {
+				return;
+			}
 			this.flags &= ~medea._NODE_FLAG_DIRTY;
 			if (this.parent) {
 				mat4.multiply(this.parent.GetGlobalTransform(),this.lmatrix,this.gmatrix);
@@ -295,14 +304,27 @@ medea._addMod('node',['frustum'],function(undefined) {
 				this.gmatrix = mat4.create( this.lmatrix );
 			}
 			
-			this.gimatrix = null;
 			this._FireListener("OnUpdateGlobalTransform");
-			return this.gmatrix;
+		},
+		
+		_UpdateInverseGlobalTransform: function() {
+			if (!(this.flags & medea._NODE_FLAG_DIRTY_GI)) {
+				return;
+			}
+			
+			this._UpdateGlobalTransform();
+			
+			this.flags &= ~medea._NODE_FLAG_DIRTY_GI;
+			mat4.inverse(this.gmatrix,this.gimatrix);
 		},
 		
 		_SetTrafoDirty : function() {
 			this.flags |= this.trafo_dirty_flag;
 			this._SetBBDirty();
+			
+			for( var i = 0, c = this.children, l = c.length; i < l; ++i) {
+				c[i]._SetTrafoDirty();
+			}
 		},
 		
 		_SetBBDirty : function() {
@@ -319,13 +341,12 @@ medea._addMod('node',['frustum'],function(undefined) {
 			this.flags &= ~medea._NODE_FLAG_DIRTY_BB;
 			var bbs = [];
 
-			for(var i = 0; i < this.children.length; ++i) {
-				var c = this.children[i];
-				bbs.push(c.GetBB());
+			for( var i = 0, c = this.children, l = c.length; i < l; ++i) {
+				bbs.push(c[i].GetBB());
 			}
 
-			for(var i = 0; i < this.entities.length; ++i) {
-				bbs.push(medea.TransformBB( this.entities[i].BB(), this.GetGlobalTransform() ));
+			for( var i = 0, c = this.entities, l = c.length; i < l; ++i) {
+				bbs.push(medea.TransformBB( c[i].BB(), this.GetGlobalTransform() ));
 			}
 
 			this.bb = medea.MergeBBs(bbs);

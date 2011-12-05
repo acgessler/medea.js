@@ -30,7 +30,16 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 			this.viewport = viewport;
 			this.Draw = function(statepool) {
 
+				// update the current world matrix to the node's global transformation matrix
 				statepool.Set("W",node.GetGlobalTransform());
+				
+				// If the global inverse is already cached in the node,
+				// copy it to the statepool to avoid inverting twice.
+				var g = node.TryGetInverseGlobalTransform();
+				if (g) {
+					statepool.Set("WI",g);
+				}
+				
 				mesh.DrawNow(statepool);
 			};
 		},

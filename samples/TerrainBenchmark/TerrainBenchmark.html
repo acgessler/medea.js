@@ -11,7 +11,8 @@ function run() {
 	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes','camcontroller'],function() {
 		var vp1 = medea.CreateViewport();
 		vp1.SetClearColor([1.0,1.0,1.0]);
-     
+		
+		var an;
         var root = medea.RootNode(), cam_node = root.AddChild();
 		
 		var cam = medea.CreateCamera();
@@ -29,8 +30,9 @@ function run() {
 				
 					
 				medea.FetchMods('splinepath', function() {
-					var an = medea.CreateSplinePathAnimator([[-1000,0.0,-1000],[600,0.0,-400],[900.0,0.0,1220.0], [-320,0.0,900]],50.0);
+					an = medea.CreateSplinePathAnimator([[-1000,0.0,-1000],[600,0.0,-400],[900.0,0.0,1220.0], [-320,0.0,900]],50.0);
 					cam_node.AddEntity(an);
+					an.Finished(true);
 					
 					medea.FetchMods('terrainheightpath', function() {
 						var tp = medea.CreateTerrainHeightPathAnimator(ter,15.0);
@@ -45,6 +47,18 @@ function run() {
 			root.AddChild(medea.CreateSkydomeNode('remote:skydome_sample/midmorning/midmorning.png',0.4));
         });
 		
+		document.getElementById('but_start').onclick = function() {
+			if(an) {
+				an.Finished(false);
+			}
+		};
+		
+		document.getElementById('but_stop').onclick = function() {
+			if(an) {
+				an.Finished(true);
+			}
+		};
+		
 		medea.SetDebugPanel(null,true);
 		medea.Start();
 	});
@@ -56,12 +70,15 @@ function run() {
 
 
 <body onload="run();">
-Press ENTER to toggle scene.   (Skydome from  http://www.tutorialsforblender3d.com/Textures/Skys/Sky_Dome_1.html, free for non-commercial use; Heightmap from Wikipedia, Public Domain)
+(Skydome from  http://www.tutorialsforblender3d.com/Textures/Skys/Sky_Dome_1.html, free for non-commercial use)
 
+	<button type="button" id="but_start">Start/Resume</button>
+	<button type="button" id="but_stop">Stop</button>
     <canvas id="canvas" style="border: none;" width="1280" height="720"></canvas>
 
     <br/>
-    
+
+
 
 </body>
 
