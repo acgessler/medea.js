@@ -822,6 +822,7 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("CreateCompositor","compositor");
 
 	this._SetFunctionStub("CreateSplinePathAnimator","splinepath");
+	this._SetFunctionStub("CreateTerrainHeightPathAnimator","terrainheightpath");
 
 	// Initialization has two phases, the first of which is used to load utility libraries
 	// that all medea modules may depend upon. This also involves creating a webgl canvas

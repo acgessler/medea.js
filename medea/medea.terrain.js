@@ -572,7 +572,7 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 	});
 
 
-	var TerrainNode = medea.Node.extend({
+	medea.TerrainNode = medea.Node.extend({
 
 		init : function(name, data, cam_node) {
 			this._super(name, medea.NODE_FLAG_NO_ROTATION | medea.NODE_FLAG_NO_SCALING);
@@ -657,57 +657,10 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		},
 	});
 
-
-
-	var SimpleTerrainPhysicsController = medea.Entity.extend(
-	{
-		init : function(terrain, height_offset) {
-			this.terrain = terrain;
-			this.height_offset = height_offset === undefined ? 2.0 : height_offset;
-
-// #ifdef DEBUG
-			medea.DebugAssert(this.terrain instanceof TerrainNode, "need valid terrain node");
-// #endif
-
-
-		},
-
-		Render : function(viewport,entity,node,rqmanager) {
-			// nothing to be done
-		},
-
-		Update : function(dtime,node) {
-			var ppos = node.GetWorldPos();
-			var h = this.terrain.GetWorldHeightForWorldPos(ppos[0],ppos[2]);
-
-			if (h === null) {
-				// outside the terrain or terrain not present yet, do not touch.
-			}
-			else {
-				ppos[1] = this.height_offset + h;
-
-				var t = vec3.create();
-				mat4.multiplyVec3(node.parent.GetInverseGlobalTransform(),ppos,t);
-				node.LocalPos(t);
-			}
-		},
-
-		HeightOffset : function(h) {
-			if (h === undefined) {
-				return this.height_offset;
-			}
-			this.height_offset = h;
-		},
-	});
-
-
 	medea.CreateTerrainNode = function(data_provider, cam_node) {
-		return new TerrainNode('terrain', data_provider, cam_node);
+		return new medea.TerrainNode('terrain', data_provider, cam_node);
 	};
 
-	medea.CreateSimpleTerrainPhysicsController = function(terrain, ho) {
-		return new SimpleTerrainPhysicsController(terrain, ho);
-	};
 });
 
 

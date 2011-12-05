@@ -29,11 +29,13 @@ function run() {
 				
 					
 				medea.FetchMods('splinepath', function() {
-					var an = medea.CreateSplinePathAnimator([[-1000,0.0,-1000],[600,0.0,-400],[900.0,0.0,1220.0], [-320,0.0,900]],180.0);
+					var an = medea.CreateSplinePathAnimator([[-1000,0.0,-1000],[600,0.0,-400],[900.0,0.0,1220.0], [-320,0.0,900]],50.0);
 					cam_node.AddEntity(an);
 					
-					var tp = medea.CreateSimpleTerrainPhysicsController(ter,15.0);
-					cam_node.AddEntity(tp);
+					medea.FetchMods('terrainheightpath', function() {
+						var tp = medea.CreateTerrainHeightPathAnimator(ter,15.0);
+						cam_node.AddEntity(tp);
+					});
 				});
 			});
 		});
