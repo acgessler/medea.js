@@ -78,6 +78,10 @@ medea._addMod('node',['frustum'],function(undefined) {
 		GetChildren: function() {
 			return this.children;
 		},
+		
+		GetParent: function() {
+			return this.parent;
+		},
 
 		AddChild: function(child) {
 			if(typeof child !== 'object' || !( child instanceof medea.Node )) {
