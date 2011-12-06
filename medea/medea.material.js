@@ -251,14 +251,18 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 						// check if this texture is already active, if not get rid of the
 						// oldest texture in the sampler cache.
 						var slots = state.tex_slots || new Array(6), oldest = state.texage+1, oldesti = 0, curgl = curval.GetGlTexture();
+						
 						for(var i = 0; i < slots.length; ++i) {
 							if (!slots[i]) {
 								oldest = state.texage+2;
 								oldesti = i;
 							}
-							else if (slots[i][1].GetGlTexture() === curgl) {
+							else if (slots[i][1] === curgl) {
 								slots[i][0] = state.texage++;
-								gl.uniform1i(pos,i);
+								
+								// XXX why do we need _Bind() here? Setting the index should suffice
+								// since the texture is already set.
+								gl.uniform1i(pos, curval._Bind(i));
 								return;
 							}
 							else if ( slots[i][0] < oldest && oldest !== state.texage+2) {
@@ -267,7 +271,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 							}
 						}
 
-						slots[oldesti] = [state.texage++,curval];
+						slots[oldesti] = [state.texage++,curgl];
 						gl.uniform1i(pos, curval._Bind(oldesti));
 
 						state.tex_slots = slots;

@@ -6,83 +6,9 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('viewport',['camera','renderqueue'],function(undefined) {
+medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
-
-	medea._DefaultStateDependencies = {
-		W : ["WVP","WV","WI","WIT",'CAM_POS_LOCAL'],
-		V : ["WVP","WV","VP"],
-		P : ["WVP","VP"],
-		CAM_POS : ['CAM_POS_LOCAL']
-	};
-
-	medea._DefaultDerivedStates = {
-	
-		"CAM_POS_LOCAL": function(statepool) {
-			return mat4.multiplyVec3(statepool.Get("WI"),statepool.GetQuick("CAM_POS"),vec3.create());
-		},
-
-		"VP": function(statepool) {
-			return mat4.multiply(statepool.GetQuick("P"),statepool.GetQuick("V"),mat4.create());
-		},
-
-		"WVP": function(statepool) {
-			return mat4.multiply(statepool.Get("VP"),statepool.GetQuick("W"),mat4.create());
-		},
-
-		"WIT": function(statepool) {
-			return mat4.transpose(statepool.Get("WI"),mat4.create());
-		},
-		
-		"WI": function(statepool) {
-			return mat4.inverse(statepool.GetQuick("W"),mat4.create());
-		},
-	};
-
-	// class StatePool
-	medea.StatePool = medea.Class.extend({
-
-		init : function(deps,derived_states) {
-			this.states = {};
-			this.deps = deps || medea._DefaultStateDependencies;
-			this.derived_states = derived_states || medea._DefaultDerivedStates;
-			this.dirty = {};
-		},
-
-		Set : function(key,value) {
-			if (key in this.deps) {
-				var v = this.deps[key];
-				for(var i = 0, e = v.length; i < e; ++i) {
-					this.dirty[v[i]] = true;
-				}
-			}
-			return this.states[key] = value;
-		},
-
-		Get : function(key) {
-			if (key in this.dirty) {
-// #ifdef DEBUG
-				if (!(key in this.derived_states)) {
-					medea.DebugAssert("only derived states can be dirty: " + key);
-				}
-// #endif
-				delete this.dirty[key];
-				return this.states[key] = this.derived_states[key](this);
-			}
-
-			return this.states[key];
-		},
-
-		GetQuick : function(key) {
-// #ifdef DEBUG
-			if (key in this.derived_states) {
-				medea.DebugAssert("only non-derived states can be queried using GetQuick(): " + key);
-			}
-// #endif
-			return this.states[key];
-		}
-	});
 
 	// class Viewport
 	medea.Viewport = medea.Class.extend({

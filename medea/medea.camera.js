@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('camera',['entity'],function() {
+medea._addMod('camera',['entity','statepool'],function() {
 	"use strict";
 	var medea = this;
 
@@ -206,8 +206,8 @@ medea._addMod('camera',['entity'],function() {
 		},
 
 		_Render : function(rq) {
-			var frustum = this.GetFrustum();
-
+			var frustum = this.GetFrustum(), statepool = medea.GetDefaultStatePool();
+			
 			// traverse all nodes in the graph and collect their render jobs
 			medea.VisitGraph(medea.RootNode(),function(node,parent_visible) {
 
@@ -234,10 +234,7 @@ medea._addMod('camera',['entity'],function() {
 				return medea.VISIBLE_PARTIAL;
 			}, this.culling ? medea.VISIBLE_PARTIAL : medea.VISIBLE_ALL);
 
-			// setup a fresh pool to easily pass global rendering states to all renderables
-			// eventually these states will be automatically transferred to shaders.
-			var statepool = new medea.StatePool();
-
+			// update state pool
 			statepool.Set("V",this.GetViewMatrix());
 			statepool.Set("P",this.GetProjectionMatrix());
 			statepool.Set("W",mat4.identity(mat4.create()));

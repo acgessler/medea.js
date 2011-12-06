@@ -120,6 +120,7 @@ medea = new (function(sdom) {
 	this.FatalError = function(what) {this.what = what;};
 
 	this.root_url = sdom.src.replace(/^(.*[\\\/])?(.*)/,'$1');
+	this.statepool = {};
 
 	// collect initial dependencies - for example the scenegraph module is always needed
 	var _initial_deps = ['node','viewport'], _initial_pre_deps = ['webgl-utils.js','webgl-debug.js','sprintf-0.7.js','glMatrix.js'];
@@ -131,6 +132,8 @@ medea = new (function(sdom) {
 		_callback_pre = function() {
 			this.sprintf = sprintf;
 			this.canvas  = document.getElementById(where);
+			
+			// note that this will automatically create a debug context if webgl-debug.js is present
 			this.gl = WebGLUtils.setupWebGL(this.canvas);
 
 			_callback_pre = _initial_pre_deps = undefined;
@@ -823,6 +826,9 @@ medea = new (function(sdom) {
 
 	this._SetFunctionStub("CreateSplinePathAnimator","splinepath");
 	this._SetFunctionStub("CreateTerrainHeightPathAnimator","terrainheightpath");
+	
+	this._SetFunctionStub("CreateStatePool","statepool");
+	this._SetFunctionStub("GetDefaultStatePool","statepool");
 
 	// Initialization has two phases, the first of which is used to load utility libraries
 	// that all medea modules may depend upon. This also involves creating a webgl canvas
