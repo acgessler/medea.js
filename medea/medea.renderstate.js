@@ -10,7 +10,13 @@ medea._addMod('renderstate',[],function(undefined) {
 	var medea = this, gl = medea.gl;
 
 	var setsimple = function(what,v) {
-		(v ? gl.enable : gl.disable)(what);
+		if (v) {
+			gl.enable(what);
+		}
+		else {
+			gl.disable(what);
+		}
+		
 	};
 
 	var df_table = {
