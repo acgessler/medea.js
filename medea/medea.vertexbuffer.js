@@ -193,7 +193,9 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 				elems = elems || 3;
 				
 				(function(idx,stride,offset) {
-					state_closure.push(function(in_map) {
+					var hash = [elems,type,stride,offset].join('-');
+					
+					state_closure.push(function(in_map, state) {
 						var real_idx = idx;
 						if(in_map) {
 							real_idx = in_map[attr_type];
@@ -201,9 +203,21 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 								return; // don't set this attribute
 							}
 						}
-
-						gl.enableVertexAttribArray(real_idx);
-						gl.vertexAttribPointer(real_idx,elems, type,false,stride,offset);
+						
+						var gls = state.GetQuick('_gl'), va = gls.va;
+						if (!va) {
+							va = gls.va = [];
+						}
+						var	prev = va[real_idx];
+						
+						if (prev === undefined) {
+							gl.enableVertexAttribArray(real_idx);
+						}
+						
+						if (prev !== hash) {
+							gl.vertexAttribPointer(real_idx,elems, type,false,stride,offset);
+							va[real_idx] = hash;
+						}
 					});
 				}) (idx,stride,offset);
 			} : function() {};
@@ -389,10 +403,22 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 			return this.init_data;
 		},
 
-		_Bind : function(attrMap) {
-			gl.bindBuffer(gl.ARRAY_BUFFER,this.GetBufferId());
+		_Bind : function(attrMap, statepool) {
+			var id = this.GetBufferId(), gls = statepool.GetQuick('_gl');
+			if (gls.ab === id) {
+				return;
+			}
+			
+			// invalidate the state cache for vertexAttrib binding
+			// now that the buffer is changed.
+			if (gls.va) {
+				gls.va.length = 0;
+			}
+			
+			gls.ab = id;
+			gl.bindBuffer(gl.ARRAY_BUFFER,id);
 			this.state_closure.forEach(function(e) {
-				e(attrMap);
+				e(attrMap, statepool);
 			});
 		},
 	});

@@ -137,10 +137,10 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 			var outer = this;
 			this.material.Use(function(pass) {
 					// set vbo and ibo if needed
-					outer.vbo._Bind(pass.GetAttributeMap());
+					outer.vbo._Bind(pass.GetAttributeMap(), statepool);
 
 					if (outer.ibo) {
-						outer.ibo._Bind();
+						outer.ibo._Bind(statepool);
 					}
 
 					// update statistics

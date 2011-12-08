@@ -99,8 +99,14 @@ medea._addMod('indexbuffer',[],function(undefined) {
 		},
 
 
-		_Bind : function() {
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.GetBufferId());
+		_Bind : function(statepool) {
+			var id = this.GetBufferId(), gls = statepool.GetQuick('_gl');
+			if (gls.eab === id) {
+				return;
+			}
+			
+			gls.eab = id;
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,id);
 		},
 	});
 

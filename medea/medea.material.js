@@ -246,6 +246,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 							return;
 						}
 
+						state = state.GetQuick('_gl');
 						state.texage = state.texage || 0;
 
 						// check if this texture is already active, if not get rid of the

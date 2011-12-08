@@ -9,7 +9,7 @@ medea._addMod('renderstate',[],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
-	var setsimple = function(what,v) {
+	var setsimple = function(what,v, cur) {
 		if (v) {
 			gl.enable(what);
 		}
@@ -54,25 +54,36 @@ medea._addMod('renderstate',[],function(undefined) {
 	
 	var cur_default = {};
 	
-	this.SetDefaultState = function(s,pool) {
+	medea.SetDefaultState = function(s,pool) {
+		var cur = pool.Get('_gl');
+		
 		cur_default = s;
 		for (var k in s) {
-			var v = s[k];
-
 			var mapped = action_map[k];
 			if(mapped !== undefined) {
-				mapped(v);
+				var v = s[k];
+				
+				if (cur[k] !== v) {
+					mapped(v);
+					cur[k] = v;
+				}
 			}
 		}
 	};
 
-	this.SetState = function(s,pool) {
+	medea.SetState = function(s,pool) {
+		var cur = pool.Get('_gl');
+		
 		for (var k in s) {
-			var v = s[k];
 
 			var mapped = action_map[k];
 			if(mapped !== undefined) {
-				mapped(v);
+				var v = s[k];
+				
+				if (cur[k] !== v) {
+					mapped(v);
+					cur[k] = v;
+				}
 			}
 		}
 		
@@ -83,7 +94,11 @@ medea._addMod('renderstate',[],function(undefined) {
 			
 			var mapped = action_map[k];
 			if(mapped !== undefined) {
-				mapped(cur_default[k]);
+				var v = cur_default[k];
+				if (cur[k] !== v) {
+					mapped(v);
+					cur[k] = v;
+				}
 			}
 		}
 	};

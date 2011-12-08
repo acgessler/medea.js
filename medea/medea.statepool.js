@@ -44,7 +44,7 @@ medea._addMod('statepool',[],function(undefined) {
 	medea.StatePool = medea.Class.extend({
 
 		init : function(deps,derived_states) {
-			this.states = {};
+			this.states = { _gl : {} };
 			this.deps = deps || _DefaultStateDependencies;
 			this.derived_states = derived_states || _DefaultDerivedStates;
 			this.dirty = {};
