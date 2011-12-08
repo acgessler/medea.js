@@ -476,6 +476,7 @@ medea = new (function(sdom) {
 		return true;
 	};
 
+	var worker_index_source = 0;
 	this.CreateWorker = function(name, callback) {
 	
 		var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
@@ -505,10 +506,16 @@ medea = new (function(sdom) {
 			var blobURL = URL.createObjectURL(bb.getBlob());
 			var worker = new Worker(blobURL);
 			
-			var msg = callback(worker);
-			if (msg) {
-				worker.onmessage = msg;
-			}
+			var worker_index = worker_index_source++;
+			
+			var msg = callback(worker, worker_index) || function() {};
+			worker.onmessage = function(e) {
+				if (e.data[0] === 'log') {
+					medea.LogDebug('(worker ' + worker_index + ') ' + e.data[1]);
+					return;
+				}
+				return msg(e);
+			};
 		});
 
 		return true;

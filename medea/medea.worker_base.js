@@ -22,8 +22,10 @@ catch (e) {
 			clb.apply(medea);
 		},
 		
-		LogDebug : function(e) {
-			//console.log(e);
+		LogDebug : function(message) {
+			// #ifdef LOG
+			postMessage(['log',message]);
+			// #endif
 		},
 		
 		DebugAssert : function(e,v) {
@@ -35,7 +37,9 @@ catch (e) {
 			else {
 				v = e;
 			}
+			// #ifdef LOG
 			medea.LogDebug('ASSERTION in worker: ' + v);
+			// #endif
 		},
 		
 		_workers : {
