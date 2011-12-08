@@ -7,11 +7,12 @@
  */
 
  // note: json2.js may be needed for contemporary browsers with incomplete HTML5 support
-medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' : null],function(undefined) {
+medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefined ? 'json2.js' : null],function(undefined) {
 	"use strict";
 	var medea = this;
 
 	medea._initMod('terraintile');
+	medea._initMod('worker_terrain');
 	
 	var terrain_ib_cache = {
 	};
@@ -419,38 +420,39 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 					ppos[2] + (realy-outer.starty)*ub -h*ilod*sc[0]/2
 				);
 
-				// in the absence of proper multitheading, these arrays can be shared for all LOD rings.
-				var nor = t._nor_cached = t._nor_cached || new Float32Array(pos.length); 
-				var bit = t._bit_cached = t._bit_cached || new Float32Array(pos.length); 
-				var tan = t._tan_cached = t._tan_cached || new Float32Array(pos.length); 
-				var uv  = t._uv_cached  = t._uv_cached  || new Float32Array(wv*hv*2); 
+				//var nor = new Float32Array(pos.length); 
+				//var bit = new Float32Array(pos.length); 
+				//var tan = new Float32Array(pos.length); 
+				var uv  = new Float32Array(wv*hv*2); 
 				
-				medea._GenHeightfieldTangentSpace(pos, wv, hv, nor, tan, bit);
-				medea._GenHeightfieldUVs(uv,wv,hv, ilod);
+				t._Dispatch('GenHeightfieldTangentSpace',function(res) {
+					//medea._GenHeightfieldTangentSpace(pos, wv, hv, nor, tan, bit);
+					medea._GenHeightfieldUVs(uv,wv,hv, ilod);
 
-				var m, vertices = { positions: pos, normals: nor, tangents: tan, bitangents: bit, uvs: [uv]};
+					var m, vertices = { positions: pos, normals: res.nor, tangents: res.tan, bitangents: res.bit, uvs: [uv]};
 
-				if(!outer.cached_mesh) {
-					var indices = outer._GetIndices(w,h);
+					if(!outer.cached_mesh) {
+						var indices = outer._GetIndices(w,h);
 
-					m = outer.cached_mesh = medea.CreateSimpleMesh(vertices, indices,
-						d.GetMaterial(outer.lod) || medea.CreateSimpleMaterialFromColor([0.7,0.7,0.5,1.0], true),
+						m = outer.cached_mesh = medea.CreateSimpleMesh(vertices, indices,
+							d.GetMaterial(outer.lod) || medea.CreateSimpleMaterialFromColor([0.7,0.7,0.5,1.0], true),
 
-						medea.VERTEXBUFFER_USAGE_DYNAMIC
-					);
-				}
-				else {
-					m = outer.cached_mesh;
-					m.VB().Fill(vertices, true);
-					m.UpdateBB();
-				}
+							medea.VERTEXBUFFER_USAGE_DYNAMIC
+						);
+					}
+					else {
+						m = outer.cached_mesh;
+						m.VB().Fill(vertices, true);
+						m.UpdateBB();
+					}
 
-				// #ifdef LOG
-				medea.LogDebug('(re-)generate TerrainTile: lod=' + outer.lod + ', startx=' + outer.startx + ', starty=' + outer.starty + ', posx=' + ppos[0] + ', posy=' + ppos[2]);
-				// #endif
+					// #ifdef LOG
+					medea.LogDebug('(re-)generate TerrainTile: lod=' + outer.lod + ', startx=' + outer.startx + ', starty=' + outer.starty + ', posx=' + ppos[0] + ', posy=' + ppos[2]);
+					// #endif
 
-				outer._SetMesh(m);
-				outer._SetPresent();
+					outer._SetMesh(m);
+					outer._SetPresent();
+				}, pos,wv,hv);
 			});
 		},
 
@@ -584,6 +586,8 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 			this.update_treshold = 0.4;
 			this.no_mens = 0.1;
 			
+			this._StartWorker();
+			
 			this.data = data;
 			this.cam_node = cam_node;
 			this._InitRings();
@@ -649,6 +653,20 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 		LOD : function(i) {
 			return this.rings[i];
 		},
+		
+		_Dispatch : function(command, callback) {
+			var args = Array.prototype.slice.call(arguments,2);
+			if (!this.worker) {
+				return callback(medea._workers[command].apply(this, args));
+			}
+			
+			this.pending_jobs[this.job_id] = callback;
+			this.worker.postMessage({
+				command : command,
+				arguments : args,
+				job_id : this.job_id++
+			});
+		},
 
 		_InitRings : function() {
 			var lods = this.data.GetLODCount();
@@ -658,12 +676,40 @@ medea._addMod('terrain',['terraintile', typeof JSON === undefined ? 'json2.js' :
 				this.rings[i] = new TerrainRing(this,i);
 			}
 		},
+		
+		_StartWorker : function() {
+		
+			var outer = this;
+			medea.CreateWorker('worker_terrain', function(w) {
+				outer.worker = w;
+				outer.pending_jobs = {};
+				outer.job_id = 0;
+			
+				return function(e) {
+					var res = e.data;
+					
+					var job = outer.pending_jobs[res.job_id];
+					medea.DebugAssert(!!job,'job not in waitlist');
+					
+					delete outer.pending_jobs[res.job_id];
+					job(res.result);
+				};
+			});
+		},
+		
+		_EndWorker : function() {
+			if (!this.worker) {
+				return;
+			}	
+			
+			this.worker.close();
+			
+			// forget all pending jobs .. not sure if this is so clever, though
+			this.pending_jobs = {};
+		},
 	});
 
 	medea.CreateTerrainNode = function(data_provider, cam_node) {
 		return new medea.TerrainNode('terrain', data_provider, cam_node);
 	};
-
 });
-
-

@@ -121,10 +121,12 @@ medea = new (function(sdom) {
 
 	this.root_url = sdom.src.replace(/^(.*[\\\/])?(.*)/,'$1');
 	this.statepool = {};
+	
+	this._workers = {};
 
 	// collect initial dependencies - for example the scenegraph module is always needed
 	var _initial_deps = ['node','viewport'], _initial_pre_deps = ['webgl-utils.js','webgl-debug.js','sprintf-0.7.js','glMatrix.js'];
-	var _waiters = {}, _deps = {}, _stubs = {}, _callback = undefined, _callback_pre = undefined, readyness = 0;
+	var _waiters = {}, _deps = {}, _stubs = {}, _sources = {}, _callback = undefined, _callback_pre = undefined, readyness = 0;
 
 	this.Ready = function(where,settings,deps,callback) {
 
@@ -474,6 +476,44 @@ medea = new (function(sdom) {
 		return true;
 	};
 
+	this.CreateWorker = function(name, callback) {
+	
+		var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
+		if (!BlobBuilder) {
+			medea.LogDebug('BlobBuilder not available, can\t use web worker');
+			callback(null);
+			return false;
+		}
+		
+		if (!Worker) {
+			medea.LogDebug('Worker not available, can\t use web worker');
+			callback(null);
+			return false;
+		}
+		
+		var URL = window.URL || window.webkitURL;
+		if (!URL || !URL.createObjectURL) {
+			medea.LogDebug('URL.createObjectURL not available, can\t use web worker');
+			callback(null);
+			return false;
+		}
+		
+		medea.FetchMods('worker_base', function() {
+			var bb = new BlobBuilder();
+			bb.append([medea.GetModSource('worker_base'),medea.GetModSource('worker_terrain')].join('\n'));
+			
+			var blobURL = URL.createObjectURL(bb.getBlob());
+			var worker = new Worker(blobURL);
+			
+			var msg = callback(worker);
+			if (msg) {
+				worker.onmessage = msg;
+			}
+		});
+
+		return true;
+	};
+			
 
 	this.Invoke = function(func) {
 		// #ifdef DEBUG
@@ -587,6 +627,10 @@ medea = new (function(sdom) {
 		s.apply(medea);
 		_stubs[name] = null;
 	};
+	
+	this.GetModSource = function(n) {
+		return _sources[n];
+	},
 
 	this.FetchMods = this._FetchDeps = function(whom,callback) {
 		callback = callback || function() {};
@@ -641,6 +685,8 @@ medea = new (function(sdom) {
 					// #ifdef LOG
 					medea.LogDebug("run: " + n);
 					// #endif LOG
+					
+					_sources[n] = text;
 					
 					// global eval() is best for debugging
 					
