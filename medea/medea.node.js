@@ -21,7 +21,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 	medea.NODE_FLAG_NO_SCALING = 0x80;
 	
 	var id_source = 0;
-
+	
 	this.Node = medea.Class.extend({
 
 		// this is to allow subclasses to have their own flags set when the node's transformation
@@ -97,11 +97,9 @@ medea._addMod('node',['frustum'],function(undefined) {
 			}
 
 			this.children.push(child);
-			child.parent = this;
-
 			this._SetBBDirty();
-			child._SetTrafoDirty();
 			
+			child.OnAttach(this);
 			return child;
 		},
 
@@ -113,11 +111,16 @@ medea._addMod('node',['frustum'],function(undefined) {
 				// #endif
 
 				this._SetBBDirty();
-				child._SetTrafoDirty();
+				child.OnAttach(null);
 				
 				this.children.splice(idx,1);
 				child.parent = null;
 			}
+		},
+		
+		OnAttach : function(parent) {
+			this.parent = parent;
+			this._SetTrafoDirty();
 		},
 
 		Update: function(dtime) {
