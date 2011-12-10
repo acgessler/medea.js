@@ -69,12 +69,8 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 			this.pt = pt | medea.PT_TRIANGLES;
 
 // #ifdef DEBUG
-			if (!this.vbo) {
-				medea.DebugAssert("need valid vbo for mesh to be complete");
-			}
-			if (!this.material) {
-				medea.DebugAssert("need valid material for mesh to be complete");
-			}
+			medea.DebugAssert(!!this.vbo,"need valid vbo for mesh to be complete");
+			medea.DebugAssert(!!this.material,"need valid material for mesh to be complete");
 // #endif
 
 // #ifdef LOG
