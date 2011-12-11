@@ -356,7 +356,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 			var bbs = [];
 
 			for( var i = 0, c = this.children, l = c.length; i < l; ++i) {
-				bbs.push(c[i].GetBB());
+				bbs.push(c[i].GetWorldBB());
 			}
 
 			for( var i = 0, c = this.entities, l = c.length; i < l; ++i) {
@@ -366,9 +366,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 			this.bb = medea.MergeBBs(bbs);
 			
 			// #ifdef DEBUG
-			if (!this.bb) {
-				medea.DebugAssert("bounding box computation failed, but it shouldn't have");
-			}
+			medea.DebugAssert(!!this.bb,"bounding box computation failed, but it shouldn't have");
 			// #endif
 
 			this._FireListener("OnUpdateBB");

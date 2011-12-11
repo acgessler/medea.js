@@ -12,7 +12,7 @@ medea._addMod('entity',[],function() {
 
     var id_source = 0;
     
-	this.Entity = medea.Class.extend({
+	medea.Entity = medea.Class.extend({
 		name : "",
 		bb : null,
 
@@ -34,9 +34,7 @@ medea._addMod('entity',[],function() {
 					this._AutoGenBB();
 				}
 				// #ifdef DEBUG
-				if(!this.bb) {
-					medea.DebugAssert('failed to generate BB for entity');
-				}
+				medea.DebugAssert(!!this.bb,'failed to generate BB for entity');
 				// #endif
 				return this.bb;
 			}
@@ -44,6 +42,9 @@ medea._addMod('entity',[],function() {
 		},
 		
 		GetWorldBB : function(parent) {
+            if(!this.bb) {
+                return medea.BB_INFINITE;
+            }
 			return medea.TransformBB(this.bb, parent.GetGlobalTransform());
 		},
 		
@@ -68,5 +69,9 @@ medea._addMod('entity',[],function() {
 			this.bb = medea.BB_INFINITE;
 		},
 	});
+    
+    medea.CreateEntity = function(name) {
+        return new medea.Entity(name);
+    };
 });
 

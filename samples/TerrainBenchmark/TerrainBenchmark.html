@@ -9,33 +9,45 @@
 function run() {
 
 	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes','camcontroller'],function() {
-		var vp1 = medea.CreateViewport();
+		var vp1 = medea.CreateViewport('main');
 		vp1.SetClearColor([1.0,1.0,1.0]);
+        
+        var vp2 = medea.CreateViewport('small_vp',0.7,0.7,0.28,0.28);
+		vp2.SetClearColor([1.0,1.0,1.0]);
 		
-		var an;
-        var root = medea.RootNode(), cam_node = root.AddChild();
+		var an, an2;
+        var root = medea.RootNode(), cam_node = root.AddChild(), cam_node2 = root.AddChild();
 		
 		var cam = medea.CreateCamera();
 		cam_node.AddEntity(cam);
 		vp1.SetCamera(cam);
+        
+        var cam2 = medea.CreateCamera();
+		cam_node2.AddEntity(cam2);
+		vp2.SetCamera(cam2);
 		
-		cam.parent.Translate(vec3.create([0,0,0]));
+		cam2.parent.Translate(vec3.create([-242,0,856]));
 			
 		medea.FetchMods(['terrain'], function() {
 			medea.CreateDefaultTerrainDataProviderFromResource('remote:terrain_sample/terrain.json', function(p) {
 			
-				var ter = medea.CreateTerrainNode(p, cam_node);
+				var ter = medea.CreateTerrainNode(p);
 				root.AddChild(ter);
-				
 					
 				medea.FetchMods('splinepath', function() {
-					an = medea.CreateSplinePathAnimator([[-1000,0.0,-1000],[600,0.0,-400],[900.0,0.0,-600]],30.0);
+					an = medea.CreateSplinePathAnimator([[-1000,0.0,-1000],[600,0.0,-400],[900.0,0.0,-600]],300.0);
 					cam_node.AddEntity(an);
+                    
+                    an2 = medea.CreateSplinePathAnimator([[1000,0.0,1000],[-600,0.0,400],[-900.0,0.0,600]],300.0);
+					cam_node2.AddEntity(an2);
+                                       
 					an.Finished(true);
+                    an2.Finished(true);
 					
 					medea.FetchMods('terrainheightpath', function() {
 						var tp = medea.CreateTerrainHeightPathAnimator(ter,15.0);
 						cam_node.AddEntity(tp);
+                        cam_node2.AddEntity(tp);
 					});
 				});
 			});
@@ -49,12 +61,14 @@ function run() {
 		document.getElementById('but_start').onclick = function() {
 			if(an) {
 				an.Finished(false);
+                an2.Finished(false);
 			}
 		};
 		
 		document.getElementById('but_stop').onclick = function() {
 			if(an) {
 				an.Finished(true);
+                an2.Finished(true);
 			}
 		};
 		

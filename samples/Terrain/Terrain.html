@@ -14,7 +14,7 @@ function run() {
      
         var root = medea.RootNode(), cam_node = root.AddChild();
 		
-		var cam = medea.CreateCamera();
+		var cam = medea.CreateCamera("MainCamera");
 		cam_node.AddEntity(cam);
 		vp1.SetCamera(cam);
 		
@@ -26,7 +26,7 @@ function run() {
 		medea.FetchMods(['terrain'], function() {
 			medea.CreateDefaultTerrainDataProviderFromResource('remote:terrain_sample/terrain.json', function(p) {
 			
-				var ter = medea.CreateTerrainNode(p, cam_node);
+				var ter = medea.CreateTerrainNode(p);
 				root.AddChild(ter);
 				
 				medea.FetchMods('terrainheightpath', function() {
