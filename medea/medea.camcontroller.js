@@ -6,12 +6,14 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('camcontroller',['camera'],function(undefined) {
+medea._addMod('camcontroller',['entity'],function(undefined) {
 	"use strict";
 	var medea = this;
+    
+    medea._initMod('entity');
+    
 
-	// class CamController
-	medea.CamController = medea.Class.extend({
+	medea.CamController = medea.Entity.extend({
 
 		enabled: false,
 		turn_speed : 0.005,
@@ -20,71 +22,25 @@ medea._addMod('camcontroller',['camera'],function(undefined) {
 		terrain_entity : null,
 		last_processed_mdelta : -1,
 
-		init : function(camera,kind,enabled) {
+		init : function(kind,enabled) {
 
-			if (camera instanceof medea.Camera) {
-				camera = camera.parent;
-			}
-
-// #ifdef DEBUG
-			if (!(camera instanceof medea.Node)) {
-				medea.DebugAssert("CamController needs a valid scenegraph node to work with");
-				return;
-			}
-// #endif
-
-			this.camera_node = camera;
 			this.kind = kind || 'fps';
-			this.Enable(enabled || false);
+			this.Enabled(enabled || false);
 		},
 
 
-		Enable : function(doit) {
-			if(doit === undefined) {
-				doit = true;
-			}
-			if(this.enabled === doit) {
-				return ;
-			}
-			this.enabled = doit;
-			if(doit) {
-				var outer = this;
-				medea.SetTickCallback(function(dtime) {
-					outer._Update(dtime);
-					return true;
-				},this);
-				return;
-			}
-			medea.RemoveTickCallback(this);
-		},
+		Enabled : medea._GetSet('enabled'),
+		TurnSpeed : medea._GetSet('turn_speed'),
+        WalkSpeed : medea._GetSet('walk_speed'),
+        TerrainEntity : medea._GetSet('terrain_entity'),
 
-		TurnSpeed : function(t) {
-			if(t === undefined) {
-				return this.turn_speed;
-			}
-			this.turn_speed = t;
-		},
-
-		WalkSpeed : function(t) {
-			if(t === undefined) {
-				return this.walk_speed;
-			}
-			this.walk_speed = t;
-		},
-
-		TerrainEntity : function(t) {
-			if(t === undefined) {
-				return this.terrain_entity;
-			}
-			this.terrain_entity = t;
-		},
-
-		_Update : function(dtime) {
-			if(medea.IsMouseDown()) {
+        
+		Update : function(dtime, n) {
+			if(!this.enabled || medea.IsMouseDown()) {
 				return;
 			}
 
-			var d = medea.GetMouseDelta(), n = this.camera_node;
+			var d = medea.GetMouseDelta();
 			if(d[2] !== this.last_processed_mdelta) {
 
 				// do not process mouse movements while the CTRL key is pressed
