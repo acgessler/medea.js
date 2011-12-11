@@ -36,8 +36,8 @@ medea._addMod('node',['frustum'],function(undefined) {
 		init : function(name, flags) {
 			this.children = [];
 			this.entities = [];
-			this.name = name || "";
-			this.id = id_source++;
+            this.id = id_source++;
+			this.name = name || ("UnnamedNode_" + this.id);
 			
 			// for culling purposes, saves the index of the frustun plane
 			// that caused this node to be culled recently. This exploits
@@ -57,8 +57,19 @@ medea._addMod('node',['frustum'],function(undefined) {
 
 			this.flags = this.trafo_dirty_flag | (flags || 0);
 		},
+        
+        Name : function(n) {
+            if (n === undefined) {
+                return this.name;
+            }
+            this.name = n;
+        },
 
 		GetEntities: function() {
+			return this.entities;
+		},
+        
+        GetActiveEntities: function(cam) {
 			return this.entities;
 		},
 
