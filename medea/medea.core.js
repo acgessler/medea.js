@@ -176,18 +176,6 @@ medea = new (function(sdom) {
 			// always allocate a default root node for the visual scene
 			this.scene_root = medea.CreateNode("root");
 
-			
-
-			this.key_state = {};
-
-			// set event handlers on the canvas panel
-			window.addEventListener('keydown', function (ev) { medea._HandleKeyDown(ev); }, true);
-			window.addEventListener('keyup', function (ev) { medea._HandleKeyUp(ev);  }, true);
-
-			this.canvas.onmousedown = function (ev) { medea._HandleMouseDown(ev); };
-			this.canvas.onmouseup   = function (ev) { medea._HandleMouseUp(ev);  };
-			this.canvas.onmousemove = function (ev) { medea._HandleMouseMove(ev); };
-			this.mouse_down = false;
 
 			_callback = _initial_deps = undefined;
 			callback();
@@ -237,26 +225,7 @@ medea = new (function(sdom) {
         return out;
     };
 
-	this.IsMouseDown = function() {
-		return this.mouse_down;
-	};
-
-	this.IsKeyDown = function(keycode) {
-		return this.key_state[keycode] || false;
-	};
-
-	this.IsKeyDownWasUp = function(keycode, state) {
-		var old = state[keycode] || false, now = state[keycode] = this.IsKeyDown(keycode);
-		return now && !old;
-	};
-
-	this.GetMouseDelta = function() {
-		return this.lastMouseDelta || [0,0,0];
-	};
-
-	this.GetMousePosition = function() {
-		return this.lastMousePosition || [-1,-1];
-	};
+	
 
 
 // #ifndef DEBUG
@@ -461,7 +430,7 @@ medea = new (function(sdom) {
 			return false;
 		}
 
-		var c = node.children;
+		var c = node.GetChildren();
 		for(var i = 0; i < c.length; ++i) {
 			this.VisitGraph(c[i],visitor,status);
 		}
@@ -520,35 +489,6 @@ medea = new (function(sdom) {
 	};
 			
 
-
-	this._HandleKeyDown = function(event) {
-		this.key_state[event.keyCode] = true;
-	};
-
-	this._HandleKeyUp = function(event) {
-		this.key_state[event.keyCode] = false;
-	};
-
-
-	this._HandleMouseDown = function(event) {
-		this.mouse_down = true;
-	};
-
-	this._HandleMouseUp = function(event) {
-		this.mouse_down = false;
-	};
-
-	this._HandleMouseMove = function(event) {
-		// XXX use getCapture if available?
-		this.lastMouseDelta = this.lastMousePosition
-			? [	event.clientX - this.lastMousePosition[0],
-				event.clientY - this.lastMousePosition[1],
-				this.lastMouseDelta[2]+1
-			]
-			: [0,0,0];
-
-		this.lastMousePosition = [event.clientX, event.clientY,this.lastMouseDelta[2]];
-	};
 
 	this._addMod = function(name,deps,init,symbols) {
 		if(_stubs[name] !== undefined) {
@@ -815,7 +755,13 @@ medea = new (function(sdom) {
  			return this[name].apply(this,arguments);
 		};
 	};
-
+    
+    this._SetFunctionStub("IsMouseDown","input");
+    this._SetFunctionStub("IsKeyDown","input");
+    this._SetFunctionStub("IsKeyDownWasUp","input");
+    this._SetFunctionStub("GetMousePosition","input");
+    this._SetFunctionStub("GetMouseDelta","input");
+    
 	this._SetFunctionStub("CreateNode","node");
     this._SetFunctionStub("CreateEntity","entity");
     

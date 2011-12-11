@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('camcontroller',['entity'],function(undefined) {
+medea._addMod('camcontroller',['entity','input'],function(undefined) {
 	"use strict";
 	var medea = this;
     

@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('debug',['visualizer'],function() {
+medea._addMod('debug',['visualizer', 'input'],function() {
 	"use strict";
 	var medea = this;
 
