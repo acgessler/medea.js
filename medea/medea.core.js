@@ -225,22 +225,24 @@ medea = new (function(sdom) {
         return out;
     };
 
-	
 
+// #ifndef LOG
+    this.Log = this.LogDebug = function() {};
+// #else 
+	this.Log = function(message, kind) {
+		console.log((kind||'info')+': ' + message);
+	};
+    
+    // #ifndef DEBUG
+	this.LogDebug = function() {};
+    // #else
+	this.LogDebug = function(message) {
+		console.log('debug: ' + message);
+	};
+    // #endif
 
-// #ifndef DEBUG
-	this.LogDebug = function(message) {
-	};
-// #else
-	this.LogDebug = function(message) {
-		console.log('DEBUG: ' + message);
-	};
 // #endif
-
-	this.LogError = function(message) {
-		console.log('ERROR: ' + message);
-	};
-
+    
 
 	this.GetSettings = function() {
 		return this.settings;

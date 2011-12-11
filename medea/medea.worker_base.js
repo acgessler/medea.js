@@ -21,11 +21,17 @@ catch (e) {
 		_addMod : function(a,b,clb) {
 			clb.apply(medea);
 		},
+        
+        Log : function(message,kind) {
+			// #ifdef LOG
+			postMessage(['log',message,kind]);
+			// #endif
+		},
 		
 		LogDebug : function(message) {
-			// #ifdef LOG
-			postMessage(['log',message]);
-			// #endif
+            // #ifdef DEBUG
+			this.Log(message,'debug');
+            // #endif
 		},
 		
 		DebugAssert : function(e,v) {
@@ -38,7 +44,7 @@ catch (e) {
 				v = e;
 			}
 			// #ifdef LOG
-			medea.LogDebug('ASSERTION in worker: ' + v);
+			postMessage(['assert',v]);
 			// #endif
 		},
 		
