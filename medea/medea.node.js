@@ -19,6 +19,8 @@ medea._addMod('node',['frustum'],function(undefined) {
 
 	medea.NODE_FLAG_NO_ROTATION = 0x40;
 	medea.NODE_FLAG_NO_SCALING = 0x80;
+    
+    medea.NODE_FLAG_USER = 0x100000;
 	
 	var id_source = 0;
 	
@@ -74,6 +76,10 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 
 		AddEntity: function(ent) {
+            // #ifdef DEBUG
+            medea.DebugAssert(ent instanceof medea.Entity,'need valid entity to attach');
+            // #endif
+            
 			this.entities.push(ent);
 			ent.OnAttach(this);
 
@@ -99,6 +105,10 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 
 		AddChild: function(child) {
+            // #ifdef DEBUG
+			medea.DebugAssert(child !== this,'cannot attach a node to itself');
+			// #endif
+                
 			if(typeof child !== 'object' || !( child instanceof medea.Node )) {
 				child = new medea.Node(child);
 			}
@@ -130,6 +140,10 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 		
 		OnAttach : function(parent) {
+            // #ifdef DEBUG
+            medea.DebugAssert(parent !== this,'cannot attach node to itself');
+            // #endif
+            
 			this.parent = parent;
 			this._SetTrafoDirty();
 		},
@@ -149,7 +163,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 			
 		Cull : function(frustum) {
-			return medea.BBInFrustum(frustum, this.GetBB(), this.plane_hint);
+			return medea.BBInFrustum(frustum, this.GetWorldBB(), this.plane_hint);
 		},
 
 		// pure getter, nowadays deprecated

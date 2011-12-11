@@ -9,6 +9,8 @@
 medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
+    
+    var id_source = 0;
 
 	// class Viewport
 	medea.Viewport = medea.Class.extend({
@@ -26,16 +28,16 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 
 
 		init : function(name,x,y,w,h,zorder,camera) {
-			this.name = name;
 			this.x = x || 0;
 			this.y = y || 0;
 			this.w = w || 1.0;
 			this.h = h || 1.0;
 			this.zorder = zorder || 0;
 			this.visualizers = [];
+            this.id = id_source++;
+            this.name = name || 'UnnamedViewport_' + this.id;
 
-			medea._Require("camera");
-			this.SetCamera(camera || new medea.Camera());
+			this.Camera(camera || medea.CreateCameraNode(this.name+'_DefaultCam'));
 
 			// viewports are initially enabled since this is what
 			// users will most likely want.
@@ -69,9 +71,7 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 		},
 
 
-		GetName: function() {
-			return this.name;
-		},
+		Name: medea._GetSet('name'),
 
 		IsEnabled: function() {
 			return this.enabled;
@@ -92,108 +92,105 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 			this.updated = true;
 		},
 
-		GetZOrder: function() {
-			return this.zorder;
-		},
+		ZOrder: medea._GetSet('zorder'),
 
-		GetClearColor: function() {
-			return this.ccolor;
-		},
 
-		SetClearColor: function(col) {
+		ClearColor: function(col) {
+            if( col === undefined) {
+                return this.ccolor;
+            }
 			this.ccolor = col;
 			this.updated = true;
 		},
 
-		SetWidth: function(w) {
+		Width: function(w) {
+            if (w === undefined) {
+                return this.w;
+            }
 			this.w = w;
 			this.updated = true;
 		},
 
 		SetHeight: function(h) {
+            if (h === undefined) {
+                return this.h;
+            }
 			this.h = h;
 			this.updated = true;
 		},
 
-		SetX: function(x) {
+		X: function(x) {
+            if (x === undefined) {
+                return this.x;
+            }
 			this.x = x;
 			this.updated = true;
 		},
 
-		SetY: function(y) {
+		Y: function(y) {
+            if (y === undefined) {
+                return this.y;
+            }
 			this.y = y;
 			this.updated = true;
 		},
 
-		SetPos: function(x,y) {
-			this.y = y;
-			this.x = x;
+		Pos: function(x,y) {
+            if (x === undefined) {
+                return [this.x,this.y];
+            }
+            else if (Array.isArray(x)) {
+                this.y = x[1];
+                this.x = x[0];
+            }
+            else {
+    			this.y = y;
+    			this.x = x;
+            }
 			this.updated = true;
 		},
 
-		SetSize: function(w,h) {
+		Size: function(w,h) {
 			this.w = w;
 			this.h = h;
 			this.updated = true;
 		},
 
-		SetRect: function(x,y,w,h) {
-			this.w = w;
-			this.h = h;
-			this.y = y;
-			this.x = x;
+		Rect: function(x,y,w,h) {
+            if (x === undefined) {
+                return [this.x,this.y,this.w,this.h];
+            }
+            else if (Array.isArray(x)) {
+                this.w = x[3];
+    			this.h = x[2];
+    			this.y = x[1];
+    			this.x = x[0];
+            }
+			else {
+                this.w = w;
+    			this.h = h;
+    			this.y = y;
+    			this.x = x;
+            }
 			this.updated = true;
 		},
-
-
-		GetWidth: function() {
-			return this.w;
-		},
-
-		GetHeight: function() {
-			return this.h;
-		},
-
-		GetX: function() {
-			return this.x;
-		},
-
-		GetY: function() {
-			return this.y;
-		},
-
-		GetRect: function() {
-			return [this.x,this.y,this.w,this.h];
-		},
-
-		GetPos: function() {
-			return [this.x,this.y];
-		},
-
-		GetSize: function() {
-			return [this.w,this.h];
-		},
-
 
 		GetAspect: function() {
 			return (this.w*medea.canvas.width)/(this.h*medea.canvas.height);
 		},
 
-
-		GetCamera : function() {
-			return this.camera;
-		},
-
-		SetCamera : function(cam) {
+		Camera : function(cam) {
+            if (cam === undefined) {
+                return this.camera;
+            }
 			if (this.camera) {
-				this.camera.OnSetViewport(null);
+				this.camera._OnSetViewport(null);
 			}
 			this.camera = cam;
 			if (this.camera) {
-				this.camera.OnSetViewport(this);
+				this.camera._OnSetViewport(this);
 			}
 		},
-
 
 		Render: function(dtime) {
 			if (!this.enabled) {
@@ -249,6 +246,41 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 			this.updated = false;
 		}
 	});
+    
+    var viewports = [];
+	var enabled_viewports = 0, default_zorder = 0;
+            
+    medea.CreateViewport = function(name,x,y,w,h,zorder) {
+		
+		// if no z-order is given, default to stacking
+		// viewports on top of each other in creation order.
+		if (zorder === undefined) {
+			zorder = default_zorder++;
+		}
+
+		var vp = new medea.Viewport(name,x,y,w,h,zorder);
+
+		zorder = vp.ZOrder();
+		var vps = viewports;
+
+		for(var i = 0; i < vps.length; ++i) {
+			if (vps[i].ZOrder() >= zorder) {
+				vps.slice(i,0,vp);
+				vps = null;
+				break;
+			}
+		}
+
+		if (vps) {
+			vps.push(vp);
+		}
+
+		return vp;
+    }
+    
+    medea.GetViewports = function() {
+		return viewports;
+	};
 });
 
 

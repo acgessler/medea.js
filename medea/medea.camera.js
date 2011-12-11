@@ -6,21 +6,21 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('camera',['entity','statepool'],function() {
+medea._addMod('camera',['statepool'],function() {
 	"use strict";
 	var medea = this;
 
-	medea._CAMERA_DIRTY_FRUSTUM = 0x1;
-	medea._CAMERA_DIRTY_VIEW = 0x2;
-	medea._CAMERA_DIRTY_PROJ = 0x4; 
+	medea._CAMERA_DIRTY_FRUSTUM = medea.NODE_FLAG_USER;
+	medea._CAMERA_DIRTY_VIEW = medea.NODE_FLAG_USER << 1;
+	medea._CAMERA_DIRTY_PROJ = medea.NODE_FLAG_USER << 2; 
 
-	medea._initMod('entity');
 
 	// class Camera
-	medea.Camera = medea.Entity.extend(
+	medea.Camera = medea.Node.extend(
 	{
 		init : function(name,fovy,aspect,znear,zfar,viewport,culling) {
 			this._super(name);
+            this.name = name || ("UnnamedCamera_" + this.id);
 
 			this.view = mat4.identity(mat4.create());
 			this.proj = mat4.identity(mat4.create());
@@ -31,27 +31,14 @@ medea._addMod('camera',['entity','statepool'],function() {
 			this.znear = znear || 1;
 			this.zfar = zfar || 10000;
 			this.culling = culling === undefined ? true: culling;
-			
-			this.parent = null;
 
 			this.viewport = null;
 			if (viewport) {
-				viewport.SetCamera(this);
+				viewport.Camera(this);
 			}
 
 			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_VIEW | medea._CAMERA_DIRTY_FRUSTUM;
 		},
-
-
-		Render : function(viewport,rqmanager) {
-			// we don't need any rendering logic for cameras, as rendering is implicitly triggered
-			// through the viewport the camera is assigned to.
-		},
-
-		Update : function(dtime) {
-			// transformation matrix updates are performed lazily as needed so this is empty, too.
-		},
-
 
 
 		GetViewMatrix : function() {
@@ -69,103 +56,53 @@ medea._addMod('camera',['entity','statepool'],function() {
 			return this.frustum;
 		},
 		
-		Culling : function(c) {
-			if (c === undefined) {
-				return this.culling;
-			}
-			this.culling = c;
-		},
-
-		OnAttach : function(parent) {
-			// #ifdef DEBUG
-			medea.DebugAssert(!this.parent,'camera entities can only be attached to one node');
-			// #endif
-			
-			this.parent = parent;
-			
-			this._super(parent);
-			this.flags |= medea._CAMERA_DIRTY_VIEW;
-
-			if(parent) {
-				var outer = this;
-				this.parent.AddListener("OnUpdateGlobalTransform",function() {
-					outer.flags |= medea._CAMERA_DIRTY_VIEW | medea._CAMERA_DIRTY_FRUSTUM;
-				},this);
-			}
-		},
-		
-		OnDetach : function(parent) {
-			this._super(parent);
-			
-			// #ifdef DEBUG
-			medea.DebugAssert(this.parent === parent,'camera entities can only be attached to one node');
-			// #endif
-			
-			this.parent.RemoveListener("OnUpdateGlobalTransform",this);
-			this.parent = null;
-		},
+		Culling: medea._GetSet('culling'),  
+        Name: medea._GetSet('name'),
         
         GetViewport : function() {
             return this.viewport;
         },
 
-		OnSetViewport : function(vp) {
+		ZNear : function(f) {
+            if (f === undefined) {
+                return this.znear;
+            }
+            this.znear = f;
+            this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
+		},
+
+		ZFar : function(f) {
+            if (f === undefined) {
+                return this.zfar;
+            }
+            this.zfar = f;
+            this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
+		},
+
+		Aspect : function(f) {
+			if (f === undefined) {
+                return this.aspect;
+            }
+            this.aspect = f;
+            this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
+		},
+
+		FOV : function(f) {
+			if (f === undefined) {
+                return this.fovy;
+            }
+            this.fovy = f;
+            this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
+		},
+        
+        
+        _OnSetViewport : function(vp) {
 			this.viewport = vp;
 		},
 
-		GetParent : function() {
-			return this.parent;
-		},
-        
-        
-        Name : function(n) {
-            if(n === undefined) {
-                return this.name;
-            }
-            this.name = n;
-        },
-
-
-		GetZNear : function() {
-			return this.znear;
-		},
-
-		GetZFar : function() {
-			return this.zfar;
-		},
-
-		GetAspect : function() {
-			return this.aspect;
-		},
-
-		GetFOV : function() {
-			return this.fovy;
-		},
-
-
-		SetZNear : function(v) {
-			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
-			this.znear = v;
-		},
-
-		SetZFar : function(v) {
-			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
-			this.zfar = v;
-		},
-
-		// aspect may be set to null to have the camera implementation take it from the viewport
-		SetAspect : function(v) {
-			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
-			this.aspect = v;
-		},
-
-		SetFOV : function(v) {
-			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
-			this.fovy = v;
-		},
-        
-        GetWorldPos : function() {
-            return this.parent ? this.parent.GetWorldPos() : [0.0,0.0,0.0];
+        _SetTrafoDirty : function() {
+            this._super();
+            this.flags |= medea._CAMERA_DIRTY_VIEW | medea._CAMERA_DIRTY_FRUSTUM;
         },
 		
 		_UpdateFrustum : function() {
@@ -179,21 +116,12 @@ medea._addMod('camera',['entity','statepool'],function() {
 			return this.frustum;
 		},
 		
-
 		_UpdateViewMatrix : function() {
 			if (!(this.flags & medea._CAMERA_DIRTY_VIEW)) {
 				return this.view;
 			}
 
-			// if the camera does not have a parent (which happens for example for the
-			// default camera that is initially assigned to a viewport), we just
-			// return the identity matrix for view transform.
-			if(!this.parent) {
-				return this.view = mat4.identity(mat4.create());
-			}
-
-
-			this.view = mat4.create(this.parent.GetInverseGlobalTransform());
+			this.view = mat4.create(this.GetInverseGlobalTransform());
 
 			this.flags &= ~medea._CAMERA_DIRTY_VIEW;
 			return this.view;
@@ -207,9 +135,7 @@ medea._addMod('camera',['entity','statepool'],function() {
 			var aspect = this.aspect;
 			if (aspect === undefined) {
 // #ifdef DEBUG
-				if (!this.viewport) {
-					medea.DebugAssert("aspect may only be omitted if the camera is assigned to a viewport");
-				}
+				medea.DebugAssert(!!this.viewport,"aspect may only be omitted while the camera is assigned to a viewport");
 // #endif
 				aspect = this.viewport.GetAspect();
 			}
@@ -265,7 +191,7 @@ medea._addMod('camera',['entity','statepool'],function() {
 	});
 
 
-	medea.CreateCamera = function(name,fovy,aspect,znear,zfar,viewport) {
+	medea.CreateCameraNode = function(name,fovy,aspect,znear,zfar,viewport) {
 		return new medea.Camera(name,fovy,aspect,znear,zfar,viewport);
 	};
 });

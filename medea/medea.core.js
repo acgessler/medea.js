@@ -166,7 +166,6 @@ medea = new (function(sdom) {
 			this.dtmin_fps = 1e6;
 			this.dtmax_fps = 0;
 
-			this.default_zorder = 0;
 
 			this.tick_callbacks = {};
 			this.stop_asap = false;
@@ -177,8 +176,7 @@ medea = new (function(sdom) {
 			// always allocate a default root node for the visual scene
 			this.scene_root = medea.CreateNode("root");
 
-			this.viewports = [];
-			this.enabled_viewports = 0;
+			
 
 			this.key_state = {};
 
@@ -279,9 +277,6 @@ medea = new (function(sdom) {
 		return this.settings;
 	};
 
-	this.GetViewports = function() {
-		return this.viewports;
-	};
 
 	this.RootNode = function(s) {
 		if(s === undefined) {
@@ -304,39 +299,6 @@ medea = new (function(sdom) {
 		} catch(e) {}
 	};
 
-	this.CreateNode = function(name,parent) {
-		this._Require("node");
-		return new this.Node(name,parent);
-	};
-
-	this.CreateViewport = function(name,x,y,w,h,zorder) {
-		this._Require("viewport");
-
-		// if no z-order is given, default to stacking
-		// viewports on top of each other in creation order.
-		if (zorder === undefined) {
-			zorder = this.default_zorder++;
-		}
-
-		var vp = new this.Viewport(name,x,y,w,h,zorder);
-
-		zorder = vp.GetZOrder();
-		var vps = this.viewports;
-
-		for(var i = 0; i < vps.length; ++i) {
-			if (vps[i].GetZOrder() >= zorder) {
-				vps.slice(i,0,vp);
-				vps = null;
-				break;
-			}
-		}
-
-		if (vps) {
-			vps.push(vp);
-		}
-
-		return vp;
-	};
 
 
 	this.SetDebugPanel = function(where) {
@@ -399,7 +361,7 @@ medea = new (function(sdom) {
 	};
 
 	this.CanRender = function() {
-		return this.gl && this.viewports.length;
+		return this.gl && this.GetViewports().length;
 	};
 
 	this.Wireframe = function(wf) {
@@ -480,8 +442,9 @@ medea = new (function(sdom) {
 		}
 
 		// perform rendering
-		for(var vn = 0; vn < this.viewports.length; ++vn) {
-			this.viewports[vn].Render(this,dtime);
+        var viewports = this.GetViewports();
+		for(var vn = 0; vn < viewports.length; ++vn) {
+			viewports[vn].Render(this,dtime);
 		}
 
 		// draw debug pannel
@@ -541,8 +504,13 @@ medea = new (function(sdom) {
 			
 			var msg = callback(worker, worker_index) || function() {};
 			worker.onmessage = function(e) {
+            
 				if (e.data[0] === 'log') {
-					medea.LogDebug('(worker ' + worker_index + ') ' + e.data[1]);
+					medea.Log('(worker ' + worker_index + ') ' + e.data[1], e.data[2] || 'debug');
+					return;
+				}
+                else if (e.data[0] === 'assert') {
+					medea.DebugAssert('(worker ' + worker_index + ') ' + e.data[1]);
 					return;
 				}
 				return msg(e);
@@ -553,20 +521,6 @@ medea = new (function(sdom) {
 	};
 			
 
-	this.Invoke = function(func) {
-		// #ifdef DEBUG
-		if (typeof func !== 'string') {
-			medea.DebugAssert('Invoke expects a string');
-		}
-		// #endif
-
-		func = this[func];
-		var outer_arguments = arguments;
-
-		this._Require(deps[func],function() {
-			func.apply(this,Array.prototype.slice.apply(outer_arguments,1));
-		});
-	};
 
 	this._HandleKeyDown = function(event) {
 		this.key_state[event.keyCode] = true;
@@ -833,6 +787,15 @@ medea = new (function(sdom) {
 
 		this.statistics.vertices_frame = this.statistics.primitives_frame = this.statistics.batches_frame = 0;
 	};
+    
+    this._GetSet = function(what) {
+        return function(f) {
+            if (f === undefined) {
+                return this[what];
+            }
+            this[what] = f;
+        };
+    };
 
 
 	this._SetFunctionStub = function(name,module_dep) {
@@ -856,6 +819,10 @@ medea = new (function(sdom) {
 
 	this._SetFunctionStub("CreateNode","node");
     this._SetFunctionStub("CreateEntity","entity");
+    
+    this._SetFunctionStub("CreateViewport","viewport");
+    this._SetFunctionStub("GetViewports","viewport");
+    this._SetFunctionStub("CreateCameraNode","camera");
 
 	this._SetFunctionStub("MakeResource","filesystem");
 	this._SetFunctionStub("Fetch","filesystem");
