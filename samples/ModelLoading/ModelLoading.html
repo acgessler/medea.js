@@ -11,7 +11,7 @@ function run() {
 
 	medea.Ready("canvas",{dataroot:'../../data'},['debug','sceneloader','keycodes'],function() {
 		var vp1 = medea.CreateViewport();
-		vp1.SetClearColor([1.0,1.0,1.0]);
+		vp1.ClearColor([1.0,1.0,1.0]);
         
         var files = ['remote:assimp_import_sample/TexturedSpider.obj.json',
             'remote:assimp_import_sample/Collada.dae.json',

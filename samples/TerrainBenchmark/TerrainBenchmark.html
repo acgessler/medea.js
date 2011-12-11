@@ -10,23 +10,23 @@ function run() {
 
 	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes','camcontroller'],function() {
 		var vp1 = medea.CreateViewport('main');
-		vp1.SetClearColor([1.0,1.0,1.0]);
+		vp1.ClearColor([1.0,1.0,1.0]);
         
         var vp2 = medea.CreateViewport('small_vp',0.7,0.7,0.28,0.28);
-		vp2.SetClearColor([1.0,1.0,1.0]);
+		vp2.ClearColor([1.0,1.0,1.0]);
 		
 		var an, an2;
-        var root = medea.RootNode(), cam_node = root.AddChild(), cam_node2 = root.AddChild();
+        var root = medea.RootNode();
 		
-		var cam = medea.CreateCamera();
-		cam_node.AddEntity(cam);
-		vp1.SetCamera(cam);
+		var cam = medea.CreateCameraNode();
+		root.AddChild(cam);
+		vp1.Camera(cam);
         
-        var cam2 = medea.CreateCamera();
-		cam_node2.AddEntity(cam2);
-		vp2.SetCamera(cam2);
+        var cam2 = medea.CreateCameraNode();
+		root.AddChild(cam2);
+		vp2.Camera(cam2);
 		
-		cam2.parent.Translate(vec3.create([-242,0,856]));
+		cam2.Translate(vec3.create([-242,0,856]));
 			
 		medea.FetchMods(['terrain'], function() {
 			medea.CreateDefaultTerrainDataProviderFromResource('remote:terrain_sample/terrain.json', function(p) {
@@ -36,18 +36,18 @@ function run() {
 					
 				medea.FetchMods('splinepath', function() {
 					an = medea.CreateSplinePathAnimator([[-1000,0.0,-1000],[600,0.0,-400],[900.0,0.0,-600]],300.0);
-					cam_node.AddEntity(an);
+					cam.AddEntity(an);
                     
                     an2 = medea.CreateSplinePathAnimator([[1000,0.0,1000],[-600,0.0,400],[-900.0,0.0,600]],300.0);
-					cam_node2.AddEntity(an2);
+					cam2.AddEntity(an2);
                                        
 					an.Finished(true);
                     an2.Finished(true);
 					
 					medea.FetchMods('terrainheightpath', function() {
 						var tp = medea.CreateTerrainHeightPathAnimator(ter,15.0);
-						cam_node.AddEntity(tp);
-                        cam_node2.AddEntity(tp);
+						cam.AddEntity(tp);
+                        cam2.AddEntity(tp);
 					});
 				});
 			});

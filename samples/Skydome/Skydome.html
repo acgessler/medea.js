@@ -10,7 +10,7 @@ function run() {
 
 	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes'],function() {
 		var vp1 = medea.CreateViewport();
-		vp1.SetClearColor([1.0,1.0,1.0]);
+		vp1.ClearColor([1.0,1.0,1.0]);
         
         var files = ['remote:assimp_import_sample/TexturedSpider.obj.json',
             'remote:assimp_import_sample/Collada.dae.json',
@@ -64,13 +64,14 @@ function run() {
 		
 		// and a plain camera controller
 		medea.FetchMods('camcontroller',function() {
-			var cam = medea.CreateCamera();
-			root.AddChild().AddEntity(cam);
-			vp1.SetCamera(cam);
+			var cam = medea.CreateCameraNode();
+			root.AddChild(cam);
+			vp1.Camera(cam);
 			
-			cam.parent.Translate(vec3.create([0,0,5]));
+			cam.Translate(vec3.create([0,0,5]));
 			
-			var cc = medea.CreateCamController(cam,'fps');
+			var cc = medea.CreateCamController('fps');
+            cam.AddEntity(cc);
 			cc.Enable();
 		});
         

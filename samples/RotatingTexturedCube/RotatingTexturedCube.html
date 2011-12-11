@@ -12,7 +12,7 @@ function run() {
 
 	medea.Ready("canvas",{dataroot:'../../data'},['debug','standardmesh'],function() {
 		var vp1 = medea.CreateViewport();
-		vp1.SetClearColor([0.5,0.5,0.5]);
+		vp1.ClearColor([0.5,0.5,0.5]);
 		
 		var m = medea.CreateStandardMesh_Cube(medea.CreateSimpleMaterialFromTexture('remote:../samples/RotatingTexturedCube/test_texture.png'));
 		

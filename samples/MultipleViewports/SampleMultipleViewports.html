@@ -14,14 +14,15 @@ function run() {
 		var vp0 = medea.CreateViewport();
 		var vp1 = medea.CreateViewport("secondary",0.1,0.1,0.1,0.1);
 
-		vp0.SetClearColor([1.0,0.0,0.0,1.0]);
-		vp1.SetClearColor([0.5,1.0,0.0,1.0]);
+		vp0.ClearColor([1.0,0.0,0.0,1.0]);
+		vp1.ClearColor([0.5,1.0,0.0,1.0]);
+        
 
 		var tx = 0, ty = 0,time=0;
 		medea.SetTickCallback(function(dtime) {
 			time += dtime;
 
-			vp1.SetPos((Math.sin(time)+1.0)*0.5,(Math.cos(time)+1.0)*0.5);
+			vp1.Pos((Math.sin(time)+1.0)*0.5,(Math.cos(time)+1.0)*0.5);
 
 			// note: we must return true here because otherwise the
 			// main loop would be quit.

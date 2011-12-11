@@ -59,7 +59,7 @@ function run() {
 
 	medea.Ready("canvas",{dataroot:'../../data'},['standardmesh','camcontroller','debug'],function() {
 		var vp1 = medea.CreateViewport();
-		vp1.SetClearColor([0.4,0.4,0.4]);
+		vp1.ClearColor([0.4,0.4,0.4]);
 		
 		var root = medea.RootNode();
 		
@@ -83,14 +83,14 @@ function run() {
 		
 		root.Translate(vec3.create([0,-10,-10]));
 		
-		var cam = medea.CreateCamera();
-		root.AddChild().AddEntity(cam);
+		var cam = medea.CreateCameraNode();
+		root.AddChild(cam);
 		
-		vp1.SetCamera(cam);
+		vp1.Camera(cam);
 		
-		//cam.parent.Translate([1,5,0]);
 		
-		var cc = medea.CreateCamController(cam,'fps');
+		var cc = medea.CreateCamController('fps');
+        cam.AddEntity(cc);
 		cc.Enable();
 
 		medea.SetDebugPanel(null,true);
