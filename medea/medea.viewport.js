@@ -11,7 +11,11 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 	var medea = this, gl = medea.gl;
     
     var id_source = 0;
+    
+    var viewports = [];
+	var enabled_viewports = 0, default_zorder = 0;
 
+    
 	// class Viewport
 	medea.Viewport = medea.Class.extend({
 		name:"",
@@ -23,11 +27,11 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 		ccolor : [0.0,0.0,0.0,1.0],
 		clearFlags : gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT,
 		enabled : 0xdeadbeef,
-		updated : false,
+		updated : true,
 		rqManager : null,
 
 
-		init : function(name,x,y,w,h,zorder,camera) {
+		init : function(name,x,y,w,h,zorder,camera,enable) {
 			this.x = x || 0;
 			this.y = y || 0;
 			this.w = w || 1.0;
@@ -41,7 +45,7 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 
 			// viewports are initially enabled since this is what
 			// users will most likely want.
-			this.Enable();
+			this.Enable(enable);
 		},
 
 
@@ -73,12 +77,15 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 
 		Name: medea._GetSet('name'),
 
-		IsEnabled: function() {
-			return this.enabled;
+		Enabled: function(f) {
+            if(f === undefined) {
+                return this.enabled;
+            }
+			this.Enable(f);
 		},
 
 		Enable: function(doit) {
-			doit = doit || true;
+			doit = doit === undefined ? true : doit;
 			if (this.enabled === doit) {
 				return;
 			}
@@ -86,14 +93,15 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 			this.enabled = doit;
 
 			// changing the 'enabled' state of a viewport has global effect
-			medea.enabled_viewports += (doit?1:-1);
+			enabled_viewports += (doit?1:-1);
 			medea.frame_flags |= medea.FRAME_VIEWPORT_UPDATED;
 
 			this.updated = true;
 		},
 
-		ZOrder: medea._GetSet('zorder'),
-
+		GetZOrder: function() {
+            return this.zorder;
+        },
 
 		ClearColor: function(col) {
             if( col === undefined) {
@@ -151,8 +159,17 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 		},
 
 		Size: function(w,h) {
-			this.w = w;
-			this.h = h;
+			if (w === undefined) {
+                return [this.w,this.h];
+            }
+            else if (Array.isArray(w)) {
+                this.h = h[1];
+                this.w = w[0];
+            }
+            else {
+    			this.h = h;
+    			this.w = w;
+            }
 			this.updated = true;
 		},
 
@@ -204,7 +221,7 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 			var rq = this.rqManager;
 
 			// setup the viewport - we usually only need to do this if we're competing with other viewports
-			if (medea.enabled_viewports>1 || medea.frame_flags & medea.FRAME_VIEWPORT_UPDATED || this.updated) {
+			if (enabled_viewports>1 || (medea.frame_flags & medea.FRAME_VIEWPORT_UPDATED) || this.updated) {
 				var cw = medea.canvas.width, ch = medea.canvas.height;
 				var cx = Math.floor(this.x*cw), cy = Math.floor(this.y*ch);
 				cw = Math.floor(this.w*cw), ch = Math.floor(this.h*ch);
@@ -247,10 +264,8 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 		}
 	});
     
-    var viewports = [];
-	var enabled_viewports = 0, default_zorder = 0;
             
-    medea.CreateViewport = function(name,x,y,w,h,zorder) {
+    medea.CreateViewport = function(name,x,y,w,h,zorder,camera,enable) {
 		
 		// if no z-order is given, default to stacking
 		// viewports on top of each other in creation order.
@@ -258,13 +273,13 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 			zorder = default_zorder++;
 		}
 
-		var vp = new medea.Viewport(name,x,y,w,h,zorder);
+		var vp = new medea.Viewport(name,x,y,w,h,zorder,camera,enable);
 
-		zorder = vp.ZOrder();
+		zorder = vp.GetZOrder();
 		var vps = viewports;
 
 		for(var i = 0; i < vps.length; ++i) {
-			if (vps[i].ZOrder() >= zorder) {
+			if (vps[i].GetZOrder() >= zorder) {
 				vps.slice(i,0,vp);
 				vps = null;
 				break;
@@ -281,6 +296,10 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
     medea.GetViewports = function() {
 		return viewports;
 	};
+    
+    medea.GetEnabledViewportCount = function() {
+        return enabled_viewports;
+    };
 });
 
 

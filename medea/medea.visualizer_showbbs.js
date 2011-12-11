@@ -71,14 +71,7 @@ medea._addMod('visualizer_showbbs',[ 'visualizer','material','frustum'],function
 		Apply : function(render_stub,original_render_stub,rq, viewport) {
 			var outer = this;
 			return function() {
-				var cp, cam = viewport.GetCamera();
-				try {
-					// reason: camera entities need not have a parent
-					cp = cam.GetParent().GetWorldPos();
-				}
-				catch(e) {
-					cp = [0.0,0.0,0.0];
-				}
+				var cam = viewport.Camera(), cp = cam.GetWorldPos();
 				var sqr = outer.draw_range * outer.draw_range, nodes_done = {};
 
 				// walk the render queue and collect bounding boxes in one large mesh
@@ -219,7 +212,7 @@ medea._addMod('visualizer_showbbs',[ 'visualizer','material','frustum'],function
 
 				if (bbs.length) {
 					// setup a dummy statepool to draw the mesh on top of everything
-					var statepool = new medea.StatePool(), cam = viewport.GetCamera();
+					var statepool = new medea.StatePool(), cam = viewport.Camera();
 
 					statepool.Set("V",cam.GetViewMatrix());
 					statepool.Set("P",cam.GetProjectionMatrix());

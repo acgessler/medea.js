@@ -432,8 +432,7 @@ medea = new (function(sdom) {
 
 		// adjust render settings if we switched to multiple viewports or vice versa
 		if (this.frame_flags & medea.FRAME_VIEWPORT_UPDATED) {
-			// XXX
-			if (this.enabled_viewports>1) {
+			if (medea.GetEnabledViewportCount()>1) {
 				this.gl.enable(this.gl.SCISSOR_TEST);
 			}
 			else {

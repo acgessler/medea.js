@@ -28,6 +28,15 @@ medea._addMod('camcontroller',['entity'],function(undefined) {
 			this.Enabled(enabled || false);
 		},
 
+        
+        Enable : function() {
+            this.enabled = true;
+        },
+        
+        Disable : function() {
+            this.enabled = false;
+        },
+        
 
 		Enabled : medea._GetSet('enabled'),
 		TurnSpeed : medea._GetSet('turn_speed'),

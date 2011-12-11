@@ -79,7 +79,7 @@ medea._addMod('visualizer_shownormals',[ 'visualizer','material'],function() {
 
 				if (count) {
 
-					var cp = viewport.GetCamera().GetParent().GetWorldPos();
+					var cp = viewport.Camera().GetWorldPos();
 					var sqr = outer.draw_range * outer.draw_range;
 
 					var pout = new Float32Array(count*6*(outer.full_ts ?3:1)), cout = new Float32Array(count*8*(outer.full_ts ?3:1)), ip = 0, ic = 0, c = 0;
@@ -178,7 +178,7 @@ medea._addMod('visualizer_shownormals',[ 'visualizer','material'],function() {
 
 				if (count) {
 					// setup a dummy statepool to draw the mesh on top of everything
-					var statepool = new medea.StatePool(), cam = viewport.GetCamera();
+					var statepool = new medea.StatePool(), cam = viewport.Camera();
 
 					statepool.Set("V",cam.GetViewMatrix());
 					statepool.Set("P",cam.GetProjectionMatrix());

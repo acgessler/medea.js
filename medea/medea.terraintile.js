@@ -9,6 +9,8 @@
 medea._addMod('terraintile',['worker_terrain','image','mesh'],function(undefined) {
 	"use strict";
 	var medea = this;
+    
+    medea._initMod('worker_terrain');
 
 	var IsPowerOfTwo = function(n) {
 		return n !== 0 && (n & (n - 1)) === 0;
