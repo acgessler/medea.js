@@ -104,6 +104,10 @@ medea._addMod('camera',['entity','statepool'],function() {
 			this.parent.RemoveListener("OnUpdateGlobalTransform",this);
 			this.parent = null;
 		},
+        
+        GetViewport : function() {
+            return this.viewport;
+        },
 
 		OnSetViewport : function(vp) {
 			this.viewport = vp;
@@ -112,6 +116,14 @@ medea._addMod('camera',['entity','statepool'],function() {
 		GetParent : function() {
 			return this.parent;
 		},
+        
+        
+        Name : function(n) {
+            if(n === undefined) {
+                return this.name;
+            }
+            this.name = n;
+        },
 
 
 		GetZNear : function() {
@@ -151,6 +163,10 @@ medea._addMod('camera',['entity','statepool'],function() {
 			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
 			this.fovy = v;
 		},
+        
+        GetWorldPos : function() {
+            return this.parent ? this.parent.GetWorldPos() : [0.0,0.0,0.0];
+        },
 		
 		_UpdateFrustum : function() {
 			if (!(this.flags & medea._CAMERA_DIRTY_FRUSTUM)) {
@@ -206,18 +222,20 @@ medea._addMod('camera',['entity','statepool'],function() {
 		},
 
 		_Render : function(rq) {
-			var frustum = this.GetFrustum(), statepool = medea.GetDefaultStatePool();
+			var frustum = this.GetFrustum(), statepool = medea.GetDefaultStatePool(), outer = this;
 			
 			// traverse all nodes in the graph and collect their render jobs
 			medea.VisitGraph(medea.RootNode(),function(node,parent_visible) {
 
-				var vis = parent_visible === medea.VISIBLE_ALL ? medea.VISIBLE_ALL : node.Cull(frustum), e = node.GetEntities();
+				var vis = parent_visible === medea.VISIBLE_ALL ? medea.VISIBLE_ALL : node.Cull(frustum);
+                var e = node.GetActiveEntities(outer);
+                
 				if(vis === medea.VISIBLE_NONE) {
 					return medea.VISIBLE_NONE;
 				}
 
 				if(vis === medea.VISIBLE_ALL || e.length === 1) {
-					node.GetEntities().forEach(function(val,idx,outer) {
+					e.forEach(function(val,idx,outer) {
 						val.Render(this,val,node,rq);
 					});
 
@@ -239,7 +257,7 @@ medea._addMod('camera',['entity','statepool'],function() {
 			statepool.Set("P",this.GetProjectionMatrix());
 			statepool.Set("W",mat4.identity(mat4.create()));
 			
-			statepool.Set("CAM_POS", (this.parent ? this.parent.GetWorldPos() : [0.0,0.0,0.0]));
+			statepool.Set("CAM_POS", this.GetWorldPos());
 
 			// rq.Flush() is left to the caller
 			return statepool;
