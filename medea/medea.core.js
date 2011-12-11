@@ -211,6 +211,33 @@ medea = new (function(sdom) {
 			}
 		}
 	};
+    
+    this.Merge = function(inp,template) {
+        var out = {};
+        for(var k in inp) {
+            var v = inp[v];
+            if (typeof v === 'object') {
+                out[k] = this.Merge(v,template[k] || {});
+            }
+            else {
+                out[k] = v;
+            }
+        }
+        for(var k in template) {
+            if (k in out) {
+                continue;
+            }
+            
+            var v = template[k];
+            if (typeof v === 'object') {
+                out[k] = this.Merge(template[k],{});
+            }
+            else {
+                out[k] = v;
+            }
+        }
+        return out;
+    };
 
 	this.IsMouseDown = function() {
 		return this.mouse_down;
@@ -386,6 +413,10 @@ medea = new (function(sdom) {
 		// to achieve the same effect.
 		// http://stackoverflow.com/questions/3539205/is-there-a-substitute-for-glpolygonmode-in-open-gl-es-webgl
 	};
+    
+    this.GetTime = function() {
+        return this.time;
+    };
 
 	this.DoSingleFrame = function(dtime) {
 		if (!this.CanRender()) {
@@ -824,6 +855,7 @@ medea = new (function(sdom) {
 	};
 
 	this._SetFunctionStub("CreateNode","node");
+    this._SetFunctionStub("CreateEntity","entity");
 
 	this._SetFunctionStub("MakeResource","filesystem");
 	this._SetFunctionStub("Fetch","filesystem");
