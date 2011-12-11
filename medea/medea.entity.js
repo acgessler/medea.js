@@ -10,14 +10,15 @@ medea._addMod('entity',[],function() {
 	"use strict";
 	var medea = this;
 
+    var id_source = 0;
+    
 	this.Entity = medea.Class.extend({
 		name : "",
 		bb : null,
 
 		init : function(name) {
-			if(name) {
-				this.name = name;
-			}
+            this.id = id_source++;
+			this.name = name || ("UnnamedEntity_" + this.id);
 		},
 
 		Render : function(viewport,rqmanager) {
