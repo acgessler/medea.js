@@ -1,0 +1,85 @@
+{
+	"unitbase" : 128,
+	"size" : [32, 32],
+	"scale" : [1.0,220.0],
+
+	"maps" : [
+		{
+			"size" : [32,32],
+			"img" : "out_0.png"
+		},
+		
+		{
+			"size" : [16,16],
+			"img" : "out_1.png"
+		},
+		
+		{
+			"size" : [8,8],
+			"img" : "out_2.png"
+		},
+		
+		{
+			"size" : [4,4],
+			"img" : "out_3.png"
+		},
+		
+		{
+			"size" : [2,2],
+			"img" : "out_4.png"
+		},
+		
+		{
+			"size" : [1,1],
+			"img" : "out_5.png"
+		}
+	],
+	
+	"materials" : [
+		{
+			"effect" : "simple",
+			"constants" : {
+				"texture" : {
+					"neutral" : [1.0,0.85,0.4],
+					"low" : "./ground3_low.jpg",
+					"high" : "./ground3.jpg"
+				},
+				
+				"texture2" : {
+					"neutral" : [1.0,0.8,0.65],
+					"low" : "./ground4_low.jpg",
+					"high" : "./ground4.jpg"
+				},
+				
+				"normal_map" : {
+					"neutral" : "normals",
+					"low" : "./ground3_NRM_low.png",
+					"high" : "./ground3_NRM.png"
+				}
+			}
+		},
+		{
+			"clonefrom" : 0
+		},
+		{
+			"clonefrom" : 0
+		},
+		{
+			"clonefrom" : 0
+		},
+		{
+			"clonefrom" : 0
+		},
+		{
+			"clonefrom" : 0
+		},
+		{
+			"clonefrom" : 0
+		},
+		{
+			"clonefrom" : 0
+		}
+	],
+	
+	"default_fetch_order" : [3,0]
+}

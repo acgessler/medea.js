@@ -1,0 +1,32 @@
+#ifdef GL_ES
+precision highp float;
+#endif
+
+uniform sampler2D normal_map;
+uniform sampler2D texture;
+uniform sampler2D texture2;
+
+varying highp vec2 va_TexCoord;
+varying highp vec3 va_Normal;
+varying highp vec3 va_TSLightDir;
+varying highp float va_EyeDist;
+
+void main()
+{
+	float fade = va_Normal.y * va_Normal.y;
+	vec3 bumpNor = (texture2D(normal_map, va_TexCoord ).rgb - 0.5) * 2.0;
+	vec3 t1 = 0.5 * ( texture2D(texture, va_TexCoord ).rgb +  texture2D(texture, va_TexCoord * 5.0 ).rgb );
+	vec3 t2 = 0.5 * ( texture2D(texture2, va_TexCoord ).rgb +  texture2D(texture2, va_TexCoord * 5.0 ).rgb );
+	
+	vec3 fog = vec3(0.5,0.65,0.94);
+	// float fogDensity = 1.0 / exp( (va_EyeDist * 0.0006)  );
+	// actually, linear fog looks better in this scene, but keep the fog away from lod0
+	float fogDensity = 1.0 - clamp(0.0,1.0, (va_EyeDist-30.0) / 2000.0);
+	
+    gl_FragColor.a = 1.0;
+	gl_FragColor.rgb = mix( fog, ( mix( t1, t2, fade + 0.2 ) 
+	  
+		)
+		* dot(normalize(va_TSLightDir), normalize(bumpNor)),  fogDensity);
+}
+
