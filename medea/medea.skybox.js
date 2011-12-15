@@ -22,11 +22,13 @@ medea._addMod('skybox',['material','standardmesh','cubetexture'],function(undefi
 
 		medea._initMod('renderqueue');
 		mesh.RenderQueue(medea.RENDERQUEUE_BACKGROUND);
-		mesh.Material().Pass(0).State({
+		mesh.Material().Passes().forEach( function(p) { 
+			p.State({
 			'depth_test'  : true,
 			'depth_write' : false,
 			'cull_face' : true,
-			'cull_face_mode' : 'back'
+			'cull_face_mode' : 'front'
+			});
 		});
 
 		nd.AddEntity(mesh);
