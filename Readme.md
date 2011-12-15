@@ -8,17 +8,16 @@ medea is a scenegraph-based, lightweight and extremely straightforward 3D engine
 It is currently in active development, but I try to keep the trunk constantly alive and the API relatively stable, so there is no need to be scared off. 
 Things I focus on: 
 
- - _Asynchronous resource management_ and _progressive loading_ (i.e. LODs) to minimize 'hard' loading times.
- - _Data-driven effect framework_ supporting stuff like automatic dynamic lighting whilst still offering a high degree of
+ - _Asynchronous and progressive loading_ to minimize 'hard' loading times.
+ - Data-driven _effect framework_ supporting stuff like automatic dynamic lighting whilst still offering a high degree of
    flexibility to shader authors.
- - _Offline content processing_ and optimization to save as much bandwidth and runtime overhead as possible. For instance <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
+ - _Offline content processing_ to save as much bandwidth and runtime overhead as possible. For instance <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
   (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) is used to import geometry from douzens of common (and also not-so-common) 3D model formats.
- - _Automatic detail adjustment_ so medea-based applications can run on
+ - _Automatic detail management so medea-based applications can scale to
    all platforms, including mobile devices. This is clearly the most difficult point on the list, but also the one of which I believe that developers would benefit the most from.
- - Getting actual releases done - you better remind me on this :-)
  
 Medea's basic structure is very similar to that of other, non browser-based 3D engines (i.e. Ogre), so anyone with some experience in 3D programming will 
-need little time to work with it. 
+need little time to get to work with it. 
 
 ### Media ###
 
