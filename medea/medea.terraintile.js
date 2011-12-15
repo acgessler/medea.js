@@ -12,9 +12,6 @@ medea._addMod('terraintile',['worker_terrain','image','mesh'],function(undefined
     
     medea._initMod('worker_terrain');
 
-	var IsPowerOfTwo = function(n) {
-		return n !== 0 && (n & (n - 1)) === 0;
-	};
 
 	medea._HeightfieldFromEvenSidedHeightmap = function(tex, scale, xz_scale, t, v) {
 		var data = tex.GetData(), w = tex.GetWidth(), h = tex.GetHeight();
@@ -196,6 +193,10 @@ medea._addMod('terraintile',['worker_terrain','image','mesh'],function(undefined
 
 		return [pos,w,h];
 	};
+	
+	medea._HeightfieldFromOddSidedHeightmap = function(tex,scale, xz_scale, t, v) {
+		return medea._HeightfieldFromOddSidedHeightmapPart(tex,0,0,tex.GetWidth(),tex.GetHeight(),scale,xz_scale, t,v);
+	};
 
 
 	medea._GenHeightfieldIndices = function(ind, qtx, qty) {
@@ -365,10 +366,10 @@ medea._addMod('terraintile',['worker_terrain','image','mesh'],function(undefined
 
 			var v;
 
-			if (IsPowerOfTwo(w) && IsPowerOfTwo(h)) {
+			if (medea._IsPow2(w) && medea._IsPow2(h)) {
 				v = medea._HeightfieldFromEvenSidedHeightmap(tex);
 			}
-			else if (IsPowerOfTwo(w-1) && IsPowerOfTwo(h-1)) {
+			else if (medea._IsPow2(w-1) && medea._IsPow2(h-1)) {
 				v = medea._HeightfieldFromOddSidedHeightmap(tex);
 				--w, --h;
 			}
