@@ -14,7 +14,7 @@ function run() {
      
         var root = medea.RootNode();
 		medea.FetchMods(['terraintile'], function() {
-			medea.CreateTerrainTileMesh('remote:terraintile_sample/heightmap_256.png',
+			medea.CreateTerrainTileMesh('remote:terraintile_sample/heightmap_257.png',
 				medea.CreateSimpleMaterialFromColor([0.8,0.8,0.8,1.0], true),
 				function(mesh) {
 					root.AddChild().Translate([-64,10,-64]).AddEntity(mesh);

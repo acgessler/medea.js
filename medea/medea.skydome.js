@@ -23,7 +23,7 @@ medea._addMod('skydome',['mesh'],function(undefined) {
 		var pos = new Array(pcnt*3);
 		var nor = new Array(pcnt*3);
 		var uv = new Array(pcnt*2);
-		var ring_info = new Array(ring_info);
+		var ring_info = new Array(rings);
 
 		ring_info[0] = [0,0.0];
 		pos[0] = 0;
@@ -38,23 +38,23 @@ medea._addMod('skydome',['mesh'],function(undefined) {
 		uv[1] = 0.0;
 
 		// generate vertices
-		var ipos = 1, iuv = 1, lat = 0.0, lad = pi*0.5/rings, fac = pi*2.0/sin(lad), x,z,y, l;
+		var ipos = 3, iuv = 3, lat = 0.0, lad = pi*0.5/rings, fac = pi*2.0/sin(lad), x,z,y, l;
 		for(var r = 1; r < rings; ++r) {
 			lat += lad;
 
 			var rad = sin(lat)*fac, nmp = round(rad);
 			ring_info[r] = [nmp,nmp - ring_info[r-1][0]];
+	
 
 			var lon = 0.0, ldf = pi*2.0/nmp;
 			for(var p = 0; p < nmp; ++p, lon += ldf) {
 
-				x = pos[ipos+0] = cos(lat) - lower_amount;
-				y = pos[ipos+1] = cos(lon) * sin(lat);
+				x = pos[ipos+0] = cos(lon) * sin(lat);
+				y = pos[ipos+1] = cos(lat) - lower_amount;
 				z = pos[ipos+2] = sin(lon) * sin(lat);
 
-
-				if(x < 0) {
-					x = 0;
+				if(y < 0) {
+					y = 0;
 				}
 
 				l = -sqrt( x*x + y*y + z*z );
@@ -62,10 +62,15 @@ medea._addMod('skydome',['mesh'],function(undefined) {
 				nor[ipos++] = y/l;
 				nor[ipos++] = z/l;
 
-				uv[iuv++] = y/2.01 + 0.5;
-				uv[iuv++] = z/2.01 + 0.5;
+				uv[iuv++] = (x + 1.0)*0.485;
+				uv[iuv++] = (z + 1.0)*0.485;
 			}
 		}
+		
+		// XXX
+		pos.length = ipos;
+		nor.length = ipos;
+		uv.length = iuv;
 
 		var n = 0;
 		for(var i = 1; i < rings; ++i) {
@@ -185,7 +190,7 @@ medea._addMod('skydome',['mesh'],function(undefined) {
 			'depth_test'  : true,
 			'depth_write' : false,
 			'cull_face'   : true,
-			'cull_face_mode' : 'back'
+			'cull_face_mode' : 'front'
 			});
 		});
 
