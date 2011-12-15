@@ -19,15 +19,14 @@ medea._addMod('cubetexture',['filesystem'],function(undefined) {
 	medea._initMod('filesystem');
 	medea.CubeTexture = medea.Resource.extend( {
 
-		init : function(src, callback, no_client_cache) {
-			// #ifdef DEBUG
-			if (no_client_cache === undefined) {
-				no_client_cache = true;
-			}
-			// #endif
+		init : function(src, callback, flags) {
 
+			this.flags = flags || 0;
 			this.texture = gl.createTexture();
 			this.callback = callback;
+			
+			// sentinel size as long as we don't know the real value yet
+			this.width = this.glwidth = this.height = this.glheight = -1;
 
 			this.img = new Array(6);
 
@@ -53,42 +52,124 @@ medea._addMod('cubetexture',['filesystem'],function(undefined) {
 				outer.img[i].onload = function() {
 					outer.OnDelayedInit(i);
 				};
-				outer.img[i].src = medea.FixURL(src[i],no_client_cache);
+				outer.img[i].src = medea.FixURL(src[i]);
 				}(i));
 			}
 		},
 
 		OnDelayedInit : function(index) {
-			gl.bindTexture(CUBE, this.texture);
-
-			var face = gl.TEXTURE_CUBE_MAP_POSITIVE_X + index;
-			gl.texImage2D(face, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.img[index]);
-
+		
+			var w = this.img[index].width, h = this.img[index].height;
+		
+			// cube textures must be POTs and all faces must be squares. Anything else
+			// doesn't make sense unlike for 2D textures.
+			// #ifdef DEBUG
+			medea.DebugAssert(w === h && medea._IsPow2(w) && medea._IsPow2(h),'cube texture faces must be squared and POTs');
+			medea.DebugAssert(this.counter === 6 || (w === this.width && h === this.height),'cube texture faces must be all of the same size');
+			// #endif 
+			
+			this.width = this.glwidth = w;
+			this.height = this.glheight = h;
+		
 			// mark this resource as complete if this was the last face
 			if (--this.counter === 0) {
-				gl.texParameteri(CUBE, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-				gl.texParameteri(CUBE, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-				gl.generateMipmap(CUBE);
-
 				this._super();
-				medea.LogDebug("successfully loaded cube texture (URL is for posx face) " + this.src[0]);
+				
+				if (!(this.flags & medea.TEXTURE_FLAG_LAZY_UPLOAD)) {
+					this._Upload();
+				}
+				
+				medea.LogDebug("successfully loaded cube texture " + this.GetSource());	
 			}
+		},
+		
+		GetWidth : function() {
+			return this.width;
+		},
 
-			// #ifdef DEBUG
-			gl.bindTexture(CUBE, null);
-			// #endif
+		GetHeight : function() {
+			return this.height;
+		},
+		
+		GetGlWidth : function() {
+			return this.glwidth;
+		},
+
+		GetGlHeight : function() {
+			return this.glheight;
 		},
 
 		GetGlTexture : function() {
 			return this.texture;
 		},
+		
+		GetSource : function() {
+			return this.src[0] + '...(1-6)';
+		},
+		
+		IsPowerOfTwo : function() {
+			return true;
+		},
+		
+		IsSquared : function() {
+			return true;
+		},
 
+		_Upload : function() {
+			if (this.uploaded) {
+				return;
+			}
+			
+			var old = gl.getParameter(gl.TEXTURE_BINDING_CUBE);
+			if(old !== this.texture) {
+				gl.bindTexture(CUBE, this.texture);
+			}
+			
+			// fill all faces
+			for ( var i = 0; i < 6; ++i) {
+				var face = gl.TEXTURE_CUBE_MAP_POSITIVE_X + i;
+				gl.texImage2D(face, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.img[i]);
+			}
+
+			// setup sampler states and generate MIPs
+			gl.texParameteri(CUBE, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+			
+			if (!(this.flags & medea.TEXTURE_FLAG_NO_MIPS)) {
+				gl.texParameteri(CUBE, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+				gl.generateMipmap(CUBE);
+			}
+			else {
+				gl.texParameteri(CUBE, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			}
+
+			// because _Upload may be called at virtually any time, we
+			// need to ensure that the global state is not altered.
+			if(old !== this.texture) {
+				gl.bindTexture(CUBE, old);
+			}
+
+			// this hopefully frees some memory
+			if (!(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE)) {
+				this.img = null;
+			}
+			
+			this.uploaded = true;
+		},
 
 		_Bind : function(slot) {
+			if (!this.IsComplete()) {
+				return;
+			}
+			
 			slot = slot || 0;
 
 			gl.activeTexture(gl.TEXTURE0 + slot);
 			gl.bindTexture(CUBE,this.texture);
+			
+			if (!this.uploaded) {
+				this._Upload();
+			}
+			
 			return slot;
 		},
 	});

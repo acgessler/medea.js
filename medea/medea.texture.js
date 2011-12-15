@@ -14,10 +14,6 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 	medea._initMod('image');
 	
 	
-	var NextPow2 = function( s ){
-		// dumb way, might use the bit fiddling hack some day?
-		return Math.pow( 2, Math.ceil( Math.log( s ) / Math.log( 2 ) ) ); 
-	};
 
 	var TEX = medea.TEXTURE_TYPE_2D = gl.TEXTURE_2D;
 	
@@ -33,6 +29,8 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 
 		init : function(src_or_img, callback, flags) {
 			this.texture = gl.createTexture();
+			this.glwidth = this.glheight = -1;
+			
 			this._super(src_or_img, callback, flags);
 		},
 
@@ -45,8 +43,8 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 				this.glheight = this.height;
 			}
 			else {
-				this.glwidth = NextPow2(this.width);
-				this.glheight = NextPow2(this.height);
+				this.glwidth = medea._NextPow2(this.width);
+				this.glheight = medea._NextPow2(this.height);
 			}
 	
 			if (this.glwidth > medea.MAX_TEXTURE_SIZE || this.glheight > medea.MAX_TEXTURE_SIZE) {

@@ -757,6 +757,15 @@ medea = new (function(sdom) {
  			return this[name].apply(this,arguments);
 		};
 	};
+	
+	this._NextPow2 = function( s ){
+		// dumb way, might use the bit fiddling hack some day?
+		return Math.pow( 2, Math.ceil( Math.log( s ) / Math.log( 2 ) ) ); 
+	};
+	
+	this._IsPow2 = function(w) {
+		return w !== 0 && (w & (w - 1)) === 0;
+	};
     
     this._SetFunctionStub("IsMouseDown","input");
     this._SetFunctionStub("IsKeyDown","input");

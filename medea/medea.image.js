@@ -17,6 +17,9 @@ medea._addMod('image',['filesystem'],function(undefined) {
 
 		init : function(src_or_image, callback, flags) {
 			this.flags = flags || 0;
+			
+			// sentinel size as long as we don't know the real value yet
+			this.width = this.height = -1;
 
 			this.callback = callback;
 			if (src_or_image instanceof Image) {
@@ -40,10 +43,10 @@ medea._addMod('image',['filesystem'],function(undefined) {
 		// #ifdef DEBUG
 		OnDelayedInit : function() {
 		
-			var w = this.width = this.img.width;
-			var h = this.height = this.img.height;
+			this.width = this.img.width;
+			this.height = this.img.height;
 			
-			this.ispot = w !== 0 && (w & (w - 1)) === 0 && h !== 0 && (h & (h - 1)) === 0;
+			this.ispot = medea._IsPow2(this.width) && medea._IsPow2(this.height);
 		
 			// mark this resource as complete
 			this._super();
@@ -53,7 +56,7 @@ medea._addMod('image',['filesystem'],function(undefined) {
 
 		GetData : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.IsComplete(),'GetData() not possible on image, loading is not yet complete');
+			medea.DebugAssert(this.IsComplete(),'texture not loaded yet');
 			medea.DebugAssert(!!this.img,'image data not present, forgot medea.TEXTURE_FLAG_KEEP_IMAGE flag on texture?');
 			// #endif
 
@@ -81,7 +84,17 @@ medea._addMod('image',['filesystem'],function(undefined) {
 		},
 		
 		IsPowerOfTwo : function() {
+			// #ifdef DEBUG
+			medea.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: texture not loaded yet');
+			// #endif
 			return this.ispot;
+		},
+		
+		IsSquare : function() {
+			// #ifdef DEBUG
+			medea.DebugAssert(this.IsComplete(),'IsSquare() ist not available: texture not loaded yet');
+			// #endif
+			return this.width === this.height;
 		},
 		
 		GetSource : function() {
