@@ -9,16 +9,14 @@
 medea._addMod('image',['filesystem'],function(undefined) {
 	"use strict";
 	var medea = this;
+	
+	medea.IMAGE_FLAG_USER = 0x1000;
 
 	medea._initMod('filesystem');
 	medea.Image = medea.Resource.extend( {
 
-		init : function(src_or_image, callback, no_client_cache) {
-			// #ifdef DEBUG
-			if (no_client_cache === undefined) {
-				no_client_cache = true;
-			}
-			// #endif
+		init : function(src_or_image, callback, flags) {
+			this.flags = flags || 0;
 
 			this.callback = callback;
 			if (src_or_image instanceof Image) {
@@ -35,29 +33,34 @@ medea._addMod('image',['filesystem'],function(undefined) {
 					outer.OnDelayedInit();
 				};
 
-				this.img.src = medea.FixURL(src_or_image,no_client_cache);
+				this.img.src = medea.FixURL(src_or_image);
 			}
 		},
 
 		// #ifdef DEBUG
 		OnDelayedInit : function() {
+		
+			var w = this.width = this.img.width;
+			var h = this.height = this.img.height;
+			
+			this.ispot = w !== 0 && (w & (w - 1)) === 0 && h !== 0 && (h & (h - 1)) === 0;
+		
 			// mark this resource as complete
 			this._super();
-			medea.LogDebug("successfully loaded raw image " + this.src);
+			medea.LogDebug("successfully loaded raw image " + this.GetSource());
 		},
 		// #endif
 
 		GetData : function() {
 			// #ifdef DEBUG
-			if (!this.IsComplete()) {
-				medea.DebugAssert('GetData() not possible on image, loading is not yet complete');
-			}
+			medea.DebugAssert(this.IsComplete(),'GetData() not possible on image, loading is not yet complete');
+			medea.DebugAssert(!!this.img,'image data not present, forgot medea.TEXTURE_FLAG_KEEP_IMAGE flag on texture?');
 			// #endif
 
 			if (!this.raw) {
 				var canvas = document.createElement('canvas');
-				canvas.width = this.img.width;
-				canvas.height = this.img.height;
+				canvas.width = this.width;
+				canvas.height = this.height;
 
 				var context = canvas.getContext('2d');
 				context.drawImage(this.img, 0, 0);
@@ -70,11 +73,19 @@ medea._addMod('image',['filesystem'],function(undefined) {
 		},
 
 		GetWidth : function() {
-			return this.img.width;
+			return this.width;
 		},
 
 		GetHeight : function() {
-			return this.img.height;
+			return this.height;
+		},
+		
+		IsPowerOfTwo : function() {
+			return this.ispot;
+		},
+		
+		GetSource : function() {
+			return this.src;
 		},
 
 		Pixel : function(x,y, rgba) {
