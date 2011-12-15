@@ -180,11 +180,13 @@ medea._addMod('skydome',['mesh'],function(undefined) {
 
 		medea._initMod('renderqueue');
 		mesh.RenderQueue(medea.RENDERQUEUE_BACKGROUND);
-		mesh.Material().Pass(0).State({
+		mesh.Material().Passes().forEach( function(p) { 
+			p.State({
 			'depth_test'  : true,
 			'depth_write' : false,
-			'cull_face' : true,
+			'cull_face'   : true,
 			'cull_face_mode' : 'back'
+			});
 		});
 
 		nd.AddEntity(mesh);
