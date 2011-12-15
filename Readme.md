@@ -13,7 +13,7 @@ Things I focus on:
    flexibility to shader authors.
  - _Offline content processing_ to save as much bandwidth and runtime overhead as possible. For instance <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
   (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) is used to import geometry from douzens of common (and also not-so-common) 3D model formats.
- - _Automatic detail management so medea-based applications can scale to
+ - _Automatic detail management_ so medea-based applications can scale to
    all platforms, including mobile devices. This is clearly the most difficult point on the list, but also the one of which I believe that developers would benefit the most from.
  
 Medea's basic structure is very similar to that of other, non browser-based 3D engines (i.e. Ogre), so anyone with some experience in 3D programming will 
