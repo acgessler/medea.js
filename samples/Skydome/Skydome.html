@@ -37,6 +37,10 @@ function run() {
         
 		medea.FetchMods(['standardmesh','material'], function() {
 			var mfloor = medea.CreateStandardMesh_Plane(medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/floor_texture.jpg'));
+			mfloor.Material().Passes().forEach( function(p) { 
+				p.CullFace(false) } 
+			);
+			
 			root.AddChild().Translate([0,-1,0]).Scale(300).AddEntity(mfloor);
 		});
         
