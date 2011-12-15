@@ -26,7 +26,7 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 
 			this.type = src.split('.').pop() == 'ps' ? medea.SHADER_TYPE_PIXEL : medea.SHADER_TYPE_VERTEX;
 			this.shader = 0;
-			this.defines = defines;
+			this.defines = defines ? medea.Merge(defines,{}) : {};
 
 			// trigger deferred loading
 			this._super(src, callback);
@@ -35,12 +35,10 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 		OnDelayedInit : function(data) {
 
 // #ifdef DEBUG
-			if (typeof data != "string") {
-				medea.DebugAssert("got unexpected argument, perhaps the source for the shader was not a single resource?");
-			}
+			medea.DebugAssert(typeof data === "string","got unexpected argument, perhaps the source for the shader was not a single resource?");
 // #endif
 
-			var c = this._GetCacheName(this.src, this.defines);
+			var c = this._GetCacheName();
 			var s = sh_cache[c];
 			if(s !== undefined) {
 				this.shader = s;
@@ -49,7 +47,9 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 			}
 
 			s = this.shader = sh_cache[c] = gl.createShader(this.type);
-			gl.shaderSource(s,data);
+			
+			var gen_source = this._PrependDefines(data);
+			gl.shaderSource(s,gen_source);
 
 			gl.compileShader(s);
 			if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
@@ -67,13 +67,28 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 			return this.shader;
 		},
 		
-		_GetCacheName : function(src, defines) {
-			var o = src;
+		_PrependDefines : function(data) {
+			var d = this.defines;
+			
+			var o = '';
+			for(var k in d) {
+				o += '#define ' + k + ' ' + (d[k] || '') + '\n';
+			}
+			if (o === '') {
+				return data;
+			}
+			return	'/* !begin medea-generated head! */\n' + o +
+					'/* !end medea-generated head! */\n' + data;
+		},
+		
+		_GetCacheName : function() {
+			var o = this.src;
 
-			if (defines) {
+			if (this.defines) {
+				var d = this.defines;
 				o += '#';
-				for(k in defines) {
-					o += k+'='+defines[k];
+				for(var k in d) {
+					o += k+'='+(d[k] || '');
 				}
 			}
 

@@ -494,12 +494,12 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		return new medea.Material(passes, name);
 	};
 
-	medea.CreateSimpleMaterialFromShaderPair = function(name, constants, attr_map) {
-		return new medea.Material(medea.CreatePassFromShaderPair(name,constants, attr_map));
+	medea.CreateSimpleMaterialFromShaderPair = function(name, constants, attr_map, defines) {
+		return new medea.Material(medea.CreatePassFromShaderPair(name,constants, attr_map, defines));
 	};
 
-	medea.CreatePassFromShaderPair = function(name, constants, attr_map) {
-		return new medea.Pass( medea.CreateShader(name+'.vs'), medea.CreateShader(name+'.ps'), constants, attr_map );
+	medea.CreatePassFromShaderPair = function(name, constants, attr_map, defines) {
+		return new medea.Pass( medea.CreateShader(name+'.vs', defines), medea.CreateShader(name+'.ps', defines), constants, attr_map );
 	};
 });
 
