@@ -121,7 +121,7 @@ medea = new (function(sdom) {
 
 	this.root_url = sdom.src.replace(/^(.*[\\\/])?(.*)/,'$1');
 	this.statepool = {};
-	
+
 	this._workers = {};
 
 	// collect initial dependencies - for example the scenegraph module is always needed
@@ -134,7 +134,7 @@ medea = new (function(sdom) {
 		_callback_pre = function() {
 			this.sprintf = sprintf;
 			this.canvas  = document.getElementById(where);
-			
+
 			// note that this will automatically create a debug context if webgl-debug.js is present
 			this.gl = WebGLUtils.setupWebGL(this.canvas);
 
@@ -197,52 +197,52 @@ medea = new (function(sdom) {
 			}
 		}
 	};
-    
-    this.Merge = function(inp,template) {
-        var out = {};
-        for(var k in inp) {
-            var v = inp[v];
-            if (typeof v === 'object') {
-                out[k] = this.Merge(v,template[k] || {});
-            }
-            else {
-                out[k] = v;
-            }
-        }
-        for(var k in template) {
-            if (k in out) {
-                continue;
-            }
-            
-            var v = template[k];
-            if (typeof v === 'object') {
-                out[k] = this.Merge(template[k],{});
-            }
-            else {
-                out[k] = v;
-            }
-        }
-        return out;
-    };
+
+	this.Merge = function(inp,template) {
+		var out = {};
+		for(var k in inp) {
+			var v = inp[v];
+			if (typeof v === 'object') {
+				out[k] = this.Merge(v,template[k] || {});
+			}
+			else {
+				out[k] = v;
+			}
+		}
+		for(var k in template) {
+			if (k in out) {
+				continue;
+			}
+
+			var v = template[k];
+			if (typeof v === 'object') {
+				out[k] = this.Merge(template[k],{});
+			}
+			else {
+				out[k] = v;
+			}
+		}
+		return out;
+	};
 
 
 // #ifndef LOG
-    this.Log = this.LogDebug = function() {};
-// #else 
+	this.Log = this.LogDebug = function() {};
+// #else
 	this.Log = function(message, kind) {
 		console.log((kind||'info')+': ' + message);
 	};
-    
-    // #ifndef DEBUG
+
+	// #ifndef DEBUG
 	this.LogDebug = function() {};
-    // #else
+	// #else
 	this.LogDebug = function(message) {
 		console.log('debug: ' + message);
 	};
-    // #endif
+	// #endif
 
 // #endif
-    
+
 
 	this.GetSettings = function() {
 		return this.settings;
@@ -346,10 +346,10 @@ medea = new (function(sdom) {
 		// to achieve the same effect.
 		// http://stackoverflow.com/questions/3539205/is-there-a-substitute-for-glpolygonmode-in-open-gl-es-webgl
 	};
-    
-    this.GetTime = function() {
-        return this.time;
-    };
+
+	this.GetTime = function() {
+		return this.time;
+	};
 
 	this.DoSingleFrame = function(dtime) {
 		if (!this.CanRender()) {
@@ -412,7 +412,7 @@ medea = new (function(sdom) {
 		}
 
 		// perform rendering
-        var viewports = this.GetViewports();
+		var viewports = this.GetViewports();
 		for(var vn = 0; vn < viewports.length; ++vn) {
 			viewports[vn].Render(this,dtime);
 		}
@@ -442,44 +442,44 @@ medea = new (function(sdom) {
 
 	var worker_index_source = 0;
 	this.CreateWorker = function(name, callback) {
-	
+
 		var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
 		if (!BlobBuilder) {
 			medea.LogDebug('BlobBuilder not available, can\t use web worker');
 			callback(null);
 			return false;
 		}
-		
+
 		if (!Worker) {
 			medea.LogDebug('Worker not available, can\t use web worker');
 			callback(null);
 			return false;
 		}
-		
+
 		var URL = window.URL || window.webkitURL;
 		if (!URL || !URL.createObjectURL) {
 			medea.LogDebug('URL.createObjectURL not available, can\t use web worker');
 			callback(null);
 			return false;
 		}
-		
+
 		medea.FetchMods('worker_base', function() {
 			var bb = new BlobBuilder();
 			bb.append([medea.GetModSource('worker_base'),medea.GetModSource('worker_terrain')].join('\n'));
-			
+
 			var blobURL = URL.createObjectURL(bb.getBlob());
 			var worker = new Worker(blobURL);
-			
+
 			var worker_index = worker_index_source++;
-			
+
 			var msg = callback(worker, worker_index) || function() {};
 			worker.onmessage = function(e) {
-            
+
 				if (e.data[0] === 'log') {
 					medea.Log('(worker ' + worker_index + ') ' + e.data[1], e.data[2] || 'debug');
 					return;
 				}
-                else if (e.data[0] === 'assert') {
+				else if (e.data[0] === 'assert') {
 					medea.DebugAssert('(worker ' + worker_index + ') ' + e.data[1]);
 					return;
 				}
@@ -489,7 +489,7 @@ medea = new (function(sdom) {
 
 		return true;
 	};
-			
+
 
 
 	this._addMod = function(name,deps,init,symbols) {
@@ -535,7 +535,7 @@ medea = new (function(sdom) {
 			// #ifdef LOG
 			medea.LogDebug('modready: ' + name);
 			// #endif
-			
+
 			var w = _waiters[name];
 
 			_stubs[name] = init;
@@ -560,7 +560,7 @@ medea = new (function(sdom) {
 		s.apply(medea);
 		_stubs[name] = null;
 	};
-	
+
 	this.GetModSource = function(n) {
 		return _sources[n];
 	},
@@ -618,14 +618,14 @@ medea = new (function(sdom) {
 					// #ifdef LOG
 					medea.LogDebug("run: " + n);
 					// #endif LOG
-					
+
 					_sources[n] = text;
-					
+
 					// global eval() is best for debugging
-					
+
 					// http://perfectionkills.com/global-eval-what-are-the-options/
 					window.eval(text);
-					
+
 					/*
 					var sc = document.createElement( 'script' );
 					sc.type = 'text/javascript';
@@ -635,7 +635,7 @@ medea = new (function(sdom) {
 					sc.innerHTML = '//<![CDATA[\n' + text  + '\n//]]>';
 					document.getElementsByTagName('head')[0].appendChild(sc);
 					*/
-					
+
 					// non medea modules won't call _addMod, so we need to mimic parts of its behaviour
 					// to satisfy all listeners and to keep the file from being loaded twice.
 					if(!is_medea_mod) {
@@ -728,15 +728,15 @@ medea = new (function(sdom) {
 
 		this.statistics.vertices_frame = this.statistics.primitives_frame = this.statistics.batches_frame = 0;
 	};
-    
-    this._GetSet = function(what) {
-        return function(f) {
-            if (f === undefined) {
-                return this[what];
-            }
-            this[what] = f;
-        };
-    };
+
+	this._GetSet = function(what) {
+		return function(f) {
+			if (f === undefined) {
+				return this[what];
+			}
+			this[what] = f;
+		};
+	};
 
 
 	this._SetFunctionStub = function(name,module_dep) {
@@ -757,28 +757,28 @@ medea = new (function(sdom) {
  			return this[name].apply(this,arguments);
 		};
 	};
-	
+
 	this._NextPow2 = function( s ){
 		// dumb way, might use the bit fiddling hack some day?
-		return Math.pow( 2, Math.ceil( Math.log( s ) / Math.log( 2 ) ) ); 
+		return Math.pow( 2, Math.ceil( Math.log( s ) / Math.log( 2 ) ) );
 	};
-	
+
 	this._IsPow2 = function(w) {
 		return w !== 0 && (w & (w - 1)) === 0;
 	};
-    
-    this._SetFunctionStub("IsMouseDown","input");
-    this._SetFunctionStub("IsKeyDown","input");
-    this._SetFunctionStub("IsKeyDownWasUp","input");
-    this._SetFunctionStub("GetMousePosition","input");
-    this._SetFunctionStub("GetMouseDelta","input");
-    
+
+	this._SetFunctionStub("IsMouseDown","input");
+	this._SetFunctionStub("IsKeyDown","input");
+	this._SetFunctionStub("IsKeyDownWasUp","input");
+	this._SetFunctionStub("GetMousePosition","input");
+	this._SetFunctionStub("GetMouseDelta","input");
+
 	this._SetFunctionStub("CreateNode","node");
-    this._SetFunctionStub("CreateEntity","entity");
-    
-    this._SetFunctionStub("CreateViewport","viewport");
-    this._SetFunctionStub("GetViewports","viewport");
-    this._SetFunctionStub("CreateCameraNode","camera");
+	this._SetFunctionStub("CreateEntity","entity");
+
+	this._SetFunctionStub("CreateViewport","viewport");
+	this._SetFunctionStub("GetViewports","viewport");
+	this._SetFunctionStub("CreateCameraNode","camera");
 
 	this._SetFunctionStub("MakeResource","filesystem");
 	this._SetFunctionStub("Fetch","filesystem");
@@ -834,7 +834,7 @@ medea = new (function(sdom) {
 
 	this._SetFunctionStub("CreateSplinePathAnimator","splinepath");
 	this._SetFunctionStub("CreateTerrainHeightPathAnimator","terrainheightpath");
-	
+
 	this._SetFunctionStub("CreateStatePool","statepool");
 	this._SetFunctionStub("GetDefaultStatePool","statepool");
 

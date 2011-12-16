@@ -9,13 +9,13 @@
 medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
-    
-    var id_source = 0;
-    
-    var viewports = [];
+
+	var id_source = 0;
+
+	var viewports = [];
 	var enabled_viewports = 0, default_zorder = 0;
 
-    
+
 	// class Viewport
 	medea.Viewport = medea.Class.extend({
 		name:"",
@@ -38,8 +38,8 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 			this.h = h || 1.0;
 			this.zorder = zorder || 0;
 			this.visualizers = [];
-            this.id = id_source++;
-            this.name = name || 'UnnamedViewport_' + this.id;
+			this.id = id_source++;
+			this.name = name || 'UnnamedViewport_' + this.id;
 
 			this.Camera(camera || medea.CreateCameraNode(this.name+'_DefaultCam'));
 
@@ -78,9 +78,9 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 		Name: medea._GetSet('name'),
 
 		Enabled: function(f) {
-            if(f === undefined) {
-                return this.enabled;
-            }
+			if(f === undefined) {
+				return this.enabled;
+			}
 			this.Enable(f);
 		},
 
@@ -100,95 +100,95 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 		},
 
 		GetZOrder: function() {
-            return this.zorder;
-        },
+			return this.zorder;
+		},
 
 		ClearColor: function(col) {
-            if( col === undefined) {
-                return this.ccolor;
-            }
+			if( col === undefined) {
+				return this.ccolor;
+			}
 			this.ccolor = col;
 			this.updated = true;
 		},
 
 		Width: function(w) {
-            if (w === undefined) {
-                return this.w;
-            }
+			if (w === undefined) {
+				return this.w;
+			}
 			this.w = w;
 			this.updated = true;
 		},
 
 		SetHeight: function(h) {
-            if (h === undefined) {
-                return this.h;
-            }
+			if (h === undefined) {
+				return this.h;
+			}
 			this.h = h;
 			this.updated = true;
 		},
 
 		X: function(x) {
-            if (x === undefined) {
-                return this.x;
-            }
+			if (x === undefined) {
+				return this.x;
+			}
 			this.x = x;
 			this.updated = true;
 		},
 
 		Y: function(y) {
-            if (y === undefined) {
-                return this.y;
-            }
+			if (y === undefined) {
+				return this.y;
+			}
 			this.y = y;
 			this.updated = true;
 		},
 
 		Pos: function(x,y) {
-            if (x === undefined) {
-                return [this.x,this.y];
-            }
-            else if (Array.isArray(x)) {
-                this.y = x[1];
-                this.x = x[0];
-            }
-            else {
-    			this.y = y;
-    			this.x = x;
-            }
+			if (x === undefined) {
+				return [this.x,this.y];
+			}
+			else if (Array.isArray(x)) {
+				this.y = x[1];
+				this.x = x[0];
+			}
+			else {
+				this.y = y;
+				this.x = x;
+			}
 			this.updated = true;
 		},
 
 		Size: function(w,h) {
 			if (w === undefined) {
-                return [this.w,this.h];
-            }
-            else if (Array.isArray(w)) {
-                this.h = h[1];
-                this.w = w[0];
-            }
-            else {
-    			this.h = h;
-    			this.w = w;
-            }
+				return [this.w,this.h];
+			}
+			else if (Array.isArray(w)) {
+				this.h = h[1];
+				this.w = w[0];
+			}
+			else {
+				this.h = h;
+				this.w = w;
+			}
 			this.updated = true;
 		},
 
 		Rect: function(x,y,w,h) {
-            if (x === undefined) {
-                return [this.x,this.y,this.w,this.h];
-            }
-            else if (Array.isArray(x)) {
-                this.w = x[3];
-    			this.h = x[2];
-    			this.y = x[1];
-    			this.x = x[0];
-            }
+			if (x === undefined) {
+				return [this.x,this.y,this.w,this.h];
+			}
+			else if (Array.isArray(x)) {
+				this.w = x[3];
+				this.h = x[2];
+				this.y = x[1];
+				this.x = x[0];
+			}
 			else {
-                this.w = w;
-    			this.h = h;
-    			this.y = y;
-    			this.x = x;
-            }
+				this.w = w;
+				this.h = h;
+				this.y = y;
+				this.x = x;
+			}
 			this.updated = true;
 		},
 
@@ -197,9 +197,9 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 		},
 
 		Camera : function(cam) {
-            if (cam === undefined) {
-                return this.camera;
-            }
+			if (cam === undefined) {
+				return this.camera;
+			}
 			if (this.camera) {
 				this.camera._OnSetViewport(null);
 			}
@@ -263,10 +263,10 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 			this.updated = false;
 		}
 	});
-    
-            
-    medea.CreateViewport = function(name,x,y,w,h,zorder,camera,enable) {
-		
+
+
+	medea.CreateViewport = function(name,x,y,w,h,zorder,camera,enable) {
+
 		// if no z-order is given, default to stacking
 		// viewports on top of each other in creation order.
 		if (zorder === undefined) {
@@ -291,15 +291,15 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 		}
 
 		return vp;
-    }
-    
-    medea.GetViewports = function() {
+	}
+
+	medea.GetViewports = function() {
 		return viewports;
 	};
-    
-    medea.GetEnabledViewportCount = function() {
-        return enabled_viewports;
-    };
+
+	medea.GetEnabledViewportCount = function() {
+		return enabled_viewports;
+	};
 });
 
 

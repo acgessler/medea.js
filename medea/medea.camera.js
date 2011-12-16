@@ -12,7 +12,7 @@ medea._addMod('camera',['statepool'],function() {
 
 	medea._CAMERA_DIRTY_FRUSTUM = medea.NODE_FLAG_USER;
 	medea._CAMERA_DIRTY_VIEW = medea.NODE_FLAG_USER << 1;
-	medea._CAMERA_DIRTY_PROJ = medea.NODE_FLAG_USER << 2; 
+	medea._CAMERA_DIRTY_PROJ = medea.NODE_FLAG_USER << 2;
 
 
 	// class Camera
@@ -20,7 +20,7 @@ medea._addMod('camera',['statepool'],function() {
 	{
 		init : function(name,fovy,aspect,znear,zfar,viewport,culling) {
 			this._super(name);
-            this.name = name || ("UnnamedCamera_" + this.id);
+			this.name = name || ("UnnamedCamera_" + this.id);
 
 			this.view = mat4.identity(mat4.create());
 			this.proj = mat4.identity(mat4.create());
@@ -50,72 +50,72 @@ medea._addMod('camera',['statepool'],function() {
 			this._UpdateProjectionMatrix();
 			return this.proj;
 		},
-		
+
 		GetFrustum : function() {
 			this._UpdateFrustum();
 			return this.frustum;
 		},
-		
-		Culling: medea._GetSet('culling'),  
-        Name: medea._GetSet('name'),
-        
-        GetViewport : function() {
-            return this.viewport;
-        },
+
+		Culling: medea._GetSet('culling'),
+		Name: medea._GetSet('name'),
+
+		GetViewport : function() {
+			return this.viewport;
+		},
 
 		ZNear : function(f) {
-            if (f === undefined) {
-                return this.znear;
-            }
-            this.znear = f;
-            this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
+			if (f === undefined) {
+				return this.znear;
+			}
+			this.znear = f;
+			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
 		},
 
 		ZFar : function(f) {
-            if (f === undefined) {
-                return this.zfar;
-            }
-            this.zfar = f;
-            this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
+			if (f === undefined) {
+				return this.zfar;
+			}
+			this.zfar = f;
+			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
 		},
 
 		Aspect : function(f) {
 			if (f === undefined) {
-                return this.aspect;
-            }
-            this.aspect = f;
-            this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
+				return this.aspect;
+			}
+			this.aspect = f;
+			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
 		},
 
 		FOV : function(f) {
 			if (f === undefined) {
-                return this.fovy;
-            }
-            this.fovy = f;
-            this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
+				return this.fovy;
+			}
+			this.fovy = f;
+			this.flags |= medea._CAMERA_DIRTY_PROJ | medea._CAMERA_DIRTY_FRUSTUM;
 		},
-        
-        
-        _OnSetViewport : function(vp) {
+
+
+		_OnSetViewport : function(vp) {
 			this.viewport = vp;
 		},
 
-        _SetTrafoDirty : function() {
-            this._super();
-            this.flags |= medea._CAMERA_DIRTY_VIEW | medea._CAMERA_DIRTY_FRUSTUM;
-        },
-		
+		_SetTrafoDirty : function() {
+			this._super();
+			this.flags |= medea._CAMERA_DIRTY_VIEW | medea._CAMERA_DIRTY_FRUSTUM;
+		},
+
 		_UpdateFrustum : function() {
 			if (!(this.flags & medea._CAMERA_DIRTY_FRUSTUM)) {
 				return this.frustum;
 			}
-			
+
 			this.frustum = medea.ExtractFrustum(this.GetViewMatrix(), this.GetProjectionMatrix());
-			
+
 			this.flags &= ~medea._CAMERA_DIRTY_FRUSTUM;
 			return this.frustum;
 		},
-		
+
 		_UpdateViewMatrix : function() {
 			if (!(this.flags & medea._CAMERA_DIRTY_VIEW)) {
 				return this.view;
@@ -149,13 +149,13 @@ medea._addMod('camera',['statepool'],function() {
 
 		_Render : function(rq) {
 			var frustum = this.GetFrustum(), statepool = medea.GetDefaultStatePool(), outer = this;
-			
+
 			// traverse all nodes in the graph and collect their render jobs
 			medea.VisitGraph(medea.RootNode(),function(node,parent_visible) {
 
 				var vis = parent_visible === medea.VISIBLE_ALL ? medea.VISIBLE_ALL : node.Cull(frustum);
-                var e = node.GetActiveEntities(outer);
-                
+				var e = node.GetActiveEntities(outer);
+
 				if(vis === medea.VISIBLE_NONE) {
 					return medea.VISIBLE_NONE;
 				}
@@ -182,7 +182,7 @@ medea._addMod('camera',['statepool'],function() {
 			statepool.Set("V",this.GetViewMatrix());
 			statepool.Set("P",this.GetProjectionMatrix());
 			statepool.Set("W",mat4.identity(mat4.create()));
-			
+
 			statepool.Set("CAM_POS", this.GetWorldPos());
 
 			// rq.Flush() is left to the caller

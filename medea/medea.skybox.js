@@ -17,12 +17,12 @@ medea._addMod('skybox',['material','standardmesh','cubetexture'],function(undefi
 		var mesh = medea.CreateStandardMesh_Cube(medea.CreateSimpleMaterialFromShaderPair('remote:mcore/shaders/skybox',{
 			texture : medea.CreateCubeTexture( texbase )
 		}));
-		
+
 		mesh.BB(medea.BB_INFINITE);
 
 		medea._initMod('renderqueue');
 		mesh.RenderQueue(medea.RENDERQUEUE_BACKGROUND);
-		mesh.Material().Passes().forEach( function(p) { 
+		mesh.Material().Passes().forEach( function(p) {
 			p.State({
 			'depth_test'  : true,
 			'depth_write' : false,

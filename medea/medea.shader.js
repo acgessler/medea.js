@@ -47,7 +47,7 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 			}
 
 			s = this.shader = sh_cache[c] = gl.createShader(this.type);
-			
+
 			var gen_source = this._PrependDefines(data);
 			gl.shaderSource(s,gen_source);
 
@@ -66,10 +66,10 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 		GetGlShader : function(gl) {
 			return this.shader;
 		},
-		
+
 		_PrependDefines : function(data) {
 			var d = this.defines;
-			
+
 			var o = '';
 			for(var k in d) {
 				o += '#define ' + k + ' ' + (d[k] || '') + '\n';
@@ -80,7 +80,7 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 			return	'/* !begin medea-generated head! */\n' + o +
 					'/* !end medea-generated head! */\n' + data;
 		},
-		
+
 		_GetCacheName : function() {
 			var o = this.src;
 

@@ -9,7 +9,7 @@
 medea._addMod('terrainheightpath',['entity'],function(undefined) {
 	"use strict";
 	var medea = this;
-	
+
 	var TerrainHeightPath = medea.Entity.extend(
 	{
 		init : function(terrain, height_offset, smooth_factor) {
@@ -39,15 +39,15 @@ medea._addMod('terrainheightpath',['entity'],function(undefined) {
 
 				var t = vec3.create();
 				mat4.multiplyVec3(node.parent.GetInverseGlobalTransform(),ppos,t);
-				
+
 				if (this.smooth_factor && node.id in this.seen) {
 					var f = Math.pow(this.smooth_factor,dtime), oldh = t[1] - this.height_offset*0.5;
 					t = vec3.add( vec3.scale(t,1.0 - f), vec3.scale(node.LocalPos(), f) );
-					
+
 					// add lower limit to make sure we don't fall below the terrain
 					t[1] = Math.max(t[1], oldh);
 				}
-				
+
 				node.LocalPos(t);
 				this.seen[node.id] = true;
 			}
@@ -59,7 +59,7 @@ medea._addMod('terrainheightpath',['entity'],function(undefined) {
 			}
 			this.height_offset = h;
 		},
-		
+
 		SmoothFactor : function(h) {
 			if (h === undefined) {
 				return this.smooth_factor;
@@ -67,7 +67,7 @@ medea._addMod('terrainheightpath',['entity'],function(undefined) {
 			this.smooth_factor = h;
 		},
 	});
-	
+
 	medea.CreateTerrainHeightPathAnimator = function(terrain, ho) {
 		return new TerrainHeightPath(terrain, ho);
 	};

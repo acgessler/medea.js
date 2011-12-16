@@ -14,11 +14,11 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		"CAM_POS" :  function(prog, pos, state) {
 			gl.uniform3fv(pos, state.GetQuick("CAM_POS"));
 		},
-		
+
 		"CAM_POS_LOCAL" :  function(prog, pos, state) {
 			gl.uniform3fv(pos, state.Get("CAM_POS_LOCAL"));
 		},
-		
+
 		"WVP" :  function(prog, pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WVP"));
 		},
@@ -26,7 +26,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		"WIT" :  function(prog, pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WIT"));
 		},
-		
+
 		"WI" :  function(prog, pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WI"));
 		},
@@ -102,50 +102,50 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			}
 			this.state = state;
 		},
-		
-		
+
+
 		// some shortcuts to simplify common state handling
 		CullFace : function(c) {
 			if (c === undefined) {
 				return this.state.cull_face;
 			}
-			
+
 			this.state.cull_face = c;
 		},
-		
+
 		CullFaceMode : function(c) {
 			if (c === undefined) {
 				return this.state.cull_face_mode;
 			}
-			
+
 			this.state.cull_face_mode = c;
 		},
-		
+
 		DepthWrite : function(c) {
 			if (c === undefined) {
 				return this.state.depth_write;
 			}
-			
+
 			this.state.depth_write = c;
 		},
-		
+
 		DepthTest : function(c) {
 			if (c === undefined) {
 				return this.state.depth_test;
 			}
-			
+
 			this.state.depth_test = c;
 		},
-		
+
 		DepthFunc : function(c) {
 			if (c === undefined) {
 				return this.state.depth_func;
 			}
-			
+
 			this.state.depth_func = c;
 		},
-		
-		
+
+
 
 		Set : function(k,val) {
 			if (val === undefined) {
@@ -252,7 +252,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 						// check if this texture is already active, if not get rid of the
 						// oldest texture in the sampler cache.
 						var slots = state.tex_slots || new Array(6), oldest = state.texage+1, oldesti = 0, curgl = curval.GetGlTexture();
-						
+
 						for(var i = 0; i < slots.length; ++i) {
 							if (!slots[i]) {
 								oldest = state.texage+2;
@@ -260,7 +260,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 							}
 							else if (slots[i][1] === curgl) {
 								slots[i][0] = state.texage++;
-								
+
 								// XXX why do we need _Bind() here? Setting the index should suffice
 								// since the texture is already set.
 								gl.uniform1i(pos, curval._Bind(i));

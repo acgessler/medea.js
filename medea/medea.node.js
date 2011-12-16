@@ -8,10 +8,10 @@
 
 medea._addMod('node',['frustum'],function(undefined) {
 	"use strict";
-	
+
 	medea.BB_INFINITE = 'i';
 	medea.BB_EMPTY = 'e';
-	
+
 
 	medea._NODE_FLAG_DIRTY = 0x1;
 	medea._NODE_FLAG_DIRTY_BB = 0x2;
@@ -19,28 +19,28 @@ medea._addMod('node',['frustum'],function(undefined) {
 
 	medea.NODE_FLAG_NO_ROTATION = 0x40;
 	medea.NODE_FLAG_NO_SCALING = 0x80;
-    
-    medea.NODE_FLAG_USER = 0x100000;
-	
+
+	medea.NODE_FLAG_USER = 0x100000;
+
 	var id_source = 0;
-	
+
 	this.Node = medea.Class.extend({
 
 		// this is to allow subclasses to have their own flags set when the node's transformation
 		// matrix is altered. By default we only set DIRTY.
-		trafo_dirty_flag: medea._NODE_FLAG_DIRTY | 
-			medea._NODE_FLAG_DIRTY_GI | 
+		trafo_dirty_flag: medea._NODE_FLAG_DIRTY |
+			medea._NODE_FLAG_DIRTY_GI |
 			medea._NODE_FLAG_DIRTY_BB,
-			
+
 		parent:null,
 
 
 		init : function(name, flags) {
 			this.children = [];
 			this.entities = [];
-            this.id = id_source++;
+			this.id = id_source++;
 			this.name = name || ("UnnamedNode_" + this.id);
-			
+
 			// for culling purposes, saves the index of the frustun plane
 			// that caused this node to be culled recently. This exploits
 			// temporal coherence in the scene.
@@ -54,43 +54,43 @@ medea._addMod('node',['frustum'],function(undefined) {
 			this.lmatrix = mat4.identity(mat4.create());
 			this.gmatrix = mat4.create();
 			this.gimatrix = mat4.create();
-			
+
 			this.bb = medea.CreateBB();
 
 			this.flags = this.trafo_dirty_flag | (flags || 0);
 		},
-        
-        Name : function(n) {
-            if (n === undefined) {
-                return this.name;
-            }
-            this.name = n;
-        },
+
+		Name : function(n) {
+			if (n === undefined) {
+				return this.name;
+			}
+			this.name = n;
+		},
 
 		GetEntities: function() {
 			return this.entities;
 		},
-        
-        GetActiveEntities: function(cam) {
+
+		GetActiveEntities: function(cam) {
 			return this.entities;
 		},
 
 		AddEntity: function(ent) {
-            // #ifdef DEBUG
-            medea.DebugAssert(ent instanceof medea.Entity,'need valid entity to attach');
-            // #endif
-            
+			// #ifdef DEBUG
+			medea.DebugAssert(ent instanceof medea.Entity,'need valid entity to attach');
+			// #endif
+
 			this.entities.push(ent);
 			ent.OnAttach(this);
 
-			this._SetBBDirty(); 
+			this._SetBBDirty();
 		},
 
 		RemoveEntity: function(ent) {
 			var idx = this.entities.indexOf(ent);
 			if(idx !== -1) {
 				ent.OnDetach(this);
-				
+
 				this._SetBBDirty();
 				this.entities.splice(idx,1);
 			}
@@ -99,16 +99,16 @@ medea._addMod('node',['frustum'],function(undefined) {
 		GetChildren: function() {
 			return this.children;
 		},
-		
+
 		GetParent: function() {
 			return this.parent;
 		},
 
 		AddChild: function(child) {
-            // #ifdef DEBUG
+			// #ifdef DEBUG
 			medea.DebugAssert(child !== this,'cannot attach a node to itself');
 			// #endif
-                
+
 			if(typeof child !== 'object' || !( child instanceof medea.Node )) {
 				child = new medea.Node(child);
 			}
@@ -119,7 +119,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 
 			this.children.push(child);
 			this._SetBBDirty();
-			
+
 			child.OnAttach(this);
 			return child;
 		},
@@ -133,17 +133,17 @@ medea._addMod('node',['frustum'],function(undefined) {
 
 				this._SetBBDirty();
 				child.OnAttach(null);
-				
+
 				this.children.splice(idx,1);
 				child.parent = null;
 			}
 		},
-		
+
 		OnAttach : function(parent) {
-            // #ifdef DEBUG
-            medea.DebugAssert(parent !== this,'cannot attach node to itself');
-            // #endif
-            
+			// #ifdef DEBUG
+			medea.DebugAssert(parent !== this,'cannot attach node to itself');
+			// #endif
+
 			this.parent = parent;
 			this._SetTrafoDirty();
 		},
@@ -151,7 +151,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 		Update: function(dtime) {
 			// all regular updates are carried out lazily, so this is a no-op
 		},
-		
+
 		GetWorldBB: function() {
 			this._UpdateBB();
 			return this.bb;
@@ -161,7 +161,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 			this._UpdateBB();
 			return this.bb;
 		},
-			
+
 		Cull : function(frustum) {
 			return medea.BBInFrustum(frustum, this.GetWorldBB(), this.plane_hint);
 		},
@@ -189,7 +189,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 			this._UpdateInverseGlobalTransform();
 			return this.gimatrix;
 		},
-		
+
 		TryGetInverseGlobalTransform: function() {
 			return this.flags & medea._NODE_FLAG_DIRTY_GI ? null : this.gimatrix;
 		},
@@ -318,7 +318,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 				}
 			}
 		},
-		
+
 
 		_UpdateGlobalTransform: function() {
 			if (!(this.flags & medea._NODE_FLAG_DIRTY)) {
@@ -331,30 +331,30 @@ medea._addMod('node',['frustum'],function(undefined) {
 			else {
 				this.gmatrix = mat4.create( this.lmatrix );
 			}
-			
+
 			this._FireListener("OnUpdateGlobalTransform");
 		},
-		
+
 		_UpdateInverseGlobalTransform: function() {
 			if (!(this.flags & medea._NODE_FLAG_DIRTY_GI)) {
 				return;
 			}
-			
+
 			this._UpdateGlobalTransform();
-			
+
 			this.flags &= ~medea._NODE_FLAG_DIRTY_GI;
 			mat4.inverse(this.gmatrix,this.gimatrix);
 		},
-		
+
 		_SetTrafoDirty : function() {
 			this.flags |= this.trafo_dirty_flag;
 			this._SetBBDirty();
-			
+
 			for( var i = 0, c = this.children, l = c.length; i < l; ++i) {
 				c[i]._SetTrafoDirty();
 			}
 		},
-		
+
 		_SetBBDirty : function() {
 			this.flags |= medea._NODE_FLAG_DIRTY_BB;
 			if (this.parent) {
@@ -378,7 +378,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 			}
 
 			this.bb = medea.MergeBBs(bbs);
-			
+
 			// #ifdef DEBUG
 			medea.DebugAssert(!!this.bb,"bounding box computation failed, but it shouldn't have");
 			// #endif

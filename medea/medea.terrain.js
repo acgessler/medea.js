@@ -13,7 +13,7 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 
 	medea._initMod('terraintile');
 	medea._initMod('worker_terrain');
-	
+
 	var terrain_ib_cache = {
 	};
 
@@ -36,14 +36,14 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			}
 		}
 	};
-    
-    var TerrainDefaultSettings = {
-        use_vertex_fetch : true,
-        use_worker : true,
-        camera_timeout : 1000,
-        update_treshold : 0.4,
-        no_mens : 0.1,
-    };
+
+	var TerrainDefaultSettings = {
+		use_vertex_fetch : true,
+		use_worker : true,
+		camera_timeout : 1000,
+		update_treshold : 0.4,
+		no_mens : 0.1,
+	};
 
 	var DefaultTerrainDataProvider = medea.Class.extend({
 
@@ -175,21 +175,21 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			// #endif
 
 			var want_scale = 1/(1 << lod);
-			
+
 			x = Math.floor(x*2.0)*0.5;
 			y = Math.floor(y*2.0)*0.5;
 			w = Math.floor(w);
 			h = Math.floor(h);
-			
+
 			var ub = Math.floor(this.desc.unitbase * real_scale);
 			var xx = x*ub, yy = y*ub, ww = w*ub, hh = h*ub;
 
 			var sbase = real_scale/want_scale;
 			//medea.LogDebug('terrain rect: ' + lod + " " + xx + " " + yy + " " + ww + " " + hh);
-			var hf = this._CreateHeightField(match._cached_img, xx, yy, ww, hh, 
-                sbase*this.desc.scale[1]*this.desc.base_hscale, 
-                sbase*this.desc.scale[0]);
-                
+			var hf = this._CreateHeightField(match._cached_img, xx, yy, ww, hh,
+				sbase*this.desc.scale[1]*this.desc.base_hscale,
+				sbase*this.desc.scale[0]);
+
 			return [hf[0],hf[1],hf[2],x,y];
 		},
 
@@ -341,8 +341,8 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			var hf = medea._HeightfieldFromOddSidedHeightmapPart(img, x,y,w,h,ys, xzs);
 			if (xofs || yofs || yofsr || xofsr) {
 				// #ifdef LOG
-				medea.LogDebug('Out of range: xofs=' + xofs + ', yofs=' + yofs + 
-                    ', xofsr=' + xofsr+ ', yofsr=' + yofsr);
+				medea.LogDebug('Out of range: xofs=' + xofs + ', yofs=' + yofs +
+					', xofsr=' + xofsr+ ', yofsr=' + yofsr);
 				// #endif
 
 				// partly out of range, move the height field and pad with dummy data
@@ -390,14 +390,14 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 		init : function(terrain,lod,cam) {
 			this.terrain = terrain;
 			this.lod = lod;
-            this.cam = cam;
+			this.cam = cam;
 			this.half_scale = 0.5*(1<<lod);
 
 			this.startx = this.starty = 1e10;
 			this.present = false;
 			this.substituted = false;
 			this.present_listeners = [];
-            this.cur_meshes = [];
+			this.cur_meshes = [];
 		},
 
 		IsPresent : function() {
@@ -417,7 +417,7 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			this.ppos = ppos;
 			this.startx = startx - this.half_scale;
 			this.starty = starty - this.half_scale;
-			
+
 			this._BuildMesh();
 		},
 
@@ -430,12 +430,12 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 
 				// center the heightfield and scale it according to its LOD
 				outer._MoveHeightfield(pos, ilod, 1.0,
-					ppos[0] + (realx-outer.startx)*ub -w*ilod*sc[0]/2, 
+					ppos[0] + (realx-outer.startx)*ub -w*ilod*sc[0]/2,
 					ppos[2] + (realy-outer.starty)*ub -h*ilod*sc[0]/2
 				);
 
-				var uv  = new Float32Array(wv*hv*2); 
-                
+				var uv  = new Float32Array(wv*hv*2);
+
 				t._Dispatch('GenHeightfieldTangentSpace',function(res) {
 					medea._GenHeightfieldUVs(uv,wv,hv, ilod);
 
@@ -457,9 +457,9 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 					}
 
 					// #ifdef LOG
-					medea.LogDebug('(re-)generate TerrainTile: lod=' + outer.lod + ', startx=' 
-                        + outer.startx + ', starty=' + outer.starty 
-                        + ', posx=' + ppos[0] + ', posy=' + ppos[2]);
+					medea.LogDebug('(re-)generate TerrainTile: lod=' + outer.lod + ', startx='
+						+ outer.startx + ', starty=' + outer.starty
+						+ ', posx=' + ppos[0] + ', posy=' + ppos[2]);
 					// #endif
 
 					outer._SetMeshes(m);
@@ -477,13 +477,13 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 				if (ib_cached) {
 					return ib_cached;
 				}
-				
+
 				var indices = new Array(w*h*2*3);
 				medea._GenHeightfieldIndicesLOD(indices,w,h);
-				
+
 				return terrain_ib_cache[ib_key] = medea.CreateIndexBuffer(indices, 0);
 			}
-			
+
 			var whs = w/4, hhs = h/4, n = this.lod-1, extend = false;
 
 			// see if higher LODs are not present yet, in this case we
@@ -530,19 +530,19 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			}
 
 			var wh = w-whs*2, hh = h-hhs*2;
-			
+
 			var ib_key = this._GetIBCacheKey(w,h,whs,hhs,wh,hh, this.lod !== t.data.GetLODCount()-1);
 			var ib_cached = terrain_ib_cache[ib_key];
 			if (ib_cached) {
 				return ib_cached;
 			}
-			
+
 			var indices = new Array((w-wh)*(h-hh)*2*3);
 			var c = (this.lod === t.data.GetLODCount()-1
 				? medea._GenHeightfieldIndicesWithHole
 				: medea._GenHeightfieldIndicesWithHoleLOD)
 				(indices,w,h,whs,hhs,wh,hh);
-				
+
 			// #ifdef LOG
 			medea.LogDebug('populate terrain IB cache: ' + ib_key);
 			// #endif
@@ -550,7 +550,7 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			indices.length = c;
 			return terrain_ib_cache[ib_key] = medea.CreateIndexBuffer(indices);
 		},
-		
+
 		_GetIBCacheKey : function(w,h,whs,hhs,wh,hh,lod) {
 			return Array.prototype.join.call(arguments,'-');
 		},
@@ -558,8 +558,8 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 		_SetMeshes : function(m) {
 			this.cur_meshes = Array.isArray(m) ? m : [m];
 		},
-        
-        GetMeshes : function() {
+
+		GetMeshes : function() {
 			return this.cur_meshes;
 		},
 
@@ -585,28 +585,28 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 	medea.TerrainNode = medea.Node.extend({
 
 		init : function(name, data, settings) {
-            this.settings = medea.Merge(settings,TerrainDefaultSettings);
+			this.settings = medea.Merge(settings,TerrainDefaultSettings);
 			this._super(name, medea.NODE_FLAG_NO_ROTATION | medea.NODE_FLAG_NO_SCALING);
-			
-            if(this.settings.use_worker) {
-                this._StartWorker();
-            }
-			
+
+			if(this.settings.use_worker) {
+				this._StartWorker();
+			}
+
 			this.data = data;
 			this.cameras = {};
-            
-            // add a dummy entity whose only purpose is to keep a static bounding
-            // box for the terrain
-            var ent = medea.CreateEntity('TerrainBBDummyEntity');
-            var ub = data.GetUnitBase(), s = data.GetScale();
-            
-            var vmax = [0.5 * data.GetWidth() * ub * s[0],s[1],0.5 * data.GetHeight() * ub * s[0]];
-            var vmin = [-vmax[0],0.0,-vmax[2]]; 
-            
-            ent.BB([vmin,vmax]);
-            this.AddEntity(ent);
+
+			// add a dummy entity whose only purpose is to keep a static bounding
+			// box for the terrain
+			var ent = medea.CreateEntity('TerrainBBDummyEntity');
+			var ub = data.GetUnitBase(), s = data.GetScale();
+
+			var vmax = [0.5 * data.GetWidth() * ub * s[0],s[1],0.5 * data.GetHeight() * ub * s[0]];
+			var vmin = [-vmax[0],0.0,-vmax[2]];
+
+			ent.BB([vmin,vmax]);
+			this.AddEntity(ent);
 		},
-        
+
 
 		UpdateTreshold : function(ts) {
 			if (ts === undefined) {
@@ -614,60 +614,60 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			}
 			this.settings.update_treshold = ts;
 		},
-		
+
 		NoMensLandBorder : function(ts) {
 			if (ts === undefined) {
 				return this.settings.no_mens;
 			}
 			this.settings.no_mens = ts;
 		},
-        
-        GetActiveEntities: function(cam) {
+
+		GetActiveEntities: function(cam) {
 			var c = this.cameras[cam.id];
-            if (c === undefined) {
-                this._AddCamera(cam);
-                return this.GetActiveEntities(cam);
-            }
-            
-            // it is being used, so keep the data for this camera alive
-            c.alive = medea.GetStatistics.frame_count;
-            
-            var rc = c.rings.length, t = new Array(rc);
-            for( var i = 0; i < rc; ++i) {
-                t[i] = c.rings[i].GetMeshes();
-            }
-            return Array.prototype.concat.apply(this.entities,t);
+			if (c === undefined) {
+				this._AddCamera(cam);
+				return this.GetActiveEntities(cam);
+			}
+
+			// it is being used, so keep the data for this camera alive
+			c.alive = medea.GetStatistics.frame_count;
+
+			var rc = c.rings.length, t = new Array(rc);
+			for( var i = 0; i < rc; ++i) {
+				t[i] = c.rings[i].GetMeshes();
+			}
+			return Array.prototype.concat.apply(this.entities,t);
 		},
-               
-        Cull : function(frustum) {
-            // terrain is never culled, but we want culling for the invidual
-            // meshes it is made up of.
-            return medea.VISIBLE_PARTIAL;
-        },   
+
+		Cull : function(frustum) {
+			// terrain is never culled, but we want culling for the invidual
+			// meshes it is made up of.
+			return medea.VISIBLE_PARTIAL;
+		},
 
 		Update: function(dtime) {
 			this._super(dtime);
 
-            var ub = this.data.GetUnitBase(), w = this.data.GetWidth(), h = this.data.GetHeight(), ut = this.UpdateTreshold();
-            for(var k in this.cameras) {
-                var cam = this.cameras[k];
-    			var ppos = cam.cam.GetWorldPos();
-    			
-    			var newx = ppos[0]/ub + w * 0.5;
-    			var newy = ppos[2]/ub + h * 0.5;
+			var ub = this.data.GetUnitBase(), w = this.data.GetWidth(), h = this.data.GetHeight(), ut = this.UpdateTreshold();
+			for(var k in this.cameras) {
+				var cam = this.cameras[k];
+				var ppos = cam.cam.GetWorldPos();
 
-    			var dx = newx - cam.startx, dy = newy - cam.starty;
-    			if (Math.abs(dx) > ut || Math.abs(dy) > ut) {
-    				for( var i = 0; i < cam.rings.length; ++i) {
-    					cam.rings[i].Update(ppos, newx, newy);
-    				}
-    			
-    				cam.startx = newx;
-    				cam.starty = newy;
-    			}
-            }
-            this.data.Update();
-            this._CleanupCameras();
+				var newx = ppos[0]/ub + w * 0.5;
+				var newy = ppos[2]/ub + h * 0.5;
+
+				var dx = newx - cam.startx, dy = newy - cam.starty;
+				if (Math.abs(dx) > ut || Math.abs(dy) > ut) {
+					for( var i = 0; i < cam.rings.length; ++i) {
+						cam.rings[i].Update(ppos, newx, newy);
+					}
+
+					cam.startx = newx;
+					cam.starty = newy;
+				}
+			}
+			this.data.Update();
+			this._CleanupCameras();
 		},
 
 		GetWorldHeightForWorldPos : function(wx,wz) {
@@ -679,14 +679,14 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			}
 
 			var ub = this.data.GetUnitBase(), b = this.no_mens;
-			
+
 			wx = w*0.5 + (wx-mypos[0])/ub;
 			wz = h*0.5 + (wz-mypos[2])/ub;
 
 			if (wx < b || wx >= w-b || wz < b || wz >= h-b) {
 				return null;
 			}
-			
+
 			var h = this.data.TryGetHeightAtPos(wx, wz);
 			return h === null ? null : h - mypos[1];
 		},
@@ -694,56 +694,56 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 		LOD : function(i,cam) {
 			return this.cameras[cam.id].rings[i];
 		},
-        
-        _GetCamEntry : function(cam) {
-            // #ifdef DEBUG
-            medea.DebugAssert(!!this.cameras[cam.id],'camera doesn\'t exist');
-            // #endif
-            
-            return this.cameras[cam.id];
-        },
-        
-        _AddCamera : function(cam) {
-            // #ifdef DEBUG
-            medea.DebugAssert(!this.cameras[cam.id],'camera exists already');
-            // #endif
-        
-            var c = this.cameras[cam.id] = {};
-            c.startx = c.starty = 1e10;
-            c.cam = cam;
-            
-            // this way it doesn't care if someone call _GetCamEntry by
-            // the entity object or the hull dictionary.
-            c.id = cam.id;
-            this._InitRings(c);
-            
-            // #ifdef LOG
-            medea.LogDebug('terrain: creating terrain data for camera ' + cam.Name());
-            // #endif LOG
-        },
-        
-        _CleanupCameras : function() {
-            var fc = medea.GetStatistics.frame_count, disp = [];
-            for(var k in this.cameras) {
-                var cam = this.cameras[k];
-                if (cam.alive !== undefined && (fc-cam.alive > this.settings.camera_timeout || cam.cam.GetViewport() === null)) {
-                    // #ifdef LOG
-                    medea.LogDebug('terrain: dropping data for camera ' + cam.Name());
-                    // #endif LOG
-                    disp.push(k);
-                }
-            }
-            for( var i = 0; i < disp.length; ++i) {
-                delete this.cameras[disp[i]];
-            }
-        },
-		
+
+		_GetCamEntry : function(cam) {
+			// #ifdef DEBUG
+			medea.DebugAssert(!!this.cameras[cam.id],'camera doesn\'t exist');
+			// #endif
+
+			return this.cameras[cam.id];
+		},
+
+		_AddCamera : function(cam) {
+			// #ifdef DEBUG
+			medea.DebugAssert(!this.cameras[cam.id],'camera exists already');
+			// #endif
+
+			var c = this.cameras[cam.id] = {};
+			c.startx = c.starty = 1e10;
+			c.cam = cam;
+
+			// this way it doesn't care if someone call _GetCamEntry by
+			// the entity object or the hull dictionary.
+			c.id = cam.id;
+			this._InitRings(c);
+
+			// #ifdef LOG
+			medea.LogDebug('terrain: creating terrain data for camera ' + cam.Name());
+			// #endif LOG
+		},
+
+		_CleanupCameras : function() {
+			var fc = medea.GetStatistics.frame_count, disp = [];
+			for(var k in this.cameras) {
+				var cam = this.cameras[k];
+				if (cam.alive !== undefined && (fc-cam.alive > this.settings.camera_timeout || cam.cam.GetViewport() === null)) {
+					// #ifdef LOG
+					medea.LogDebug('terrain: dropping data for camera ' + cam.Name());
+					// #endif LOG
+					disp.push(k);
+				}
+			}
+			for( var i = 0; i < disp.length; ++i) {
+				delete this.cameras[disp[i]];
+			}
+		},
+
 		_Dispatch : function(command, callback) {
 			var args = Array.prototype.slice.call(arguments,2);
 			if (!this.worker) {
 				return callback(medea._workers[command].apply(this, args));
 			}
-			
+
 			this.pending_jobs[this.job_id] = callback;
 			this.worker.postMessage({
 				command : command,
@@ -760,33 +760,33 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 				v.rings[i] = new TerrainRing(this,i,v);
 			}
 		},
-		
+
 		_StartWorker : function() {
 			var outer = this;
 			medea.CreateWorker('worker_terrain', function(w) {
 				outer.worker = w;
 				outer.pending_jobs = {};
 				outer.job_id = 0;
-			
+
 				return function(e) {
 					var res = e.data;
-					
+
 					var job = outer.pending_jobs[res.job_id];
 					medea.DebugAssert(!!job,'job not in waitlist');
-					
+
 					delete outer.pending_jobs[res.job_id];
 					job(res.result);
 				};
 			});
 		},
-		
+
 		_EndWorker : function() {
 			if (!this.worker) {
 				return;
-			}	
-			
+			}
+
 			this.worker.close();
-			
+
 			// forget all pending jobs .. not sure if this is so clever, though
 			this.pending_jobs = {};
 		},

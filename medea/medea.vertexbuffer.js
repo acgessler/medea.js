@@ -115,7 +115,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 
 			this.flags = flags;
 			this.state_closure = state_closure || [];
-			
+
 			if (data instanceof Array) {
 				this.positions = data;
 
@@ -184,17 +184,17 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 			}
 
 			var ab = new ArrayBuffer(this.itemcount * stride);
-			
+
 			// this is used to build the state_closure array, which is later used during rendering
 			// to prepare the OpenGL pipeline for drawing this VBO. However, if the calling code
 			// did already supply us with it, we make this a no-op.
-			var addStateEntry = !state_closure.length ? function(attr_type,idx,elems,type) { 
+			var addStateEntry = !state_closure.length ? function(attr_type,idx,elems,type) {
 				type = type || gl.FLOAT;
 				elems = elems || 3;
-				
+
 				(function(idx,stride,offset) {
 					var hash = [elems,type,stride,offset].join('-');
-					
+
 					state_closure.push(function(in_map, state) {
 						var real_idx = idx;
 						if(in_map) {
@@ -203,17 +203,17 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 								return; // don't set this attribute
 							}
 						}
-						
+
 						var gls = state.GetQuick('_gl'), va = gls.va;
 						if (!va) {
 							va = gls.va = [];
 						}
 						var	prev = va[real_idx];
-						
+
 						if (prev === undefined) {
 							gl.enableVertexAttribArray(real_idx);
 						}
-						
+
 						if (prev !== hash) {
 							gl.vertexAttribPointer(real_idx,elems, type,false,stride,offset);
 							va[real_idx] = hash;
@@ -230,7 +230,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 					view[im+0] = p[i3+0];
 					view[im+1] = p[i3+1];
 					view[im+2] = p[i3+2];
-					
+
 					// #ifdef DEBUG
 					medea.DebugAssert(!isNaN(p[i3+0]) && !isNaN(p[i3+1]) && !isNaN(p[i3+2]),'found NaN vertex position ('+i+') - this is rather a "NotAVertex"');
 					// #endif
@@ -412,13 +412,13 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 			if (gls.ab === id) {
 				return;
 			}
-			
+
 			// invalidate the state cache for vertexAttrib binding
 			// now that the buffer is changed.
 			if (gls.va) {
 				gls.va.length = 0;
 			}
-			
+
 			gls.ab = id;
 			gl.bindBuffer(gl.ARRAY_BUFFER,id);
 			this.state_closure.forEach(function(e) {

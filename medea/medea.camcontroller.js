@@ -9,9 +9,9 @@
 medea._addMod('camcontroller',['entity','input'],function(undefined) {
 	"use strict";
 	var medea = this;
-    
-    medea._initMod('entity');
-    
+
+	medea._initMod('entity');
+
 
 	medea.CamController = medea.Entity.extend({
 
@@ -28,22 +28,22 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			this.Enabled(enabled || false);
 		},
 
-        
-        Enable : function() {
-            this.enabled = true;
-        },
-        
-        Disable : function() {
-            this.enabled = false;
-        },
-        
+
+		Enable : function() {
+			this.enabled = true;
+		},
+
+		Disable : function() {
+			this.enabled = false;
+		},
+
 
 		Enabled : medea._GetSet('enabled'),
 		TurnSpeed : medea._GetSet('turn_speed'),
-        WalkSpeed : medea._GetSet('walk_speed'),
-        TerrainEntity : medea._GetSet('terrain_entity'),
+		WalkSpeed : medea._GetSet('walk_speed'),
+		TerrainEntity : medea._GetSet('terrain_entity'),
 
-        
+
 		Update : function(dtime, n) {
 			if(!this.enabled || medea.IsMouseDown()) {
 				return;

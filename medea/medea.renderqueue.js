@@ -28,7 +28,7 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 	this._initial_state_depth_test_enabled = {
 		'depth_test' : true,
 		'depth_func' : 'less_equal',
-		
+
 		// culling is turned on by default
 		'cull_face' : true,
 		'cull_face_mode' : 'back'
@@ -36,7 +36,7 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 
 	this._initial_state_depth_test_disabled = {
 		'depth_test' : false,
-		
+
 		// culling is turned on by default
 		'cull_face' : true,
 		'cull_face_mode' : 'back'

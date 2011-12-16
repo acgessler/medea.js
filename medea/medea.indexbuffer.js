@@ -104,7 +104,7 @@ medea._addMod('indexbuffer',[],function(undefined) {
 			if (gls.eab === id) {
 				return;
 			}
-			
+
 			gls.eab = id;
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,id);
 		},

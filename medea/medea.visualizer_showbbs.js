@@ -12,21 +12,21 @@ medea._addMod('visualizer_showbbs',[ 'visualizer','material','frustum'],function
 	var ordinal = 10;
 
 	var col_ent = [1.0,0.0,0.0,1.0], col_nodes = [1.0,1.0,0.0,1.0], col_partial = [0.0,1.0,0.0,1.0];
-	
+
 	var AddNodes = function(node,bbs,done) {
 		if(node in done) {
 			return;
 		}
-		
+
 		var bb = node.GetWorldBB();
 		if(bb === medea.BB_INFINITE) {
 			return;
 		}
-						
+
 		if (bb !== medea.BB_EMPTY) {
 			bbs.push([node.GetWorldBB(),col_nodes]);
 		}
-		
+
 		done[node.id] = true;
 		if (node.parent) {
 			AddNodes(node.parent,bbs,done);
@@ -53,14 +53,14 @@ medea._addMod('visualizer_showbbs',[ 'visualizer','material','frustum'],function
 			}
 			this.draw_range = fr;
 		},
-		
+
 		DrawNodes : function(fr) {
 			if (fr === undefined) {
 				return this.draw_nodes;
 			}
 			this.draw_nodes = fr;
 		},
-		
+
 		ShowCullState : function(fr) {
 			if (fr === undefined) {
 				return this.show_cull_state;
@@ -82,19 +82,19 @@ medea._addMod('visualizer_showbbs',[ 'visualizer','material','frustum'],function
 					var entries = queues[i].GetEntries();
 					for (var j = 0; entries && j < entries.length; ++j) {
 						var job = entries[j], w = job.node.GetWorldPos();
-								
+
 						var bb = job.entity.GetWorldBB(job.node);
 						if(bb === medea.BB_INFINITE || bb === medea.BB_EMPTY) {
 							continue;
 						}
-						
+
 						var d0 = w[0]-cp[0], d1 = w[1]-cp[1], d2 = w[2]-cp[2];
 						if ( d0*d0 + d1*d1 + d2*d2 > sqr) {
 							continue;
 						}
 
 						bbs.push([bb,col_ent]);
-						
+
 						if (outer.draw_nodes) {
 							// we can omit the bounding box for the node if it has just one entity
 							if (job.node.GetEntities().length === 1) {
@@ -111,7 +111,7 @@ medea._addMod('visualizer_showbbs',[ 'visualizer','material','frustum'],function
 
 				if (bbs.length) {
 					if (outer.show_cull_state) {
-				
+
 						var fr = cam.GetFrustum();
 						for (var i = 0; i < bbs.length; ++i) {
 							if (medea.BBInFrustum(fr, bbs[i][0]) === medea.VISIBLE_PARTIAL) {
@@ -119,16 +119,16 @@ medea._addMod('visualizer_showbbs',[ 'visualizer','material','frustum'],function
 							}
 						}
 					}
-				
+
 					var pout = new Float32Array(bbs.length*8*3), cout = new Float32Array(bbs.length*8*4), ind = new Int32Array(bbs.length*24);
 					var ip = 0, ic = 0, ii = 0;
-					
+
 					for (var i = 0; i < bbs.length; ++i) {
 						var bb = bbs[i][0], col = bbs[i][1];
-						
+
 						var max = bb[1], min = bb[0], b = ip/3;
 						var push_vec;
-						
+
 						// handle OBB vs AABB
 						if (bb.length === 3) {
 							var mat = bb[2], tmpv = vec3.create();
@@ -146,23 +146,23 @@ medea._addMod('visualizer_showbbs',[ 'visualizer','material','frustum'],function
 								pout[ip++] = v[2];
 							};
 						}
-						
+
 						push_vec([min[0],min[1],min[2]]);
 						push_vec([min[0],max[1],min[2]]);
 						push_vec([min[0],max[1],max[2]]);
 						push_vec([min[0],min[1],max[2]]);
-						
+
 						push_vec([max[0],min[1],min[2]]);
 						push_vec([max[0],max[1],min[2]]);
 						push_vec([max[0],max[1],max[2]]);
 						push_vec([max[0],min[1],max[2]]);
-							
+
 						for (var k = 0; k < 8; ++k) {
 							for(var s = 0; s < 4; ++s) {
 								cout[ic++] = col[s];
 							}
 						}
-						
+
 						ind[ii++] = b+0;
 						ind[ii++] = b+1;
 						ind[ii++] = b+1;
@@ -171,7 +171,7 @@ medea._addMod('visualizer_showbbs',[ 'visualizer','material','frustum'],function
 						ind[ii++] = b+3;
 						ind[ii++] = b+3;
 						ind[ii++] = b+0;
-						
+
 						ind[ii++] = b+4;
 						ind[ii++] = b+5;
 						ind[ii++] = b+5;
@@ -180,16 +180,16 @@ medea._addMod('visualizer_showbbs',[ 'visualizer','material','frustum'],function
 						ind[ii++] = b+7;
 						ind[ii++] = b+7;
 						ind[ii++] = b+4;
-						
+
 						ind[ii++] = b+0;
 						ind[ii++] = b+4;
-						
+
 						ind[ii++] = b+1;
 						ind[ii++] = b+5;
-						
+
 						ind[ii++] = b+2;
 						ind[ii++] = b+6;
-						
+
 						ind[ii++] = b+3;
 						ind[ii++] = b+7;
 					}

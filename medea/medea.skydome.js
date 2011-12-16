@@ -44,7 +44,7 @@ medea._addMod('skydome',['mesh'],function(undefined) {
 
 			var rad = sin(lat)*fac, nmp = round(rad);
 			ring_info[r] = [nmp,nmp - ring_info[r-1][0]];
-	
+
 
 			var lon = 0.0, ldf = pi*2.0/nmp;
 			for(var p = 0; p < nmp; ++p, lon += ldf) {
@@ -66,7 +66,7 @@ medea._addMod('skydome',['mesh'],function(undefined) {
 				uv[iuv++] = (z + 1.0)*0.485;
 			}
 		}
-		
+
 		// XXX
 		pos.length = ipos;
 		nor.length = ipos;
@@ -180,12 +180,12 @@ medea._addMod('skydome',['mesh'],function(undefined) {
 		var mesh = CreateDomeMesh(medea.CreateSimpleMaterialFromShaderPair('remote:mcore/shaders/skydome',{
 			texture : medea.CreateTexture( texbase )
 		}), lower_amount, rings);
-		
+
 		mesh.BB(medea.BB_INFINITE);
 
 		medea._initMod('renderqueue');
 		mesh.RenderQueue(medea.RENDERQUEUE_BACKGROUND);
-		mesh.Material().Passes().forEach( function(p) { 
+		mesh.Material().Passes().forEach( function(p) {
 			p.State({
 			'depth_test'  : true,
 			'depth_write' : false,

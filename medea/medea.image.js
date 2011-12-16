@@ -9,7 +9,7 @@
 medea._addMod('image',['filesystem'],function(undefined) {
 	"use strict";
 	var medea = this;
-	
+
 	medea.IMAGE_FLAG_USER = 0x1000;
 
 	medea._initMod('filesystem');
@@ -17,7 +17,7 @@ medea._addMod('image',['filesystem'],function(undefined) {
 
 		init : function(src_or_image, callback, flags) {
 			this.flags = flags || 0;
-			
+
 			// sentinel size as long as we don't know the real value yet
 			this.width = this.height = -1;
 
@@ -42,12 +42,12 @@ medea._addMod('image',['filesystem'],function(undefined) {
 
 		// #ifdef DEBUG
 		OnDelayedInit : function() {
-		
+
 			this.width = this.img.width;
 			this.height = this.img.height;
-			
+
 			this.ispot = medea._IsPow2(this.width) && medea._IsPow2(this.height);
-		
+
 			// mark this resource as complete
 			this._super();
 			medea.LogDebug("successfully loaded raw image " + this.GetSource());
@@ -82,21 +82,21 @@ medea._addMod('image',['filesystem'],function(undefined) {
 		GetHeight : function() {
 			return this.height;
 		},
-		
+
 		IsPowerOfTwo : function() {
 			// #ifdef DEBUG
 			medea.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: texture not loaded yet');
 			// #endif
 			return this.ispot;
 		},
-		
+
 		IsSquare : function() {
 			// #ifdef DEBUG
 			medea.DebugAssert(this.IsComplete(),'IsSquare() ist not available: texture not loaded yet');
 			// #endif
 			return this.width === this.height;
 		},
-		
+
 		GetSource : function() {
 			return this.src;
 		},

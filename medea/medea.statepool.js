@@ -18,7 +18,7 @@ medea._addMod('statepool',[],function(undefined) {
 	};
 
 	var _DefaultDerivedStates = {
-	
+
 		"CAM_POS_LOCAL": function(statepool) {
 			return mat4.multiplyVec3(statepool.Get("WI"),statepool.GetQuick("CAM_POS"),vec3.create());
 		},
@@ -34,7 +34,7 @@ medea._addMod('statepool',[],function(undefined) {
 		"WIT": function(statepool) {
 			return mat4.transpose(statepool.Get("WI"),mat4.create());
 		},
-		
+
 		"WI": function(statepool) {
 			return mat4.inverse(statepool.GetQuick("W"),mat4.create());
 		},
@@ -79,14 +79,14 @@ medea._addMod('statepool',[],function(undefined) {
 			return this.states[key];
 		}
 	});
-	
+
 	medea.CreateStatePool = function(deps, derived_states) {
 		return new medea.StatePool(deps,derived_states);
 	};
-	
-	
+
+
 	var def_pool = medea.CreateStatePool();
-	
+
 	medea.GetDefaultStatePool = function(deps, derived_states) {
 		// for debugging, use a new StatePool to prevent unwanted state leaking
 		return def_pool;

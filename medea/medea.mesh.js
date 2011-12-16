@@ -32,14 +32,14 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 
 				// update the current world matrix to the node's global transformation matrix
 				statepool.Set("W",node.GetGlobalTransform());
-				
+
 				// If the global inverse is already cached in the node,
 				// copy it to the statepool to avoid inverting twice.
 				var g = node.TryGetInverseGlobalTransform();
 				if (g) {
 					statepool.Set("WI",g);
 				}
-				
+
 				mesh.DrawNow(statepool);
 			};
 		},
@@ -183,7 +183,7 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 			},statepool);
 
 		},
-		
+
 		// updating BBs is well-defined for meshes, so make this functionality public
 		UpdateBB : function() {
 			this._AutoGenBB();
@@ -218,15 +218,15 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 		if (indices && (Array.isArray(indices) || typeof indices === 'object' && !(indices instanceof medea.Class))) {
 			indices = medea.CreateIndexBuffer(indices,flags);
 		}
-		
+
 		if (typeof vertices === 'object' && !(vertices instanceof medea.Class)) {
 			vertices = medea.CreateVertexBuffer(vertices,flags);
 		}
-		
+
 		if (material_or_color instanceof Array) {
 			material_or_color = medea.CreateSimpleMaterialFromColor(material_or_color);
 		}
-		
+
 		return new medea.Mesh(vertices,indices,material_or_color);
 	};
 });

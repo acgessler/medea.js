@@ -5,10 +5,10 @@
  * medea is (c) 2011, Alexander C. Gessler
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
- 
+
 try {
 	medea; // this should throw ReferenceError etc. from within a web worker
-	
+
 	medea._addMod('worker_base',[], function() {
 	});
 }
@@ -21,19 +21,19 @@ catch (e) {
 		_addMod : function(a,b,clb) {
 			clb.apply(medea);
 		},
-        
-        Log : function(message,kind) {
+
+		Log : function(message,kind) {
 			// #ifdef LOG
 			postMessage(['log',message,kind]);
 			// #endif
 		},
-		
+
 		LogDebug : function(message) {
-            // #ifdef DEBUG
+			// #ifdef DEBUG
 			this.Log(message,'debug');
-            // #endif
+			// #endif
 		},
-		
+
 		DebugAssert : function(e,v) {
 			if (v !== undefined) {
 				if (e) {
@@ -47,11 +47,11 @@ catch (e) {
 			postMessage(['assert',v]);
 			// #endif
 		},
-		
+
 		_workers : {
 		},
 	};
-	
+
 	onmessage = function(e) {
 		var call = medea._workers[e.data.command];
 		if (call) {
@@ -66,4 +66,3 @@ catch (e) {
 		}
 	};
  }
- 

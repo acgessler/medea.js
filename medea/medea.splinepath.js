@@ -9,7 +9,7 @@
 medea._addMod('splinepath',['entity'],function(undefined) {
 	"use strict";
 	var medea = this;
-	
+
 	var SplinePathAnimator = medea.Entity.extend(
 	{
 		init : function(points, duration, loop, ping_pong, tightness) {
@@ -30,9 +30,9 @@ medea._addMod('splinepath',['entity'],function(undefined) {
 			if (this.finished) {
 				return;
 			}
-			
+
 			this.time += dtime;
-			
+
 			// this is based on Irrlicht's CSceneNodeAnimatorFollowSpline::animateNode
 			var p = this.points;
 			if (p.length === 0) {
@@ -41,7 +41,7 @@ medea._addMod('splinepath',['entity'],function(undefined) {
 				}
 				return;
 			}
-			
+
 			if (p.length === 1) {
 				node.LocalPos(p[0]);
 				if (this.time > 0) {
@@ -51,7 +51,7 @@ medea._addMod('splinepath',['entity'],function(undefined) {
 				}
 				return;
 			}
-			
+
 			var dt = this.time * p.length / this.duration;
 			var uid = Math.floor(dt);
 			if (!this.loop && uid >= p.length-1) {
@@ -59,7 +59,7 @@ medea._addMod('splinepath',['entity'],function(undefined) {
 				this.finished = true;
 				return;
 			}
-			
+
 			var pong = this.ping_pong && !!(Math.floor(uid/(p.length-1)) %2), u = dt-Math.floor(dt), i;
 			if (pong) {
 				u = 1.0 - u;
@@ -68,32 +68,32 @@ medea._addMod('splinepath',['entity'],function(undefined) {
 			else {
 				i = this.ping_pong ? uid % (p.length-1) : uid % p.length;
 			}
-			
+
 			var clamp = function(idx) {
 				return ( idx<0 ? p.length +idx : ( idx>=p.length ? idx-p.length : idx ) );
 			};
-			
+
 			var p0 = p[ clamp(i-1) ];
 			var p1 = p[ clamp(i+0) ];
 			var p2 = p[ clamp(i+1) ];
 			var p3 = p[ clamp(i+2) ];
-			
+
 			var h1 = 2.0 * u * u * u - 3.0 * u * u + 1.0;
 			var h2 = -2.0 * u * u * u + 3.0 * u * u;
 			var h3 = u * u * u - 2.0 * u * u + u;
 			var h4 = u * u * u - u * u;
-			
+
 			var out = [0,0,0];
 			for (var n = 0; n < 3; ++n) {
 				var t1 = (p2[n]-p0[n]) * this.tightness;
 				var t2 = (p3[n]-p1[n]) * this.tightness;
-			
+
 				out[n] = p1[n] * h1 + p2[n] + h2 +t1 * h3+ t2 * h4;
 			}
-		
+
 			node.LocalPos(out);
 		},
-		
+
 		Finished : function(h) {
 			if (h === undefined) {
 				return this.finished;
@@ -107,28 +107,28 @@ medea._addMod('splinepath',['entity'],function(undefined) {
 			}
 			this.points = h;
 		},
-		
+
 		Duration : function(h) {
 			if (h === undefined) {
 				return this.duration;
 			}
 			this.duration = h;
 		},
-		
+
 		Tightness : function(h) {
 			if (h === undefined) {
 				return this.tightness;
 			}
 			this.tightness = h;
 		},
-		
+
 		Loop : function(h) {
 			if (h === undefined) {
 				return this.loop;
 			}
 			this.loop = h;
 		},
-		
+
 		PingPong : function(h) {
 			if (h === undefined) {
 				return this.ping_pong;

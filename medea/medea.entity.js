@@ -10,14 +10,14 @@ medea._addMod('entity',[],function() {
 	"use strict";
 	var medea = this;
 
-    var id_source = 0;
-    
+	var id_source = 0;
+
 	medea.Entity = medea.Class.extend({
 		name : "",
 		bb : null,
 
 		init : function(name) {
-            this.id = id_source++;
+			this.id = id_source++;
 			this.name = name || ("UnnamedEntity_" + this.id);
 		},
 
@@ -40,26 +40,26 @@ medea._addMod('entity',[],function() {
 			}
 			this.bb = b;
 		},
-		
+
 		GetWorldBB : function(parent) {
-            if(!this.bb) {
-                return medea.BB_INFINITE;
-            }
+			if(!this.bb) {
+				return medea.BB_INFINITE;
+			}
 			return medea.TransformBB(this.bb, parent.GetGlobalTransform());
 		},
-		
+
 		Cull : function(parent,frustum) {
 			return medea.BBInFrustum(frustum, this.GetWorldBB(parent));
 		},
 
-		
+
 
 		// note that entities can be attached to multiple nodes by default.
 		// deriving classes which do NOT want this, should assert this
 		// case in OnAttach().
 		OnAttach : function(node) {
 		},
-		
+
 		OnDetach : function(node) {
 		},
 
@@ -69,9 +69,9 @@ medea._addMod('entity',[],function() {
 			this.bb = medea.BB_INFINITE;
 		},
 	});
-    
-    medea.CreateEntity = function(name) {
-        return new medea.Entity(name);
-    };
+
+	medea.CreateEntity = function(name) {
+		return new medea.Entity(name);
+	};
 });
 

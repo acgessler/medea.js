@@ -16,7 +16,7 @@ medea._addMod('renderstate',[],function(undefined) {
 		else {
 			gl.disable(what);
 		}
-		
+
 	};
 
 	var df_table = {
@@ -50,19 +50,19 @@ medea._addMod('renderstate',[],function(undefined) {
 			gl.cullFace(cfm_table[v]);
 		},
 	};
-	
-	
+
+
 	var cur_default = {};
-	
+
 	medea.SetDefaultState = function(s,pool) {
 		var cur = pool.Get('_gl');
-		
+
 		cur_default = s;
 		for (var k in s) {
 			var mapped = action_map[k];
 			if(mapped !== undefined) {
 				var v = s[k];
-				
+
 				if (cur[k] !== v) {
 					mapped(v);
 					cur[k] = v;
@@ -73,25 +73,25 @@ medea._addMod('renderstate',[],function(undefined) {
 
 	medea.SetState = function(s,pool) {
 		var cur = pool.Get('_gl');
-		
+
 		for (var k in s) {
 
 			var mapped = action_map[k];
 			if(mapped !== undefined) {
 				var v = s[k];
-				
+
 				if (cur[k] !== v) {
 					mapped(v);
 					cur[k] = v;
 				}
 			}
 		}
-		
+
 		for (var k in cur_default) {
 			if (k in s) {
 				continue;
 			}
-			
+
 			var mapped = action_map[k];
 			if(mapped !== undefined) {
 				var v = cur_default[k];

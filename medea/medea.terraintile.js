@@ -9,8 +9,8 @@
 medea._addMod('terraintile',['worker_terrain','image','mesh'],function(undefined) {
 	"use strict";
 	var medea = this;
-    
-    medea._initMod('worker_terrain');
+
+	medea._initMod('worker_terrain');
 
 
 	medea._HeightfieldFromEvenSidedHeightmap = function(tex, scale, xz_scale, t, v) {
@@ -193,7 +193,7 @@ medea._addMod('terraintile',['worker_terrain','image','mesh'],function(undefined
 
 		return [pos,w,h];
 	};
-	
+
 	medea._HeightfieldFromOddSidedHeightmap = function(tex,scale, xz_scale, t, v) {
 		return medea._HeightfieldFromOddSidedHeightmapPart(tex,0,0,tex.GetWidth(),tex.GetHeight(),scale,xz_scale, t,v);
 	};

@@ -5,15 +5,15 @@
  * medea is (c) 2011, Alexander C. Gessler
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
- 
- 
+
+
  // This file is usable both as regular medea module and as
  // web worker running in parallel to the main page.
- 
+
  medea._addMod('worker_terrain',[],function(undefined) {
 	"use strict";
 	var medea = this;
-		
+
 	medea._GenHeightfieldTangentSpace = function(pos, wv,hv, nor, tan, bit) {
 		var sqrt = Math.sqrt, w3 = wv*3;
 
@@ -92,19 +92,19 @@
 			}
 		}
 	};
-	
+
 	// public worker interface
 	medea._workers.GenHeightfieldTangentSpace = function(pos,wv,hv) {
 		// #ifdef LOG
 		medea.LogDebug('gen-tangents ' + wv + ' ' + hv);
 		// #endif
-		
-		var nor = new Float32Array(pos.length); 
-		var bit = new Float32Array(pos.length); 
-		var tan = new Float32Array(pos.length); 
-			
+
+		var nor = new Float32Array(pos.length);
+		var bit = new Float32Array(pos.length);
+		var tan = new Float32Array(pos.length);
+
 		medea._GenHeightfieldTangentSpace(pos,wv,hv,nor,tan,bit);
-		
+
 		return {
 			nor : nor,
 			bit : bit,
