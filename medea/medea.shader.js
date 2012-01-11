@@ -37,21 +37,34 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 // #ifdef DEBUG
 			medea.DebugAssert(typeof data === "string","got unexpected argument, perhaps the source for the shader was not a single resource?");
 // #endif
+			this.source = data;
 
 			var c = this._GetCacheName();
 			var s = sh_cache[c];
 			if(s !== undefined) {
-				this.shader = s;
+				this.gen_source = s.gen_source;
+				this.shader = s.shader;
 				this._super();
 				return;
 			}
 
-			s = this.shader = sh_cache[c] = gl.createShader(this.type);
-
-			var gen_source = this._PrependDefines(data);
-			gl.shaderSource(s,gen_source);
-
+			s = this.shader = gl.createShader(this.type);
+			this.gen_source = this._PrependDefines(data);
+			
+			// XXX run preprocessor manually so we have access to the
+			// final, preprocessed shader.
+			
+			// create a new cache entry for this shader
+			sh_cache[c] = {
+				shader : this.shader,
+				source : this.source,
+				gen_source : this.gen_source
+			};
+			
+			// compile the preprocessed shader
+			gl.shaderSource(s,this.gen_source);
 			gl.compileShader(s);
+			
 			if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
 				medea.NotifyFatal("failure compiling shader " +  this.src + ", error log: " + gl.getShaderInfoLog(s));
 				return;
@@ -61,6 +74,15 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 			this._super();
 
 			medea.LogDebug("successfully compiled shader " + this.src);
+		},
+		
+		GetSourceCode : function() {
+			return this.source;
+		},
+		
+		GetPreProcessedSourceCode : function() {
+		// XXX this is not the preprocessed source code ..
+			return this.gen_source;
 		},
 
 		GetGlShader : function(gl) {
