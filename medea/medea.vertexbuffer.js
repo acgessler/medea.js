@@ -406,6 +406,15 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 		GetSourceData : function() {
 			return this.init_data;
 		},
+        
+        Dispose : function() {
+            if (this.buffer === -1) {
+                return;
+            }
+            
+            gl.deleteBuffer(this.buffer);
+            this.buffer = -1;
+        },
 
 		_Bind : function(attrMap, statepool) {
 			var id = this.GetBufferId(), gls = statepool.GetQuick('_gl');
