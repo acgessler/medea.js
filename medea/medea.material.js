@@ -9,6 +9,31 @@
 medea._addMod('material',['shader','texture'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
+	
+	// map from GLSL type identifiers to the corresponding GL enumerated types
+	var glsl_typemap = {
+		'vec2'	: gl.FLOAT_VEC2,
+		'vec3'	: gl.FLOAT_VEC3,
+		'vec4'	: gl.FLOAT_VEC4,
+		'ivec2'	: gl.INT_VEC2,
+		'ivec3'	: gl.INT_VEC3,
+		'ivec4'	: gl.INT_VEC4,
+		'bvec2'	: gl.BOOL_VEC2,
+		'bvec3'	: gl.BOOL_VEC2,
+		'bvec4'	: gl.BOOL_VEC4,
+		'mat2'	: gl.BOOL_MAT2,
+		'mat3'	: gl.BOOL_MAT3,
+		'mat4'	: gl.BOOL_MAT4,
+		'sampler2D'	: gl.SAMPLER_2D,
+		'samplerCube'	: gl.SAMPLER_CUBE,
+	};
+	
+	var glsl_type_picker = [];
+	for (var k in glsl_typemap) {
+		glsl_type_picker.push(k);
+	}
+	glsl_type_picker = '(' + glsl_type_picker.join('|') + ')';
+	
 
 	medea.ShaderSetters = {
 		"CAM_POS" :  function(prog, pos, state) {
@@ -168,19 +193,8 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				return;
 			}
 
-			var info = gl.getActiveUniform(this.program,pos), type = info.type;
-			var handler = null;
-
-			// this is a workaround for my secondary linux system on which the driver
-			// for the builtin Intel GMA unit is not only not on the whitelist of ff/chrome,
-			// but also keeps confusing sampler and matrix uniforms. The workaround
-			// doesn't make it much betteŗ, though, because the driver manages to get
-			// almost everything else wrong as well. Seems there is a reason that
-			// whitelists are used to determine if Webgl is to be supported or not.
-			// XXX SAME trouble on a GF 9600M. Hmpf.
-			if (typeof val === 'string' && /.*\.(jpg|png|gif|bmp)/i.test(val) ) {
-				type = gl.SAMPLER_2D;
-			}
+            var handler = null;
+            var type = this._GetUniformType(k);
 
 			switch(type) {
 				case gl.FLOAT_VEC4:
@@ -378,7 +392,8 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 				// #ifdef DEBUG
 				if(a['POSITION'] === undefined) {
-					medea.LogDebug('failed to derive automatic attribute mapping table, at least there is no POSITION input defind.');
+					medea.LogDebug('failed to derive automatic attribute mapping table, '
+                        +'at least there is no POSITION input defined.');
 				}
 				// #endif
 			}
@@ -397,6 +412,51 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				medea.SetState(this.state,statepool);
 			}
 		},
+        
+        _GetUniformType : function(name) {
+            /* Using getActiveUniform to obtain the type seems to be the most
+               straightforward way, but unfortunately it keeps telling me
+               that a lot of uniforms are in fact sampler2D's even if they
+               are not. Also, results seem to vary from system to system,
+               suggesting trouble with either the underlying GL implementation
+               or the browser's WebGL code
+            
+               So for now, until all such issues are resolved in all major 
+               browsers, scan the source code for the declaration of the
+               variable and extract the type.
+ 
+               This will fail for arrays, structures, etc. but those are not
+               currently handled anyway.               
+            */
+			
+			var vs = this.vs.GetPreProcessedSourceCode(), ps = this.ps.GetPreProcessedSourceCode();
+			var rex = new RegExp(glsl_type_picker + '\\s+' + name);
+			
+			// further escaping should not be needed, name is required to be
+			// a valid GLSL identifier.
+			var typename = (rex.exec(vs) || rex.exec(ps))[1];
+			
+			// #ifdef DEBUG
+			medea.DebugAssert(!!typename,"failed to determine data type of shader uniform " + name);
+			// #endif
+			
+			return glsl_typemap[typename];
+        
+            /*
+			var info = gl.getActiveUniform(this.program,pos), type = info.type;
+
+			// this is a workaround for my secondary linux system on which the driver
+			// for the builtin Intel GMA unit is not only not on the whitelist of ff/chrome,
+			// but also keeps confusing sampler and matrix uniforms. The workaround
+			// doesn't make it much betteŗ, though, because the driver manages to get
+			// almost everything else wrong as well. Seems there is a reason that
+			// whitelists are used to determine if Webgl is to be supported or not.
+			// XXX SAME trouble on a GF 9600M. Hmpf.
+			if (typeof val === 'string' && /.*\.(jpg|png|gif|bmp)/i.test(val) ) {
+				type = gl.SAMPLER_2D;
+			}
+            */
+        }
 	});
 
 	// class Material
