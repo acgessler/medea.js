@@ -198,8 +198,8 @@ medea = new (function(sdom) {
 		}
 	};
 
-	this.Merge = function(inp,template) {
-		var out = {};
+	this.Merge = function(inp,template,out_opt) {
+		var out = out_opt || {};
 		for(var k in inp) {
 			var v = inp[v];
 			if (typeof v === 'object') {
