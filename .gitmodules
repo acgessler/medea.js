@@ -1,0 +1,3 @@
+[submodule "medea/cpp"]
+	path = medea/cpp
+	url = git://github.com/acgessler/cpp.js.git
