@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('shader',['filesystem'],function(undefined) {
+medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -18,7 +18,10 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 	// cache for compiled shader objects.
 	var sh_cache = {
 	};
-
+	
+	var default_defines = {
+		'GL_ES' : ''
+	};
 
 	medea.Shader = medea.Resource.extend( {
 
@@ -26,7 +29,7 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 
 			this.type = src.split('.').pop() == 'ps' ? medea.SHADER_TYPE_PIXEL : medea.SHADER_TYPE_VERTEX;
 			this.shader = 0;
-			this.defines = defines ? medea.Merge(defines,{}) : {};
+			this.defines = medea.Merge(defines || {},default_defines);
 
 			// trigger deferred loading
 			this._super(src, callback);
@@ -49,10 +52,10 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 			}
 
 			s = this.shader = gl.createShader(this.type);
-			this.gen_source = this._PrependDefines(data);
 			
-			// XXX run preprocessor manually so we have access to the
-			// final, preprocessed shader.
+			var cpp = cpp_js();
+			cpp.define_multiple(this.defines);
+			this.gen_source = cpp.run(data, this.src);
 			
 			// create a new cache entry for this shader
 			sh_cache[c] = {
@@ -81,7 +84,6 @@ medea._addMod('shader',['filesystem'],function(undefined) {
 		},
 		
 		GetPreProcessedSourceCode : function() {
-		// XXX this is not the preprocessed source code ..
 			return this.gen_source;
 		},
 
