@@ -19,6 +19,7 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 	var sh_cache = {
 	};
 	
+	// predefined macros
 	var default_defines = {
 		'GL_ES' : ''
 	};
@@ -27,7 +28,10 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 
 		init : function(src, defines, callback) {
 
-			this.type = src.split('.').pop() == 'ps' ? medea.SHADER_TYPE_PIXEL : medea.SHADER_TYPE_VERTEX;
+			this.type = src.split('.').pop() == 'ps' 
+				? medea.SHADER_TYPE_PIXEL 
+				: medea.SHADER_TYPE_VERTEX;
+				
 			this.shader = 0;
 			this.defines = medea.Merge(defines || {},default_defines);
 
@@ -36,9 +40,10 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 		},
 
 		OnDelayedInit : function(data) {
-
 // #ifdef DEBUG
-			medea.DebugAssert(typeof data === "string","got unexpected argument, perhaps the source for the shader was not a single resource?");
+			medea.DebugAssert(typeof data === "string","got unexpected argument, perhaps " 
+				+ "the source for the shader was not a single resource?"
+			);
 // #endif
 			this.source = data;
 
@@ -50,33 +55,72 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 				this._super();
 				return;
 			}
-
-			s = this.shader = gl.createShader(this.type);
 			
-			var cpp = cpp_js();
+			var self = this;
+			
+			// preprocessing shaders is asynchronous
+			var settings = {
+				include_func : function(file, is_global, resumer) {
+					if (!is_global) {
+						file = medea._GetPath(self.src) + file;
+					}
+					
+					alert(file);
+					medea.Fetch(file,
+						function(data) {
+						alert(data);
+							resumer(data);
+						},
+						function(error) {
+							resumer(null);
+						}
+					);
+				},
+				
+				completion_func : function(data) {
+					self.gen_source = data;
+					s = self.shader = gl.createShader(self.type);
+
+					// create a new cache entry for this shader
+					sh_cache[c] = {
+						shader : self.shader,
+						source : self.source,
+						gen_source : self.gen_source
+					};
+					
+					// compile the preprocessed shader
+					gl.shaderSource(s,self.gen_source);
+					gl.compileShader(s);
+					
+					if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+						medea.NotifyFatal("failure compiling shader " +  self.src 
+							+ ", error log: " + gl.getShaderInfoLog(s)
+						);
+						return;
+					}
+
+					// mark this resource as complete
+					self._super();
+
+					medea.LogDebug("successfully compiled shader " 
+						+ self.src
+					);
+				},
+				
+				error_func : function(message) {
+					medea.NotifyFatal("failure preprocessing shader " 
+						+ ": " + message
+					);
+					return;
+				}
+			};
+			
+			var cpp = cpp_js(settings);
 			cpp.define_multiple(this.defines);
 			this.gen_source = cpp.run(data, this.src);
 			
-			// create a new cache entry for this shader
-			sh_cache[c] = {
-				shader : this.shader,
-				source : this.source,
-				gen_source : this.gen_source
-			};
-			
-			// compile the preprocessed shader
-			gl.shaderSource(s,this.gen_source);
-			gl.compileShader(s);
-			
-			if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-				medea.NotifyFatal("failure compiling shader " +  this.src + ", error log: " + gl.getShaderInfoLog(s));
-				return;
-			}
-
-			// mark this resource as complete
-			this._super();
-
-			medea.LogDebug("successfully compiled shader " + this.src);
+			// do _not_ mark the resource as complete yet. This is done
+			// in the completion_func above, which is invoked by cpp.js.
 		},
 		
 		GetSourceCode : function() {
@@ -91,20 +135,6 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 			return this.shader;
 		},
 
-		_PrependDefines : function(data) {
-			var d = this.defines;
-
-			var o = '';
-			for(var k in d) {
-				o += '#define ' + k + ' ' + (d[k] || '') + '\n';
-			}
-			if (o === '') {
-				return data;
-			}
-			return	'/* !begin medea-generated head! */\n' + o +
-					'/* !end medea-generated head! */\n' + data;
-		},
-
 		_GetCacheName : function() {
 			var o = this.src;
 
@@ -115,7 +145,6 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 					o += k+'='+(d[k] || '');
 				}
 			}
-
 			return o;
 		},
 	});

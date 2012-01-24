@@ -766,6 +766,11 @@ medea = new (function(sdom) {
 	this._IsPow2 = function(w) {
 		return w !== 0 && (w & (w - 1)) === 0;
 	};
+	
+	this._GetPath = function(src) {
+		return src.replace(/^(.*[\\\/])?(.*)/,'$1');
+	}
+	
 
 	this._SetFunctionStub("IsMouseDown","input");
 	this._SetFunctionStub("IsKeyDown","input");
