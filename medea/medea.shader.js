@@ -65,10 +65,8 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 						file = medea._GetPath(self.src) + file;
 					}
 					
-					alert(file);
 					medea.Fetch(file,
 						function(data) {
-						alert(data);
 							resumer(data);
 						},
 						function(error) {
