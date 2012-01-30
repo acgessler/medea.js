@@ -23,6 +23,8 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 	var default_defines = {
 		'GL_ES' : ''
 	};
+	
+	var re_toplevel = /^\s*toplevel\(\s*"\s*(.+)\s*"\s*\)\s*$/;
 
 	medea.Shader = medea.Resource.extend( {
 
@@ -58,6 +60,15 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 			
 			var self = this;
 			
+			// additional top-level declarations are specified in-place using
+			// #pragma toplevel. Each time cpp.js encounters one, it invokes
+			// settings.pragma_func.
+			var top_level_decls = [];
+			
+			// _super() is dynamically assigned and ceases to exist as soon
+			// as OnDelayedInit returns, so we need to grab a ref.
+			var call_outer_super = self._super;
+			
 			// preprocessing shaders is asynchronous
 			var settings = {
 				include_func : function(file, is_global, resumer) {
@@ -76,7 +87,7 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 				},
 				
 				completion_func : function(data) {
-					self.gen_source = data;
+					self.gen_source = top_level_decls.join('\n') + '\n' + data;
 					s = self.shader = gl.createShader(self.type);
 
 					// create a new cache entry for this shader
@@ -98,7 +109,7 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 					}
 
 					// mark this resource as complete
-					self._super();
+					call_outer_super.apply(self);
 
 					medea.LogDebug("successfully compiled shader " 
 						+ self.src
@@ -110,7 +121,18 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 						+ ": " + message
 					);
 					return;
-				}
+				},
+				
+				pragma_func : function(pragma_text) {
+					var r = re_toplevel.exec(pragma_text);
+					if (!r) {
+						medea.NotifyFatal("syntax error in #pragma toplevel: " + pragma_text);
+						return null;
+					}
+					
+					top_level_decls.push(r[1]);
+					return true;
+				},
 			};
 			
 			var cpp = cpp_js(settings);

@@ -1,0 +1,101 @@
+
+
+/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+ * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+ *
+ * medea is (c) 2011, Alexander C. Gessler
+ * licensed under the terms and conditions of a 3 clause BSD license.
+ */
+ 
+#ifndef INCLUDED_MEDEA_CORE_PSH
+#define INCLUDED_MEDEA_CORE_PSH
+
+#ifdef MEDEA_VERTEX_SHADER_LIB
+#error core.psh included but core.vsh is already present 
+#endif
+
+#define MEDEA_PIXEL_SHADER_LIB
+
+// Set default floating-point precision to medium
+#ifdef GL_ES
+#pragma toplevel("precision mediump float;")
+#endif
+
+ 
+#define _concat(a,b) a ## b
+#define concat(a,b) _concat(a,b)
+
+#define _stringize(a) # a
+#define stringize(a) _stringize(a)
+#define _pr(aa) _Pragma(aa)
+
+#define _add_varying(type, name) \
+	_pr(stringize(toplevel("varying " stringize(type) " " stringize(name) ";")))
+	
+#define _add_uniform(type, name) \
+	_pr(stringize(toplevel("uniform " stringize(type) " " stringize(name) ";"))) 
+ 
+	
+		/** */
+#define Fetch(type, name) \
+	_add_varying(type, concat(va_,name)) \
+	(concat(va_,name))
+	
+#define FetchVec3(name) \
+	Fetch(vec3, name)
+	
+#define FetchVec2(name) \
+	Fetch(vec2, name)
+	
+#define FetchVec4(name) \
+	Fetch(vec4, name)
+	
+#define FetchFloat(name) \
+	Fetch(highp float, name)
+	
+	
+#define FetchTexCoordN(channel) \
+	FetchVec2(concat(TexCoord,channel))
+ 
+#define FetchTexCoord() \
+	FetchTexCoordN(0)
+	
+#define FetchPosition() \
+	FetchVec3(WorldPosition)
+	
+#define FetchNormal() \
+	FetchVec3(Normal)
+	
+#define FetchTangent() \
+	FetchVec3(Tangent)
+	
+#define FetchBitangent() \
+	FetchVec3(Bitangent)
+	
+	
+	
+#define ModelNormalToWorldSpace(p) \
+	_add_uniform(mat4, WIT) \
+	((WIT * vec4(p.xzy, 0.0)).xzy)
+	
+#define ModelToWorldSpace(p) \
+	_add_uniform(mat4, W) \
+	((W * vec4(p.xzy, 1.0)).xzy)
+	
+#define WorldToClipSpace(p) \
+	_add_uniform(mat4, VP) \
+	((VP * vec4(p.xzy, 1.0)))
+	
+#define ModelToClipSpace(p) \
+	_add_uniform(mat4, P) \
+	(WVP * vec4(p.xzy, 1.0))
+	
+ 
+ 
+/** */
+#define GetWorldEyeDistance(vec3_WORLD_POSITION) \
+	_add_uniform(vec3, CAM_POS_LOCAL) \
+	length(vec3_WORLD_POSITION - CAM_POS_LOCAL)
+	
+#endif // INCLUDED_MEDEA_CORE_PSH
+ 
