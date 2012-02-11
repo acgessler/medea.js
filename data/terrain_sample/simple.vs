@@ -13,7 +13,7 @@ void main()
 	PassNormal(ModelNormalToWorldSpace(vert.NORMAL));
 	PassTexCoord(FetchTexCoord()*4.0);
 	
-	PassFloat(EyeDist,GetWorldEyeDistance(vert.POSITION));
+	PassFloat(EyeDist,GetWorldEyeDistance(worldPos));
 	
 	mat3 rotmat = mat3(vert.TANGENT, vert.BITANGENT, vert.NORMAL);
 	vec3 lightdir = normalize( rotmat * normalize(vec3(0.0,1.0,-1.0)) );

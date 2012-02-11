@@ -1,18 +1,17 @@
 
-attribute vec3 POSITION;
-attribute vec3 NORMAL;
-attribute vec2 TEXCOORD0;
-
-uniform mat4 WVP;
-uniform mat4 WIT;
-
-varying highp vec2 va_TexCoord;
-varying highp vec3 va_Normal;
+/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+ * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+ *
+ * medea is (c) 2011, Alexander C. Gessler
+ * licensed under the terms and conditions of a 3 clause BSD license.
+ */
+ 
+#include <remote:mcore/shaders/core.vsh>
 
 void main()
 {
-	gl_Position = WVP * vec4(POSITION,1.0);
-	va_TexCoord = TEXCOORD0;
-    va_Normal = (WIT * vec4(NORMAL,0.0)).xzy;
+	PassClipPosition(ModelToClipSpace(FetchPosition()));
+	PassNormal(ModelNormalToWorldSpace(FetchNormal()));
+	PassTexCoord(FetchTexCoord());
 }
 

@@ -1,12 +1,17 @@
-#ifdef GL_ES
-precision highp float;
-#endif
-
-varying highp vec2 va_TexCoord;
+/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+ * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+ *
+ * medea is (c) 2011, Alexander C. Gessler
+ * licensed under the terms and conditions of a 3 clause BSD license.
+ */
+ 
 uniform sampler2D texture;
+uniform vec3 lightdir;
+
+#include <remote:mcore/shaders/core.psh>
 
 void main()
 {
-	gl_FragColor = texture2D(texture, va_TexCoord );
+	gl_FragColor = texture2D(texture, FetchTexCoord() );
 }
 

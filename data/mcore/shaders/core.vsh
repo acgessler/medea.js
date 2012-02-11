@@ -63,7 +63,7 @@
 
 	/** */
 #define PassClipPosition(vec4_clip_position) \
-	PassVec4(Position, vec4_clip_position)
+	gl_Position = vec4_clip_position
 	
 	/** */
 #define PassPosition(vec3_world_position) \
@@ -81,7 +81,13 @@
 #define PassTexCoord(vec2_texcoord) \
 	PassTexCoordN(vec2_texcoord, 0)
 	
+	/** */
+#define Pass3DTexCoordN(vec3_texcoord, channel) \
+	PassVec3(concat(TexCoord,channel), vec3_texcoord)
 	
+	/** */
+#define Pass3DTexCoord(vec3_texcoord) \
+	Pass3DTexCoordN(vec3_texcoord, 0)
 	
 	
 	
@@ -109,6 +115,13 @@
 #define FetchTexCoord() \
 	FetchTexCoordN(0)
 	
+#define Fetch3DTexCoordN(channel) \
+	FetchVec3(concat(TEXCOORD,channel))
+ 
+#define Fetch3DTexCoord() \
+	FetchTexCoord3DN(0)
+
+	
 #define FetchPosition() \
 	FetchVec3(POSITION)
 	
@@ -124,19 +137,19 @@
 	
 #define ModelNormalToWorldSpace(p) \
 	_add_uniform(mat4, WIT) \
-	((WIT * vec4(p.xzy, 0.0)).xzy)
+	((WIT * vec4(p.xyz, 0.0)).xyz)
 	
 #define ModelToWorldSpace(p) \
 	_add_uniform(mat4, W) \
-	((W * vec4(p.xzy, 1.0)).xzy)
+	((W * vec4(p.xyz, 1.0)).xyz)
 	
 #define WorldToClipSpace(p) \
 	_add_uniform(mat4, VP) \
-	((VP * vec4(p.xzy, 1.0)))
+	((VP * vec4(p.xyz, 1.0)))
 	
 #define ModelToClipSpace(p) \
-	_add_uniform(mat4, P) \
-	(WVP * vec4(p.xzy, 1.0))
+	_add_uniform(mat4, WVP) \
+	(WVP * vec4(p.xyz, 1.0))
 	
  
 /** */

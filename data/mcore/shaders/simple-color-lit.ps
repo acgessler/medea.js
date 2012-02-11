@@ -1,15 +1,18 @@
-#ifdef GL_ES
-precision highp float;
-#endif
+/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+ * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+ *
+ * medea is (c) 2011, Alexander C. Gessler
+ * licensed under the terms and conditions of a 3 clause BSD license.
+ */
+
+#include <remote:mcore/shaders/core.psh> 
 
 uniform vec3 color;
 uniform vec3 lightdir;
 
-varying highp vec3 va_Normal;
-
 void main()
 {
 	gl_FragColor.a = 1.0;
-	gl_FragColor.rgb = color * dot(normalize(lightdir), normalize(va_Normal));
+	gl_FragColor.rgb = color * dot(normalize(lightdir), normalize(FetchNormal()));
 }
 
