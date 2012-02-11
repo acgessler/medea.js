@@ -17,19 +17,43 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 
 	var TEX = medea.TEXTURE_TYPE_2D = gl.TEXTURE_2D;
 
-	//
+	// flags specific to medea.Texture
 	medea.TEXTURE_FLAG_KEEP_IMAGE    = medea.IMAGE_FLAG_USER;
 	medea.TEXTURE_FLAG_LAZY_UPLOAD   = medea.IMAGE_FLAG_USER << 1;
 	medea.TEXTURE_FLAG_NPOT_PAD      = medea.IMAGE_FLAG_USER << 2;
 	medea.TEXTURE_FLAG_NO_MIPS       = medea.IMAGE_FLAG_USER << 3;
+	
+	// possible values for the `format` parameter 
+	medea.TEXTURE_FORMAT_RGBA        = 'rgba';
+	medea.TEXTURE_FORMAT_RGB         = 'rgb';
+	medea.TEXTURE_FORMAT_LUM         = 'lum';
+	medea.TEXTURE_FORMAT_LUM_ALPHA   = 'luma';
+	
+	
+	var texfmt_to_gl = function(f) {
+		switch(f) {
+			case medea.TEXTURE_FORMAT_RGBA:
+				return gl.RGBA;
+			case medea.TEXTURE_FORMAT_RGB:
+				return gl.RGB;
+			case medea.TEXTURE_FORMAT_LUM:
+				return gl.LUMINANCE;
+			case medea.TEXTURE_FORMAT_LUM_ALPHA:
+				return gl.LUMINANCE_ALPHA;
+		}
+		// #ifdef DEBUG
+		medea.DebugAssert('unrecognized texture format: ' + f);
+		// #endif
+	}
 
 	medea.MAX_TEXTURE_SIZE = gl.getParameter(gl.MAX_TEXTURE_SIZE);
 
 	medea.Texture = medea.Image.extend( {
 
-		init : function(src_or_img, callback, flags) {
+		init : function(src_or_img, callback, flags, format) {
 			this.texture = gl.createTexture();
 			this.glwidth = this.glheight = -1;
+			this.format = format || medea.TEXTURE_FORMAT_RGBA;
 
 			this._super(src_or_img, callback, flags);
 		},
@@ -96,6 +120,7 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 			}
 
 			var img = this.img;
+			var intfmt = texfmt_to_gl(this.format);
 
 			// scale or pad NPOT or oversized textures
 			if (this.glwidth !== this.width || this.glheight !== this.height) {
@@ -130,12 +155,12 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 				// engines, though.
 				var c = ctx.getImageData(0,0,canvas.width,canvas.height);
 				ctx = canvas = null;
-				gl.texImage2D(TEX, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
+				gl.texImage2D(TEX, 0, intfmt, gl.RGBA, gl.UNSIGNED_BYTE, c);
 			}
 			else {
 
 				// copy to the gl texture
-				gl.texImage2D(TEX, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+				gl.texImage2D(TEX, 0, intfmt, gl.RGBA, gl.UNSIGNED_BYTE, img);
 			}
 
 			// setup sampler states and generate MIPs
@@ -182,8 +207,8 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 		},
 	});
 
-	medea.CreateTexture = function(src_or_image, callback, flags) {
-		return new medea.Texture(src_or_image, callback, flags);
+	medea.CreateTexture = function(src_or_image, callback, flags, format) {
+		return new medea.Texture(src_or_image, callback, flags, format);
 	}
 });
 
