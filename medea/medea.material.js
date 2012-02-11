@@ -77,7 +77,6 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	// class Pass
 	medea.Pass = medea.Class.extend({
 
-		program:null,
 
 		init : function(vs,ps,constants,attr_map,state) {
 			this.vs = vs;
@@ -86,6 +85,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			this.auto_setters = {};
 			this.attr_map = attr_map;
 			this.state = state || {};
+			this.program = null;
 
 // #ifdef DEBUG
 			if (!vs || !ps) {
@@ -434,7 +434,12 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			
 			// further escaping should not be needed, name is required to be
 			// a valid GLSL identifier.
-			var typename = (rex.exec(vs) || rex.exec(ps))[1];
+			try {
+				var typename = (rex.exec(vs) || rex.exec(ps))[1];
+			} catch(e) {
+				// should not happen
+				medea.DebugAssert('could not find type declaration for uniform: ' + name);
+			}
 			
 			// #ifdef DEBUG
 			medea.DebugAssert(!!typename,"failed to determine data type of shader uniform " + name);

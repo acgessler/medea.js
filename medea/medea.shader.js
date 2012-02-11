@@ -15,7 +15,7 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 
 	medea._initMod('filesystem');
 
-	// cache for compiled shader objects.
+	// cache for compiled shader objects
 	var sh_cache = {
 	};
 	
@@ -87,6 +87,9 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 				},
 				
 				completion_func : function(data) {
+					// #ifdef DEBUG
+					medea.DebugAssert(!!data,'unexpected null');
+					// #endif
 					self.gen_source = top_level_decls.join('\n') + '\n' + data;
 					s = self.shader = gl.createShader(self.type);
 
@@ -137,7 +140,7 @@ medea._addMod('shader',['filesystem','cpp/cpp.js'],function(undefined) {
 			
 			var cpp = cpp_js(settings);
 			cpp.define_multiple(this.defines);
-			this.gen_source = cpp.run(data, this.src);
+			cpp.run(data, this.src);
 			
 			// do _not_ mark the resource as complete yet. This is done
 			// in the completion_func above, which is invoked by cpp.js.
