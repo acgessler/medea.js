@@ -16,7 +16,7 @@ void main()
 
 	// set w==z to ensure z becomes 1 after perspectivical divide
 	mat4 m = mat4(VP[0],VP[1],VP[2],vec4(0.0,0.0,0.0,1.0));
-	vec4 t = m * vec4(pos.xzy,1.0);
+	vec4 t = m * vec4(pos.xyz,1.0);
 	PassClipPosition(t.xyzz);
 	Pass3DTexCoord(pos);
 }
