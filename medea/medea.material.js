@@ -395,11 +395,34 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			// with explicit disposal semantics).
 			out.program = this.program;
 			
-			// auto-setters and attribute mapping are always safe to share
-			out.auto_setters = this.auto_setters;
+			// attribute mapping is always safe to share
 			out.attr_map = this.attr_map;
 			
+			// however, we need to rebuild setters from scratch
+			out.auto_setters = {};
+			out._ExtractUniforms();
+			out._RefreshState();
+			
 			return out;
+		},
+		
+		_ExtractUniforms : function() {
+			// extract uniforms that we update automatically and setup state managers for them
+			for(var k in medea.ShaderSetters) {
+				var pos = gl.getUniformLocation(this.program, k);
+				if(pos) {
+					this.auto_setters[k] = [pos,medea.ShaderSetters[k]];
+				}
+			};
+		},
+		
+		_RefreshState : function() {
+			// re-install state managers for all constants
+			var old = this.constants;
+			this.constants = {};
+			for(var k in old) {
+				this.Set(k,old[k]);
+			}
 		},
 
 		_TryAssembleProgram : function() {
@@ -427,21 +450,9 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			}
 			// #endif
 
-			// extract uniforms that we update automatically and setup state managers for them
-			for(var k in medea.ShaderSetters) {
-				var pos = gl.getUniformLocation(this.program, k);
-				if(pos) {
-					this.auto_setters[k] = [pos,medea.ShaderSetters[k]];
-				}
-			};
-
-			// install state managers for all pre-defined constants that we got from the caller
-			var old = this.constants;
-			this.constants = {};
-			for(var k in old) {
-				this.Set(k,old[k]);
-			}
-
+			this._ExtractUniforms();
+			this._RefreshState();
+			
 			// if the user didn't supply an attribute mapping (i.e. which pre-defined
 			// attribute type maps to which attribute in the shader), derive it
 			// from the attribute names, assuming their names are recognized.
