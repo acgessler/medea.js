@@ -10,6 +10,14 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 	
+	
+	medea.MATERIAL_CLONE_COPY_STATE 		= 0x1;
+	medea.MATERIAL_CLONE_SHARE_STATE 		= 0x2;
+	
+	medea.MATERIAL_CLONE_COPY_CONSTANTS 	= 0x4;
+	medea.MATERIAL_CLONE_SHARE_CONSTANTS 	= 0x8;
+	
+	
 	// map from GLSL type identifiers to the corresponding GL enumerated types
 	var glsl_typemap = {
 		'vec2'	: gl.FLOAT_VEC2,
@@ -81,7 +89,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		init : function(vs,ps,constants,attr_map,state) {
 			this.vs = vs;
 			this.ps = ps;
-			this.constants = constants;
+			this.constants = constants || {};
 			this.auto_setters = {};
 			this.attr_map = attr_map;
 			this.state = state || {};
@@ -96,9 +104,6 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			this._TryAssembleProgram();
 		},
 
-		IsComplete : function() {
-			return this.program !== null;
-		},
 
 		Begin : function(statepool) {
 			if (this.program === null) {
@@ -339,10 +344,66 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		Get : function(k) {
 			return this.constants[k];
 		},
+		
+		IsComplete : function() {
+			return this.program !== null;
+		},
+		
+		IsClone : function() {
+			return 'clone_flags' in this;
+		},
 
+		
+		_Clone : function(clone_flags, out) {
+			var new_out = false;
+			if(!out) {
+				out = new medea.Pass(this.vs, this.ps);
+				new_out = true;
+			}
+			
+			if (new_out) {
+				if (clone_flags & medea.MATERIAL_CLONE_COPY_STATE) {
+					out.state = medea.Merge(this.state, {}, {});
+				}
+				else if (clone_flags & medea.MATERIAL_CLONE_SHARE_STATE) {
+					out.state = this.state;
+				}
+				
+				if (clone_flags & medea.MATERIAL_CLONE_COPY_CONSTANTS) {
+					out.constants = medea.Merge(this.constants, {}, {});
+				}
+				else if (clone_flags & medea.MATERIAL_CLONE_SHARE_CONSTANTS) {
+					out.constants = this.constants;
+				}
+			}
+			
+			if (!this.IsComplete()) {
+				// since this instance isn't complete yet, we can't
+				// clone the other yet. Add it to a list and do the actual cloning
+				// as soon as all data is present. This is a bit dirty and imposes an
+				// unwanted reference holder on the cloned pass, but it cannot be
+				// avoided with the current design.
+				if (!this.wannabe_clones) {
+					this.wannabe_clones = [];
+				}
+				this.wannabe_clones.push(out);
+				out.clone_flags = clone_flags;
+				return out;
+			}
+			
+			// program reference can be shared (XXX but this does not play well
+			// with explicit disposal semantics).
+			out.program = this.program;
+			
+			// auto-setters and attribute mapping are always safe to share
+			out.auto_setters = this.auto_setters;
+			out.attr_map = this.attr_map;
+			
+			return out;
+		},
 
 		_TryAssembleProgram : function() {
-			if (this.program !== null || !this.vs.IsComplete() || !this.ps.IsComplete()) {
+			if (this.IsComplete() || !this.vs.IsComplete() || !this.ps.IsComplete() || this.IsClone()) {
 				// can't assemble this program yet, for we first need to wait for some dependent resources to load
 				return;
 			}
@@ -396,6 +457,16 @@ medea._addMod('material',['shader','texture'],function(undefined) {
                         +'at least there is no POSITION input defined.');
 				}
 				// #endif
+			}
+			
+			// now transfer the dictionaries and the program reference to all pending
+			// clones for this material.
+			if (this.wannabe_clones) {
+				for (var i = 0; i < this.wannabe_clones.length; ++i) {
+					this._Clone( this.wannabe_clones[i].clone_flags, this.wannabe_clones[i] );
+				}
+				
+				delete this.wannabe_clones;
 			}
 		},
 
@@ -511,6 +582,8 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		GetId: function() {
 			return 0;
 		},
+		
+		Name : medea._GetSet(this,'name'),
 
 		Use: function(drawfunc,statepool) {
 			// invoke the drawing callback once per pass
@@ -558,6 +631,14 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	medea.CreateMaterial = function(passes, name) {
 		return new medea.Material(passes, name);
 	};
+	
+	medea.CloneMaterial = function(mat, name, clone_flags) {
+		var passes = mat.Passes(), newp = new Array(passes.length);
+		for (var i = 0; i < passes.length; ++i) {
+			newp[i] = medea.ClonePass(passes[i], clone_flags);
+		}
+		return new medea.Material(newp, name || mat.Name()+'_clone');
+	};
 
 	medea.CreateSimpleMaterialFromShaderPair = function(name, constants, attr_map, defines) {
 		return new medea.Material(medea.CreatePassFromShaderPair(name,constants, attr_map, defines));
@@ -565,6 +646,10 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 	medea.CreatePassFromShaderPair = function(name, constants, attr_map, defines) {
 		return new medea.Pass( medea.CreateShader(name+'.vs', defines), medea.CreateShader(name+'.ps', defines), constants, attr_map );
+	};
+	
+	medea.ClonePass = function(pass, clone_flags) {
+		return pass._Clone(clone_flags);
 	};
 });
 
