@@ -22,14 +22,14 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 	medea.TEXTURE_FLAG_LAZY_UPLOAD   = medea.IMAGE_FLAG_USER << 1;
 	medea.TEXTURE_FLAG_NPOT_PAD      = medea.IMAGE_FLAG_USER << 2;
 	medea.TEXTURE_FLAG_NO_MIPS       = medea.IMAGE_FLAG_USER << 3;
-	
-	// possible values for the `format` parameter 
+
+	// possible values for the `format` parameter
 	medea.TEXTURE_FORMAT_RGBA        = 'rgba';
 	medea.TEXTURE_FORMAT_RGB         = 'rgb';
 	medea.TEXTURE_FORMAT_LUM         = 'lum';
 	medea.TEXTURE_FORMAT_LUM_ALPHA   = 'luma';
-	
-	
+
+
 	var texfmt_to_gl = function(f) {
 		switch(f) {
 			case medea.TEXTURE_FORMAT_RGBA:
@@ -153,7 +153,7 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 				var ctx = canvas.getContext("2d");
 
 				if (this.flags & medea.TEXTURE_FLAG_NPOT_PAD) {
-					ctx.drawImage(img, 0, 0, Math.min(img.width,canvas.width), 
+					ctx.drawImage(img, 0, 0, Math.min(img.width,canvas.width),
 						Math.min(img.height,canvas.height));
 				}
 				else {

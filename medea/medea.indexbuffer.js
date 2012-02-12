@@ -98,14 +98,14 @@ medea._addMod('indexbuffer',[],function(undefined) {
 			return this.flags;
 		},
 
-        Dispose : function() {
-            if (this.buffer === -1) {
-                return;
-            }
-            
-            gl.deleteBuffer(this.buffer);
-            this.buffer = -1;
-        },
+		Dispose : function() {
+			if (this.buffer === -1) {
+				return;
+			}
+
+			gl.deleteBuffer(this.buffer);
+			this.buffer = -1;
+		},
 
 		_Bind : function(statepool) {
 			var id = this.GetBufferId(), gls = statepool.GetQuick('_gl');

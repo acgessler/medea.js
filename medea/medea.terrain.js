@@ -13,10 +13,10 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 
 	medea._initMod('terraintile');
 	medea._initMod('worker_terrain');
-    
-    
-    medea.TERRAIN_MATERIAL_ENABLE_VERTEX_FETCH = 0x1;
-    
+
+
+	medea.TERRAIN_MATERIAL_ENABLE_VERTEX_FETCH = 0x1;
+
 
 	var terrain_ib_cache = {
 	};
@@ -63,23 +63,23 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 				// #endif
 				return;
 			}
-            
-            // #ifdef DEBUG
-            medea.DebugAssert(medea._IsPow2(this.desc.unitbase) && this.desc.unitbase >= 4, 
-                "unitbase for terrain must be power of two >= 4");
-            medea.DebugAssert(medea._IsPow2(this.desc.width), 
-                "terrain width must be power of two");
-            medea.DebugAssert(medea._IsPow2(this.desc.height), 
-                "terrain height must be power of two");
-            // #endif
+
+			// #ifdef DEBUG
+			medea.DebugAssert(medea._IsPow2(this.desc.unitbase) && this.desc.unitbase >= 4,
+				"unitbase for terrain must be power of two >= 4");
+			medea.DebugAssert(medea._IsPow2(this.desc.width),
+				"terrain width must be power of two");
+			medea.DebugAssert(medea._IsPow2(this.desc.height),
+				"terrain height must be power of two");
+			// #endif
 
 			var w = Math.min(this.desc.size[0],this.desc.size[1]), cnt = 0;
 			for (; w >= 1; ++cnt, w /= 2);
 			this.lod_count = cnt;
 
 			this.desc.base_hscale = this.desc.base_hscale || 1.0/255.0;
-            
-            this.url_root = url_root || this.desc.url_root || '';
+
+			this.url_root = url_root || this.desc.url_root || '';
 			this.maps_bysize = {};
 			this.fetch_queue = [];
 			this.materials = {};
@@ -185,7 +185,7 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			var real_scale = match.size[0]/this.desc.size[0];
 			// #ifdef DEBUG
 			medea.DebugAssert(real_scale == match.size[1]/this.desc.size[1],
-                "LOD images with different aspect ratios than the main terrain are not supported");
+				"LOD images with different aspect ratios than the main terrain are not supported");
 			// #endif
 
 			var want_scale = 1/(1 << lod);
@@ -199,17 +199,17 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			var xx = x*ub, yy = y*ub, ww = w*ub, hh = h*ub;
 
 			var sbase = real_scale/want_scale;
-			
+
 			var hf = this._CreateHeightField(match._cached_img, xx, yy, ww, hh,
 				sbase*this.desc.scale[1]*this.desc.base_hscale,
 				sbase*this.desc.scale[0]);
 
 			return [hf[0],hf[1],hf[2],x,y];
 		},
-        
-        // may return NULL to indicate vertex fetching is not supported
-        // returns [uv_offsetscale,world_scale,world_offset, texture]
-        GetVertexFetchParams : function(x,y,w,h,lod) {
+
+		// may return NULL to indicate vertex fetching is not supported
+		// returns [uv_offsetscale,world_scale,world_offset, texture]
+		GetVertexFetchParams : function(x,y,w,h,lod) {
 			var match = null;
 			if (Array.isArray(x)) {
 				y = x[1];
@@ -220,9 +220,9 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 				x = x[0];
 			}
 
-            var sx = this.desc.size[0], sy = this.desc.size[1];
+			var sx = this.desc.size[0], sy = this.desc.size[1];
 			var ilod = (1 << lod);
-            
+
 			if (!match) {
 				var wx = sx / ilod, hx = sy / ilod;
 				match = this._FindLOD(wx,hx);
@@ -232,41 +232,41 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			}
 
 			var real_scale = match.size[0]/sx;
-            
+
 			// #ifdef DEBUG
 			medea.DebugAssert(real_scale == match.size[1]/sy,
-                "LOD images with different aspect ratios than the main terrain are not supported");
+				"LOD images with different aspect ratios than the main terrain are not supported");
 			// #endif
-            
-            var want_scale = 1/ilod;
-            var ub = Math.floor(this.desc.unitbase * real_scale), iub = 1/ub, ox = x, oy = y;
+
+			var want_scale = 1/ilod;
+			var ub = Math.floor(this.desc.unitbase * real_scale), iub = 1/ub, ox = x, oy = y;
 
 			x = Math.floor(x*ub)*iub;
 			y = Math.floor(y*ub)*iub;
 
 			var sbase = real_scale/want_scale;
-            var uv = [x / sx, y / sy, w / sx, w / sy];
-			
+			var uv = [x / sx, y / sy, w / sx, w / sy];
+
 			var sc = this.desc.scale;
 			var wpos = [
 				ub*((x-ox)-ilod*sc[0]/2),
 				0,
 				ub*((y-oy)-ilod*sc[0]/2)
 			];
-			
+
 			var wscale = [
 				ilod,
 				sbase*this.desc.scale[1],
 				ilod
 			];
-            return [uv,wscale,wpos,match._cached_img];
+			return [uv,wscale,wpos,match._cached_img];
 		},
 
 
 		_FindLOD : function(w,h) {
 			// #ifdef DEBUG
 			medea.DebugAssert(w <= this.GetWidth() && h <= this.GetHeight(),
-                'width and height may not exceed terrain dimensions');
+				'width and height may not exceed terrain dimensions');
 			// #endif
 			if (!w || !h) {
 				return null;
@@ -311,42 +311,42 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 						}
 					}
 				},
-				
+
 				// Flags:
-				
-                // preserve the original image data (even if vertex fetching is active,
-                // we need it for height queries.
-                medea.TEXTURE_FLAG_KEEP_IMAGE |
-                
-                // we don't know whether we need the texture data on the GPU
-                medea.TEXTURE_FLAG_LAZY_UPLOAD |
-                
-                // no MIP maps, if any, we need only vertex shader access where
-                // the gradients for MIP map sampling aren't available anyway.
-                medea.TEXTURE_FLAG_NO_MIPS |
-				
+
+				// preserve the original image data (even if vertex fetching is active,
+				// we need it for height queries.
+				medea.TEXTURE_FLAG_KEEP_IMAGE |
+
+				// we don't know whether we need the texture data on the GPU
+				medea.TEXTURE_FLAG_LAZY_UPLOAD |
+
+				// no MIP maps, if any, we need only vertex shader access where
+				// the gradients for MIP map sampling aren't available anyway.
+				medea.TEXTURE_FLAG_NO_MIPS |
+
 				// non power of two input data should be padded, not scaled
 				// to preserve the original pixel data. The down side is that we
 				// need to do some manual corrections in the shaders.
 				medea.TEXTURE_FLAG_NPOT_PAD,
-				
-				
+
+
 				// Format:
-				
+
 				// only one component needed, input image is grayscale anyway
 				medea.TEXTURE_FORMAT_LUM,
-				
-				
+
+
 				// Overwrite size to make sure 4097x407 inputs won't get padded
 				// to 8096x8096, which kills almost all memory limits.
 				map.size[0] * this.desc.unitbase,
 				map.size[1] * this.desc.unitbase
-                );
+				);
 			}
 		},
 
 		GetMaterial : function(lod, behaviour_flags) {
-            var key = lod + '_' + behaviour_flags;
+			var key = lod + '_' + behaviour_flags;
 			if (this.materials[key]) {
 				return this.materials[key];
 			}
@@ -357,23 +357,23 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 
 			var mat = this.desc.materials[lod];
 			if(mat.clonefrom !== undefined) {
-				return this.materials[key] = medea.CloneMaterial(this.GetMaterial(mat.clonefrom, 
+				return this.materials[key] = medea.CloneMaterial(this.GetMaterial(mat.clonefrom,
 					behaviour_flags),
 					medea.MATERIAL_CLONE_SHARE_STATE);
 			}
 
 			var name = this.url_root + '/' + mat.effect, constants = mat.constants;
-            
-            var defines = {};
-            if (behaviour_flags & medea.TERRAIN_MATERIAL_ENABLE_VERTEX_FETCH) {
-                defines['ENABLE_TERRAIN_VERTEX_FETCH'] = null;
-            }
+
+			var defines = {};
+			if (behaviour_flags & medea.TERRAIN_MATERIAL_ENABLE_VERTEX_FETCH) {
+				defines['ENABLE_TERRAIN_VERTEX_FETCH'] = null;
+			}
 
 			// make texture paths absolute
 			FixTexturePaths(constants, this.url_root);
 			var m = new medea.Material(medea.CreatePassFromShaderPair(name,constants,undefined,defines));
-            this.materials[key] = m;
-            
+			this.materials[key] = m;
+
 			// enable culling unless the user disables it explicitly
 			var p = m.Passes();
 			for(var i = 0; i < p.length; ++i) {
@@ -530,59 +530,59 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 
 			this._BuildMesh();
 		},
-        
-        _Dispose : function() {
-            this.is_obsolete = true;
-        },
-		
+
+		_Dispose : function() {
+			this.is_obsolete = true;
+		},
+
 		_BuildMesh : function() {
 			var t = this.terrain, ilod = 1<<this.lod, outer = this;
-            var vertex_fetch = t.UseVertexFetch();
-            
+			var vertex_fetch = t.UseVertexFetch();
+
 			// Fetch the material as early as possible to improve parallelization
-            var flags = vertex_fetch ? medea.TERRAIN_MATERIAL_ENABLE_VERTEX_FETCH : 0;
-            var material = t.data.GetMaterial(this.lod, flags);
-            if (!material) {
-                // Data provider failed to deliver us a material for this setup.
-                // XXX default material doesn't support vertex fetching.
-                material = medea.CreateSimpleMaterialFromColor([0.7,0.7,0.5,1.0], true);
-           
-                // #ifdef LOG
-				medea.Log('terrain data provider failed to deliver a material for LOD ' 
-                    + this.lod + ' with behaviour flags: ' + flags,'error');
+			var flags = vertex_fetch ? medea.TERRAIN_MATERIAL_ENABLE_VERTEX_FETCH : 0;
+			var material = t.data.GetMaterial(this.lod, flags);
+			if (!material) {
+				// Data provider failed to deliver us a material for this setup.
+				// XXX default material doesn't support vertex fetching.
+				material = medea.CreateSimpleMaterialFromColor([0.7,0.7,0.5,1.0], true);
+
+				// #ifdef LOG
+				medea.Log('terrain data provider failed to deliver a material for LOD '
+					+ this.lod + ' with behaviour flags: ' + flags,'error');
 				// #endif
-            }
-                
+			}
+
 			var ppos = this.ppos;
 			t.data.RequestLOD( this.startx, this.starty,ilod,ilod,this.lod, function(tup) {
-                // This happens if the request for the LOD takes so long that the terrain
-                // ring is no longer active / already disposed when control returns.
-                if(outer.is_obsolete) {
-                    return;
-                }
-                
-                // Note: `vertex_fetch` has still the same value since any changes 
-                // would cause all terrain data to be disposed.
-                if (vertex_fetch) {
+				// This happens if the request for the LOD takes so long that the terrain
+				// ring is no longer active / already disposed when control returns.
+				if(outer.is_obsolete) {
+					return;
+				}
+
+				// Note: `vertex_fetch` has still the same value since any changes
+				// would cause all terrain data to be disposed.
+				if (vertex_fetch) {
 					outer._BuildVFetchingMesh(tup, material, ilod, ppos);
-                    return;
-                }
-				
+					return;
+				}
+
 				outer._BuildHeightfieldMesh(tup, material, ilod, ppos);
 			});
 		},
-		
+
 		_BuildVFetchingMesh : function(tup, material, ilod, ppos) {
 			if(!this.cached_mesh) {
 				var ub = this.terrain.data.GetUnitBase();
 				var indices = this._GetIndices(ub,ub);
 
-				this.cached_mesh = medea.CreateSimpleMesh(this.terrain._GetVBOForVertexFetch(), 
+				this.cached_mesh = medea.CreateSimpleMesh(this.terrain._GetVBOForVertexFetch(),
 					indices,
 					material
 				);
 			}
-			
+
 			var params = this.terrain.data.GetVertexFetchParams(tup), passes = material.Passes();
 			if (!params) {
 				// #ifdef LOG
@@ -590,35 +590,35 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 				// #endif
 				return;
 			}
-			
+
 			// #ifdef DEBUG
-			medea.DebugAssert(params.length === 4 && params[0].length === 4 
+			medea.DebugAssert(params.length === 4 && params[0].length === 4
 				&& params[1].length === 3
 				&& params[2].length === 3
 				&& params[3] instanceof medea.Texture,
 				"GetVertexFetchParams() implementation does not conform to specification"
 			);
 			// #endif
-			
+
 			var wpos = params[2];
 			wpos[0] += ppos[0];
 			wpos[2] += ppos[2];
-			
-			passes.forEach(function(pass) {        
+
+			passes.forEach(function(pass) {
 				pass.Set('_tvf_range',params[0]);
 				pass.Set('_tvf_scale',params[1]);
 				pass.Set('_tvf_wpos',wpos);
 				pass.Set('_tvf_height_map',params[3]);
 			});
-			
+
 			this._SetMeshes(this.cached_mesh);
 			this._SetPresent();
 		},
-		
+
 		_BuildHeightfieldMesh : function(tup, material, ilod, ppos) {
 			var v = d.SampleLOD(tup);
 			var pos = v[0], wv = v[1], hv = v[2], w = wv-1, h = hv-1, realx = v[3], realy = v[4];
-			
+
 			var sc = this.terrain.data.GetScale(), ub = this.terrain.data.GetUnitBase();
 
 			// center the heightfield and scale it according to its LOD
@@ -635,15 +635,15 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 				if(outer.is_obsolete) {
 					return;
 				}
-			
+
 				medea._GenHeightfieldUVs(uv,wv,hv, ilod);
-				
+
 				var m;
-				var vertices = { 
-					positions: pos, 
-					normals: res.nor, 
+				var vertices = {
+					positions: pos,
+					normals: res.nor,
 					tangents: res.tan,
-					bitangents: res.bit, 
+					bitangents: res.bit,
 					uvs: [uv]
 				};
 
@@ -704,19 +704,19 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			// finish loading so we can shrink again.
 			if (extend) {
 				// #ifdef LOG
-				medea.LogDebug('extending indices for lod ' + this.lod 
-                    + ' down to cover lod ' + n + ' as well');
+				medea.LogDebug('extending indices for lod ' + this.lod
+					+ ' down to cover lod ' + n + ' as well');
 				// #endif
 
 				for( var nn = n; nn < this.lod; ++nn) {
 					t.LOD(nn,cam).substituted = true;
 					(function(nn, outer) {
 						var pf = function() {
-                            // This happens if stuff goes wrong and the ring is no longer active / 
-                            // already disposed when control reaches here.
-                            if(outer.is_obsolete) {
-                                return;
-                            }
+							// This happens if stuff goes wrong and the ring is no longer active /
+							// already disposed when control reaches here.
+							if(outer.is_obsolete) {
+								return;
+							}
 
 							for( var m = outer.lod-1; m >= 0 && !t.LOD(m,cam).IsPresent(); --m );
 							if(m === -1) {
@@ -724,8 +724,8 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 							}
 							if (m === nn) {
 								// #ifdef LOG
-								medea.LogDebug('shrinking indices for ' + outer.lod 
-                                    + ' again now that lod ' + nn + ' is present');
+								medea.LogDebug('shrinking indices for ' + outer.lod
+									+ ' again now that lod ' + nn + ' is present');
 								// #endif
 
 								outer.cached_mesh.IB(outer._GetIndices(w,h));
@@ -806,7 +806,7 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			this.cameras = {};
 
 			// add a dummy entity whose only purpose is to keep a static bounding
-			// box for the terrain 
+			// box for the terrain
 			var ent = medea.CreateEntity('TerrainBBDummyEntity');
 			var ub = data.GetUnitBase(), s = data.GetScale();
 
@@ -817,38 +817,38 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			this.AddEntity(ent);
 		},
 
-        CameraTimeout : medea._GetSet('camera_timeout'),
+		CameraTimeout : medea._GetSet('camera_timeout'),
 		UpdateTreshold : medea._GetSet('update_treshold'),
-        NoMensLandBorder : medea._GetSet('no_mens'),
+		NoMensLandBorder : medea._GetSet('no_mens'),
 
 		UseVertexFetch : function(ts) {
 			if (ts === undefined) {
 				return this.use_vertex_fetch;
 			}
-            
-            if(ts === this.use_vertex_fetch) {
-                return;
-            }
-            this._DropAllData();
+
+			if(ts === this.use_vertex_fetch) {
+				return;
+			}
+			this._DropAllData();
 			this.use_vertex_fetch = ts;
 		},
-        
-        UseWorker : function(ts) {
+
+		UseWorker : function(ts) {
 			if (ts === undefined) {
 				return this.use_worker;
 			}
-            
-            if(ts === this.use_worker) {
-                return;
-            }
-     
+
+			if(ts === this.use_worker) {
+				return;
+			}
+
 			this.use_worker = ts;
-            if(ts) {
-                this._StartWorker();
-            }
-            else {
-                this._EndWorker();
-            }
+			if(ts) {
+				this._StartWorker();
+			}
+			else {
+				this._EndWorker();
+			}
 		},
 
 		GetActiveEntities: function(cam) {
@@ -950,33 +950,33 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			medea.LogDebug('terrain: creating terrain data for camera ' + cam.Name());
 			// #endif LOG
 		},
-        
-        _RemoveCamera : function(cam) {
-            // #ifdef DEBUG
+
+		_RemoveCamera : function(cam) {
+			// #ifdef DEBUG
 			medea.DebugAssert(!!this.cameras[cam.id],'camera does not exist');
 			// #endif
-            
-            var rings = this.cameras[cam.id].rings;
-            for (var i = 0; i < rings.length; ++i) {
-                rings[i].Dispose();
-            }
-            delete this.cameras[cam.id];
-        },
-        
-        _DropAllData : function() {
-            var t = [];
-            for(var k in this.cameras) {
-                t.push(this.cameras[k]);
-            }
-            t.forEach(function(c) {
-                this._RemoveCamera(c);
-            },this);
-            
-            if (this._vf_vbo) {
-                this._vf_vbo.Dispose();
-                delete this._vf_vbo;
-            }
-        },
+
+			var rings = this.cameras[cam.id].rings;
+			for (var i = 0; i < rings.length; ++i) {
+				rings[i].Dispose();
+			}
+			delete this.cameras[cam.id];
+		},
+
+		_DropAllData : function() {
+			var t = [];
+			for(var k in this.cameras) {
+				t.push(this.cameras[k]);
+			}
+			t.forEach(function(c) {
+				this._RemoveCamera(c);
+			},this);
+
+			if (this._vf_vbo) {
+				this._vf_vbo.Dispose();
+				delete this._vf_vbo;
+			}
+		},
 
 		_CleanupCameras : function() {
 			var fc = medea.GetStatistics.frame_count, disp = [];
@@ -1046,30 +1046,30 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			// forget all pending jobs .. not sure if this is so clever, though
 			this.pending_jobs = {};
 		},
-        
-        _GetVBOForVertexFetch : function() {
-            if (this._vf_vbo) {
-                return this._vf_vbo;
-            }
-            
-            var ub = this.data.GetUnitBase(), ub2 = ub/2, ubplus1 = ub+1;
-            var vertices = new Float32Array(ubplus1*ubplus1*3);
-            for(var y = -ub2, c = 0; y <= ub2; ++y) {
-                for(var x = -ub2; x <= ub2; ++x) {
-                    vertices[c++] = x;
-                    vertices[c++] = 0;
-                    vertices[c++] = y;
-                }
-            }
-            
-            var uv = new Float32Array(ubplus1*ubplus1*2);
-            medea._GenHeightfieldUVs(uv,ubplus1,ubplus1, 1.0);
-            
-            return this._vf_vbo = medea.CreateVertexBuffer({
-                positions:vertices,
-                uvs : [uv]
-            });
-        },
+
+		_GetVBOForVertexFetch : function() {
+			if (this._vf_vbo) {
+				return this._vf_vbo;
+			}
+
+			var ub = this.data.GetUnitBase(), ub2 = ub/2, ubplus1 = ub+1;
+			var vertices = new Float32Array(ubplus1*ubplus1*3);
+			for(var y = -ub2, c = 0; y <= ub2; ++y) {
+				for(var x = -ub2; x <= ub2; ++x) {
+					vertices[c++] = x;
+					vertices[c++] = 0;
+					vertices[c++] = y;
+				}
+			}
+
+			var uv = new Float32Array(ubplus1*ubplus1*2);
+			medea._GenHeightfieldUVs(uv,ubplus1,ubplus1, 1.0);
+
+			return this._vf_vbo = medea.CreateVertexBuffer({
+				positions:vertices,
+				uvs : [uv]
+			});
+		},
 	});
 
 	medea.CreateTerrainNode = function(data_provider, settings) {

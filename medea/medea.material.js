@@ -9,15 +9,15 @@
 medea._addMod('material',['shader','texture'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
-	
-	
+
+
 	medea.MATERIAL_CLONE_COPY_STATE 		= 0x1;
 	medea.MATERIAL_CLONE_SHARE_STATE 		= 0x2;
-	
+
 	medea.MATERIAL_CLONE_COPY_CONSTANTS 	= 0x4;
 	medea.MATERIAL_CLONE_SHARE_CONSTANTS 	= 0x8;
-	
-	
+
+
 	// map from GLSL type identifiers to the corresponding GL enumerated types
 	var glsl_typemap = {
 		'vec2'	: gl.FLOAT_VEC2,
@@ -35,13 +35,13 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		'sampler2D'	: gl.SAMPLER_2D,
 		'samplerCube'	: gl.SAMPLER_CUBE,
 	};
-	
+
 	var glsl_type_picker = [];
 	for (var k in glsl_typemap) {
 		glsl_type_picker.push(k);
 	}
 	glsl_type_picker = '(' + glsl_type_picker.join('|') + ')';
-	
+
 
 	medea.ShaderSetters = {
 		"CAM_POS" :  function(prog, pos, state) {
@@ -198,8 +198,8 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				return;
 			}
 
-            var handler = null;
-            var type = this._GetUniformType(k);
+			var handler = null;
+			var type = this._GetUniformType(k);
 
 			switch(type) {
 				case gl.FLOAT_VEC4:
@@ -344,23 +344,23 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		Get : function(k) {
 			return this.constants[k];
 		},
-		
+
 		IsComplete : function() {
 			return this.program !== null;
 		},
-		
+
 		IsClone : function() {
 			return 'clone_flags' in this;
 		},
 
-		
+
 		_Clone : function(clone_flags, out) {
 			var new_out = false;
 			if(!out) {
 				out = new medea.Pass(this.vs, this.ps);
 				new_out = true;
 			}
-			
+
 			if (new_out) {
 				if (clone_flags & medea.MATERIAL_CLONE_COPY_STATE) {
 					out.state = medea.Merge(this.state, {}, {});
@@ -368,7 +368,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				else if (clone_flags & medea.MATERIAL_CLONE_SHARE_STATE) {
 					out.state = this.state;
 				}
-				
+
 				if (clone_flags & medea.MATERIAL_CLONE_COPY_CONSTANTS) {
 					out.constants = medea.Merge(this.constants, {}, {});
 				}
@@ -376,7 +376,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 					out.constants = this.constants;
 				}
 			}
-			
+
 			if (!this.IsComplete()) {
 				// since this instance isn't complete yet, we can't
 				// clone the other yet. Add it to a list and do the actual cloning
@@ -390,22 +390,22 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				out.clone_flags = clone_flags;
 				return out;
 			}
-			
+
 			// program reference can be shared (XXX but this does not play well
 			// with explicit disposal semantics).
 			out.program = this.program;
-			
+
 			// attribute mapping is always safe to share
 			out.attr_map = this.attr_map;
-			
+
 			// however, we need to rebuild setters from scratch
 			out.auto_setters = {};
 			out._ExtractUniforms();
 			out._RefreshState();
-			
+
 			return out;
 		},
-		
+
 		_ExtractUniforms : function() {
 			// extract uniforms that we update automatically and setup state managers for them
 			for(var k in medea.ShaderSetters) {
@@ -415,7 +415,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				}
 			};
 		},
-		
+
 		_RefreshState : function() {
 			// re-install state managers for all constants
 			var old = this.constants;
@@ -452,7 +452,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 			this._ExtractUniforms();
 			this._RefreshState();
-			
+
 			// if the user didn't supply an attribute mapping (i.e. which pre-defined
 			// attribute type maps to which attribute in the shader), derive it
 			// from the attribute names, assuming their names are recognized.
@@ -465,18 +465,18 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				// #ifdef DEBUG
 				if(a['POSITION'] === undefined) {
 					medea.LogDebug('failed to derive automatic attribute mapping table, '
-                        +'at least there is no POSITION input defined.');
+						+'at least there is no POSITION input defined.');
 				}
 				// #endif
 			}
-			
+
 			// now transfer the dictionaries and the program reference to all pending
 			// clones for this material.
 			if (this.wannabe_clones) {
 				for (var i = 0; i < this.wannabe_clones.length; ++i) {
 					this._Clone( this.wannabe_clones[i].clone_flags, this.wannabe_clones[i] );
 				}
-				
+
 				delete this.wannabe_clones;
 			}
 		},
@@ -494,26 +494,26 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				medea.SetState(this.state,statepool);
 			}
 		},
-        
-        _GetUniformType : function(name) {
-            /* Using getActiveUniform to obtain the type seems to be the most
-               straightforward way, but unfortunately it keeps telling me
-               that a lot of uniforms are in fact sampler2D's even if they
-               are not. Also, results seem to vary from system to system,
-               suggesting trouble with either the underlying GL implementation
-               or the browser's WebGL code
-            
-               So for now, until all such issues are resolved in all major 
-               browsers, scan the source code for the declaration of the
-               variable and extract the type.
- 
-               This will fail for arrays, structures, etc. but those are not
-               currently handled anyway.               
-            */
-			
+
+		_GetUniformType : function(name) {
+			/* Using getActiveUniform to obtain the type seems to be the most
+			   straightforward way, but unfortunately it keeps telling me
+			   that a lot of uniforms are in fact sampler2D's even if they
+			   are not. Also, results seem to vary from system to system,
+			   suggesting trouble with either the underlying GL implementation
+			   or the browser's WebGL code
+
+			   So for now, until all such issues are resolved in all major
+			   browsers, scan the source code for the declaration of the
+			   variable and extract the type.
+
+			   This will fail for arrays, structures, etc. but those are not
+			   currently handled anyway.
+			*/
+
 			var vs = this.vs.GetPreProcessedSourceCode(), ps = this.ps.GetPreProcessedSourceCode();
 			var rex = new RegExp(glsl_type_picker + '\\s+' + name);
-			
+
 			// further escaping should not be needed, name is required to be
 			// a valid GLSL identifier.
 			try {
@@ -522,14 +522,14 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				// should not happen
 				medea.DebugAssert('could not find type declaration for uniform: ' + name);
 			}
-			
+
 			// #ifdef DEBUG
 			medea.DebugAssert(!!typename,"failed to determine data type of shader uniform " + name);
 			// #endif
-			
+
 			return glsl_typemap[typename];
-        
-            /*
+
+			/*
 			var info = gl.getActiveUniform(this.program,pos), type = info.type;
 
 			// this is a workaround for my secondary linux system on which the driver
@@ -542,8 +542,8 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			if (typeof val === 'string' && /.*\.(jpg|png|gif|bmp)/i.test(val) ) {
 				type = gl.SAMPLER_2D;
 			}
-            */
-        }
+			*/
+		}
 	});
 
 	// class Material
@@ -593,7 +593,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		GetId: function() {
 			return 0;
 		},
-		
+
 		Name : medea._GetSet(this,'name'),
 
 		Use: function(drawfunc,statepool) {
@@ -642,7 +642,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	medea.CreateMaterial = function(passes, name) {
 		return new medea.Material(passes, name);
 	};
-	
+
 	medea.CloneMaterial = function(mat, name, clone_flags) {
 		var passes = mat.Passes(), newp = new Array(passes.length);
 		for (var i = 0; i < passes.length; ++i) {
@@ -658,7 +658,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	medea.CreatePassFromShaderPair = function(name, constants, attr_map, defines) {
 		return new medea.Pass( medea.CreateShader(name+'.vs', defines), medea.CreateShader(name+'.ps', defines), constants, attr_map );
 	};
-	
+
 	medea.ClonePass = function(pass, clone_flags) {
 		return pass._Clone(clone_flags);
 	};
