@@ -134,14 +134,15 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 			// scale or pad NPOT or oversized textures
 			if (this.glwidth !== this.width || this.glheight !== this.height) {
 				// #ifdef LOG
+				var newsize = '(' + this.glwidth + ' x ' + this.glheight + ')';
 				if (!this.IsPowerOfTwo()) {
 					medea.Log('texture ' + this.GetSource() + ' is not of a power-of-two size, this means it will be ' + (
-						this.flags & medea.TEXTURE_FLAG_NPOT_PAD ? 'padded' : 'scaled') + ' to fit','warn');
+						this.flags & medea.TEXTURE_FLAG_NPOT_PAD ? 'padded' : 'scaled') + ' to ' + newsize,'warn');
 				}
 
 				if (this.hits_size_limit) {
 					medea.Log('texture ' + this.GetSource() + ' is exceeds the maximum size so it will be ' + (
-						this.flags & medea.TEXTURE_FLAG_NPOT_PAD ? 'padded' : 'scaled') + ' to fit','warn');
+						this.flags & medea.TEXTURE_FLAG_NPOT_PAD ? 'padded' : 'scaled') + ' to '  + newsize,'warn');
 				}
 				// #endif
 
