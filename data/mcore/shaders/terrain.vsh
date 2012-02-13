@@ -32,7 +32,7 @@ void GetTerrainVertex(out TerrainVertex vert) {
 	_add_uniform(vec4,_tvf_range);
 	_add_uniform(vec3,_tvf_wpos);
 	_add_uniform(vec3,_tvf_scale);
-	_add_uniform(vec3,_tvf_uvdelta);
+	_add_uniform(vec4,_tvf_uvdelta);
 	_add_uniform(sampler2D,_tvf_height_map);
 
     vec2 uv = _tvf_range.xy + TEXCOORD0 * _tvf_range.zw;
@@ -41,9 +41,11 @@ void GetTerrainVertex(out TerrainVertex vert) {
     vert.POSITION *= _tvf_scale.xyz;
 	vert.POSITION += _tvf_wpos.xyz;
     
-    vert.NORMAL = vec3(0.0,1.0,0.0);
-    vert.TANGENT = vec3(1.0,0.0,0.0);
-    vert.BITANGENT = vec3(0.0,0.0,1.0);
+    
+    vert.TANGENT = normalize( vec3(1.0,_tvf_scale.y * (texture2D(_tvf_height_map, uv + _tvf_uvdelta.xw).r - texture2D(_tvf_height_map, uv - _tvf_uvdelta.xw).r),0) );
+    vert.BITANGENT = normalize( vec3(0,_tvf_scale.y * (texture2D(_tvf_height_map, uv + _tvf_uvdelta.wy).r - texture2D(_tvf_height_map, uv - _tvf_uvdelta.wy).r),1.0) );
+	
+	vert.NORMAL = cross(vert.TANGENT,vert.BITANGENT);
 	
 #else
 

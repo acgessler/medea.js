@@ -274,9 +274,10 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			];
 			
 			var uvdelta = [
-				0,
-				0,
-				ilod
+				uv[2] / ub,
+				uv[3] / ub,
+				ilod,
+				0 // fourth component must be 0, see the default shader for the details
 			];
 
 			material.Passes().forEach(function(pass) {
