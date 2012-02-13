@@ -207,18 +207,15 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			return [hf[0],hf[1],hf[2],x,y];
 		},
 
-		// may return NULL to indicate vertex fetching is not supported
-		// returns [uv_offsetscale,world_scale,world_offset, texture]
-		GetVertexFetchParams : function(x,y,w,h,lod) {
-			var match = null;
-			if (Array.isArray(x)) {
-				y = x[1];
-				w = x[2];
-				h = x[3];
-				lod = x[4];
-				match = x[5];
-				x = x[0];
-			}
+	
+		SetupVertexFetchParams : function(tup, material, ppos) {
+			// extract parameters
+			var x = tup[0];
+			var y = tup[1];
+			var w = tup[2];
+			var h = tup[3];
+			var lod = tup[4];
+			var match = tup[5];
 
 			var sx = this.desc.size[0], sy = this.desc.size[1];
 			var ilod = (1 << lod);
@@ -238,28 +235,57 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 				"LOD images with different aspect ratios than the main terrain are not supported");
 			// #endif
 
+			var tex = match._cached_img;
+			
 			var want_scale = 1/ilod;
-			var ub = Math.floor(this.desc.unitbase * real_scale), iub = 1/ub, ox = x, oy = y;
-
-			x = Math.floor(x*ub)*iub;
-			y = Math.floor(y*ub)*iub;
-
+			var ub = this.desc.unitbase, iub = 1/ub, ox = x, oy = y;
+			
+			x = Math.floor(x*2.0)*0.5;
+			y = Math.floor(y*2.0)*0.5;
+			w = Math.floor(w);
+			h = Math.floor(h);
+			
 			var sbase = real_scale/want_scale;
 			var uv = [x / sx, y / sy, w / sx, w / sy];
+			
+			// the original height data is (pow2+1)^2, but we cropped
+			// it to pow2^2. This means UV coordinates need adjustment
+			// to account for this.
+			var bias = tex.GetPaddingCompensationFactor();
+			uv[0] *= bias[0];
+			uv[1] *= bias[1];
+			uv[2] *= bias[0];
+			uv[3] *= bias[1];
 
-			var sc = this.desc.scale;
+			uv[0] += 0.5/tex.GetGlTextureWidth();
+			uv[1] += 0.5/tex.GetGlTextureHeight();
+			
 			var wpos = [
-				ub*((x-ox)-ilod*sc[0]/2),
+				ppos[0] + ub*(x-ox),
 				0,
-				ub*((y-oy)-ilod*sc[0]/2)
+				ppos[2] + ub*(y-oy)
 			];
-
+			
+			var sc = this.desc.scale;
 			var wscale = [
-				ilod,
-				sbase*this.desc.scale[1],
+				ilod*sc[0],
+				sbase*sc[1],
+				ilod*sc[0]
+			];
+			
+			var uvdelta = [
+				0,
+				0,
 				ilod
 			];
-			return [uv,wscale,wpos,match._cached_img];
+
+			material.Passes().forEach(function(pass) {
+				pass.Set('_tvf_range',uv);
+				pass.Set('_tvf_scale',wscale);
+				pass.Set('_tvf_wpos',wpos);
+				pass.Set('_tvf_uvdelta',uvdelta);
+				pass.Set('_tvf_height_map',tex);
+			});
 		},
 
 
@@ -583,54 +609,28 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 				);
 			}
 
-			var params = this.terrain.data.GetVertexFetchParams(tup), passes = material.Passes();
-			if (!params) {
-				// #ifdef LOG
-				medea.Log('terrain data provider failed to deliver inputs for vertex texture fetching','error');
-				// #endif
-				return;
-			}
-
-			// #ifdef DEBUG
-			medea.DebugAssert(params.length === 4 && params[0].length === 4
-				&& params[1].length === 3
-				&& params[2].length === 3
-				&& params[3] instanceof medea.Texture,
-				"GetVertexFetchParams() implementation does not conform to specification"
-			);
-			// #endif
-
-			var wpos = params[2];
-			wpos[0] += ppos[0];
-			wpos[2] += ppos[2];
-
-			passes.forEach(function(pass) {
-				pass.Set('_tvf_range',params[0]);
-				pass.Set('_tvf_scale',params[1]);
-				pass.Set('_tvf_wpos',wpos);
-				pass.Set('_tvf_height_map',params[3]);
-			});
+			this.terrain.data.SetupVertexFetchParams(tup, material, ppos);
 
 			this._SetMeshes(this.cached_mesh);
 			this._SetPresent();
 		},
 
 		_BuildHeightfieldMesh : function(tup, material, ilod, ppos) {
-			var v = d.SampleLOD(tup);
+			var v = this.terrain.data.SampleLOD(tup);
 			var pos = v[0], wv = v[1], hv = v[2], w = wv-1, h = hv-1, realx = v[3], realy = v[4];
 
 			var sc = this.terrain.data.GetScale(), ub = this.terrain.data.GetUnitBase();
 
 			// center the heightfield and scale it according to its LOD
-			outer._MoveHeightfield(pos, ilod, 1.0,
-				ppos[0] + (realx-outer.startx)*ub -w*ilod*sc[0]/2,
-				ppos[2] + (realy-outer.starty)*ub -h*ilod*sc[0]/2
+			this._MoveHeightfield(pos, ilod, 1.0,
+				ppos[0] + (realx-this.startx)*ub -w*ilod*sc[0]/2,
+				ppos[2] + (realy-this.starty)*ub -h*ilod*sc[0]/2
 			);
 
 			var uv  = new Float32Array(wv*hv*2);
 
 			var outer = this;
-			t._Dispatch('GenHeightfieldTangentSpace',function(res) {
+			this.terrain._Dispatch('GenHeightfieldTangentSpace',function(res) {
 				// make sure this closure is not the only interested party remaining
 				if(outer.is_obsolete) {
 					return;

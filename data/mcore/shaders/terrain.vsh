@@ -20,6 +20,7 @@ struct TerrainVertex {
 	vec3 NORMAL;
 	vec3 TANGENT;
 	vec3 BITANGENT;
+	vec2 TEXCOORD0;
 };
 
 /** */
@@ -30,14 +31,15 @@ void GetTerrainVertex(out TerrainVertex vert) {
 #ifdef ENABLE_TERRAIN_VERTEX_FETCH
 	_add_uniform(vec4,_tvf_range);
 	_add_uniform(vec3,_tvf_wpos);
-	_add_uniform(highp vec3,_tvf_scale);
+	_add_uniform(vec3,_tvf_scale);
+	_add_uniform(vec3,_tvf_uvdelta);
 	_add_uniform(sampler2D,_tvf_height_map);
 
     vec2 uv = _tvf_range.xy + TEXCOORD0 * _tvf_range.zw;
 	
     vert.POSITION.y = texture2D(_tvf_height_map, uv).r;
-    vert.POSITION *= _tvf_scale;
-	vert.POSITION += _tvf_wpos;
+    vert.POSITION *= _tvf_scale.xyz;
+	vert.POSITION += _tvf_wpos.xyz;
     
     vert.NORMAL = vec3(0.0,1.0,0.0);
     vert.TANGENT = vec3(1.0,0.0,0.0);
@@ -49,6 +51,12 @@ void GetTerrainVertex(out TerrainVertex vert) {
 	vert.TANGENT = FetchTangent();
 	vert.BITANGENT = FetchBitangent();
 	
+#endif
+
+	vert.TEXCOORD0 = FetchTexCoord();
+	
+#ifdef ENABLE_TERRAIN_VERTEX_FETCH
+	vert.TEXCOORD0 *= _tvf_uvdelta.z;
 #endif
 }
 
