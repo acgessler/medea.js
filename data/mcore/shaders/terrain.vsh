@@ -33,6 +33,7 @@ void GetTerrainVertex(out TerrainVertex vert) {
 	_add_uniform(vec3,_tvf_wpos);
 	_add_uniform(vec3,_tvf_scale);
 	_add_uniform(vec4,_tvf_uvdelta);
+	_add_uniform(vec2,_tvf_uvoffset);
 	_add_uniform(sampler2D,_tvf_height_map);
 
     vec2 uv = _tvf_range.xy + TEXCOORD0 * _tvf_range.zw;
@@ -41,9 +42,20 @@ void GetTerrainVertex(out TerrainVertex vert) {
     vert.POSITION *= _tvf_scale.xyz;
 	vert.POSITION += _tvf_wpos.xyz;
     
-    
-    vert.TANGENT = normalize( vec3(1.0,_tvf_scale.y * (texture2D(_tvf_height_map, uv + _tvf_uvdelta.xw).r - texture2D(_tvf_height_map, uv - _tvf_uvdelta.xw).r),0) );
-    vert.BITANGENT = normalize( vec3(0,_tvf_scale.y * (texture2D(_tvf_height_map, uv + _tvf_uvdelta.wy).r - texture2D(_tvf_height_map, uv - _tvf_uvdelta.wy).r),1.0) );
+    // compute tangent space by weighting surrounding height deltas
+	// (factor 0.5 omitted to get more contrast ...)
+	float xd = _tvf_scale.y * (
+			texture2D(_tvf_height_map, uv + _tvf_uvdelta.xw).r - 
+			texture2D(_tvf_height_map, uv - _tvf_uvdelta.xw).r
+	);
+			
+	float yd = _tvf_scale.y * (
+			texture2D(_tvf_height_map, uv + _tvf_uvdelta.wy).r - 
+			texture2D(_tvf_height_map, uv - _tvf_uvdelta.wy).r
+	);
+	
+    vert.TANGENT = normalize( vec3(1.0,xd,0) );
+    vert.BITANGENT = normalize( vec3(0,yd,1.0) );
 	
 	vert.NORMAL = cross(vert.TANGENT,vert.BITANGENT);
 	
@@ -59,6 +71,7 @@ void GetTerrainVertex(out TerrainVertex vert) {
 	
 #ifdef ENABLE_TERRAIN_VERTEX_FETCH
 	vert.TEXCOORD0 *= _tvf_uvdelta.z;
+	vert.TEXCOORD0 += _tvf_uvoffset.xy;
 #endif
 }
 

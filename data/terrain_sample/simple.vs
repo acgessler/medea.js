@@ -11,7 +11,7 @@ void main()
 	
 	PassClipPosition(WorldToClipSpace(worldPos));
 	PassNormal(ModelNormalToWorldSpace(vert.NORMAL));
-	PassTexCoord(vert.TEXCOORD0*4.0);
+	PassTexCoord(vert.TEXCOORD0*3.0);
 	
 	PassFloat(EyeDist,GetWorldEyeDistance(worldPos));
 	

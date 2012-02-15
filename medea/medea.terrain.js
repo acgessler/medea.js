@@ -240,8 +240,8 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			var want_scale = 1/ilod;
 			var ub = this.desc.unitbase, iub = 1/ub, ox = x, oy = y;
 			
-			x = Math.floor(x*2.0)*0.5;
-			y = Math.floor(y*2.0)*0.5;
+			x = Math.floor(x*ub)/ub;
+			y = Math.floor(y*ub)/ub;
 			w = Math.floor(w);
 			h = Math.floor(h);
 			
@@ -257,6 +257,9 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			uv[2] *= bias[0];
 			uv[3] *= bias[1];
 
+			// and this is to move the sampling point to the center of
+			// a texel, which effectively disables any filtering no
+			// matter if we turn it on or off.
 			uv[0] += 0.5/tex.GetGlTextureWidth();
 			uv[1] += 0.5/tex.GetGlTextureHeight();
 			
@@ -276,8 +279,13 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 			var uvdelta = [
 				uv[2] / ub,
 				uv[3] / ub,
-				ilod,
+				1.0,
 				0 // fourth component must be 0, see the default shader for the details
+			];
+			
+			var uvoffset = [
+				(x-Math.floor(ox)),
+				(y-Math.floor(oy))
 			];
 
 			material.Passes().forEach(function(pass) {
@@ -285,6 +293,7 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 				pass.Set('_tvf_scale',wscale);
 				pass.Set('_tvf_wpos',wpos);
 				pass.Set('_tvf_uvdelta',uvdelta);
+				pass.Set('_tvf_uvoffset',uvoffset);
 				pass.Set('_tvf_height_map',tex);
 			});
 		},
@@ -375,7 +384,7 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 		GetMaterial : function(lod, behaviour_flags) {
 			var key = lod + '_' + behaviour_flags;
 			if (this.materials[key]) {
-				return this.materials[key];
+				return medea.CloneMaterial(this.materials[key], medea.MATERIAL_CLONE_SHARE_STATE);
 			}
 
 			if (!this.desc.materials[lod]) {
@@ -384,9 +393,8 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 
 			var mat = this.desc.materials[lod];
 			if(mat.clonefrom !== undefined) {
-				return this.materials[key] = medea.CloneMaterial(this.GetMaterial(mat.clonefrom,
-					behaviour_flags),
-					medea.MATERIAL_CLONE_SHARE_STATE);
+				return this.materials[key] = this.GetMaterial(mat.clonefrom,
+					behaviour_flags);
 			}
 
 			var name = this.url_root + '/' + mat.effect, constants = mat.constants;
@@ -565,19 +573,21 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 		_BuildMesh : function() {
 			var t = this.terrain, ilod = 1<<this.lod, outer = this;
 			var vertex_fetch = t.UseVertexFetch();
+			
+			if(!this.material) {
+				// Fetch the material as early as possible to improve parallelization
+				var flags = vertex_fetch ? medea.TERRAIN_MATERIAL_ENABLE_VERTEX_FETCH : 0;
+				this.material = t.data.GetMaterial(this.lod, flags);
+				if (!this.material) {
+					// Data provider failed to deliver us a material for this setup.
+					// XXX default material doesn't support vertex fetching.
+					this.material = medea.CreateSimpleMaterialFromColor([0.7,0.7,0.5,1.0], true);
 
-			// Fetch the material as early as possible to improve parallelization
-			var flags = vertex_fetch ? medea.TERRAIN_MATERIAL_ENABLE_VERTEX_FETCH : 0;
-			var material = t.data.GetMaterial(this.lod, flags);
-			if (!material) {
-				// Data provider failed to deliver us a material for this setup.
-				// XXX default material doesn't support vertex fetching.
-				material = medea.CreateSimpleMaterialFromColor([0.7,0.7,0.5,1.0], true);
-
-				// #ifdef LOG
-				medea.Log('terrain data provider failed to deliver a material for LOD '
-					+ this.lod + ' with behaviour flags: ' + flags,'error');
-				// #endif
+					// #ifdef LOG
+					medea.Log('terrain data provider failed to deliver a material for LOD '
+						+ this.lod + ' with behaviour flags: ' + flags,'error');
+					// #endif
+				}
 			}
 
 			var ppos = this.ppos;
@@ -591,26 +601,26 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 				// Note: `vertex_fetch` has still the same value since any changes
 				// would cause all terrain data to be disposed.
 				if (vertex_fetch) {
-					outer._BuildVFetchingMesh(tup, material, ilod, ppos);
+					outer._BuildVFetchingMesh(tup, ilod, ppos);
 					return;
 				}
 
-				outer._BuildHeightfieldMesh(tup, material, ilod, ppos);
+				outer._BuildHeightfieldMesh(tup, ilod, ppos);
 			});
 		},
 
-		_BuildVFetchingMesh : function(tup, material, ilod, ppos) {
+		_BuildVFetchingMesh : function(tup, ilod, ppos) {
 			if(!this.cached_mesh) {
 				var ub = this.terrain.data.GetUnitBase();
 				var indices = this._GetIndices(ub,ub);
 
 				this.cached_mesh = medea.CreateSimpleMesh(this.terrain._GetVBOForVertexFetch(),
 					indices,
-					material
+					this.material
 				);
 			}
 
-			this.terrain.data.SetupVertexFetchParams(tup, material, ppos);
+			this.terrain.data.SetupVertexFetchParams(tup, this.material, ppos);
 
 			this._SetMeshes(this.cached_mesh);
 			this._SetPresent();
@@ -652,7 +662,7 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 					var indices = outer._GetIndices(w,h);
 
 					m = outer.cached_mesh = medea.CreateSimpleMesh(vertices, indices,
-						material,
+						outer.material,
 						medea.VERTEXBUFFER_USAGE_DYNAMIC
 					);
 				}
@@ -887,6 +897,13 @@ medea._addMod('terrain',[,'worker_terrain','terraintile', typeof JSON === undefi
 				var newy = ppos[2]/ub + h * 0.5;
 
 				var dx = newx - cam.startx, dy = newy - cam.starty;
+				
+				// updating the terrain is much cheaper with vertex fetching, so
+				// interpret the update treshold differently.
+				if (this.UseVertexFetch()) {
+					ut *= 0.01;
+				}
+				
 				if (Math.abs(dx) > ut || Math.abs(dy) > ut) {
 					for( var i = 0; i < cam.rings.length; ++i) {
 						cam.rings[i].Update(ppos, newx, newy);
