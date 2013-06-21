@@ -612,8 +612,8 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	});
 
 	medea.CreateSimpleMaterialFromColor = function(color, dummy_light) {
-		if(color.length === 4) { // drop alpha. this is not a transparency effect.
-			color = [color[0],color[1],color[2]];
+		if(color.length === 3) { 
+			color = [color[0],color[1],color[2],1.0];
 		}
 		var name = "remote:mcore/shaders/simple-color", constants = {
 			color:color
