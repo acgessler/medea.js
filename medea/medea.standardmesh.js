@@ -32,7 +32,7 @@ medea._addMod('standardmesh',['mesh'],function(undefined) {
 			[
 				0, 1, 2,     0, 2, 3,   // bottom
 			],
-		color_or_material || [1.0,0.0,0.0,1.0]);
+		color_or_material || [1.0,0.0,0.0]);
 	};
 
 
@@ -119,7 +119,7 @@ medea._addMod('standardmesh',['mesh'],function(undefined) {
 				16, 17, 18,     16, 18, 19,   // right
 				20, 21, 22,     20, 22, 23    // left
 			],
-		color_or_material || [1.0,0.0,0.0,1.0]);
+		color_or_material || [1.0,0.0,0.0]);
 	};
 });
 
