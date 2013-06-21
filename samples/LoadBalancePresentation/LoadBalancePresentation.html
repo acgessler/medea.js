@@ -64,9 +64,19 @@ function run() {
 		"------"
 		]
 	];
-		
+	
+	var movement_vectors = [
+		[1,1,0],
+		[0,-1,0],
+		[0,0,2]
+	];
+	
+	// number of cells on each axis
+	var NUM_CELLS = 6;
+
 
 	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes', 'standardmesh'],function() {
+	
 		var vp1 = medea.CreateViewport();
 		vp1.ClearColor([0.7,0.7,0.7]);
      
@@ -92,36 +102,114 @@ function run() {
 		var scene_root = medea.CreateNode();
 		root.AddChild(scene_root);
 		
-		// create NUM_CELLS^3 cube of cubes
-	
-		var NUM_CELLS = 6;
-		var n = 1;
-		for (var x = 0; x < NUM_CELLS; ++x) {
-			for (var y = 0; y < NUM_CELLS; ++y) {
-				for (var z = 0; z < NUM_CELLS; ++z) {
-				
-					var slice = initial_data[z];
-					var symbol = slice[y][x];
-					if(symbol === '-') {
-						continue;
+		// -----------------------------------------------------
+		var DiscretePositionToLocal = function(x,y,z) {
+			if(x instanceof Array) {
+				y = x[1];
+				z = x[2];
+				x = x[0];
+			}
+			return vec3.create([(x-NUM_CELLS/2)*3,(y-NUM_CELLS/2)*3,(z-NUM_CELLS/2)*3]);
+		};
+		
+		
+		// -----------------------------------------------------
+		var DiscreteVectorToLocal = function(x,y,z) {
+			if(x instanceof Array) {
+				y = x[1];
+				z = x[2];
+				x = x[0];
+			}
+			return vec3.create([x*3,y*3,z*3]);
+		};
+		
+		
+		// -----------------------------------------------------
+		// Initial grid initialization, returns occupation array
+		var InitializeCells = function() {
+			var occupation  = [
+			];
+		
+			// create NUM_CELLS^3 cube of cubes
+			var n = 1;
+			for (var x = 0; x < NUM_CELLS; ++x) {
+				var xa = [];
+				occupation.push(xa);
+				for (var y = 0; y < NUM_CELLS; ++y) {
+					var ya = [];
+					xa.push(ya);
+					for (var z = 0; z < NUM_CELLS; ++z) {
+						var slice = initial_data[z];
+						var symbol = slice[y][x];
+						if(symbol === '-') {
+							ya.push(null);
+							continue;
+						}
+						
+						var nd = medea.CreateNode(n++);
+						ya.push([nd,symbol - '0']);
+						
+						var mesh = cube_mesh_red;
+						if(symbol === '1') {
+							mesh = cube_mesh_green;
+						}
+						else if(symbol === '2') {
+							mesh = cube_mesh_blue;
+						}
+						nd.AddEntity(mesh);
+						nd.Translate(DiscretePositionToLocal(x,y,z));
+						
+						scene_root.AddChild(nd);
 					}
-					
-					var nd = medea.CreateNode(n++);
-					
-					var mesh = cube_mesh_red;
-					if(symbol === '1') {
-						mesh = cube_mesh_green;
-					}
-					else if(symbol === '2') {
-						mesh = cube_mesh_blue;
-					}
-					nd.AddEntity(mesh);
-					nd.Translate(vec3.create([(x-NUM_CELLS/2)*3,(y-NUM_CELLS/2)*3,(z-NUM_CELLS/2)*3]));
-					
-					scene_root.AddChild(nd);
 				}
 			}
-		}
+			return occupation;
+		};
+		
+		var current_step = 0;
+		
+		// -----------------------------------------------------
+		// Advance the simulation by `delta` steps.
+		var Step = function(delta, occupation) {
+			current_step += delta;
+			var abs_delta = delta < 0 ? - delta : delta;
+			
+			var handled = {};
+			
+			for (var x = 0; x < NUM_CELLS; ++x) {
+				var xa = occupation[x];
+				for (var y = 0; y < NUM_CELLS; ++y) {
+					var ya = xa[y];
+					for (var z = 0; z < NUM_CELLS; ++z) {
+						if (ya[z] === null) {
+							continue;
+						}
+						
+						var node = ya[z][0];
+						if(node in handled) {
+							// continue; TODO
+						}
+						var vec = movement_vectors[ya[z][1]];
+						
+						var pos = [x,y,z];
+						
+						pos[0] = (pos[0] + vec[0] * delta + NUM_CELLS * abs_delta) % NUM_CELLS;
+						pos[1] = (pos[1] + vec[1] * delta + NUM_CELLS * abs_delta) % NUM_CELLS;
+						pos[2] = (pos[2] + vec[2] * delta + NUM_CELLS * abs_delta) % NUM_CELLS;
+						
+						occupation[ pos[0] ][ pos[1] ][ pos[2] ] = ya[z];
+						ya[z] = null;
+						
+						node.ResetTransform();
+						node.Translate(DiscretePositionToLocal(pos));
+						
+						handled[node] = true;
+					}
+				}
+			}
+		};
+		
+		var occupation = InitializeCells();
 		
 		// and a plain camera controller
 		medea.FetchMods('camcontroller',function() {
@@ -137,9 +225,29 @@ function run() {
 		});
 		
 		var time = 0;
+		var wait_for_arrow_release = false;
+		
+		// handle user input and update presentation accordingly
 		medea.SetTickCallback(function(dtime) {
 			time += dtime;
 			
+			// left arrow
+			if (medea.IsKeyDown(37)) {
+				if(wait_for_arrow_release === false) {
+					Step(-1, occupation);
+					wait_for_arrow_release = true;
+				}
+			}
+			// right arrow
+			else if (medea.IsKeyDown(39)) {
+				if(wait_for_arrow_release === false) {
+					Step(1, occupation);
+					wait_for_arrow_release = true;
+				}
+			}
+			else {
+				wait_for_arrow_release = false;
+			}
 			return true;
 		});	
         
