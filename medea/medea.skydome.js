@@ -174,6 +174,31 @@ medea._addMod('skydome',['mesh'],function(undefined) {
 		return medea.CreateSimpleMesh({ positions:pos, normals:nor, uvs:[uv] }, ind, mat);
 	};
 
+	/* --{
+	@entry medea CreateSkydomeNode
+
+	Create a scenegraph node and attach a skydome to it. The skydome is simply a mesh
+	that is configured to add itself to the {background rendering queue -> medea
+	RenderQueue}. The default skydome effect is located in "mcore/shaders/skydome"
+	and draws the skydome behind the rest of the scene, using a single sphere texture.
+
+	`CreateSkydomeNode(texbase, lower_amount, rings)`
+
+	texbase:
+	@a URI; of the texture to be displayed on the skydome.
+
+	lower_amount:
+	Amount by which the skydome is shifted downwards on the y-axis. This is to make
+	sure that the horizon is fully covered. Typical values are 0 ... 0.5 depending
+	on the setting.
+
+	rings:
+	Number of longitudial 'rings' to subdivide the skydome into. This determines
+	how smooth the texture will look on the dome, but high values affect rendering
+	speed negatively. Typical values range from 10 ... 35.
+
+	Returns a {medea Node} instance.
+	}-- */
 	medea.CreateSkydomeNode = function(texbase, lower_amount, rings) {
 		var nd = medea.CreateNode("skydome");
 
