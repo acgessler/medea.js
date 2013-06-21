@@ -122,6 +122,11 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 			}
 			this.ibo = ibo;
 		},
+		
+		Clone : function(material_or_color, deep_copy) {
+			medea.DebugAssert(!deep_copy, 'not implemented yet');
+			return medea.CreateSimpleMesh(this.vbo, this.ibo, material_or_color);
+		},
 
 		DrawNow : function(statepool) {
 
