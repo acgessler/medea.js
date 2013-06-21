@@ -1,0 +1,168 @@
+<html>
+
+<head>
+<title></title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script type="text/javascript" src="../../medea/medea.core.js"></script>
+<script type="text/javascript">
+
+function run() {
+
+	var initial_data = [
+	
+		[
+		"------",
+		"------",
+		"---0--",
+		"--00--",
+		"------",
+		"------"
+		],
+		
+		[
+		"------",
+		"------",
+		"-000--",
+		"--000-",
+		"------",
+		"------"
+		],
+		
+		[
+		"------",
+		"---00-",
+		"--00--",
+		"--111-",
+		"------",
+		"------"
+		],
+		
+		[
+		"---22-",
+		"--220-",
+		"11----",
+		"1111--",
+		"------",
+		"------"
+		],
+		
+		[
+		"------",
+		"----2-",
+		"1---2-",
+		"11----",
+		"------",
+		"------"
+		],
+		
+		[
+		"------",
+		"----2-",
+		"-11---",
+		"-11---",
+		"------",
+		"------"
+		]
+	];
+		
+
+	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes', 'standardmesh'],function() {
+		var vp1 = medea.CreateViewport();
+		vp1.ClearColor([0.7,0.7,0.7]);
+     
+		
+        var root = medea.RootNode();
+		
+		/*
+		medea.FetchMods(['terraintile'], function() {
+			medea.CreateTerrainTileMesh('remote:terraintile_sample/heightmap_257.png',
+				medea.CreateSimpleMaterialFromColor([0.8,0.8,0.8,1.0], true),
+				function(mesh) {
+					root.AddChild().Translate([-64,10,-64]).AddEntity(mesh);
+				}
+			);
+		}); */
+        
+		var cube_mesh = medea.CreateStandardMesh_Cube([1.0,0.0,0.0]);
+		
+		var cube_mesh_red   = cube_mesh;
+		var cube_mesh_green = cube_mesh.Clone([0.0,1.0,0.0]);
+		var cube_mesh_blue  = cube_mesh.Clone([0.0,0.0,1.0]);
+		
+		var scene_root = medea.CreateNode();
+		root.AddChild(scene_root);
+		
+		// create NUM_CELLS^3 cube of cubes
+	
+		var NUM_CELLS = 6;
+		var n = 1;
+		for (var x = 0; x < NUM_CELLS; ++x) {
+			for (var y = 0; y < NUM_CELLS; ++y) {
+				for (var z = 0; z < NUM_CELLS; ++z) {
+				
+					var slice = initial_data[z];
+					var symbol = slice[y][x];
+					if(symbol === '-') {
+						continue;
+					}
+					
+					var nd = medea.CreateNode(n++);
+					
+					var mesh = cube_mesh_red;
+					if(symbol === '1') {
+						mesh = cube_mesh_green;
+					}
+					else if(symbol === '2') {
+						mesh = cube_mesh_blue;
+					}
+					nd.AddEntity(mesh);
+					nd.Translate(vec3.create([(x-NUM_CELLS/2)*3,(y-NUM_CELLS/2)*3,(z-NUM_CELLS/2)*3]));
+					
+					scene_root.AddChild(nd);
+				}
+			}
+		}
+		
+		// and a plain camera controller
+		medea.FetchMods('camcontroller',function() {
+			var cam = medea.CreateCameraNode();
+			root.AddChild(cam);
+			vp1.Camera(cam);
+			
+			cam.Translate(vec3.create([0,0,35]));
+			
+			var cc = medea.CreateCamController('fps');
+            cam.AddEntity(cc);
+			cc.Enable();
+		});
+		
+		var time = 0;
+		medea.SetTickCallback(function(dtime) {
+			time += dtime;
+			
+			return true;
+		});	
+        
+		medea.SetDebugPanel(null,true);
+		medea.Start();
+	});
+}
+
+</script>
+
+</head>
+
+
+<body onload="run();">
+
+	<div><font size="-1" color="grey" face="Verdana">https://github.com/acgessler/medea.js - Lightweight JavaScript 3D Engine</font></div>
+	
+
+    <canvas id="canvas" style="border: none;" width="950" height="650"></canvas>
+
+    <br/>
+    
+
+</body>
+
+</html>
