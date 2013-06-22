@@ -73,6 +73,16 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 							n.LocalXAxis(vec3.cross(n.LocalYAxis(),n.LocalZAxis()));
 						}
 					}
+					else if(this.kind === 'rotatex') {
+						
+						// process mouse movement on the x axis
+						if(d[0]) {
+							var mrot = mat4.rotate(mat4.identity(mat4.create()),d[0]*this.turn_speed,[0,1,0]);
+							n.LocalYAxis(mat4.multiplyVec3(mrot,n.LocalYAxis()));
+							n.LocalZAxis(mat4.multiplyVec3(mrot,n.LocalZAxis()));
+							n.LocalXAxis(vec3.cross(n.LocalYAxis(),n.LocalZAxis()));
+						}						
+					}
 					// #ifdef DEBUG
 					else {
 						medea.DebugAssert("Camera mode not recognized: " + this.kind);
