@@ -58,6 +58,14 @@ medea._addMod('node',['frustum'],function(undefined) {
 			this.bb = medea.CreateBB();
 
 			this.flags = this.trafo_dirty_flag | (flags || 0);
+			this.enabled = true;
+		},
+		
+		Enabled : function(e) {
+			if (e === undefined) {
+				return this.enabled;
+			}
+			this.enabled = e;
 		},
 
 		Name : function(n) {

@@ -392,6 +392,9 @@ medea = new (function(sdom) {
 
 		// perform update
 		this.VisitGraph(this.scene_root,function(node) {
+			if(!node.Enabled()) {
+				return true;
+			}
 			var e = node.GetEntities();
 			for(var i = 0; i < e.length; ++i) {
 				e[i].Update(dtime,node);
