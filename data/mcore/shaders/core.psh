@@ -66,6 +66,12 @@
 #define Fetch3DTexCoord() \
 	Fetch3DTexCoordN(0)
 	
+#define FetchColorN(channel) \
+	FetchVec3(concat(Color,channel))
+	
+#define FetchColor() \
+	FetchColorN(0)
+	
 #define FetchPosition() \
 	FetchVec3(WorldPosition)
 	

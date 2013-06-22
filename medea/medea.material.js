@@ -620,11 +620,25 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		};
 
 		if(dummy_light) {
-			constants['lightdir'] = [0.709,-0.709,-0.709];
+			constants['lightdir'] = [0.309,1.209,-0.709];
 			name += '-lit';
 		}
 		return new medea.Material(medea.CreatePassFromShaderPair(name,constants));
 	};
+	
+	
+	medea.CreateSimpleMaterialFromVertexColor = function(dummy_light) {
+		var name = "remote:mcore/shaders/simple-vertex-color", constants = {
+			
+		};
+
+		if(dummy_light) {
+			constants['lightdir'] = [0.709,-0.709,0.709];
+			name += '-lit';
+		}
+		return new medea.Material(medea.CreatePassFromShaderPair(name,constants));
+	};
+	
 
 	medea.CreateSimpleMaterialFromTexture = function(texture, dummy_light) {
 		var name = "remote:mcore/shaders/simple-textured", constants = {
@@ -638,6 +652,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 		return new medea.Material(medea.CreatePassFromShaderPair(name,constants));
 	};
+	
 
 	medea.CreateMaterial = function(passes, name) {
 		return new medea.Material(passes, name);

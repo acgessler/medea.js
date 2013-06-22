@@ -90,6 +90,17 @@
 	Pass3DTexCoordN(vec3_texcoord, 0)
 	
 	
+		/** */
+#define PassColorN(vec3_color, channel) \
+	PassVec3(concat(Color,channel), vec3_color)
+	
+	/** */
+#define PassColor(vec3_color) \
+	PassColorN(vec3_color, 0)
+	
+	
+	
+	
 	
 	/** */
 #define Fetch(type, name) \
@@ -120,6 +131,15 @@
  
 #define Fetch3DTexCoord() \
 	FetchTexCoord3DN(0)
+	
+	
+#define FetchColorN(channel) \
+	FetchVec3(concat(COLOR,channel))
+	
+#define FetchColor() \
+	FetchColorN(0)
+	
+
 
 	
 #define FetchPosition() \

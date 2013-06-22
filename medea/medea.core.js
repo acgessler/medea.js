@@ -798,6 +798,7 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("CreateSimpleMaterialFromShaderPair","material");
 	this._SetFunctionStub("CreateSimpleMaterialFromColor","material");
 	this._SetFunctionStub("CreateSimpleMaterialFromTexture","material");
+	this._SetFunctionStub("CreateSimpleMaterialFromVertexColors","material");
 
 	this._SetFunctionStub("CreateVertexBuffer","vertexbuffer");
 	this._SetFunctionStub("CreateIndexBuffer","indexbuffer");
