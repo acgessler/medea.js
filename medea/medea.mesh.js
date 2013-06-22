@@ -123,7 +123,7 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 			this.ibo = ibo;
 		},
 		
-		Clone : function(material_or_color, deep_copy) {
+		_Clone : function(material_or_color, deep_copy) {
 			medea.DebugAssert(!deep_copy, 'not implemented yet');
 			return medea.CreateSimpleMesh(this.vbo, this.ibo, material_or_color);
 		},
@@ -216,9 +216,20 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 			this.bb = this.vbo.GetMinMaxVerts();
 		},
 	});
+	
+	
+	var _mesh_cache = {
+	
+	};
+	
+	
+	medea.QueryMeshCache = function(cache_name) {
+		return _mesh_cache[cache_name];
+	};
+	
 
 	// - supports both index- and vertexbuffer specific flags
-	medea.CreateSimpleMesh = function(vertices,indices,material_or_color,flags) {
+	medea.CreateSimpleMesh = function(vertices,indices,material_or_color,flags, cache_name) {
 
 		if (indices && (Array.isArray(indices) || typeof indices === 'object' && !(indices instanceof medea.Class))) {
 			indices = medea.CreateIndexBuffer(indices,flags);
@@ -232,7 +243,17 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 			material_or_color = medea.CreateSimpleMaterialFromColor(material_or_color);
 		}
 
-		return new medea.Mesh(vertices,indices,material_or_color);
+		var mesh = new medea.Mesh(vertices,indices,material_or_color);
+		if (cache_name !== undefined) {
+			_mesh_cache[cache_name] = mesh;
+		}
+		return mesh;
+	};
+	
+	
+	// create clone of a mesh (shares vbo, ibo). Material can be different, though.
+	medea.CloneMesh = function(mesh, material_or_color, deep_copy) {
+		return mesh._Clone(material_or_color, deep_copy);
 	};
 });
 

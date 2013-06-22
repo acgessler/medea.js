@@ -810,7 +810,10 @@ medea = new (function(sdom) {
 
 	this._SetFunctionStub("CreateStandardMesh_Plane","standardmesh");
 	this._SetFunctionStub("CreateStandardMesh_Cube","standardmesh");
+	
 	this._SetFunctionStub("CreateSimpleMesh","mesh");
+	this._SetFunctionStub("CloneMesh","mesh");
+	this._SetFunctionStub("QueryMeshCache","mesh");
 
 	this._SetFunctionStub("SetState","renderstate");
 	this._SetFunctionStub("SetDefaultState","renderstate");

@@ -620,7 +620,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		};
 
 		if(dummy_light) {
-			constants['lightdir'] = [0.0,0.709,0.709];
+			constants['lightdir'] = [0.709,-0.709,-0.709];
 			name += '-lit';
 		}
 		return new medea.Material(medea.CreatePassFromShaderPair(name,constants));
@@ -632,7 +632,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		};
 
 		if(dummy_light) {
-			constants['lightdir'] = [0.0,0.709,0.709];
+			constants['lightdir'] = [0.709,-0.709,0.709];
 			name += '-lit';
 		}
 
