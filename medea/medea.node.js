@@ -103,6 +103,12 @@ medea._addMod('node',['frustum'],function(undefined) {
 				this.entities.splice(idx,1);
 			}
 		},
+		
+		RemoveAllEntities: function(ent) {
+			while(this.entities.length > 0) {
+				this.RemoveEntity(this.entities[0]);
+			}
+		},
 
 		GetChildren: function() {
 			return this.children;
