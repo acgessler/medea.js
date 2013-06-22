@@ -67,8 +67,8 @@ function run() {
 	
 	var movement_vectors = [
 		[1,1,0],
-		[0,-1,0],
-		[0,0,2]
+		[0,1,0],
+		[1,0,1]
 	];
 	
 	// number of cells on each axis
@@ -142,12 +142,16 @@ function run() {
 						var slice = initial_data[z];
 						var symbol = slice[y][x];
 						if(symbol === '-') {
-							ya.push(null);
+							ya.push([]);
 							continue;
 						}
 						
 						var nd = medea.CreateNode(n++);
-						ya.push([nd,symbol - '0']);
+						ya.push([{
+							node 	: nd,
+							symbol	: symbol - '0'
+							}
+						]);
 						
 						var mesh = cube_mesh_red;
 						if(symbol === '1') {
@@ -156,6 +160,7 @@ function run() {
 						else if(symbol === '2') {
 							mesh = cube_mesh_blue;
 						}
+						
 						nd.AddEntity(mesh);
 						nd.Translate(DiscretePositionToLocal(x,y,z));
 						
@@ -168,11 +173,59 @@ function run() {
 		
 		var current_step = 0;
 		
+		
+		// -----------------------------------------------------
+		// Advance the given cell by `delta` steps.
+		var StepCell = function(delta, occupation, current_cell, x, y, z, handled) {
+
+			for(var i = 0; i < current_cell.length; ++i) {
+			
+				var node = current_cell[i].node;
+				if(node.Name() in handled) {
+					continue; 
+				}
+				var vec = movement_vectors[current_cell[i].symbol];
+				
+				var pos = [x,y,z];
+				
+				// prevent negative mode
+				var abs_delta = delta < 0 ? - delta : delta;
+				pos[0] = (pos[0] + vec[0] * delta + NUM_CELLS * abs_delta) % NUM_CELLS;
+				pos[1] = (pos[1] + vec[1] * delta + NUM_CELLS * abs_delta) % NUM_CELLS;
+				pos[2] = (pos[2] + vec[2] * delta + NUM_CELLS * abs_delta) % NUM_CELLS;
+				
+				if(pos[0] != x || pos[1] != y || pos[2] != z) {
+					
+					var shortcut = occupation[ pos[0] ][ pos[1] ];
+					shortcut[ pos[2] ].push(current_cell[i]);
+					
+					// check if the target spot is occupied, if so, temporarily hide this cube
+					// and add it to the target spot's waiting list.
+					if (shortcut[ pos[2] ].length > 0) {
+						//ya[z][0].node.Disable();
+					}
+					
+					current_cell.shift();
+					--i;
+				}
+				
+				node.ResetTransform();
+				node.Translate(DiscretePositionToLocal(pos));
+				
+				handled[node.Name()] = true;
+			}
+			
+			// activate the next node in our own waiting list, if any
+			if(current_cell.length > 0) {
+				//ya[z][0].node.Enable();
+			}
+		}
+		
+		
 		// -----------------------------------------------------
 		// Advance the simulation by `delta` steps.
 		var Step = function(delta, occupation) {
 			current_step += delta;
-			var abs_delta = delta < 0 ? - delta : delta;
 			
 			var handled = {};
 			
@@ -181,29 +234,8 @@ function run() {
 				for (var y = 0; y < NUM_CELLS; ++y) {
 					var ya = xa[y];
 					for (var z = 0; z < NUM_CELLS; ++z) {
-						if (ya[z] === null) {
-							continue;
-						}
-						
-						var node = ya[z][0];
-						if(node in handled) {
-							// continue; TODO
-						}
-						var vec = movement_vectors[ya[z][1]];
-						
-						var pos = [x,y,z];
-						
-						pos[0] = (pos[0] + vec[0] * delta + NUM_CELLS * abs_delta) % NUM_CELLS;
-						pos[1] = (pos[1] + vec[1] * delta + NUM_CELLS * abs_delta) % NUM_CELLS;
-						pos[2] = (pos[2] + vec[2] * delta + NUM_CELLS * abs_delta) % NUM_CELLS;
-						
-						occupation[ pos[0] ][ pos[1] ][ pos[2] ] = ya[z];
-						ya[z] = null;
-						
-						node.ResetTransform();
-						node.Translate(DiscretePositionToLocal(pos));
-						
-						handled[node] = true;
+					
+						StepCell(delta, occupation, ya[z], x, y, z, handled);
 					}
 				}
 			}
@@ -226,6 +258,7 @@ function run() {
 		
 		var time = 0;
 		var wait_for_arrow_release = false;
+		
 		
 		// handle user input and update presentation accordingly
 		medea.SetTickCallback(function(dtime) {
