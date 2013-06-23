@@ -11,6 +11,10 @@ medea._addMod('entity',[],function() {
 	var medea = this;
 
 	var id_source = 0;
+	
+	
+	medea.ENTITY_UPDATE_WAS_REMOVED = 0x8;
+	
 
 	medea.Entity = medea.Class.extend({
 		name : "",

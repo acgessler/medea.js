@@ -94,6 +94,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 			this._SetBBDirty();
 		},
 
+		// note: when doing this from within Entity.Update(), return medea.ENTITY_UPDATE_WAS_REMOVED
 		RemoveEntity: function(ent) {
 			var idx = this.entities.indexOf(ent);
 			if(idx !== -1) {

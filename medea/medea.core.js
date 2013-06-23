@@ -396,8 +396,11 @@ medea = new (function(sdom) {
 				return true;
 			}
 			var e = node.GetEntities();
+			// if entities return medea.ENTITY_UPDATE_WAS_REMOVED  from Update(), this means they removed
 			for(var i = 0; i < e.length; ++i) {
-				e[i].Update(dtime,node);
+				if(e[i].Update(dtime,node) === medea.ENTITY_UPDATE_WAS_REMOVED) {
+					--i;
+				}
 			}
 
 			node.Update(dtime);
@@ -844,6 +847,7 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("CreateVisualizer_ShowBBs","visualizer_showbbs");
 	this._SetFunctionStub("CreateCompositor","compositor");
 
+	this._SetFunctionStub("CreateFromToAnimator","simpleanim");
 	this._SetFunctionStub("CreateSplinePathAnimator","splinepath");
 	this._SetFunctionStub("CreateTerrainHeightPathAnimator","terrainheightpath");
 
