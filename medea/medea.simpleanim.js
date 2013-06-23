@@ -35,12 +35,14 @@ medea._addMod('simpleanim',['entity'],function(undefined) {
 			if(this.time === undefined) {
 				this.time = 0.0;
 			}
-			else if(this.time > this.duration) {
+			
+			this.time += dtime;
+			if(this.time > this.duration) {
+				// ensure proper end position
+				node.LocalPos(this.to);
 				this.finished = true;
 				return;
 			}
-
-			this.time += dtime;
 			
 			var fraction = this.time / this.duration;
 			var position = [this.from[0],this.from[1],this.from[2]];
