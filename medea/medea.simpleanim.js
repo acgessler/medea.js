@@ -12,6 +12,10 @@ medea._addMod('simpleanim',['entity'],function(undefined) {
 
 	var FromToAnimator = medea.Entity.extend(
 	{
+	
+		finished_clb : null,
+		
+	
 		init : function(from, to, duration, auto_unadd) {
 			this.from = from;
 			this.to = to;
@@ -40,7 +44,7 @@ medea._addMod('simpleanim',['entity'],function(undefined) {
 			if(this.time > this.duration) {
 				// ensure proper end position
 				node.LocalPos(this.to);
-				this.finished = true;
+				this.Finished(true);
 				return;
 			}
 			
@@ -59,6 +63,16 @@ medea._addMod('simpleanim',['entity'],function(undefined) {
 				return this.finished;
 			}
 			this.finished = h;
+			if(h && this.finished_clb != null) {
+				this.finished_clb(this);
+			}
+		},
+		
+		FinishingCallback : function(c) {
+			if (c === undefined) {
+				return this.finished_clb;
+			}
+			this.finished_clb = c;
 		}
 	});
 
