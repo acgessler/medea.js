@@ -105,9 +105,26 @@ medea._addMod('node',['frustum'],function(undefined) {
 			}
 		},
 		
-		RemoveAllEntities: function(ent) {
-			while(this.entities.length > 0) {
-				this.RemoveEntity(this.entities[0]);
+		RemoveAllEntities: function(tag) {
+			if(tag === undefined) {
+				for (var i = 0; i < this.entities.length; ++i) {
+					this.entities[i].OnDetach(this);
+				}
+				
+				this.entities = [];
+				this._SetBBDirty();
+				return;
+			}
+			for (var i = 0; i < this.entities.length; ++i) {
+				var ent = this.entities[i];
+				if(ent.Tag() !== tag) {
+					continue;
+				}
+				
+				ent.OnDetach(this);
+
+				this._SetBBDirty();
+				this.entities.splice(i,1);
 			}
 		},
 

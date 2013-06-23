@@ -19,6 +19,7 @@ medea._addMod('entity',[],function() {
 	medea.Entity = medea.Class.extend({
 		name : "",
 		bb : null,
+		tag : null,
 
 		init : function(name) {
 			this.id = id_source++;
@@ -30,6 +31,14 @@ medea._addMod('entity',[],function() {
 		},
 
 		Update : function(dtime) {
+		},
+		
+		// Tag() is used with node.RemoveAllEntities() 
+		Tag : function(n) {
+			if (n === undefined) {
+				return this.tag;
+			}
+			this.tag = n;
 		},
 
 		BB : function(b) {
