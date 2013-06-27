@@ -152,6 +152,9 @@ medea._addMod('camera',['statepool'],function() {
 
 			// traverse all nodes in the graph and collect their render jobs
 			medea.VisitGraph(medea.RootNode(),function(node,parent_visible) {
+				if(!node.Enabled()) {
+					return medea.VISIBLE_NONE;
+				}
 
 				var vis = parent_visible === medea.VISIBLE_ALL ? medea.VISIBLE_ALL : node.Cull(frustum);
 				var e = node.GetActiveEntities(outer);
