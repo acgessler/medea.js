@@ -17,13 +17,18 @@ medea._addMod('filesystem',[],function() {
 	}
 
 	medea.FixURL = function(s, no_client_cache, root) {
+	
 		if (s.slice(0,7) === 'remote:') {
+			s = (root || settings_root) + s.slice(7);
+		}
+		else if (s.slice(0,7) === 'url:') {
 			s = s.slice(7);
 		}
+		
 		if (no_client_cache) {
 			s += '?nocache='+(new Date()).getTime();
 		}
-		return (root || settings_root) + s;
+		return s;
 	};
 
 	// class Resource
@@ -113,8 +118,8 @@ medea._addMod('filesystem',[],function() {
 	
 	
 		init : function(root_name, prefix) {
-			this.root = root_name || settings_root;
-			this.prefix = prefix || "remote";
+			this.root = root_name;
+			this.prefix = prefix;
 		},
 	
 
@@ -125,7 +130,7 @@ medea._addMod('filesystem',[],function() {
 		Load : function(what,callback,onerror,no_session_cache) {
 
 			what = medea.FixURL(what, false, this.root);
-
+			
 			if (!no_session_cache) {
 				var c = _http_cache[what];
 				if(c) {
@@ -257,7 +262,7 @@ medea._addMod('filesystem',[],function() {
 		new medea.DocumentFileSystemHandler(),
 	];
 
-	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler());
-	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler("./","url"));
+	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler(settings_root, "remote"));
+	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler("","url"));
 });
 
