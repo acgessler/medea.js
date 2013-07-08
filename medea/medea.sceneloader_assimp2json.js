@@ -117,7 +117,7 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', typeof JSON === un
 
 		if(node.meshes) {
 			for(var i = 0; i < node.meshes.length; ++i) {
-				anchor.AddEntity(LoadMesh(w,node.meshes[i]));
+				outnd.AddEntity(LoadMesh(w,node.meshes[i]));
 			}
 		}
 
