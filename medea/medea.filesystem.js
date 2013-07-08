@@ -11,19 +11,19 @@ medea._addMod('filesystem',[],function() {
 	var medea = this, gl = medea.gl;
 
 	// find root location for remote files
-	var root = medea.GetSettings()['dataroot'] || 'data';
-	if (root.charAt(root.length-1) !== '/') {
-		root += '/';
+	var settings_root = medea.GetSettings()['dataroot'] || 'data';
+	if (settings_root.charAt(settings_root.length-1) !== '/') {
+		settings_root += '/';
 	}
 
-	medea.FixURL = function(s, no_client_cache) {
+	medea.FixURL = function(s, no_client_cache, root) {
 		if (s.slice(0,7) === 'remote:') {
 			s = s.slice(7);
 		}
 		if (no_client_cache) {
 			s += '?nocache='+(new Date()).getTime();
 		}
-		return root + s;
+		return (root || settings_root) + s;
 	};
 
 	// class Resource
@@ -75,7 +75,7 @@ medea._addMod('filesystem',[],function() {
 	medea.LocalFileSystemHandler = medea.FileSystemHandler.extend({
 
 		init : function(root) {
-			this.root = root;
+			this.root = root || settings_root;
 // #ifdef DEBUG
 			if (!this.root) {
 				medea.DebugAssert("need a valid filesystem handle for local file support");
@@ -90,7 +90,7 @@ medea._addMod('filesystem',[],function() {
 		Load : function(what,callback,onerror) {
 			medea.LogDebug("begin loading: " + what + " from local disk");
 
-			root.getFile(what, {}, function(fileEntry) {
+			this.root.getFile(what, {}, function(fileEntry) {
 
 				var reader = new FileReader();
 				reader.onload = function(e) {
@@ -110,14 +110,21 @@ medea._addMod('filesystem',[],function() {
 	// class LocalFileSystemHandler
 	var _http_cache = {};
 	medea.HTTPRemoteFileSystemHandler = medea.FileSystemHandler.extend({
+	
+	
+		init : function(root_name, prefix) {
+			this.root = root_name || settings_root;
+			this.prefix = prefix || "remote";
+		},
+	
 
 		CanHandle : function(prefix) {
-			return prefix == "remote";
+			return prefix == this.prefix;
 		},
 
 		Load : function(what,callback,onerror,no_session_cache) {
 
-			what = medea.FixURL(what);
+			what = medea.FixURL(what, false, this.root);
 
 			if (!no_session_cache) {
 				var c = _http_cache[what];
@@ -251,5 +258,6 @@ medea._addMod('filesystem',[],function() {
 	];
 
 	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler());
+	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler("./","url"));
 });
 
