@@ -15,16 +15,31 @@ medea._addMod('filesystem',[],function() {
 	if (settings_root.charAt(settings_root.length-1) !== '/') {
 		settings_root += '/';
 	}
-
-	medea.FixURL = function(s, no_client_cache, root) {
-		if (s.slice(0,7) === 'remote:') {
-			s = s.slice(7);
-		}
+	
+	
+	var AppendUrlParameters = function(s, no_client_cache) {
 		if (no_client_cache) {
 			s += '?nocache='+(new Date()).getTime();
 		}
-		return (root || settings_root) + s;
+		return s;
+	}
+	
+
+	// TODO this is only necessary because the image module still relies on the
+	// browser's URL resolution.
+	medea.FixURL = function(s, no_client_cache, root) {
+	
+		if (s.slice(0,7) === 'remote:') {
+			s = (root || settings_root) + s.slice(7);
+		}
+		else if (s.slice(0,4) === 'url:') {
+			s = s.slice(4);
+		}
+		
+		s = AppendUrlParameters(s);
+		return s;
 	};
+	
 
 	// class Resource
 	medea.Resource = medea.Class.extend({
@@ -113,8 +128,8 @@ medea._addMod('filesystem',[],function() {
 	
 	
 		init : function(root_name, prefix) {
-			this.root = root_name || settings_root;
-			this.prefix = prefix || "remote";
+			this.root = root_name;
+			this.prefix = prefix;
 		},
 	
 
@@ -122,10 +137,10 @@ medea._addMod('filesystem',[],function() {
 			return prefix == this.prefix;
 		},
 
-		Load : function(what,callback,onerror,no_session_cache) {
+		Load : function(what_orig,callback, onerror,no_session_cache) {
 
-			what = medea.FixURL(what, false, this.root);
-
+			var what = this.root + AppendUrlParameters(what_orig);
+			
 			if (!no_session_cache) {
 				var c = _http_cache[what];
 				if(c) {
@@ -257,7 +272,7 @@ medea._addMod('filesystem',[],function() {
 		new medea.DocumentFileSystemHandler(),
 	];
 
-	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler());
-	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler("./","url"));
+	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler(settings_root, "remote"));
+	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler("","url"));
 });
 

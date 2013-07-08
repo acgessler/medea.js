@@ -36,6 +36,8 @@ medea._addMod('image',['filesystem'],function(undefined) {
 					outer.OnDelayedInit();
 				};
 
+				// XXX this circumvents the filesystem as we have to rely on the browser's
+				// URl resolution. Find a better solution for this.
 				this.img.src = medea.FixURL(src_or_image);
 			}
 		},
