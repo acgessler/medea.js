@@ -121,6 +121,8 @@ medea._addMod('camera',['statepool'],function() {
 				return this.view;
 			}
 
+			// TODO: optimize this, the view matrix inverse can be 
+			// constructed much easier
 			this.view = mat4.create(this.GetInverseGlobalTransform());
 
 			this.flags &= ~medea._CAMERA_DIRTY_VIEW;

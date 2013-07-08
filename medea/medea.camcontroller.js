@@ -19,6 +19,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		turn_speed : 0.005,
 		walk_speed : 5.5,
 		last_processed_mdelta : -1,
+		last_processed_mwdelta : -1,
 
 		init : function(enabled) {
 			this._super();
@@ -39,7 +40,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		},
 		
 		
-		Update : function(dtime, n) {
+		Update : function(dtime, node) {
 			if(!this.enabled || medea.IsMouseDown()) {
 				return;
 			}
@@ -49,19 +50,33 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			
 				// do not process mouse movements while the CTRL key is pressed
 				if (!medea.IsKeyDown(17)) {
-					this.ProcessMouseDelta(dtime, n, d);
+					this.ProcessMouseDelta(dtime, node, d);
 				}
 				this.last_processed_mdelta = d[2];
 			}
+
+			d = medea.GetMouseWheelDelta();
+			if(d[1] !== this.last_processed_mwdelta) {
+
+				// do not process mouse movements while the CTRL key is pressed
+				if (!medea.IsKeyDown(17)) {
+					this.ProcessMouseWheel(dtime, node, d[0]);
+				}
+
+				this.last_processed_mwdelta = d[1];
+			}
 			
-			this.ProcessKeyboard(dtime, n);
+			this.ProcessKeyboard(dtime, node);
 		},
 		
 		
-		ProcessMouseDelta : function(dtime, n, d) {
+		ProcessMouseDelta : function(dtime, node, d) {
+		},
+
+		ProcessMouseWheel : function(dtime, node, z) {
 		},
 		
-		ProcessKeyboard : function(dtime, n) {
+		ProcessKeyboard : function(dtime, node) {
 		}
 	});
 
@@ -153,7 +168,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 	
 	
 	medea.OrbitCamController = medea.CamController.extend({
-		turn_speed : 0.005,
+		turn_speed : 0.015,
 		camera_distance : 3.0,
 		pan_speed : 0.004,
 		zoom_speed : 1.00105,
@@ -178,38 +193,38 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		MinimumCameraDistance : medea._GetSet('minimum_camera_distance'),
 
 
-		ProcessMouseDelta : function(dtime, n, d) {
+		ProcessMouseDelta : function(dtime, node, d) {
 			
 			// process mouse movement on the x axis
 			if(d[0]) {
-				mat4.rotate(this.view,-d[0]*this.turn_speed,[0,1,0]);
+				mat4.rotateY(this.view, d[0]*this.turn_speed);
 			}
 			
 			// process mouse movement on the y axis
 			if(d[1]) {
-				mat4.rotate(this.view,-d[1]*this.turn_speed,[1,0,0]);
+				mat4.rotateX(this.view, d[1]*this.turn_speed);
 			}
 			
-			this._UpdateNodeTransformation(n);
+			this._UpdateNodeTransformation(node);
 		},
 		
 		
-		ProcessScroll : function(dtime, n, z) {
+		ProcessMouseWheel : function(dtime, node, z) {
 			var d = this.camera_distance;
-			d *= Math.pow(this.zoom_distance, -z);
+			d *= Math.pow(this.zoom_speed, -z * 50);
             d = Math.max(d, this.minimum_camera_distance);
 			this.camera_distance = d;
-			
-            this._UpdateNodeTransformation(n);
+
+			this._UpdateNodeTransformation(node);
 		},
 		
 		
-		Pan : function(x, y, n) {
+		Pan : function(x, y, node) {
 			var ps = this.pan_speed;
             this.pan_vector[0] += x * ps;
             this.pan_vector[1] += -y * ps;
 
-            this._UpdateNodeTransformation(n);
+            this._UpdateNodeTransformation(node);
         },
 		
 		
@@ -227,19 +242,19 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			
 			var vup = [v[1], v[5], v[9]];
 			
-			var vright = vec3.cross(veye, vup, vec3.create());
+			var vright = vec3.cross(vup, veye, vec3.create());
 			vec3.normalize(vright);
 			vo[0]  = vright[0];
 			vo[4]  = vright[1];
 			vo[8]  = vright[2];
 
-			vec3.cross(vright, veye, vup);
+			vec3.cross(veye, vright, vup);
 			vec3.normalize(vup);
 			vo[1]  = vup[0];
 			vo[5]  = vup[1];
 			vo[9]  = vup[2];
 
-			mat4.translate(vo, vec3.negate(veye));
+			mat4.translate(vo, veye);
 			node.LocalTransform(vo);
 		}
 	});
@@ -268,7 +283,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 				n.LocalZAxis(mat4.multiplyVec3(mrot,n.LocalZAxis()));
 				n.LocalXAxis(vec3.cross(n.LocalYAxis(),n.LocalZAxis()));
 			}		
-		},
+		}
 	});
 	
 	
