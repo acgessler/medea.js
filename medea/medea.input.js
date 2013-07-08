@@ -12,7 +12,9 @@ medea._addMod('input',[],function() {
 
 	var key_state = {};
 	var mouse_down = false;
-	var lastMouseDelta = undefined, lastMousePosition = undefined;
+
+	var lastMouseDelta, lastMousePosition;
+	var lastMouseWheelDelta = [0,0];
 
 
 	var HandleKeyDown = function(event) {
@@ -44,6 +46,26 @@ medea._addMod('input',[],function() {
 		lastMousePosition = [event.clientX, event.clientY,lastMouseDelta[2]];
 	};
 
+	medea.canvas.onmousewheel = function(event) {
+		var delta = 0;
+ 
+    	if (event.wheelDelta !== undefined) {
+        	delta = event.wheelDelta / 60;
+ 
+    	} 
+    	else if (event.detail !== undefined) {
+        	delta = -event.detail / 2;
+   	 	}
+
+   	 	lastMouseWheelDelta = [
+   	 		delta,
+   	 		lastMouseWheelDelta[1]+1
+   	 	];
+
+		event.preventDefault();
+	};
+
+
 	// set event handlers on the canvas panel
 	window.addEventListener('keydown', HandleKeyDown, true);
 	window.addEventListener('keyup', HandleKeyUp, true);
@@ -66,6 +88,10 @@ medea._addMod('input',[],function() {
 
 	medea.GetMouseDelta = function() {
 		return lastMouseDelta || [0,0,0];
+	};
+
+	medea.GetMouseWheelDelta = function() {
+		return lastMouseWheelDelta || [0,0];
 	};
 
 	medea.GetMousePosition = function() {
