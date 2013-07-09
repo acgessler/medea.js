@@ -76,11 +76,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 
 			d = medea.GetMouseWheelDelta();
 			if(d[1] !== this.last_processed_mwdelta) {
-
-				if (this._ShouldHandleMouseMovements()) {
-					this.ProcessMouseWheel(dtime, node, d[0]);
-				}
-
+				this.ProcessMouseWheel(dtime, node, d[0]);
 				this.last_processed_mwdelta = d[1];
 			}
 			
@@ -205,18 +201,21 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 	medea.OrbitCamController = medea.CamController.extend({
 		turn_speed : 0.02,
 		camera_distance : 2.5,
-		pan_speed : 0.004,
+		pan_speed : 0.006,
 		zoom_speed : 1.00105,
 		minimum_camera_distance : 1.0,
 		maximum_camera_distance : 10.0,
 		dirty_trafo : true,
+		pan_enable : true,
+		zoom_enable : true,
+
 
 		init : function(enabled) {
 			this._super(enabled);
 			
 			this.view = mat4.identity(mat4.create()); // TODO: set initial state
 			this.view_with_offset = mat4.identity(mat4.create());
-			this.pan_vector = [0.0,0.0];
+			this.pan_vector = [0.0,0.0,0.0];
 		},
 
 
@@ -224,6 +223,9 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		TurnSpeed : medea._GetSet('turn_speed'),
 		ZoomSpeed : medea._GetSet('zoom_speed'),
 		PanSpeed : medea._GetSet('pan_speed'),
+
+		PanEnable : medea._GetSet('pan_enable'),
+		ZoomEnable : medea._GetSet('zoom_enable'),
 		
 		CameraDistance : medea._GetSet('camera_distance'),
 		MinimumCameraDistance : medea._GetSet('minimum_camera_distance'),
@@ -237,6 +239,11 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 
 
 		ProcessMouseDelta : function(dtime, node, d) {
+			if(medea.IsMouseWheelDown()) {
+				this.Pan(d[0], d[1]);
+				return;
+			}
+
 			// process mouse movement on the x axis
 			if(d[0]) {
 				mat4.rotateY(this.view, -d[0]*this.turn_speed);
@@ -252,6 +259,10 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		
 		
 		ProcessMouseWheel : function(dtime, node, z) {
+			if(!this.zoom_enable) {
+				return;
+			}
+
 			var d = this.camera_distance;
 			d *= Math.pow(this.zoom_speed, -z * 50);
             d = Math.max(d, this.minimum_camera_distance);
@@ -262,10 +273,14 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		},
 		
 		
-		Pan : function(x, y, node) {
+		Pan : function(x, y) {
+			if(!this.pan_enable) {
+				return;
+			}
 			var ps = this.pan_speed;
-            this.pan_vector[0] += x * ps;
-            this.pan_vector[1] += -y * ps;
+            this.pan_vector[0] += -x * ps;
+            this.pan_vector[1] += y * ps;
+            this.pan_vector[2] = 0.0;
 
             this.dirty_trafo = true;
         },
@@ -302,8 +317,12 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 
 			// TODO: optimize
 			mat4.multiply(mat4.translate(mat4.identity(mat4.create()), veye), vo, vo);
-			node.LocalTransform(vo);
 
+			if(this.pan_enable) {
+				mat4.translate(vo, this.pan_vector, vo);
+			}
+
+			node.LocalTransform(vo);
 			this.dirty_trafo = false;
 		}
 	});
