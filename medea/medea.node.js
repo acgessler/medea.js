@@ -203,13 +203,19 @@ medea._addMod('node',['frustum'],function(undefined) {
 			return this.lmatrix;
 		},
 
-		LocalTransform: function(l) {
+		LocalTransform: function(l, no_copy) {
 			if(l === undefined) {
 				return this.lmatrix;
 			}
 
 			this._SetTrafoDirty();
-			this.lmatrix = l;
+
+			if(no_copy) {
+				this.lmatrix = l;
+			}
+			else {
+				mat4.set(l, this.lmatrix);
+			}
 		},
 
 		GetGlobalTransform: function() {
@@ -249,11 +255,13 @@ medea._addMod('node',['frustum'],function(undefined) {
 
 			mat4.scale(this.lmatrix, typeof s === 'number' ? [s,s,s] : s);
 			this._SetTrafoDirty();
+			alert(mat4.str(this.lmatrix));
 			return this;
 		},
 
 		ScaleToFit : function(s) {
 			var bb = this.GetBB(), m = Math.max, e;
+			medea.DebugAssert(bb.length === 2, 'must be AABB');
 			e = m(-bb[0][0],bb[1][0]);
 			e = m(e,m(-bb[0][1],bb[1][1]));
 			e = m(e,m(-bb[0][2],bb[1][2]));
@@ -264,11 +272,12 @@ medea._addMod('node',['frustum'],function(undefined) {
 
 		Center : function(s) {
 			var bb = this.GetBB();
-		
+			medea.DebugAssert(bb.length === 2, 'must be AABB');
 			var x = bb[1][0] - bb[0][0];
 			var y = bb[1][1] - bb[0][1];
 			var z = bb[1][2] - bb[0][2];
-			this.Translate([-x/2,-y/2,-z/2]);
+			var vec = [-(x/2 + bb[0][0]),-(y/2 + bb[0][1]),-(z/2 + bb[0][2])];
+			this.Translate(vec);
 		},
 
 
