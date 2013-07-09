@@ -6,6 +6,22 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
+
+
+ // mouse movements are always tracked
+medea.CAMCONTROLLER_MOUSE_STYLE_ALWAYS = 0x1;
+
+ // mouse movements are tracked iff ctrl (or the key it maps to) is pressed
+medea.CAMCONTROLLER_MOUSE_STYLE_ON_CTRL = 0x2;
+
+ // mouse movements are tracked iff ctrl (or the key it maps to) is not pressed
+medea.CAMCONTROLLER_MOUSE_STYLE_OFF_CTRL = 0x3;
+
+// mouse movements are tracked iff the left mouse button is pressed
+medea.CAMCONTROLLER_MOUSE_STYLE_ON_LEFT_MBUTTON = 0x4;
+
+
+
 medea._addMod('camcontroller',['entity','input'],function(undefined) {
 	"use strict";
 	var medea = this;
@@ -20,14 +36,18 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		walk_speed : 5.5,
 		last_processed_mdelta : -1,
 		last_processed_mwdelta : -1,
+		mouse_style : -1,
 
-		init : function(enabled) {
+		init : function(enabled, mouse_style) {
 			this._super();
+
 			this.Enabled(enabled || false);
+			this.MouseStyle(mouse_style || medea.CAMCONTROLLER_MOUSE_STYLE_OFF_CTRL);
 		},
 
 
 		Enabled : medea._GetSet('enabled'),
+		MouseStyle : medea._GetSet('mouse_style'),
 		
 
 		// TODO: deprecate in favour of Enabled()
@@ -41,15 +61,14 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		
 		
 		Update : function(dtime, node) {
-			if(!this.enabled || medea.IsMouseDown()) {
+			if(!this.enabled) {
 				return;
 			}
 
 			var d = medea.GetMouseDelta();
 			if(d[2] !== this.last_processed_mdelta) {
 			
-				// do not process mouse movements while the CTRL key is pressed
-				if (!medea.IsKeyDown(17)) {
+				if (this._ShouldHandleMouseMovements()) {
 					this.ProcessMouseDelta(dtime, node, d);
 				}
 				this.last_processed_mdelta = d[2];
@@ -58,8 +77,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			d = medea.GetMouseWheelDelta();
 			if(d[1] !== this.last_processed_mwdelta) {
 
-				// do not process mouse movements while the CTRL key is pressed
-				if (!medea.IsKeyDown(17)) {
+				if (this._ShouldHandleMouseMovements()) {
 					this.ProcessMouseWheel(dtime, node, d[0]);
 				}
 
@@ -77,6 +95,23 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		},
 		
 		ProcessKeyboard : function(dtime, node) {
+		},
+
+
+		_ShouldHandleMouseMovements : function() {
+			switch(this.mouse_style) {
+				case medea.CAMCONTROLLER_MOUSE_STYLE_ALWAYS:
+					return true;
+				case medea.CAMCONTROLLER_MOUSE_STYLE_OFF_CTRL:
+					return !medea.IsKeyDown(17);
+				case medea.CAMCONTROLLER_MOUSE_STYLE_ON_CTRL:
+					return  medea.IsKeyDown(17);
+				case medea.CAMCONTROLLER_MOUSE_STYLE_ON_LEFT_MBUTTON:
+					return medea.IsMouseDown();
+			}
+			// #ifdef DEBUG
+			medea.DebugAssert(false, 'mouse style not recognized: ' + this.mouse_style);
+			// #endif 
 		}
 	});
 
@@ -195,7 +230,6 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 
 
 		ProcessMouseDelta : function(dtime, node, d) {
-			
 			// process mouse movement on the x axis
 			if(d[0]) {
 				mat4.rotateY(this.view, -d[0]*this.turn_speed);
