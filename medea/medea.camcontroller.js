@@ -209,6 +209,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		zoom_speed : 1.00105,
 		minimum_camera_distance : 1.0,
 		maximum_camera_distance : 10.0,
+		dirty_trafo : true,
 
 		init : function(enabled) {
 			this._super(enabled);
@@ -229,6 +230,12 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		MaximumCameraDistance : medea._GetSet('maximum_camera_distance'),
 
 
+		Update : function(dtime, node) {
+			this._super(dtime, node);
+			this._UpdateNodeTransformation(node);
+		},
+
+
 		ProcessMouseDelta : function(dtime, node, d) {
 			// process mouse movement on the x axis
 			if(d[0]) {
@@ -239,8 +246,8 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			if(d[1]) {
 				mat4.rotateX(this.view, -d[1]*this.turn_speed);
 			}
-			
-			this._UpdateNodeTransformation(node);
+
+			this.dirty_trafo = true;
 		},
 		
 		
@@ -251,7 +258,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
             d = Math.min(d, this.maximum_camera_distance);
 			this.camera_distance = d;
 
-			this._UpdateNodeTransformation(node);
+			this.dirty_trafo = true;
 		},
 		
 		
@@ -260,11 +267,14 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
             this.pan_vector[0] += x * ps;
             this.pan_vector[1] += -y * ps;
 
-            this._UpdateNodeTransformation(node);
+            this.dirty_trafo = true;
         },
 		
 		
 		_UpdateNodeTransformation : function(node) {
+			if (this.dirty_trafo === false) {
+				return;
+			}
 			var vo = this.view_with_offset;
 			var v  = this.view;
 			var dist = this.camera_distance;
@@ -293,6 +303,8 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			// TODO: optimize
 			mat4.multiply(mat4.translate(mat4.identity(mat4.create()), veye), vo, vo);
 			node.LocalTransform(vo);
+
+			this.dirty_trafo = false;
 		}
 	});
 	
