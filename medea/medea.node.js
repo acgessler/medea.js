@@ -263,12 +263,11 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 
 		Center : function(s) {
-			var bb = this.GetBB(), max = Math.max, min = Math.min, emax;
+			var bb = this.GetBB();
 		
 			var x = bb[1][0] - bb[0][0];
 			var y = bb[1][1] - bb[0][1];
 			var z = bb[1][2] - bb[0][2];
-
 			this.Translate([-x/2,-y/2,-z/2]);
 		},
 

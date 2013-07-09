@@ -197,12 +197,12 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			
 			// process mouse movement on the x axis
 			if(d[0]) {
-				mat4.rotateY(this.view, d[0]*this.turn_speed);
+				mat4.rotateY(this.view, -d[0]*this.turn_speed);
 			}
 			
 			// process mouse movement on the y axis
 			if(d[1]) {
-				mat4.rotateX(this.view, d[1]*this.turn_speed);
+				mat4.rotateX(this.view, -d[1]*this.turn_speed);
 			}
 			
 			this._UpdateNodeTransformation(node);
@@ -235,24 +235,24 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 
 			mat4.identity(vo);
 			
-			var veye = [v[2]  * dist, v[6]  * dist, v[10] * dist];
-			vo[2]  = v[2];
-			vo[6]  = v[6];
+			var veye = [v[8]  * dist, v[9]  * dist, v[10] * dist];
+			vo[8]  = v[8];
+			vo[9]  = v[9];
 			vo[10] = v[10];
 			
-			var vup = [v[1], v[5], v[9]];
+			var vup = [v[4], v[5], v[6]];
 			
 			var vright = vec3.cross(vup, veye, vec3.create());
 			vec3.normalize(vright);
 			vo[0]  = vright[0];
-			vo[4]  = vright[1];
-			vo[8]  = vright[2];
+			vo[1]  = vright[1];
+			vo[2]  = vright[2];
 
 			vec3.cross(veye, vright, vup);
 			vec3.normalize(vup);
-			vo[1]  = vup[0];
+			vo[4]  = vup[0];
 			vo[5]  = vup[1];
-			vo[9]  = vup[2];
+			vo[6]  = vup[2];
 
 			mat4.translate(vo, veye);
 			node.LocalTransform(vo);
