@@ -6,12 +6,13 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('input',[],function() {
+medea._addMod('input',[],function(undefined) {
 	"use strict";
 	var medea = this;
 
 	var key_state = {};
 	var mouse_down = false;
+	var mouse_wheel_down = false;
 
 	var lastMouseDelta, lastMousePosition;
 	var lastMouseWheelDelta = [0,0];
@@ -27,11 +28,21 @@ medea._addMod('input',[],function() {
 
 
 	medea.canvas.onmousedown = function(event) {
-		mouse_down = true;
+		if(event.which === 1) {
+			mouse_down = true;
+		}
+		else if(event.which === 2) {
+			mouse_wheel_down = true;
+		}
 	};
 
 	medea.canvas.onmouseup = function(event) {
-		mouse_down = false;
+		if(event.which === 1) {
+			mouse_down = false;
+		}
+		else if(event.which === 2) {
+			mouse_wheel_down = false;
+		}
 	};
 
 	medea.canvas.onmousemove = function(event) {
@@ -75,6 +86,10 @@ medea._addMod('input',[],function() {
 
 	medea.IsMouseDown = function() {
 		return mouse_down;
+	};
+
+	medea.IsMouseWheelDown = function() {
+		return mouse_wheel_down;
 	};
 
 	medea.IsKeyDown = function(keycode) {
