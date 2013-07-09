@@ -168,12 +168,12 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 	
 	
 	medea.OrbitCamController = medea.CamController.extend({
-		turn_speed : 0.015,
-		camera_distance : 3.0,
+		turn_speed : 0.02,
+		camera_distance : 2.5,
 		pan_speed : 0.004,
 		zoom_speed : 1.00105,
-		minimum_camera_distance : 0.1,
-		
+		minimum_camera_distance : 1.0,
+		maximum_camera_distance : 10.0,
 
 		init : function(enabled) {
 			this._super(enabled);
@@ -191,6 +191,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		
 		CameraDistance : medea._GetSet('camera_distance'),
 		MinimumCameraDistance : medea._GetSet('minimum_camera_distance'),
+		MaximumCameraDistance : medea._GetSet('maximum_camera_distance'),
 
 
 		ProcessMouseDelta : function(dtime, node, d) {
@@ -213,6 +214,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			var d = this.camera_distance;
 			d *= Math.pow(this.zoom_speed, -z * 50);
             d = Math.max(d, this.minimum_camera_distance);
+            d = Math.min(d, this.maximum_camera_distance);
 			this.camera_distance = d;
 
 			this._UpdateNodeTransformation(node);
