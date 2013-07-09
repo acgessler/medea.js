@@ -254,7 +254,8 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			vo[5]  = vup[1];
 			vo[6]  = vup[2];
 
-			mat4.translate(vo, veye);
+			// TODO: optimize
+			mat4.multiply(mat4.translate(mat4.identity(mat4.create()), veye), vo, vo);
 			node.LocalTransform(vo);
 		}
 	});
