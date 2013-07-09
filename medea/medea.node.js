@@ -255,7 +255,6 @@ medea._addMod('node',['frustum'],function(undefined) {
 
 			mat4.scale(this.lmatrix, typeof s === 'number' ? [s,s,s] : s);
 			this._SetTrafoDirty();
-			alert(mat4.str(this.lmatrix));
 			return this;
 		},
 
