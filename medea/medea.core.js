@@ -111,10 +111,10 @@ medea = new (function(sdom) {
 	this.FRAME_VIEWPORT_UPDATED = 0x1;
 	this.FRAME_CANVAS_SIZE_CHANGED = this.FRAME_VIEWPORT_UPDATED | 0x2;
 
-
 	this.VISIBLE_NONE = 0x0;
 	this.VISIBLE_ALL = 0x1;
 	this.VISIBLE_PARTIAL = 0x2;
+
 
 	this.AssertionError = function(what) {this.what = what;};
 	this.FatalError = function(what) {this.what = what;};
@@ -125,20 +125,57 @@ medea = new (function(sdom) {
 	this._workers = {};
 
 	// collect initial dependencies - for example the scenegraph module is always needed
-	var _initial_deps = ['node','viewport'], _initial_pre_deps = ['webgl-utils.js','webgl-debug.js','sprintf-0.7.js','glMatrix.js'];
+	var _initial_deps = ['node','viewport'];
+	var _initial_pre_deps = ['webgl-utils.js','sprintf-0.7.js','glMatrix.js'];
+
 	var _waiters = {}, _deps = {}, _stubs = {}, _sources = {}, _callback = undefined, _callback_pre = undefined, readyness = 0;
 
-	this.Ready = function(where,settings,deps,callback) {
+	this.Ready = function(where, settings, deps, user_callback, failure_callback) {
 
 		// first initialization phase -- create webgl canvas and prepare environment
 		_callback_pre = function() {
 			this.sprintf = sprintf;
 			this.canvas  = document.getElementById(where);
 
-			// note that this will automatically create a debug context if webgl-debug.js is present
-			this.gl = WebGLUtils.setupWebGL(this.canvas);
+			// #if DEBUG
+			//this.Assert(this.canvas != null, "element with #id \"" + where + "\" not found");
+			// #endif
 
+			// create a webgl
+			// try out all the names under which webgl might be available
+			var candidates = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl"];
+			var context = null;
+			for (var i = 0; i < candidates.length; ++i) {
+				try {
+					context = this.canvas.getContext(candidates[i]);
+
+				} catch(ex) {
+
+				}
+				// no matter what happens, we take the first non-null context we get
+				if (context) {
+					break;
+				}
+			}
 			_callback_pre = _initial_pre_deps = undefined;
+
+			if(!context) {
+				this.Log('webgl initialization failed','error');
+				_callback = undefined;
+				if(failure_callback) {
+					failure_callback();
+				}
+				return;
+			}
+			
+			// automatically create debug context if webgl-debug.js is present
+			if (window['WebGLDebugUtils'] !== undefined) {
+				context = WebGLDebugUtils.makeDebugContext(context);
+			}
+
+
+			this.gl = context;
+			return;
 		};
 
 		// second phase of initialization -- prepare the rest and invoke the Ready() callback
@@ -176,9 +213,8 @@ medea = new (function(sdom) {
 			// always allocate a default root node for the visual scene
 			this.scene_root = medea.CreateNode("root");
 
-
 			_callback = _initial_deps = undefined;
-			callback();
+			user_callback();
 		};
 
 		if(deps) {
@@ -191,9 +227,13 @@ medea = new (function(sdom) {
 		}
 
 		if(readyness > 0) {
-			_callback_pre.apply(medea);
+			if(_callback_pre) {
+				_callback_pre.apply(medea);
+			}
 			if(readyness > 1) {
-				_callback.apply(medea);
+				if(_callback) {
+					_callback.apply(medea);
+				}
 			}
 		}
 	};
@@ -858,10 +898,13 @@ medea = new (function(sdom) {
 	// that all medea modules may depend upon. This also involves creating a webgl canvas
 	// (which is accessible through the medea.gl namespace)
 	this._FetchDeps(_initial_pre_deps, function() {
-		++readyness;
 		if (_callback_pre) {
-			_callback_pre.apply(medea);
+			if(!_callback_pre.apply(medea)) {
+				return;
+			}
 		}
+
+		++readyness;
 		medea._FetchDeps(_initial_deps, function() {
 			++readyness;
 			if (_callback) {
