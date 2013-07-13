@@ -228,7 +228,8 @@ medea._addMod('viewport',['camera','renderqueue','statepool'],function(undefined
 
 				if (this.clearFlags) {
 					if (this.clearFlags & gl.COLOR_BUFFER_BIT) {
-						gl.clearColor(this.ccolor[0],this.ccolor[1],this.ccolor[2],this.ccolor[3]);
+						var color = this.ccolor;
+						gl.clearColor(color[0], color[1], color[2], color.length === 4 ? color[3] : 1.0);
 					}
 
 					gl.scissor(cx,cy,cw,ch);
