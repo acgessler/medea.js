@@ -11,7 +11,8 @@ var scripts = document.getElementsByTagName('script');
 medea = new (function(sdom) {
 	var medea = this;
 
-	// workaround if Array.forEach is not available
+	// **************************************************************************
+	// workaround if Array.forEach not available
 	// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/array/foreach
 	if (!Array.prototype.forEach)
 	{
@@ -36,6 +37,8 @@ medea = new (function(sdom) {
 	  };
 	}
 
+	// **************************************************************************
+	// workaround for Array.isArray not available
 	// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
 	if (typeof Array.isArray != 'function') {
 	  Array.isArray = function (obj) {
@@ -43,12 +46,13 @@ medea = new (function(sdom) {
 	  };
 	}
 
+
+	// **************************************************************************
 	/* Simple JavaScript Inheritance
 	 * By John Resig http://ejohn.org/
 	 * MIT Licensed.
 	 */
 	// Inspired by base2 and Prototype
-
 	  var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
 	  // The base Class implementation (does nothing)
 	  this.Class = function(){};
@@ -107,6 +111,36 @@ medea = new (function(sdom) {
 	  };
 
 
+	// **************************************************************************
+	// Cross-browser requestAnimationFrame
+	// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+	// http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+	 
+	// requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
+	 
+	// MIT license
+	(function() {
+
+	    var lastTime = 0;
+	    var vendors = ['ms', 'moz', 'webkit', 'o'];
+	    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+	        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];	   
+	    }
+	 
+	    if (!window.requestAnimationFrame) {
+	        window.requestAnimationFrame = function(callback, element) {
+	            var currTime = new Date().getTime();
+	            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+	            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+	              timeToCall);
+	            lastTime = currTime + timeToCall;
+	            return id;
+	        };
+	    }
+	})();
+
+
+	// TODO: restructure constants
 	// constants
 	this.FRAME_VIEWPORT_UPDATED = 0x1;
 	this.FRAME_CANVAS_SIZE_CHANGED = this.FRAME_VIEWPORT_UPDATED | 0x2;
@@ -124,9 +158,9 @@ medea = new (function(sdom) {
 
 	this._workers = {};
 
-	// collect initial dependencies - for example the scenegraph module is always needed
+	// collect initial dependencies - for example the scenegraph module and the mathlib is always needed
 	var _initial_deps = ['node','viewport'];
-	var _initial_pre_deps = ['webgl-utils.js','sprintf-0.7.js','glMatrix.js'];
+	var _initial_pre_deps = ['sprintf-0.7.js','glMatrix.js'];
 
 	var _waiters = {}, _deps = {}, _stubs = {}, _sources = {}, _callback = undefined, _callback_pre = undefined, readyness = 0;
 
@@ -343,7 +377,9 @@ medea = new (function(sdom) {
 
 	this.Start = function() {
 		if (!this.stop_asap) {
-			window.requestAnimFrame(function() { medea.Start(); },this.canvas);
+			window.requestAnimationFrame(function() { 
+				medea.Start(); 
+			}, this.canvas);
 
 			if (this.debug_panel) {
 				//setTimeout(function(){medea.debug_panel.Update();},1000);
