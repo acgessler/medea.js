@@ -136,9 +136,10 @@ medea._addMod('camera',['statepool'],function() {
 
 			var aspect = this.aspect;
 			if (aspect === undefined) {
-// #ifdef DEBUG
+				// #if DEBUG
 				medea.DebugAssert(!!this.viewport,"aspect may only be omitted while the camera is assigned to a viewport");
-// #endif
+				// #endif
+
 				aspect = this.viewport.GetAspect();
 			}
 

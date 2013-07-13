@@ -203,7 +203,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		camera_distance : 2.5,
 		pan_speed : 0.006,
 		zoom_speed : 1.00105,
-		minimum_camera_distance : 1.0,
+		minimum_camera_distance : 0.2,
 		maximum_camera_distance : 10.0,
 		dirty_trafo : true,
 		pan_enable : true,
