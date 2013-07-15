@@ -19,7 +19,7 @@ medea._addMod('camera',['statepool'],function() {
 	medea.Camera = medea.Node.extend(
 	{
 		init : function(name,fovy,aspect,znear,zfar,viewport,culling) {
-			this._super(name);
+			this._super(name, medea.NODE_FLAG_NO_SCALING);
 			this.name = name || ("UnnamedCamera_" + this.id);
 
 			this.view = mat4.identity(mat4.create());
@@ -121,9 +121,34 @@ medea._addMod('camera',['statepool'],function() {
 				return this.view;
 			}
 
-			// TODO: optimize this, the view matrix inverse can be 
-			// constructed much easier
-			this.view = mat4.create(this.GetInverseGlobalTransform());
+			// the view matrix is the inverse of the camera node's global
+			// transformation. As we do not permit any scaling on this
+			// matrix, it only consists of a translation vector t (whose
+			// inverse is -t^T) and a orthogonal 3x3 sub matrix r (whose 
+			// inverse is r^T).
+			var global = this.GetGlobalTransform()
+
+			var view = this.view;
+
+			var v0  = view[0]  = global[0];
+			var v1  = view[1]  = global[4];
+			var v2  = view[2]  = global[8];
+
+			var v4  = view[4]  = global[1];
+			var v5  = view[5]  = global[5];
+			var v6  = view[6]  = global[9];
+
+			var v8  = view[8]  = global[2];
+			var v9  = view[9]  = global[6];
+			var v10 = view[10] = global[10];
+
+			var ex = -global[12]
+			var ey = -global[13]
+			var ez = -global[14]
+
+			view[12] = ex * v0 + ey * v4 + ez * v8
+			view[13] = ex * v1 + ey * v5 + ez * v9
+			view[14] = ex * v2 + ey * v6 + ez * v10
 
 			this.flags &= ~medea._CAMERA_DIRTY_VIEW;
 			return this.view;
