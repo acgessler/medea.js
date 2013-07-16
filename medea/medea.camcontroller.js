@@ -239,7 +239,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 
 
 		ProcessMouseDelta : function(dtime, node, d) {
-			if(medea.IsMouseWheelDown()) {
+			if(medea.IsMouseButtonDown(1)) {
 				this.Pan(d[0], d[1]);
 				return;
 			}

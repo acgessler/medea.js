@@ -11,8 +11,7 @@ medea._addMod('input',[],function(undefined) {
 	var medea = this;
 
 	var key_state = {};
-	var mouse_down = false;
-	var mouse_wheel_down = false;
+	var mouse_down = [false ,false, false];
 
 	var lastMouseDelta, lastMousePosition;
 	var lastMouseWheelDelta = [0,0];
@@ -28,20 +27,14 @@ medea._addMod('input',[],function(undefined) {
 
 
 	medea.canvas.onmousedown = function(event) {
-		if(event.which === 1) {
-			mouse_down = true;
-		}
-		else if(event.which === 2) {
-			mouse_wheel_down = true;
+		if(event.which <= 3 && event.which > 0) {
+			mouse_down[event.which - 1] = true;
 		}
 	};
 
 	medea.canvas.onmouseup = function(event) {
-		if(event.which === 1) {
-			mouse_down = false;
-		}
-		else if(event.which === 2) {
-			mouse_wheel_down = false;
+		if(event.which <= 3 && event.which > 0) {
+			mouse_down[event.which - 1] = false;
 		}
 	};
 
@@ -72,7 +65,6 @@ medea._addMod('input',[],function(undefined) {
    	 		delta,
    	 		lastMouseWheelDelta[1]+1
    	 	];
-
 		event.preventDefault();
 	};
 
@@ -85,11 +77,11 @@ medea._addMod('input',[],function(undefined) {
 
 
 	medea.IsMouseDown = function() {
-		return mouse_down;
+		return mouse_down[0];
 	};
 
-	medea.IsMouseWheelDown = function() {
-		return mouse_wheel_down;
+	medea.IsMouseButtonDown = function(which) {
+		return mouse_down[which];
 	};
 
 	medea.IsKeyDown = function(keycode) {
