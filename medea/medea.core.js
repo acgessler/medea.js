@@ -855,10 +855,14 @@ medea = new (function(sdom) {
 
 
 	this._SetFunctionStub("IsMouseDown","input");
+	this._SetFunctionStub("IsMouseButtonDown","input");
 	this._SetFunctionStub("IsKeyDown","input");
 	this._SetFunctionStub("IsKeyDownWasUp","input");
 	this._SetFunctionStub("GetMousePosition","input");
 	this._SetFunctionStub("GetMouseDelta","input");
+
+	this._SetFunctionStub("SetKeyMap","keymap");
+	this._SetFunctionStub("GetKeyMap","keymap");
 
 	this._SetFunctionStub("CreateNode","node");
 	this._SetFunctionStub("CreateEntity","entity");
@@ -929,6 +933,7 @@ medea = new (function(sdom) {
 
 	this._SetFunctionStub("CreateStatePool","statepool");
 	this._SetFunctionStub("GetDefaultStatePool","statepool");
+	
 
 	// Initialization has two phases, the first of which is used to load utility libraries
 	// that all medea modules may depend upon. This also involves creating a webgl canvas

@@ -74,6 +74,7 @@ medea._addMod('input',[],function(undefined) {
 	window.addEventListener('keyup', HandleKeyUp, true);
 
 
+	var settings = medea.settings;
 
 
 	medea.IsMouseDown = function() {
@@ -85,10 +86,16 @@ medea._addMod('input',[],function(undefined) {
 	};
 
 	medea.IsKeyDown = function(keycode) {
+		if(settings.keymap) {
+			keycode = settings.keymap[keycode];
+		}
 		return key_state[keycode] || false;
 	};
 
 	medea.IsKeyDownWasUp = function(keycode, state) {
+		if(settings.keymap) {
+			keycode = settings.keymap[keycode];
+		}
 		var old = state[keycode] || false, now = state[keycode] = medea.IsKeyDown(keycode);
 		return now && !old;
 	};
