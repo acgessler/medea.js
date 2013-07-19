@@ -208,6 +208,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		dirty_trafo : true,
 		pan_enable : true,
 		zoom_enable : true,
+		panning_mouse_buttons : [1,2],
 
 
 		init : function(enabled) {
@@ -231,6 +232,8 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		MinimumCameraDistance : medea._GetSet('minimum_camera_distance'),
 		MaximumCameraDistance : medea._GetSet('maximum_camera_distance'),
 
+		PanningMouseButtons : medea._GetSet('panning_mouse_buttons'),
+
 
 		Update : function(dtime, node) {
 			this._super(dtime, node);
@@ -239,10 +242,21 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 
 
 		ProcessMouseDelta : function(dtime, node, d) {
-			if(medea.IsMouseButtonDown(1)) {
-				this.Pan(d[0], d[1]);
-				return;
+			if(!Array.isArray(this.panning_mouse_buttons)) {
+				if(medea.IsMouseButtonDown(this.panning_mouse_buttons)) {
+					this.Pan(d[0], d[1]);
+					return;
+				}
 			}
+			else {
+				for(var i = 0; i < this.panning_mouse_buttons.length; ++i) {
+					if(medea.IsMouseButtonDown(this.panning_mouse_buttons[i])) {
+						this.Pan(d[0], d[1]);
+						return;
+					}
+				}
+			}
+
 
 			// process mouse movement on the x axis
 			if(d[0]) {
