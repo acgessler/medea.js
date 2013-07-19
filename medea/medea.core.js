@@ -691,7 +691,7 @@ medea = new (function(sdom) {
 				}
 
 				(function(n,is_medea_mod) {
-				medea._AjaxFetch(medea.root_url+'/'+(is_medea_mod ? 'medea.' +n + '.js' : n),function(text,status) {
+				medea._AjaxFetch(medea.root_url+(is_medea_mod ? 'medea.' +n + '.js' : n),function(text,status) {
 					if(status !== 200) {
 						medea.DebugAssert('failure loading script ' + n);
 						return;
@@ -933,7 +933,7 @@ medea = new (function(sdom) {
 
 	this._SetFunctionStub("CreateStatePool","statepool");
 	this._SetFunctionStub("GetDefaultStatePool","statepool");
-	
+
 
 	// Initialization has two phases, the first of which is used to load utility libraries
 	// that all medea modules may depend upon. This also involves creating a webgl canvas
