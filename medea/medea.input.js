@@ -25,32 +25,7 @@ medea._addMod('input',[],function(undefined) {
 		key_state[event.keyCode] = false;
 	};
 
-
-	medea.canvas.onmousedown = function(event) {
-		if(event.which <= 3 && event.which > 0) {
-			mouse_down[event.which - 1] = true;
-		}
-	};
-
-	medea.canvas.onmouseup = function(event) {
-		if(event.which <= 3 && event.which > 0) {
-			mouse_down[event.which - 1] = false;
-		}
-	};
-
-	medea.canvas.onmousemove = function(event) {
-		// XXX use getCapture if available?
-		lastMouseDelta = lastMousePosition
-			? [	event.clientX - lastMousePosition[0],
-				event.clientY - lastMousePosition[1],
-				lastMouseDelta[2]+1
-			]
-			: [0,0,0];
-
-		lastMousePosition = [event.clientX, event.clientY,lastMouseDelta[2]];
-	};
-
-	medea.canvas.onmousewheel = function(event) {
+	var HandleMouseWheel = function(event) {
 		var delta = 0;
  
     	if (event.wheelDelta !== undefined) {
@@ -68,11 +43,41 @@ medea._addMod('input',[],function(undefined) {
 		event.preventDefault();
 	};
 
+	var HandleMouseDown = function(event) {
+		if(event.which <= 3 && event.which > 0) {
+			mouse_down[event.which - 1] = true;
+		}
+	};
 
-	// set event handlers on the canvas panel
+	var HandleMouseUp = function(event) {
+		if(event.which <= 3 && event.which > 0) {
+			mouse_down[event.which - 1] = false;
+		}
+	};
+
+	var HandleMouseMove = function(event) {
+		// XXX use getCapture if available?
+		lastMouseDelta = lastMousePosition
+			? [	event.clientX - lastMousePosition[0],
+				event.clientY - lastMousePosition[1],
+				lastMouseDelta[2]+1
+			]
+			: [0,0,0];
+
+		lastMousePosition = [event.clientX, event.clientY,lastMouseDelta[2]];
+	};
+
+
+	medea.canvas.onmousedown = HandleMouseDown;
+	medea.canvas.onmouseup = HandleMouseUp;
+	medea.canvas.onmousemove = HandleMouseMove;
+
 	window.addEventListener('keydown', HandleKeyDown, true);
 	window.addEventListener('keyup', HandleKeyUp, true);
 
+	// cross browser mouse wheel
+	window.addEventListener('DOMMouseScroll', HandleMouseWheel, false); // Gecko
+	medea.canvas.onmousewheel = HandleMouseWheel;
 
 	var settings = medea.settings;
 
