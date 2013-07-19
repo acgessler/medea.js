@@ -65,6 +65,14 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 				return;
 			}
 
+			this.ProcessMouse();
+			
+			
+			this.ProcessKeyboard(dtime, node);
+		},
+
+
+		ProcessMouse : function(dtime, node) {
 			var d = medea.GetMouseDelta();
 			if(d[2] !== this.last_processed_mdelta) {
 			
@@ -79,8 +87,6 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 				this.ProcessMouseWheel(dtime, node, d[0]);
 				this.last_processed_mwdelta = d[1];
 			}
-			
-			this.ProcessKeyboard(dtime, node);
 		},
 		
 		
@@ -241,23 +247,45 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		},
 
 
-		ProcessMouseDelta : function(dtime, node, d) {
-			if(!Array.isArray(this.panning_mouse_buttons)) {
-				if(medea.IsMouseButtonDown(this.panning_mouse_buttons)) {
-					this.Pan(d[0], d[1]);
-					return;
-				}
-			}
-			else {
-				for(var i = 0; i < this.panning_mouse_buttons.length; ++i) {
-					if(medea.IsMouseButtonDown(this.panning_mouse_buttons[i])) {
-						this.Pan(d[0], d[1]);
-						return;
+		ProcessMouse : function(dtime, node) {
+			var d = medea.GetMouseDelta();
+			if(d[2] !== this.last_processed_mdelta) {
+			
+				// handle panning directly
+				var did_panning = false;
+				if (this.enabled && this.pan_enable) {
+					if(!Array.isArray(this.panning_mouse_buttons)) {
+						if(medea.IsMouseButtonDown(this.panning_mouse_buttons)) {
+							did_panning = true;
+							this.Pan(d[0], d[1]);
+						}
+					}
+					else {
+						for(var i = 0; i < this.panning_mouse_buttons.length; ++i) {
+							if(medea.IsMouseButtonDown(this.panning_mouse_buttons[i])) {
+								did_panning = true;
+								this.Pan(d[0], d[1]);
+								break;
+							}
+						}
 					}
 				}
+
+				if (did_panning === false && this._ShouldHandleMouseMovements()) {
+					this.ProcessMouseDelta(dtime, node, d);
+				}
+				this.last_processed_mdelta = d[2];
 			}
 
+			d = medea.GetMouseWheelDelta();
+			if(d[1] !== this.last_processed_mwdelta) {
+				this.ProcessMouseWheel(dtime, node, d[0]);
+				this.last_processed_mwdelta = d[1];
+			}
+		},
 
+
+		ProcessMouseDelta : function(dtime, node, d) {
 			// process mouse movement on the x axis
 			if(d[0]) {
 				mat4.rotateY(this.view, -d[0]*this.turn_speed);
