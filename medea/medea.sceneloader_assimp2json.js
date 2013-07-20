@@ -7,7 +7,7 @@
  */
 
  // note: json2.js may be needed for contemporary browsers with incomplete HTML5 support
-medea._addMod('sceneloader_assimp2json',['mesh','filesystem', typeof JSON === undefined ? 'json2.js' : null],function(undefined) {
+medea._addMod('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],function(undefined) {
 	"use strict";
 	var medea = this;
 

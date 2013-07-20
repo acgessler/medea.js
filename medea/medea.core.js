@@ -163,6 +163,12 @@ medea = new (function(sdom) {
 	var _initial_pre_deps = ['sprintf-0.7.js','glMatrix.js'];
 
 	var _waiters = {}, _deps = {}, _stubs = {}, _sources = {}, _callback = undefined, _callback_pre = undefined, readyness = 0;
+	
+	//
+	if(typeof JSON !== undefined) {
+		_stubs['json2.js'] = function() {};
+	}
+
 
 	this.Ready = function(where, settings, deps, user_callback, failure_callback) {
 
