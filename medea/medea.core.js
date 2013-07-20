@@ -162,10 +162,10 @@ medea = new (function(sdom) {
 	var _initial_deps = ['node','viewport'];
 	var _initial_pre_deps = []; 
 
-	if (sprintf === undefined) {
+	if (window.sprintf === undefined) {
 		_initial_pre_deps.push('sprintf-0.7.js');
 	}
-	if (mat4 === undefined) {
+	if (window.mat4 === undefined) {
 		_initial_pre_deps.push('glMatrix.js');
 	}
 
@@ -951,25 +951,39 @@ medea = new (function(sdom) {
 	this._SetFunctionStub("CreateStatePool","statepool");
 	this._SetFunctionStub("GetDefaultStatePool","statepool");
 
+	// for internal use by build.py only
+	this._markScriptAsLoaded = function(name) {
+		_stubs[name] = null;
+	}
 
-	// Initialization has two phases, the first of which is used to load utility libraries
-	// that all medea modules may depend upon. This also involves creating a webgl canvas
-	// (which is accessible through the medea.gl namespace)
-	this._FetchDeps(_initial_pre_deps, function() {
-		if (_callback_pre) {
-			if(!_callback_pre.apply(medea)) {
-				return;
+	// for internal use by build.py only
+	this._initLibrary = function() {
+
+		// Initialization has two phases, the first of which is used to load utility libraries
+		// that all medea modules may depend upon. This also involves creating a webgl canvas
+		// (which is accessible through the medea.gl namespace)
+		this._FetchDeps(_initial_pre_deps, function() {
+			if (_callback_pre) {
+				if(!_callback_pre.apply(medea)) {
+					return;
+				}
 			}
-		}
 
-		++readyness;
-		medea._FetchDeps(_initial_deps, function() {
 			++readyness;
-			if (_callback) {
-				_callback.apply(medea);
-			}
+			medea._FetchDeps(_initial_deps, function() {
+				++readyness;
+				if (_callback) {
+					_callback.apply(medea);
+				}
+			});
 		});
-	});
+
+		this._initLibrary = null;
+	};
+
+	if (window.medea_is_compiled === undefined) {
+		this._initLibrary();
+	}
 
 } )(scripts[scripts.length-1]);
 

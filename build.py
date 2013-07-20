@@ -120,13 +120,19 @@ def run(input_folder, output_folder, files_to_compact):
 	
 	# generate medea.core-compiled.js output file
 	with open(os.path.join(output_folder, 'medea.core-compiled.js'), 'wt') as outp:
-		for dep in topo_order:
+		outp.write('medea_is_compiled = true;');
+		for n, dep in enumerate(topo_order):
 			path = os.path.join(input_folder, dep);
 			print('collating: ' + path)
 
 			with open(path, 'rt') as inp:
 				outp.write(inp.read())
+				if n >= 3 and (len(dep) <= 6 or dep[:6] != 'medea.'):
+					outp.write('medea._markScriptAsLoaded("'+dep+'")')
 				outp.write('\n')
+
+		outp.write('medea._initLibrary();');
+		outp.write('delete window.medea_is_compiled;');
 
 	# copy all other files
 	for file in os.listdir(input_folder):
