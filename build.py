@@ -40,10 +40,15 @@ import os
 import shutil
 
 def get_full_file_name(file):
+	# the rules for module names are simple - if the full .js file name
+	# is given, we load it directly. Otherwise, we assume it is a medea
+	# module of the given name and derive the file name from it.
 	return ('medea.' + file + '.js') if not ".js" in file else file
+
 
 def run(input_folder, output_folder, files_to_compact):
 
+	# cleanup previous compiler output
 	shutil.rmtree(output_folder, True)
 	try:
 		os.mkdir(output_folder)
@@ -77,14 +82,15 @@ def run(input_folder, output_folder, files_to_compact):
 					print('unexpected input: two _addMod calls in one file')
 					break
 				l = match.group(1)
-				l = frozenset(get_full_file_name(l.strip()[1:-1]) for l in l.split(',') if len(l.strip()) > 0)
+				l = frozenset(get_full_file_name(l.strip()[1:-1]) for l in l.split(',') \
+					if len(l.strip()) > 0)
 
 				for dep in l:
 					all_deps.add(dep)
 					if not dep in mods_by_deps:
 						files_to_compact.append(dep)
 
-				mods_by_deps[full_file_name] = l
+			mods_by_deps[full_file_name] = l or frozenset()
 
 	print('deriving topological order of collated modules')
 
