@@ -161,7 +161,7 @@ medea = new (function(sdom) {
 	// collect initial dependencies - for example the scenegraph module and the mathlib is always needed
 	var _initial_deps = ['node','viewport'];
 	var _initial_pre_deps = []; 
-	
+
 	if (sprintf === undefined) {
 		_initial_pre_deps.push('sprintf-0.7.js');
 	}
@@ -207,7 +207,9 @@ medea = new (function(sdom) {
 			_callback_pre = _initial_pre_deps = undefined;
 
 			if(!context) {
+				// #if LOG
 				this.Log('webgl initialization failed','error');
+				// #endif
 				_callback = undefined;
 				if(failure_callback) {
 					failure_callback();
@@ -636,8 +638,10 @@ medea = new (function(sdom) {
 			_stubs[name] = init;
 			delete _waiters[name];
 
-			for(var i = 0; i < w.length; ++i) {
-				w[i]();
+			if (w) { 
+				for(var i = 0; i < w.length; ++i) {
+					w[i]();
+				}
 			}
 		});
 	};
