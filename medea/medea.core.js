@@ -160,7 +160,14 @@ medea = new (function(sdom) {
 
 	// collect initial dependencies - for example the scenegraph module and the mathlib is always needed
 	var _initial_deps = ['node','viewport'];
-	var _initial_pre_deps = ['sprintf-0.7.js','glMatrix.js'];
+	var _initial_pre_deps = []; 
+	
+	if (sprintf === undefined) {
+		_initial_pre_deps.push('sprintf-0.7.js');
+	}
+	if (mat4 === undefined) {
+		_initial_pre_deps.push('glMatrix.js');
+	}
 
 	var _waiters = {}, _deps = {}, _stubs = {}, _sources = {}, _callback = undefined, _callback_pre = undefined, readyness = 0;
 	
