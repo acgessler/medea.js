@@ -32,6 +32,9 @@ where
       medea.core-compiled.js file. Note that any direct dependencies of 
       these modules are implicitly included in the set.
 
+      You may also specify non-medea modules here, in this case the 
+      full filename including the .js extension is to be used.
+
 """
 
 import sys
