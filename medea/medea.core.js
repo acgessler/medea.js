@@ -547,7 +547,7 @@ medea = new (function(sdom) {
 
 		medea.FetchMods('worker_base', function() {
 			var bb = new BlobBuilder();
-			bb.append([medea.GetModSource('worker_base'),medea.GetModSource('worker_terrain')].join('\n'));
+			bb.append([medea.GetModSource('worker_base'),medea.GetModSource(name )].join('\n'));
 
 			var blobURL = URL.createObjectURL(bb.getBlob());
 			var worker = new Worker(blobURL);
