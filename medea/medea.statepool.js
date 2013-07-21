@@ -19,24 +19,29 @@ medea._addMod('statepool',[],function(undefined) {
 
 	var _DefaultDerivedStates = {
 
-		"CAM_POS_LOCAL": function(statepool) {
-			return mat4.multiplyVec3(statepool.Get("WI"),statepool.GetQuick("CAM_POS"),vec3.create());
+		"CAM_POS_LOCAL": function(statepool, old) {
+			return mat4.multiplyVec3(statepool.Get("WI"),statepool.GetQuick("CAM_POS"),
+				old || vec3.create());
 		},
 
-		"VP": function(statepool) {
-			return mat4.multiply(statepool.GetQuick("P"),statepool.GetQuick("V"),mat4.create());
+		"VP": function(statepool, old) {
+			return mat4.multiply(statepool.GetQuick("P"),statepool.GetQuick("V"),
+				old || mat4.create());
 		},
 
-		"WVP": function(statepool) {
-			return mat4.multiply(statepool.Get("VP"),statepool.GetQuick("W"),mat4.create());
+		"WVP": function(statepool, old) {
+			return mat4.multiply(statepool.Get("VP"),statepool.GetQuick("W"),
+				old || mat4.create());
 		},
 
-		"WIT": function(statepool) {
-			return mat4.transpose(statepool.Get("WI"),mat4.create());
+		"WIT": function(statepool, old) {
+			return mat4.transpose(statepool.Get("WI"),
+				old || mat4.create());
 		},
 
-		"WI": function(statepool) {
-			return mat4.inverse(statepool.GetQuick("W"),mat4.create());
+		"WI": function(statepool, old) {
+			return mat4.inverse(statepool.GetQuick("W"),
+				old || mat4.create());
 		},
 	};
 
@@ -66,7 +71,7 @@ medea._addMod('statepool',[],function(undefined) {
 				medea.DebugAssert(key in this.derived_states,"only derived states can be 'dirty': " + key);
 // #endif
 				delete this.dirty[key];
-				return this.states[key] = this.derived_states[key](this);
+				return this.states[key] = this.derived_states[key](this, this.states[key]);
 			}
 
 			return this.states[key];
