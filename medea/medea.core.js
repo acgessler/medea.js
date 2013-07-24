@@ -450,9 +450,21 @@ medea = new (function(sdom) {
 			return is_fullscreen_mode;
 		}
 
+		if (!!is_fullscreen_mode === !!enable_fullscreen) {
+			return;
+		}
+
 		is_fullscreen_mode = enable_fullscreen;
 
-		var canvas = this.canvas;
+		var canvas = this.canvas.parentNode;
+		var on_change_to_fs = function() {
+			if(document.mozFullScreen || document.webkitIsFullScreen) {
+        		alert(1);
+    		}
+		};
+
+		document.addEventListener('mozfullscreenchange', on_change_to_fs);
+		document.addEventListener('webkitfullscreenchange', on_change_to_fs);
 
 		if (is_fullscreen_mode) {
 			if (canvas.requestFullscreen) {
@@ -461,8 +473,13 @@ medea = new (function(sdom) {
 	    	else if (canvas.mozRequestFullScreen) {
 	      		canvas.mozRequestFullScreen();
 	    	} 
-	    	else if (canvas.webkitRequestFullscreen) {
-	      		canvas.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+	    	else if (canvas.webkitRequestFullScreen) {
+	    		// http://stackoverflow.com/questions/8427413/
+	      		canvas.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+				if (!document.webkitCurrentFullScreenElement) {
+    				// Element.ALLOW_KEYBOARD_INPUT does not work, document is not in full screen mode
+					canvas.webkitRequestFullScreen();
+				}
 	   		}
    		}
    		else {
