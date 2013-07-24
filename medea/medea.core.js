@@ -442,6 +442,42 @@ medea = new (function(sdom) {
 		return this.time;
 	};
 
+	var is_fullscreen_mode = false;
+
+	this.FullscreenMode = function(enable_fullscreen) {
+		// based on https://developer.mozilla.org/en-US/docs/Web/Guide/DOM/Using_full_screen_mode
+		if (enable_fullscreen === undefined) {
+			return is_fullscreen_mode;
+		}
+
+		is_fullscreen_mode = enable_fullscreen;
+
+		var canvas = this.canvas;
+
+		if (is_fullscreen_mode) {
+			if (canvas.requestFullscreen) {
+	      		canvas.requestFullscreen();
+	    	} 
+	    	else if (canvas.mozRequestFullScreen) {
+	      		canvas.mozRequestFullScreen();
+	    	} 
+	    	else if (canvas.webkitRequestFullscreen) {
+	      		canvas.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+	   		}
+   		}
+   		else {
+   			if (document.cancelFullScreen) {
+      			document.cancelFullScreen();
+    		} 
+    		else if (document.mozCancelFullScreen) {
+      			document.mozCancelFullScreen();
+    		} 
+    		else if (document.webkitCancelFullScreen) {
+      			document.webkitCancelFullScreen();
+    		}
+   		}
+	};
+
 	this.DoSingleFrame = function(dtime) {
 		if (!this.CanRender()) {
 			this.NotifyFatal("Not ready for rendering; need a GL context and a viewport");
