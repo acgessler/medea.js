@@ -220,9 +220,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		init : function(enabled) {
 			this._super(enabled);
 			
-			this.view = mat4.identity(mat4.create()); // TODO: set initial state
-			this.view_with_offset = mat4.identity(mat4.create());
-			this.pan_vector = [0.0,0.0,0.0];
+			this.Reset();
 		},
 
 
@@ -239,6 +237,17 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		MaximumCameraDistance : medea._GetSet('maximum_camera_distance'),
 
 		PanningMouseButtons : medea._GetSet('panning_mouse_buttons'),
+
+
+		Reset : function() {
+
+			this.view = mat4.identity(mat4.create()); // TODO: set initial state
+			this.view_with_offset = mat4.identity(mat4.create());
+			this.pan_vector = [0.0,0.0,0.0];
+			this.camera_distance = 2.5;
+			this.dirty_trafo = true;
+		},
+
 
 
 		Update : function(dtime, node) {
