@@ -128,6 +128,28 @@ medea._addMod('node',['frustum'],function(undefined) {
 			}
 		},
 
+		FilterEntities : function(classes, callback) {
+			if (Array.isArray(classes)) {
+				var ce = classes.length;
+				for (var i = 0, e = this.entities.length; i < e; ++i) {
+					var ent = this.entities[i];
+					for (var c = 0; c < ce; ++c) {
+						if (ent instanceof classes[c]) {
+							callback(ent);
+						}
+					}
+				}
+				return;
+			}
+
+			for (var i = 0, e = this.entities.length; i < e; ++i) {
+				var ent = this.entities[i];
+				if (ent instanceof classes) {
+					callback(ent);
+				}
+			}
+		},
+
 		GetChildren: function() {
 			return this.children;
 		},
