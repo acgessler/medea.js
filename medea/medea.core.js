@@ -881,6 +881,7 @@ medea = new (function(sdom) {
 	// is displayed.
 
 	medea_api("FullscreenMode","fullscreen");
+	medea_api("FullscreenModeKey","fullscreen");
 
 	medea_api("CreateInputHandler","input_handler");
 	medea_api("IsMouseDown","input");
