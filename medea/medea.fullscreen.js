@@ -119,12 +119,9 @@ medea._addMod('fullscreen',[],function(undefined) {
 	      		canvas.mozRequestFullScreen();
 	    	} 
 	    	else if (canvas.webkitRequestFullScreen) {
-	    		// http://stackoverflow.com/questions/8427413/
+	    		// TODO: http://stackoverflow.com/questions/8427413/ - do we need a workaround
+	    		// for this? 
 	      		canvas.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-				if (!document.webkitCurrentFullScreenElement) {
-    				// Element.ALLOW_KEYBOARD_INPUT does not work, document is not in full screen mode
-					canvas.webkitRequestFullScreen();
-				}
 	   		}
    		}
    		else {
