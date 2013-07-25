@@ -55,7 +55,7 @@ medea._addMod('filesystem',[],function() {
 					outer.OnDelayedInit.apply(outer,arguments);
 				},
 				function(error) {
-					medea.LogError('failed to delay initialize resource from ' + src + ', resource remains non-complete: '+error);
+					medea.Log('failed to delay initialize resource from ' + src + ', resource remains non-complete: '+error, 'error');
 				}
 			);
 		},
