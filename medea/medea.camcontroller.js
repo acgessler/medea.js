@@ -65,9 +65,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 				return;
 			}
 
-			this.ProcessMouse();
-			
-			
+			this.ProcessMouse(dtime, node);
 			this.ProcessKeyboard(dtime, node);
 		},
 
@@ -125,31 +123,33 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		turn_speed : 0.005,
 		walk_speed : 5.5,
 
+		hispeed_on_shift : true,
 		terrain_entity : null,
 
 		init : function(enabled) {
 			this._super(enabled);
+			this.scratch_mat = mat4.identity(mat4.create());
 		},
 
-	
+		HispeedOnShift : medea._GetSet('hispeed_on_shift'),
 		TurnSpeed : medea._GetSet('turn_speed'),
 		WalkSpeed : medea._GetSet('walk_speed'),
 		TerrainEntity : medea._GetSet('terrain_entity'),
 
 
 		ProcessMouseDelta : function(dtime, n, d) {
-			var mrot;
+			var mrot = this.scratch_mat;
 
 			// process mouse movement on the y axis
 			if(d[1]) {
-				mrot = mat4.rotate(mat4.identity(mat4.create()),-d[1]*this.turn_speed,n.LocalXAxis());
+				mrot = mat4.rotate(mat4.identity(mrot),-d[1]*this.turn_speed,n.LocalXAxis());
 				n.LocalYAxis(mat4.multiplyVec3(mrot,n.LocalYAxis()));
 				n.LocalZAxis(mat4.multiplyVec3(mrot,n.LocalZAxis()));
 			}
 
 			// process mouse movement on the x axis
 			if(d[0]) {
-				mrot = mat4.rotate(mat4.identity(mat4.create()),-d[0]*this.turn_speed,[0,1,0]);
+				mrot = mat4.rotate(mat4.identity(mrot),-d[0]*this.turn_speed,[0,1,0]);
 				n.LocalYAxis(mat4.multiplyVec3(mrot,n.LocalYAxis()));
 				n.LocalZAxis(mat4.multiplyVec3(mrot,n.LocalZAxis()));
 				n.LocalXAxis(vec3.cross(n.LocalYAxis(),n.LocalZAxis()));
@@ -160,8 +160,10 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		ProcessKeyboard : function(dtime, n) {
 
 			var ws = this.walk_speed;
-			if(medea.IsKeyDown(16)) {
-				ws *= 10;
+			if(this.hispeed_on_shift) {
+				if(medea.IsKeyDown(16) /* SHIFT */) {
+					ws *= 10;
+				}
 			}
 
 			// W
@@ -182,9 +184,10 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			}
 
 			// PAGE UP
+			var terrain = this.terrain_entity;
 			if(medea.IsKeyDown(33)) {
-				if (this.terrain_entity) {
-					this.terrain_entity.HeightOffset(this.terrain_entity.HeightOffset()+ws * dtime);
+				if (terrain) {
+					terrain.HeightOffset(terrain.HeightOffset()+ws * dtime);
 				}
 				else {
 					n.Translate([0,ws * dtime,0]);
@@ -193,8 +196,8 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			
 			// PAGE DOWN
 			if(medea.IsKeyDown(34)) {
-				if (this.terrain_entity) {
-					this.terrain_entity.HeightOffset(this.terrain_entity.HeightOffset()-ws * dtime);
+				if (terrain) {
+					terrain.HeightOffset(terrain.HeightOffset()-ws * dtime);
 				}
 				else {
 					n.Translate([0,-ws * dtime,0]);
