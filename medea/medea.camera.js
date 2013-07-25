@@ -181,6 +181,18 @@ medea._addMod('camera',['statepool'],function() {
 			}
 			var statepool = medea.GetDefaultStatePool(), outer = this;
 
+			// (hack) check if the (logical) canvas size changed, if so, dirty the projection
+			// matrix in case the angle depends on it.
+			if(this.aspect === undefined) {
+				var canvas = medea.canvas;
+				if (canvas.width !== this.last_canvas_w || canvas.height !== this.last_canvas_h) {
+					this.flags |= medea._CAMERA_DIRTY_PROJ;
+				}
+
+				this.last_canvas_w = canvas.width;
+				this.last_canvas_h = canvas.height;
+			}
+
 			// update state pool
 			statepool.Set("V",this.GetViewMatrix());
 			statepool.Set("P",this.GetProjectionMatrix());
