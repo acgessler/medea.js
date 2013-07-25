@@ -12,6 +12,7 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 	//
 	this.RENDERQUEUE_FIRST = 0;
 
+	this.RENDERQUEUE_LIGHT = 8;
 	this.RENDERQUEUE_DEFAULT_EARLY = 10;
 	this.RENDERQUEUE_DEFAULT = 11;
 	this.RENDERQUEUE_DEFAULT_LATE = 12;
@@ -61,6 +62,14 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 			entries.sort(function(a,b) {
 				return a.MaterialId() < b.MaterialId();
 			});
+		}
+	});
+
+	// class NoSorter
+	this.NoSorter = medea.Class.extend({
+
+		Run : function(entries) {
+			// intentionally a no-op
 		}
 	});
 
@@ -126,6 +135,10 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 			// choose some suitable default sorting algorithms
 			var distance_sorter = new medea.DistanceSorter();
 			var material_sorter = new medea.MaterialSorter();
+			var no_sorter = new medea.NoSorter();
+
+			var light_queue = this.queues[medea.RENDERQUEUE_LIGHT];
+			light_queue.Sorter(no_sorter);
 
 			var defs = [medea.RENDERQUEUE_DEFAULT_EARLY,medea.RENDERQUEUE_DEFAULT,medea.RENDERQUEUE_DEFAULT_LATE], outer = this;
 			defs.forEach(function(s) {

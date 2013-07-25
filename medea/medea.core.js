@@ -880,6 +880,8 @@ medea = new (function(sdom) {
 	// If an API is called without the corresponding module, an error message 
 	// is displayed.
 
+	medea_api("CreateDirectionalLight","light");
+
 	medea_api("FullscreenMode","fullscreen");
 	medea_api("FullscreenModeKey","fullscreen");
 
