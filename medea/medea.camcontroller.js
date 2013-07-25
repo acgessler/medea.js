@@ -352,7 +352,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			vo[9]  = v[9];
 			vo[10] = v[10];
 			
-			var vup = [v[4], v[5], v[6]];
+			var vup = [0, 1, 0];
 			
 			var vright = vec3.cross(vup, veye, vec3.create());
 			vec3.normalize(vright);
