@@ -17,6 +17,12 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	medea.MATERIAL_CLONE_COPY_CONSTANTS 	= 0x4;
 	medea.MATERIAL_CLONE_SHARE_CONSTANTS 	= 0x8;
 
+	/** medea.MAX_DIRECTIONAL_LIGHTS 
+	 *
+	 *  Maximum number of directional light sources supported for forward rendering.
+	 * */
+	medea.MAX_DIRECTIONAL_LIGHTS = 8;
+
 
 	// map from GLSL type identifiers to the corresponding GL enumerated types
 	var glsl_typemap = {
@@ -43,7 +49,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	glsl_type_picker = '(' + glsl_type_picker.join('|') + ')';
 
 
-	medea.ShaderSetters = {
+	var setters = medea.ShaderSetters = {
 		"CAM_POS" :  function(prog, pos, state) {
 			gl.uniform3fv(pos, state.GetQuick("CAM_POS"));
 		},
@@ -78,8 +84,35 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 		"P" :  function(prog, pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.GetQuick("P"));
-		},
+		}
 	};
+
+	var zero_light = [0,0,0];
+
+	// generate shader setters for directional lights
+	for (var i = 0, e = medea.MAX_DIRECTIONAL_LIGHTS; i < e; ++i) {
+		(function(i) { 
+			// LIGHT_Dn_DIR -- global light direction vector
+			setters["LIGHT_D"+i+"_DIR"] = function(prog, pos, state) {
+				var lights = state.Get("DIR_LIGHTS");
+				if(!lights || lights.length <= i) {
+					// TODO: maybe reset it for debug builds
+					return;
+				}
+				gl.uniform3fv(pos, lights[i].world_dir);
+			};
+
+			// LIGHT_Dn_COLOR -- light color
+			setters["LIGHT_D"+i+"_COLOR"] = function(prog, pos, state) {
+				var lights = state.Get("DIR_LIGHTS");
+				if(!lights || lights.length <= i) {
+					gl.uniform3fv(pos, zero_light);
+					return;
+				}
+				gl.uniform3fv(pos, lights[i].color);
+			};
+		})(i);
+	}
 
 
 	// class Pass

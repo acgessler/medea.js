@@ -28,9 +28,16 @@ medea._addMod('light',['entity'],function(undefined) {
 				var light = this.light;
 				var list_name = null;
 
+				var light_info = {
+					color : light.color
+				};
+
 				// add this light to the statepool so that materials will find it
 				if(light instanceof medea.DirectionalLight) {
 					list_name = 'DIR_LIGHTS';
+
+					light_info.world_dir = vec3.create();
+					mat4.multiplyVec3(node.GetGlobalTransform(), light_dir, light_info.world_dir);
 				}
 				/* else if(light instanceof medea.PointLight) {
 					list_name = 'POINT_LIGHTS';
@@ -46,7 +53,7 @@ medea._addMod('light',['entity'],function(undefined) {
 				if(lights === undefined) {
 					dlights = statepool.Set(list_name,[]);
 				}
-				lights.append(light);
+				lights.append(light_info);
 			};
 		},
 	});
