@@ -214,17 +214,16 @@ medea = new (function(sdom) {
 				if(failure_callback) {
 					failure_callback();
 				}
-				return;
+				return false;
 			}
 			
 			// automatically create debug context if webgl-debug.js is present
-			if (window['WebGLDebugUtils'] !== undefined) {
+			if (window.WebGLDebugUtils !== undefined) {
 				context = WebGLDebugUtils.makeDebugContext(context);
 			}
 
-
 			this.gl = context;
-			return;
+			return true;
 		};
 
 		// second phase of initialization -- prepare the rest and invoke the Ready() callback
