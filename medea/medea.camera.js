@@ -170,13 +170,23 @@ medea._addMod('camera',['statepool'],function() {
 
 			mat4.perspective(this.fovy,aspect,this.znear,this.zfar,this.proj);
 
-
 			this.flags &= ~medea._CAMERA_DIRTY_PROJ;
 			return this.proj;
 		},
 
 		_Render : function(rq) {
-			var frustum = this.GetFrustum(), statepool = medea.GetDefaultStatePool(), outer = this;
+			var frustum = null;
+			if (this.culling) {
+				frustum = this.GetFrustum();
+			}
+			var statepool = medea.GetDefaultStatePool(), outer = this;
+
+			// update state pool
+			statepool.Set("V",this.GetViewMatrix());
+			statepool.Set("P",this.GetProjectionMatrix());
+			statepool.Set("W",mat4.identity(mat4.create()));
+
+			statepool.Set("CAM_POS", this.GetWorldPos());
 
 			// traverse all nodes in the graph and collect their render jobs
 			medea.VisitGraph(medea.RootNode(),function(node,parent_visible) {
@@ -196,7 +206,7 @@ medea._addMod('camera',['statepool'],function() {
 						val.Render(this,val,node,rq);
 					});
 
-					return medea.VISIBLE_PARTIAL;
+					return medea.VISIBLE_ALL;
 				}
 
 				// partial visibility and more than one entity, cull per entity
@@ -208,13 +218,6 @@ medea._addMod('camera',['statepool'],function() {
 
 				return medea.VISIBLE_PARTIAL;
 			}, this.culling ? medea.VISIBLE_PARTIAL : medea.VISIBLE_ALL);
-
-			// update state pool
-			statepool.Set("V",this.GetViewMatrix());
-			statepool.Set("P",this.GetProjectionMatrix());
-			statepool.Set("W",mat4.identity(mat4.create()));
-
-			statepool.Set("CAM_POS", this.GetWorldPos());
 
 			// rq.Flush() is left to the caller
 			return statepool;
