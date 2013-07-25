@@ -870,88 +870,98 @@ medea = new (function(sdom) {
 		return src.replace(/^(.*[\\\/])?(.*)/,'$1');
 	}
 
-	this._SetFunctionStub("FullscreenMode","fullscreen");
 
-	this._SetFunctionStub("CreateInputHandler","input_handler");
-	this._SetFunctionStub("IsMouseDown","input");
-	this._SetFunctionStub("IsMouseButtonDown","input");
-	this._SetFunctionStub("IsKeyDown","input");
-	this._SetFunctionStub("IsKeyDownWasUp","input");
-	this._SetFunctionStub("GetMousePosition","input");
-	this._SetFunctionStub("GetMouseDelta","input");
+	var medea_api = function() {
+		medea._SetFunctionStub.apply(medea,arguments);
+	};
 
-	this._SetFunctionStub("SetKeyMap","keymap");
-	this._SetFunctionStub("GetKeyMap","keymap");
+	// **************************************************************************
+	// List of all API functions along with the modules in which they can be found.
+	// If an API is called without the corresponding module, an error message 
+	// is displayed.
 
-	this._SetFunctionStub("CreateNode","node");
-	this._SetFunctionStub("CreateEntity","entity");
+	medea_api("FullscreenMode","fullscreen");
 
-	this._SetFunctionStub("CreateViewport","viewport");
-	this._SetFunctionStub("GetViewports","viewport");
-	this._SetFunctionStub("CreateCameraNode","camera");
+	medea_api("CreateInputHandler","input_handler");
+	medea_api("IsMouseDown","input");
+	medea_api("IsMouseButtonDown","input");
+	medea_api("IsKeyDown","input");
+	medea_api("IsKeyDownWasUp","input");
+	medea_api("GetMousePosition","input");
+	medea_api("GetMouseDelta","input");
 
-	this._SetFunctionStub("MakeResource","filesystem");
-	this._SetFunctionStub("Fetch","filesystem");
-	this._SetFunctionStub("FetchMultiple","filesystem");
+	medea_api("SetKeyMap","keymap");
+	medea_api("GetKeyMap","keymap");
 
-	this._SetFunctionStub("CreatePassFromShaderPair","material");
-	this._SetFunctionStub("CreateMaterial","material");
+	medea_api("CreateNode","node");
+	medea_api("CreateEntity","entity");
 
-	this._SetFunctionStub("CreateSimpleMaterialFromShaderPair","material");
-	this._SetFunctionStub("CreateSimpleMaterialFromColor","material");
-	this._SetFunctionStub("CreateSimpleMaterialFromTexture","material");
-	this._SetFunctionStub("CreateSimpleMaterialFromVertexColors","material");
+	medea_api("CreateViewport","viewport");
+	medea_api("GetViewports","viewport");
+	medea_api("CreateCameraNode","camera");
 
-	this._SetFunctionStub("CreateVertexBuffer","vertexbuffer");
-	this._SetFunctionStub("CreateIndexBuffer","indexbuffer");
+	medea_api("MakeResource","filesystem");
+	medea_api("Fetch","filesystem");
+	medea_api("FetchMultiple","filesystem");
 
-	this._SetFunctionStub("CreateShader","shader");
-	this._SetFunctionStub("CreateImage","image");
-	this._SetFunctionStub("CreateTexture","texture");
-	this._SetFunctionStub("CreateLODTexture","lodtexture");
-	this._SetFunctionStub("CreateCubeTexture","cubetexture");
+	medea_api("CreatePassFromShaderPair","material");
+	medea_api("CreateMaterial","material");
 
-	this._SetFunctionStub("CreateStandardMesh_Plane","standardmesh");
-	this._SetFunctionStub("CreateStandardMesh_Cube","standardmesh");
+	medea_api("CreateSimpleMaterialFromShaderPair","material");
+	medea_api("CreateSimpleMaterialFromColor","material");
+	medea_api("CreateSimpleMaterialFromTexture","material");
+	medea_api("CreateSimpleMaterialFromVertexColors","material");
+
+	medea_api("CreateVertexBuffer","vertexbuffer");
+	medea_api("CreateIndexBuffer","indexbuffer");
+
+	medea_api("CreateShader","shader");
+	medea_api("CreateImage","image");
+	medea_api("CreateTexture","texture");
+	medea_api("CreateLODTexture","lodtexture");
+	medea_api("CreateCubeTexture","cubetexture");
+
+	medea_api("CreateStandardMesh_Plane","standardmesh");
+	medea_api("CreateStandardMesh_Cube","standardmesh");
 	
-	this._SetFunctionStub("CreateSimpleMesh","mesh");
-	this._SetFunctionStub("CloneMesh","mesh");
-	this._SetFunctionStub("QueryMeshCache","mesh");
+	medea_api("CreateSimpleMesh","mesh");
+	medea_api("CloneMesh","mesh");
+	medea_api("QueryMeshCache","mesh");
 
-	this._SetFunctionStub("SetState","renderstate");
-	this._SetFunctionStub("SetDefaultState","renderstate");
-	this._SetFunctionStub("CreateRenderQueueManager","renderqueue");
+	medea_api("SetState","renderstate");
+	medea_api("SetDefaultState","renderstate");
+	medea_api("CreateRenderQueueManager","renderqueue");
 
-	this._SetFunctionStub("CreateCamera","camera");
-	this._SetFunctionStub("CreateCamController","camcontroller");
+	medea_api("CreateCamera","camera");
+	medea_api("CreateCamController","camcontroller");
 
-	this._SetFunctionStub("CreateBB","frustum");
-	this._SetFunctionStub("MergeBBs","frustum");
-	this._SetFunctionStub("TransformBB","frustum");
+	medea_api("CreateBB","frustum");
+	medea_api("MergeBBs","frustum");
+	medea_api("TransformBB","frustum");
 
-	this._SetFunctionStub("LoadScene","sceneloader");
-	this._SetFunctionStub("LoadSceneFromResource","sceneloader");
+	medea_api("LoadScene","sceneloader");
+	medea_api("LoadSceneFromResource","sceneloader");
 
-	this._SetFunctionStub("CreateSkyboxNode","skybox");
-	this._SetFunctionStub("CreateSkydomeNode","skydome");
+	medea_api("CreateSkyboxNode","skybox");
+	medea_api("CreateSkydomeNode","skydome");
 
-	this._SetFunctionStub("CreateTerrainTileMesh","terraintile");
+	medea_api("CreateTerrainTileMesh","terraintile");
 
-	this._SetFunctionStub("CreateDefaultTerrainDataProviderFromResource","terrain");
-	this._SetFunctionStub("CreateDefaultTerrainDataProvider","terrain");
-	this._SetFunctionStub("CreateTerrainNode","terrain");
+	medea_api("CreateDefaultTerrainDataProviderFromResource","terrain");
+	medea_api("CreateDefaultTerrainDataProvider","terrain");
+	medea_api("CreateTerrainNode","terrain");
 
-	this._SetFunctionStub("CreateVisualizer","visualizer");
-	this._SetFunctionStub("CreateVisualizer_ShowNormals","visualizer_shownormals");
-	this._SetFunctionStub("CreateVisualizer_ShowBBs","visualizer_showbbs");
-	this._SetFunctionStub("CreateCompositor","compositor");
+	medea_api("CreateVisualizer","visualizer");
+	medea_api("CreateVisualizer_ShowNormals","visualizer_shownormals");
+	medea_api("CreateVisualizer_ShowBBs","visualizer_showbbs");
+	medea_api("CreateCompositor","compositor");
 
-	this._SetFunctionStub("CreateFromToAnimator","simpleanim");
-	this._SetFunctionStub("CreateSplinePathAnimator","splinepath");
-	this._SetFunctionStub("CreateTerrainHeightPathAnimator","terrainheightpath");
+	medea_api("CreateFromToAnimator","simpleanim");
+	medea_api("CreateSplinePathAnimator","splinepath");
+	medea_api("CreateTerrainHeightPathAnimator","terrainheightpath");
 
-	this._SetFunctionStub("CreateStatePool","statepool");
-	this._SetFunctionStub("GetDefaultStatePool","statepool");
+	medea_api("CreateStatePool","statepool");
+	medea_api("GetDefaultStatePool","statepool");
 
 	// for internal use by build.py only
 	this._markScriptAsLoaded = function(name) {
