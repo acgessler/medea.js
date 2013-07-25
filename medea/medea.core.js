@@ -872,6 +872,7 @@ medea = new (function(sdom) {
 
 	this._SetFunctionStub("FullscreenMode","fullscreen");
 
+	this._SetFunctionStub("CreateInputHandler","input_handler");
 	this._SetFunctionStub("IsMouseDown","input");
 	this._SetFunctionStub("IsMouseButtonDown","input");
 	this._SetFunctionStub("IsKeyDown","input");

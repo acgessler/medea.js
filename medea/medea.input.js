@@ -96,15 +96,7 @@ medea._addMod('input',[],function(undefined) {
 		}
 		return key_state[keycode] || false;
 	};
-
-	medea.IsKeyDownWasUp = function(keycode, state) {
-		if(settings.keymap) {
-			keycode = settings.keymap[keycode];
-		}
-		var old = state[keycode] || false, now = state[keycode] = medea.IsKeyDown(keycode);
-		return now && !old;
-	};
-
+	
 	medea.GetMouseDelta = function() {
 		return lastMouseDelta || [0,0,0];
 	};
