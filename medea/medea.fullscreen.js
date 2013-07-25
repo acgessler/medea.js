@@ -104,9 +104,11 @@ medea._addMod('fullscreen',[],function(undefined) {
 		//is_fullscreen_mode = enable_fullscreen;
 		var canvas = this.canvas;
 
-		old_width = canvas.width;
-		old_height = canvas.height;
-
+		if(enable_fullscreen) {
+			old_width = canvas.width;
+			old_height = canvas.height;
+		}
+		
 		// TODO: since going to fullscreen mode is asynchronous, we could offer a callback
 		document.addEventListener('mozfullscreenchange', on_change_to_fs);
 		document.addEventListener('webkitfullscreenchange', on_change_to_fs);
