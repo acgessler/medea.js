@@ -10,6 +10,9 @@ medea._addMod('frustum',[],function(undefined) {
 	"use strict";
 	var medea = this, min = Math.min, max = Math.max;
 
+	// temporary storage for medea.BBInFrustum()
+	var vt = vec3.create();
+
 	// BB_INFINITE and BB_EMPTY are defined in the "node" module
 
 	medea.CreateBB = function(vmin,vmax, mat) {
@@ -234,7 +237,7 @@ medea._addMod('frustum',[],function(undefined) {
 		}
 		// OBB
 		else {
-			var mat = bb[2], vt = vec3.create();
+			var mat = bb[2], /* vt = vec3.create() */;
 			for (var i = plane_hint[0], ii = 0; ii < 6; ++ii, ++i) {
 				if (i === 6) {
 					i = 0;

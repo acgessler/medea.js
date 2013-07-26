@@ -428,10 +428,12 @@ medea._addMod('node',['frustum'],function(undefined) {
 		},
 
 		_SetBBDirty : function() {
-			this.flags |= medea._NODE_FLAG_DIRTY_BB;
-			if (this.parent) {
-				this.parent._SetBBDirty();
+			var node = this, flag = medea._NODE_FLAG_DIRTY_BB;
+			do {
+				node.flags |= flag;
+				node = node.parent;
 			}
+			while(node != null);
 		},
 
 		_UpdateBB: function() {
@@ -445,8 +447,10 @@ medea._addMod('node',['frustum'],function(undefined) {
 				bbs.push(c[i].GetWorldBB());
 			}
 
+			// TODO: avoid temporary matrices
+			var trafo = this.GetGlobalTransform();
 			for( var i = 0, c = this.entities, l = c.length; i < l; ++i) {
-				bbs.push(medea.TransformBB( c[i].BB(), this.GetGlobalTransform() ));
+				bbs.push(medea.TransformBB( c[i].BB(), trafo ));
 			}
 
 			this.bb = medea.MergeBBs(bbs);
