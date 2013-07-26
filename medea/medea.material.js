@@ -582,13 +582,22 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	// class Material
 	medea.Material = medea.Class.extend({
 		name : "",
+		mat_gen : null,
 
 		init : function(passes, name) {
 			if(name) {
 				this.name = name;
 			}
 
-			this.passes = passes;
+			if (passes.Update !== undefined) {
+				this.mat_gen = passes;
+				this.passes = [];
+				this.mat_gen.Update(this.passes);
+			}
+			else {
+				this.passes = passes;
+			}
+
 			if (this.passes instanceof medea.Pass) {
 				this.passes = [this.passes];
 			}
@@ -630,9 +639,12 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		Name : medea._GetSet(this,'name'),
 
 		Use: function(drawfunc,statepool) {
+			if (this.mat_gen) {
+				this.mat_gen.Update(this.passes);
+			}
+
 			// invoke the drawing callback once per pass
 			this.passes.forEach(function(pass) {
-
 				if(!pass.Begin(statepool)) {
 					// XXX substitute a default material?
 					return;
