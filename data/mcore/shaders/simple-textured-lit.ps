@@ -7,7 +7,7 @@
  */
  
 uniform sampler2D texture;
-uniform vec3 lightdir;
+uniform vec3 LIGHT_D0_DIR;
 
 #include <remote:mcore/shaders/core.psh>
 
@@ -15,7 +15,7 @@ uniform vec3 lightdir;
 void main()
 {
     gl_FragColor.a = 1.0;
-	gl_FragColor.rgb = texture2D(texture, FetchTexCoord() ).rgb * (dot(normalize(lightdir), 
+	gl_FragColor.rgb = texture2D(texture, FetchTexCoord() ).rgb * (dot(normalize(LIGHT_D0_DIR), 
 		normalize(FetchNormal()))+1.0) * 0.5;
 }
 

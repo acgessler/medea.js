@@ -167,6 +167,16 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 		},
 
 		Flush : function(statepool) {
+
+			// (hack) insert default light into light render queue
+			var light_queue = this.queues[medea.RENDERQUEUE_LIGHT];
+			if(light_queue.GetEntries().length === 0) {
+				statepool.Set("DIR_LIGHTS",[{
+					  world_dir :  [0.309,1.209,-0.709]
+					, color : [1,1,1]
+				}]);
+			}
+
 			this.queues.forEach(function(e) {
 				e.Flush(statepool);
 			});

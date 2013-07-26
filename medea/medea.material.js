@@ -653,7 +653,6 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		};
 
 		if(dummy_light) {
-			constants['lightdir'] = [0.309,1.209,-0.709];
 			name += '-lit';
 		}
 		return new medea.Material(medea.CreatePassFromShaderPair(name,constants));
@@ -666,7 +665,6 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		};
 
 		if(dummy_light) {
-			constants['lightdir'] = [0.709,-0.709,0.709];
 			name += '-lit';
 		}
 		return new medea.Material(medea.CreatePassFromShaderPair(name,constants));
@@ -679,7 +677,6 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		};
 
 		if(dummy_light) {
-			constants['lightdir'] = [0.709,-0.709,0.709];
 			name += '-lit';
 		}
 

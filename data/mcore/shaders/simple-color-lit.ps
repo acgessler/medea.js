@@ -8,13 +8,13 @@
 #include <remote:mcore/shaders/core.psh> 
 
 uniform vec4 color;
-uniform vec3 lightdir;
+uniform vec3 LIGHT_D0_DIR;
 
 void main()
 {
 	gl_FragColor.a = 1.0;
 	
-	float n = max(0.0,dot(normalize(lightdir), normalize(FetchNormal())));
+	float n = max(0.0,dot(normalize(LIGHT_D0_DIR), normalize(FetchNormal())));
 	gl_FragColor.rgb = color.rgb * (0.2 + n);
 }
 
