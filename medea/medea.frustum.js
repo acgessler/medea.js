@@ -12,6 +12,7 @@ medea._addMod('frustum',[],function(undefined) {
 
 	// temporary storage for medea.BBInFrustum()
 	var vt = vec3.create();
+	var vtemp = vec3.create();
 
 	// BB_INFINITE and BB_EMPTY are defined in the "node" module
 
@@ -170,9 +171,10 @@ medea._addMod('frustum',[],function(undefined) {
 	};
 
 	medea.PointInFrustum = function(f, v) {
+		var v0 = v[0];
 		for (var i = 0; i < 6; ++i) {
 			var ff = f[i];
-			if (ff[0] * v[0] + ff[1] * v[1] + ff[2] * v[2] + v[3] <= 0) {
+			if (ff[0] * v0 + ff[1] * v[1] + ff[2] * v[2] + v[3] <= 0) {
 				return false;
 			}
 		}
@@ -194,6 +196,14 @@ medea._addMod('frustum',[],function(undefined) {
 
 		var min = bb[0], max = bb[1], t = 0;
 
+		var min0 = min[0];
+		var min1 = min[1];
+		var min2 = min[2];
+
+		var max0 = max[0];
+		var max1 = max[1];
+		var max2 = max[2];
+
 		// AABB
 		if (bb.length === 2) {
 			for (var i = plane_hint[0], ii = 0; ii < 6; ++ii, ++i) {
@@ -201,28 +211,28 @@ medea._addMod('frustum',[],function(undefined) {
 					i = 0;
 				}
 				var ff = f[i], c = 0;
-				if (ff[0] * min[0] + ff[1] * min[1] + ff[2] * min[2] + ff[3] > 0) {
+				if (ff[0] * min0 + ff[1] * min1 + ff[2] * min2 + ff[3] > 0) {
 					++c;
 				}
-				if (ff[0] * max[0] + ff[1] * min[1] + ff[2] * min[2] + ff[3] > 0) {
+				if (ff[0] * max0 + ff[1] * min1 + ff[2] * min2 + ff[3] > 0) {
 					++c;
 				}
-				if (ff[0] * max[0] + ff[1] * max[1] +6 ff[2] * min[2] + ff[3] > 0) {
+				if (ff[0] * max0 + ff[1] * max1 + ff[2] * min2 + ff[3] > 0) {
 					++c;
 				}
-				if (ff[0] * max[0] + ff[1] * max[1] + ff[2] * max[2] + ff[3] > 0) {
+				if (ff[0] * max0 + ff[1] * max1 + ff[2] * max2 + ff[3] > 0) {
 					++c;
 				}
-				if (ff[0] * max[0] + ff[1] * min[1] + ff[2] * max[2] + ff[3] > 0) {
+				if (ff[0] * max0 + ff[1] * min1 + ff[2] * max2 + ff[3] > 0) {
 					++c;
 				}
-				if (ff[0] * min[0] + ff[1] * max[1] + ff[2] * max[2] + ff[3] > 0) {
+				if (ff[0] * min0 + ff[1] * max1 + ff[2] * max2 + ff[3] > 0) {
 					++c;
 				}
-				if (ff[0] * min[0] + ff[1] * max[1] + ff[2] * min[2] + ff[3] > 0) {
+				if (ff[0] * min0 + ff[1] * max1 + ff[2] * min2 + ff[3] > 0) {
 					++c;
 				}
-				if (ff[0] * min[0] + ff[1] * min[1] + ff[2] * max[2] + ff[3] > 0) {
+				if (ff[0] * min0 + ff[1] * min1 + ff[2] * max2 + ff[3] > 0) {
 					++c;
 				}
 
@@ -237,49 +247,74 @@ medea._addMod('frustum',[],function(undefined) {
 		}
 		// OBB
 		else {
-			var mat = bb[2] /* vt = vec3.create() */;
+			var mat = bb[2];
 			for (var i = plane_hint[0], ii = 0; ii < 6; ++ii, ++i) {
 				if (i === 6) {
 					i = 0;
 				}
 				var ff = f[i], c = 0;
 
-				mat4.multiplyVec3(mat,[min[0],min[1],min[2]], vt);
+				// vtemp and vt are global to avoid the extra allocation
+				vtemp[0] = min0;
+				vtemp[1] = min1;
+				vtemp[2] = min2;
+				mat4.multiplyVec3(mat,vtemp, vt);
 				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
 					++c;
 				}
 
-				mat4.multiplyVec3(mat,[min[0],max[1],min[2]], vt);
+				vtemp[0] = min0;
+				vtemp[1] = max1;
+				vtemp[2] = min2;
+				mat4.multiplyVec3(mat,vtemp, vt);
 				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
 					++c;
 				}
 
-				mat4.multiplyVec3(mat,[min[0],max[1],max[2]], vt);
+				vtemp[0] = min0;
+				vtemp[1] = max1;
+				vtemp[2] = max2;
+				mat4.multiplyVec3(mat,vtemp, vt);
 				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
 					++c;
 				}
 
-				mat4.multiplyVec3(mat,[min[0],min[1],max[2]], vt);
+				vtemp[0] = min0;
+				vtemp[1] = min1;
+				vtemp[2] = max2;
+				mat4.multiplyVec3(mat,vtemp, vt);
 				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
 					++c;
 				}
 
-				mat4.multiplyVec3(mat,[max[0],min[1],min[2]], vt);
+				vtemp[0] = max0;
+				vtemp[1] = min1;
+				vtemp[2] = min2;
+				mat4.multiplyVec3(mat,vtemp, vt);
 				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
 					++c;
 				}
 
-				mat4.multiplyVec3(mat,[max[0],max[1],min[2]], vt);
+				vtemp[0] = max0;
+				vtemp[1] = max1;
+				vtemp[2] = min2;
+				mat4.multiplyVec3(mat,vtemp, vt);
 				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
 					++c;
 				}
 
-				mat4.multiplyVec3(mat,[max[0],max[1],max[2]], vt);
+				vtemp[0] = max0;
+				vtemp[1] = max1;
+				vtemp[2] = max2;
+				mat4.multiplyVec3(mat,vtemp, vt);
 				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
 					++c;
 				}
 
-				mat4.multiplyVec3(mat,[max[0],min[1],max[2]], vt);
+				vtemp[0] = max0;
+				vtemp[1] = min1;
+				vtemp[2] = max2;
+				mat4.multiplyVec3(mat,vtemp, vt);
 				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
 					++c;
 				}
