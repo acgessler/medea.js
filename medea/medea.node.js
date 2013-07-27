@@ -303,7 +303,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 
 
 		ResetTransform: function() {
-			this.lmatrix = mat4.identity(mat4.create());
+			mat4.identity(this.lmatrix);
 			this._SetTrafoDirty();
 			return this;
 		},
