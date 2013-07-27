@@ -25,7 +25,6 @@ medea._addMod('materialgen',['shader','material'],function(undefined) {
 			gl_FragColor.rgb = texture2D(texture, FetchTexCoord() ).rgb * (dot(normalize(LIGHT_D0_DIR), 
 				normalize(FetchNormal()))+1.0) * 0.5;
 		}
-
 "
 	};
 
@@ -40,9 +39,7 @@ medea._addMod('materialgen',['shader','material'],function(undefined) {
 
 		Update : function(statepool, passes) {
 
-
 		},
-
 
 		EvaluateDirectionalLight : function(index) {
 			return {
@@ -50,7 +47,7 @@ medea._addMod('materialgen',['shader','material'],function(undefined) {
 				diffuse 	: 'strength * $light_diffuse_color'
 				specular 	: 'strength * $light_specular_color'
 				ambient		: '$light_ambient_color'
-			}
+			};
 		},
 
 		EvaluatePointLight : function(index) {
@@ -58,12 +55,27 @@ medea._addMod('materialgen',['shader','material'],function(undefined) {
 				prefix		: 
 					'vec3 dir = $pos_world - $light_pos_world; \
 					 float distance = length(dir); \
-					 float attenuation = 1-clamp(distance/$light_range,0,1); \
+					 float attenuation = 1.0-clamp(distance/$light_range,0.0,1.0); \
 					 float strength = dot($normal_world, dir) * attenuation;'
 				diffuse 	: 'strength * $light_diffuse_color'
 				specular 	: 'strength * $light_specular_color'
 				ambient		: '$light_ambient_color'
-			}
+			};
+		},
+
+		EvaluateSpotLight : function(index) {
+			return {
+				prefix		: 
+					'vec3 dir = $pos_world - $light_pos_world; \
+					 float distance = length(dir); \
+					 float attenuation = 1.0-clamp(distance/$light_range,0.0,1.0); \
+					 float angle = smoothstep($light_spot_angle_inner, $light_spot_angle_outer) \
+					 	* dot($light_dir_world, normalize(distance));
+					 float strength = dot($normal_world, dir) * attenuation * angle;'
+				diffuse 	: 'strength * $light_diffuse_color'
+				specular 	: 'strength * $light_specular_color'
+				ambient		: '$light_ambient_color'
+			};
 		}
 	});
 
