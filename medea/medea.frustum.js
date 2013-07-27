@@ -207,7 +207,7 @@ medea._addMod('frustum',[],function(undefined) {
 				if (ff[0] * max[0] + ff[1] * min[1] + ff[2] * min[2] + ff[3] > 0) {
 					++c;
 				}
-				if (ff[0] * max[0] + ff[1] * max[1] + ff[2] * min[2] + ff[3] > 0) {
+				if (ff[0] * max[0] + ff[1] * max[1] +6 ff[2] * min[2] + ff[3] > 0) {
 					++c;
 				}
 				if (ff[0] * max[0] + ff[1] * max[1] + ff[2] * max[2] + ff[3] > 0) {

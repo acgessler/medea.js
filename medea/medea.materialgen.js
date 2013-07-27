@@ -13,8 +13,8 @@ medea._addMod('materialgen',['shader','material'],function(undefined) {
 
 	var generate_vertex_shader = function(dir_lights, point_lights, spot_lights) {
 		return 
-		"uniform sampler2D texture;\
-		uniform vec3 LIGHT_D0_DIR;\
+		"uniform sampler2D texture;	\
+		uniform vec3 LIGHT_D0_DIR;	\
 
 		#include <remote:mcore/shaders/core.psh>\n
 
@@ -41,6 +41,29 @@ medea._addMod('materialgen',['shader','material'],function(undefined) {
 		Update : function(statepool, passes) {
 
 
+		},
+
+
+		EvaluateDirectionalLight : function(index) {
+			return {
+				prefix		: 'float strength = dot($normal_world, $light_dir_world);'
+				diffuse 	: 'strength * $light_diffuse_color'
+				specular 	: 'strength * $light_specular_color'
+				ambient		: '$light_ambient_color'
+			}
+		},
+
+		EvaluatePointLight : function(index) {
+			return {
+				prefix		: 
+					'vec3 dir = $pos_world - $light_pos_world; \
+					 float distance = length(dir); \
+					 float attenuation = 1-clamp(distance/$light_range,0,1); \
+					 float strength = dot($normal_world, dir) * attenuation;'
+				diffuse 	: 'strength * $light_diffuse_color'
+				specular 	: 'strength * $light_specular_color'
+				ambient		: '$light_ambient_color'
+			}
 		}
 	});
 
