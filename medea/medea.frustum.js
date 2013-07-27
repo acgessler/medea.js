@@ -237,7 +237,7 @@ medea._addMod('frustum',[],function(undefined) {
 		}
 		// OBB
 		else {
-			var mat = bb[2], /* vt = vec3.create() */;
+			var mat = bb[2] /* vt = vec3.create() */;
 			for (var i = plane_hint[0], ii = 0; ii < 6; ++ii, ++i) {
 				if (i === 6) {
 					i = 0;
