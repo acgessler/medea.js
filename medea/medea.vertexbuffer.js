@@ -10,6 +10,19 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
+	// http://blog.tojicode.com/2012/10/oesvertexarrayobject-extension.html
+	var va_ext = gl.getExtension("OES_vertex_array_object");
+
+	// #ifdef DEBUG
+	if (va_ext) {
+		medea.LogDebug('using OES_vertex_array_object extension');
+	}
+	else {
+		medea.LogDebug('OES_vertex_array_object extension not available');
+	}
+	// #endif
+
+
 	// constants for mappings of various vertex attributes, these map 1 one by one
 	// to the standard names for shader attribute names.
 	medea.ATTR_POSITION      = "POSITION";
@@ -193,7 +206,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 				elems = elems || 3;
 
 				(function(idx,stride,offset) {
-					var hash = [elems,type,stride,offset].join('-');
+					var entry_key = [elems,type,stride,offset].join('-');
 
 					state_closure.push(function(in_map, state) {
 						var real_idx = idx;
@@ -202,6 +215,12 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 							if (real_idx === undefined) {
 								return; // don't set this attribute
 							}
+						}
+
+						if(!state) {
+							gl.enableVertexAttribArray(real_idx);
+							gl.vertexAttribPointer(real_idx,elems, type,false,stride,offset);
+							return
 						}
 
 						var gls = state.GetQuick('_gl'), va = gls.va;
@@ -214,9 +233,9 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 							gl.enableVertexAttribArray(real_idx);
 						}
 
-						if (prev !== hash) {
+						if (prev !== entry_key) {
 							gl.vertexAttribPointer(real_idx,elems, type,false,stride,offset);
-							va[real_idx] = hash;
+							va[real_idx] = entry_key;
 						}
 					});
 				}) (idx,stride,offset);
@@ -320,7 +339,10 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 
 			this.stride = stride;
 
-			gl.bufferData(gl.ARRAY_BUFFER,ab, this.flags & medea.VERTEXBUFFER_USAGE_DYNAMIC ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
+			gl.bufferData(gl.ARRAY_BUFFER,ab, this.flags & medea.VERTEXBUFFER_USAGE_DYNAMIC 
+				? gl.DYNAMIC_DRAW 
+				: gl.STATIC_DRAW);
+
 			this.interleaved = ab;
 		},
 
@@ -387,6 +409,25 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 			}
 		},
 
+		_TryPopulateVAO : function(attrMap) {
+			if (!va_ext) {
+				return;
+			}
+			this.vao = va_ext.createVertexArrayOES();
+			if(!this.vao) {
+				return;
+			}
+
+			va_ext.bindVertexArrayOES(this.vao);
+			gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);
+
+			this.state_closure.forEach(function(e) {
+				e(attrMap);
+			});
+
+			va_ext.bindVertexArrayOES(null);
+		},
+
 		GetBufferId : function() {
 			return this.buffer;
 		},
@@ -422,13 +463,55 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 				return;
 			}
 
+			gls.ab = id;
+			// use VAO if available. The VAO changes, however, with the input attribute
+			// map so we have to quickly detect if the current VAO is still up to date.
+			if(va_ext) {
+				if(this.vao) {
+					var cached = this._vao_attrmap;
+					var dirty = false;
+					
+					if(attrMap && cached) {
+						// TODO: better way of doing this?
+						for(var key in attrMap) {
+							if (attrMap[key] !== cached[key]) {
+								dirty = true;
+								break;
+							}
+						}
+						for(var key in cached) {
+							if (attrMap[key] !== cached[key]) {
+								dirty = true;
+								break;
+							}
+						}
+					}
+					else if (attrMap || cached) {
+						dirty = true;
+					}
+
+					if(dirty) {
+						va_ext.deleteVertexArrayOES(this.vao);
+						this.vao = null;
+					}
+				}
+
+				if(!this.vao) {
+					this._TryPopulateVAO(attrMap);
+				}
+
+				if(this.vao) {
+					va_ext.bindVertexArrayOES(this.vao);
+					return;
+				}
+			}
+
 			// invalidate the state cache for vertexAttrib binding
 			// now that the buffer is changed.
 			if (gls.va) {
 				gls.va.length = 0;
 			}
 
-			gls.ab = id;
 			gl.bindBuffer(gl.ARRAY_BUFFER,id);
 			this.state_closure.forEach(function(e) {
 				e(attrMap, statepool);
