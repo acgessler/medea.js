@@ -11,7 +11,9 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 	var medea = this, gl = medea.gl;
 
 	// http://blog.tojicode.com/2012/10/oesvertexarrayobject-extension.html
-	var va_ext = gl.getExtension("OES_vertex_array_object");
+	var va_ext = gl.getExtension("OES_vertex_array_object") ||
+		gl.getExtension("MOZ_OES_vertex_array_object") ||
+		gl.getExtension("WEBKIT_OES_vertex_array_object");
 
 	// #ifdef DEBUG
 	if (va_ext) {
