@@ -163,6 +163,10 @@
 	_add_uniform(mat4, W) \
 	((W * vec4(p.xyz, 1.0)).xyz)
 	
+#define ModelDirToWorldDir(p) \
+	_add_uniform(mat4, W) \
+	((W * vec4(p.xyz, 0.0)).xyz)
+
 #define WorldToClipSpace(p) \
 	_add_uniform(mat4, VP) \
 	((VP * vec4(p.xyz, 1.0)))

@@ -11,6 +11,6 @@
 void main()
 {
 	PassClipPosition(ModelToClipSpace(FetchPosition()));
-	PassNormal(FetchNormal());
+	PassNormal(ModelDirToWorldDir(FetchNormal()));
 }
 
