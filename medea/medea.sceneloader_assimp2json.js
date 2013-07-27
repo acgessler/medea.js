@@ -66,7 +66,9 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functi
 			}
 		}
 
-		return w.materials[material_idx] = w.material_resolver(props);
+		var mat = w.materials[material_idx] = w.material_resolver(props);
+		mat.imported_mat_data = props;
+		return mat;
 	};
 
 	var LoadMesh = function(w,mesh_idx) {
