@@ -56,10 +56,11 @@ medea._addMod('statepool',[],function(undefined) {
 		},
 
 		Set : function(key,value) {
-			if (key in this.deps) {
-				var v = this.deps[key];
-				for(var i = 0, e = v.length; i < e; ++i) {
-					this.dirty[v[i]] = true;
+			var dep_entry = this.deps[key];
+			if (dep_entry !== undefined) {
+				var dirty = this.dirty;
+				for(var i = 0, e = dep_entry.length; i < e; ++i) {
+					dirty[dep_entry[i]] = true;
 				}
 			}
 			return this.states[key] = value;
