@@ -35,7 +35,13 @@ medea._addMod('filesystem',[],function() {
 		else if (s.slice(0,4) === 'url:') {
 			s = s.slice(4);
 		}
-		
+
+		// cleanup URL to avoid trouble in some browsers
+		// a) replace backslashes by forward slashes
+		s = s.replace(/\\/,'/');
+		// b) drop double slashes
+		s =  s.replace(/\/\//,'/');
+
 		s = AppendUrlParameters(s);
 		return s;
 	};
