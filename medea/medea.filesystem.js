@@ -19,7 +19,7 @@ medea._addMod('filesystem',[],function() {
 	
 	var AppendUrlParameters = function(s, no_client_cache) {
 		if (no_client_cache) {
-			s += '?nocache='+(new Date()).getTime();
+			s += (s.indexOf('?') !== -1 ? '&' : '?') + 'nocache='+(new Date()).getTime();
 		}
 		return s;
 	}
