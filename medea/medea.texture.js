@@ -14,6 +14,24 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 	medea._initMod('image');
 
 
+	// check for presence of the EXT_texture_filter_anisotropic extension,
+	// which enables us to use anistropic filtering.
+	var aniso_ext = gl.getExtension("EXT_texture_filter_anisotropic") ||
+		gl.getExtension("MOZ_EXT_texture_filter_anisotropic") ||
+		gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic");
+
+	// #ifdef DEBUG
+	var max_anisotropy;
+	if (aniso_ext) {
+		medea.LogDebug('using EXT_texture_filter_anisotropic extension');
+		max_anisotropy = gl.getParameter(aniso_ext.
+			MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+	}
+	else {
+		medea.LogDebug('EXT_texture_filter_anisotropic extension not available');
+	}
+	// #endif
+
 
 	var TEX = medea.TEXTURE_TYPE_2D = gl.TEXTURE_2D;
 
@@ -182,6 +200,11 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 			if (!(this.flags & medea.TEXTURE_FLAG_NO_MIPS)) {
 				gl.texParameteri(TEX, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
 				gl.generateMipmap(TEX);
+
+				if (aniso_ext) {
+					gl.texParameterf(gl.TEXTURE_2D, aniso_ext.TEXTURE_MAX_ANISOTROPY_EXT, 
+						max_anisotropy);
+				}
 			}
 			else {
 				gl.texParameteri(TEX, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
