@@ -33,12 +33,18 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 				// update the current world matrix to the node's global transformation matrix
 				statepool.Set("W",node.GetGlobalTransform());
 
-				// If the global inverse is already cached in the node,
-				// copy it to the statepool to avoid inverting twice.
-				var g = node.TryGetInverseGlobalTransform();
-				if (g) {
-					statepool.Set("WI",g);
+				// Always set WI and WIT. Lighting naturally relies on
+				// it, so we can assume that this is always needed.
+				// By using the node's intelligent update mechanism
+				// we can thus save lots of matrix math.
+				var wi = node.GetInverseGlobalTransform();
+				statepool.Set("WI",wi);
+				var wit = statepool.Get("WIT");
+				if(wit === undefined) {
+					wit = mat4.create();
 				}
+				mat4.transpose(wi, wit);
+				statepool.SetQuick("WIT",wit);
 
 				mesh.DrawNow(statepool);
 			};

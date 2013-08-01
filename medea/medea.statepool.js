@@ -63,15 +63,28 @@ medea._addMod('statepool',[],function(undefined) {
 					dirty[dep_entry[i]] = true;
 				}
 			}
+			if(key in this.derived_states) {
+				this.dirty[key] = false;
+			}
+			return this.states[key] = value;
+		},
+
+		SetQuick : function(key,value) {
+// #ifdef DEBUG
+			medea.DebugAssert(!(key in this.deps),"only states with no dependent states can be set using SetQuick(): " + key);
+// #endif
+			if(key in this.derived_states) {
+				this.dirty[key] = false;
+			}
 			return this.states[key] = value;
 		},
 
 		Get : function(key) {
-			if (key in this.dirty) {
+			if (this.dirty[key] === true) {
 // #ifdef DEBUG
 				medea.DebugAssert(key in this.derived_states,"only derived states can be 'dirty': " + key);
 // #endif
-				delete this.dirty[key];
+				this.dirty[key] = false;
 				return this.states[key] = this.derived_states[key](this, this.states[key]);
 			}
 
