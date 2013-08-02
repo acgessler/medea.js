@@ -12,7 +12,12 @@ def get_full_file_name(file):
 
 
 def javascript_string_escape(s):
-	return s.replace('"','\'')
+	# TODO: this does not catch everything.
+	escaped = s.replace('\\','\\\\') 
+	escaped = escaped.replace('"','\\"')
+	escaped = escaped.replace('\'','\\\'')
+
+	return '+ \n'.join("'" + line + "\\n'" for line in escaped.split('\n')) + '\n'
 
 
 def include_resource(resource, source_file):
@@ -20,7 +25,7 @@ def include_resource(resource, source_file):
 		with open(source_file, 'rt') as inp:
 			return """ 
 
-			medea._bakedResources["{resource}"] = "{data}";
+			medea._bakedResources["{resource}"] = {data};
 
 			""".format(resource=resource, data=javascript_string_escape(inp.read()))
 	except IOError:
