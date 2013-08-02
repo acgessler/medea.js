@@ -115,7 +115,7 @@ medea._addMod('statepool',[],function(undefined) {
 	var def_pool = medea.CreateStatePool();
 
 	medea.GetDefaultStatePool = function(deps, derived_states) {
-		// for debugging, use a new StatePool to prevent unwanted state leaking
+		// TODO for debugging, use a new StatePool to prevent unwanted state leaking
 		return def_pool;
 	};
 });
