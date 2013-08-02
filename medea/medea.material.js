@@ -24,6 +24,9 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	medea.MAX_DIRECTIONAL_LIGHTS = 8;
 
 
+	// cache for gl program objects, indexed by "vs_id" + "ps_id"
+	var program_cache = {};
+
 	// map from GLSL type identifiers to the corresponding GL enumerated types
 	var glsl_typemap = {
 		'vec2'	: gl.FLOAT_VEC2,
@@ -291,11 +294,18 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				case gl.SAMPLER_2D:
 				case gl.SAMPLER_CUBE:
 
-					// explicitly bound texture
-					handler = function(prog, pos, state, curval) {
+					// explicitly bound texture - this is a special case because string values
+					// for texture parameters are not eval()ed but requested as textures from
+					// the server.
+					this.auto_setters[k] = [pos,function(prog,pos,state) {
+						// note: constants[k] is not set to be the texture as it is loaded.
+						// this is because the user expects consistent values with the Get/Set
+						// APIs, so we cannot change the object type in the background. The
+						// texture object only exists in the Set() closure.
+						var curval = val;
+
 						if (!(curval instanceof medea.Resource)) {
-							//curval = medea.GetDefaultTexture();
-							return;
+							curval = medea.GetDefaultTexture();
 						}
 
 						state = state.GetQuick('_gl');
@@ -328,14 +338,15 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 						gl.uniform1i(pos, curval._Bind(oldesti));
 
 						state.tex_slots = slots;
-					};
+					}];
 
 					if (typeof val === 'string') {
 						// #ifdef DEBUG
 						medea.LogDebug('create texture for shader uniform with string value: ' + k + ', ' + val);
 						// #endif
 						medea.FetchMods(['texture'], function() {
-							c[k] = medea.CreateTexture(val);
+							// see note above for why c[k] is not changed
+							val = medea.CreateTexture(val);
 						});
 
 					}
@@ -344,7 +355,8 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 						medea.LogDebug('create lod texture for shader uniform with string value: ' + k + ', ' + val);
 						// #endif
 						medea.FetchMods(['lodtexture'], function() {
-							c[k] = medea.CreateLODTexture(val);
+							// see note above for why c[k] is not changed
+							val = medea.CreateLODTexture(val);
 						});
 					}
 					break;
@@ -444,7 +456,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			for(var k in medea.ShaderSetters) {
 				var pos = gl.getUniformLocation(this.program, k);
 				if(pos) {
-					this.auto_setters[k] = [pos,medea.ShaderSetters[k]];
+					this.auto_setters[k] = [pos, medea.ShaderSetters[k]];
 				}
 			};
 		},
@@ -463,25 +475,38 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				// can't assemble this program yet, for we first need to wait for some dependent resources to load
 				return;
 			}
-			var p = this.program = gl.createProgram();
 
-			gl.attachShader(p,this.vs.GetGlShader());
-			gl.attachShader(p,this.ps.GetGlShader());
+			// first check if we do already have a linked copy of this shader program
+			var cache_name =  this.vs.GetShaderId() + '#' + this.ps.GetShaderId();
+			var p = program_cache[cache_name];
+			if(p === undefined) {
+				// there is none, so we have to link the program
+				p = program_cache[cache_name] = this.program = gl.createProgram();
+				gl.attachShader(p,this.vs.GetGlShader());
+				gl.attachShader(p,this.ps.GetGlShader());
 
 
-			gl.linkProgram(p);
-			if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
-				medea.NotifyFatal("failure linking program, error log: " + gl.getProgramInfoLog(p));
-				return;
+				gl.linkProgram(p);
+				if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+					medea.NotifyFatal("failure linking program, error log: " + gl.getProgramInfoLog(p));
+					return;
+				}
+
+				// #ifdef DEBUG
+				gl.validateProgram(p);
+				if (!gl.getProgramParameter(p, gl.VALIDATE_STATUS)) {
+					medea.NotifyFatal("failure validating program, error log: " + gl.getProgramInfoLog(p));
+					return;
+				}
+
+				// #ifdef DEBUG
+				medea.LogDebug('successfully linked program #' +p);
+				// #endif
 			}
-
-			// #ifdef DEBUG
-			gl.validateProgram(p);
-			if (!gl.getProgramParameter(p, gl.VALIDATE_STATUS)) {
-				medea.NotifyFatal("failure validating program, error log: " + gl.getProgramInfoLog(p));
-				return;
+			else {
+				this.program = p;
+				gl.useProgram(this.program);
 			}
-			// #endif
 
 			this._ExtractUniforms();
 			this._RefreshState();
@@ -712,7 +737,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		return new medea.Material(medea.CreatePassFromShaderPair(name,constants, attr_map, defines));
 	};
 
-	medea.CreatePassFromShaderPair = function(name, constants, attr_map, defines) {
+	medea.CreatePassFromShaderPair = function(name, constants, attr_map, defines, no_clone) {
 		return new medea.Pass( medea.CreateShader(name+'.vs', defines), medea.CreateShader(name+'.ps', defines), constants, attr_map );
 	};
 
