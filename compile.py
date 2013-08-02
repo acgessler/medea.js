@@ -23,6 +23,7 @@ at runtime using AJAX.
 Usage:
 
 python3 compile.py [output-folder] [modules-to-compact...] [-r resources-to-include...]
+python3 compile.py -c config-file
 
 where
 
@@ -48,6 +49,24 @@ where
       resource can be found. 
 
       Embedding resources is only supported for text files.
+
+   config-file 
+      Is a text configuration file (python ConfigParser format) that
+      looks like this:
+
+        [general]
+		output=compiled
+
+		[modules]
+		frustum
+		viewport
+		...
+
+		[resources]
+		remote:mcore/shaders/core.psh=data/mcore/shaders/core.psh
+		...
+
+	  where the fields correspond exactly to the command line parameters above.
 """
 
 import sys
@@ -61,22 +80,49 @@ if __name__ == "__main__":
 	if len(sys.argv) < 3:
 		print(help)
 		sys.exit(-1)
-
-	modules = sys.argv[2:]
+	
 	resources = {}
 
-	for n,arg in enumerate(sys.argv):
-		if arg[:2] == '-r':
-			modules = sys.argv[2:n]
+	if sys.argv[1] == '-c':
+		# cannot use ConfigParser due to colons in keys
+		with open(sys.argv[2], "rt") as inp:
+			lines = [l.strip() for l in inp.readlines() if l.strip() and not l.strip()[0] == '#']
+			sections = {}
+			sections[''] = cur_section = {}
+			for n, line in enumerate(lines):
+				lineno = n+1
+				head = re.match(r'^\[(.+)\]$', line)
+				if head is None:
+					elem = re.match(r'^(.+?)(?:\=(.+?))?$', line)
+					if elem is None:
+						print('invalid entry in configuration file, line ' + str(lineno))
+						sys.exit(-3)
+					cur_section[elem.group(1)] = elem.group(2)
+				else:
+					sections[head.group(1)] = cur_section = {}
 
-			def parse_res(k):
-				match = re.match(r'^(.+?)\=(.+?)$',k)
-				if match is None:
-					print('invalid format for resource entry: ' + k)
-					sys.exit(-2)
-				return match.groups()
+		output = sections['general']['output']
+		modules = list(sections['modules'].keys()) if 'modules' in sections else []
+		resources = sections['resources'] if 'resources' in sections else {}
 
-			resources = dict(parse_res(k) for k in sys.argv[n+1:]);
-			break
+	else:
+		output = sys.argv[1]
+		modules = sys.argv[2:]
 
-	compiler.run('medea', sys.argv[1], modules, resources)
+		for n,arg in enumerate(sys.argv):
+			if arg[:2] == '-r':
+				modules = sys.argv[2:n]
+
+				def parse_res(k):
+					match = re.match(r'^(.+?)\=(.+?)$',k)
+					if match is None:
+						print('invalid format for resource entry: ' + k)
+						sys.exit(-2)
+					return match.groups()
+
+				resources = dict(parse_res(k) for k in sys.argv[n+1:]);
+				break
+
+	assert modules
+	assert output
+	compiler.run('medea', output, modules, resources)
