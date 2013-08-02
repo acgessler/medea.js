@@ -49,25 +49,40 @@ medea._addMod('shader',['filesystem','cpp.js'],function(undefined) {
 // #endif
 			this.source = data;
 
+			// _super() is dynamically assigned and ceases to exist as soon
+			// as OnDelayedInit returns, so we need to grab a ref.
+			var self = this;
+			var call_outer_super = self._super;
+	
+
+			// check if the shader has already been loaded or is currently
+			// being fetched/compiled.
 			var c = this._GetCacheName();
 			var s = sh_cache[c];
 			if(s !== undefined) {
-				this.gen_source = s.gen_source;
-				this.shader = s.shader;
-				this._super();
+				if(Array.isArray(s)) {
+					// loading is in process, wait for it.
+					s.push(function(s) {
+						self.gen_source = s.gen_source;
+						self.shader = s.shader;
+						call_outer_super.apply(self);
+					});
+				}
+				else {
+					this.gen_source = s.gen_source;
+					this.shader = s.shader;
+					this._super();
+				}
 				return;
 			}
 
-			var self = this;
+			var waiters = sh_cache[c] = [];
 
 			// additional top-level declarations are specified in-place using
 			// #pragma toplevel. Each time cpp.js encounters one, it invokes
 			// settings.pragma_func.
 			var top_level_decls = [];
 
-			// _super() is dynamically assigned and ceases to exist as soon
-			// as OnDelayedInit returns, so we need to grab a ref.
-			var call_outer_super = self._super;
 
 			// preprocessing shaders is asynchronous
 			var settings = {
@@ -94,7 +109,7 @@ medea._addMod('shader',['filesystem','cpp.js'],function(undefined) {
 					s = self.shader = gl.createShader(self.type);
 
 					// create a new cache entry for this shader
-					sh_cache[c] = {
+					var entry = sh_cache[c] = {
 						shader : self.shader,
 						source : self.source,
 						gen_source : self.gen_source
@@ -113,6 +128,11 @@ medea._addMod('shader',['filesystem','cpp.js'],function(undefined) {
 
 					// mark this resource as complete
 					call_outer_super.apply(self);
+
+					// callback all waiters
+					for (var i = 0, e = waiters.length; i < e; ++i) {
+						waiters[i](entry);
+					}
 
 					medea.LogDebug("successfully compiled shader "
 						+ self.src
