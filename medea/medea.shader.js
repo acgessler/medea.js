@@ -15,6 +15,9 @@ medea._addMod('shader',['filesystem','cpp.js'],function(undefined) {
 
 	medea._initMod('filesystem');
 
+	// counter for getting shader ids from
+	var shader_id_counter = 0;
+
 	// cache for compiled shader objects
 	var sh_cache = {
 	};
@@ -60,18 +63,18 @@ medea._addMod('shader',['filesystem','cpp.js'],function(undefined) {
 			var c = this._GetCacheName();
 			var s = sh_cache[c];
 			if(s !== undefined) {
+				var commit = function(s) {
+					self.gen_source = s.gen_source;
+					self.shader = s.shader;
+					self.shader_id = s.shader_id;
+					call_outer_super.apply(self);
+				};
 				if(Array.isArray(s)) {
 					// loading is in process, wait for it.
-					s.push(function(s) {
-						self.gen_source = s.gen_source;
-						self.shader = s.shader;
-						call_outer_super.apply(self);
-					});
+					s.push(commit);
 				}
 				else {
-					this.gen_source = s.gen_source;
-					this.shader = s.shader;
-					this._super();
+					commit(s);
 				}
 				return;
 			}
@@ -108,11 +111,14 @@ medea._addMod('shader',['filesystem','cpp.js'],function(undefined) {
 					self.gen_source = top_level_decls.join('\n') + '\n' + data;
 					s = self.shader = gl.createShader(self.type);
 
+					self.shader_id = ++shader_id_counter;
+
 					// create a new cache entry for this shader
 					var entry = sh_cache[c] = {
 						shader : self.shader,
 						source : self.source,
-						gen_source : self.gen_source
+						gen_source : self.gen_source,
+						shader_id : self.shader_id
 					};
 
 					// compile the preprocessed shader
@@ -174,8 +180,12 @@ medea._addMod('shader',['filesystem','cpp.js'],function(undefined) {
 			return this.gen_source;
 		},
 
-		GetGlShader : function(gl) {
+		GetGlShader : function() {
 			return this.shader;
+		},
+
+		GetShaderId : function() {
+			return this.shader_id;
 		},
 
 		_GetCacheName : function() {
