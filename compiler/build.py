@@ -11,7 +11,43 @@ def get_full_file_name(file):
 	return ('medea.' + file + '.js') if not ".js" in file else file
 
 
-def run(input_folder, output_folder, files_to_compact):
+def javascript_string_escape(s):
+	return s.replace('"','\'')
+
+
+def include_resource(resource, source_file):
+	try:
+		with open(source_file, 'rt') as inp:
+			return """ 
+
+			medea._bakedResources["{resource}"] = "{data}";
+
+			""".format(resource=resource, data=javascript_string_escape(inp.read()))
+	except IOError:
+		print('failed to open input file: ' + source_file)
+
+
+def derive_topological_order(initial, mods_by_deps):
+	mods_by_deps_copy = dict(mods_by_deps)
+	topo_order = list(initial)
+	deps_handled = set()
+	while len(mods_by_deps_copy) > 0:
+		for k,v in mods_by_deps_copy.items():
+			if not v.issubset(deps_handled):
+				continue
+
+			if not k in topo_order:
+				topo_order.append(k)
+			mods_by_deps_copy.pop(k)
+			deps_handled.add(k)
+			break
+		else:
+			print('error: cyclic dependency in modules, current order is ' + str(topo_order))
+			sys.exit(-2)
+	return topo_order
+
+
+def run(input_folder, output_folder, files_to_compact, resources_to_include = {}):
 
 	# cleanup previous compiler output
 	shutil.rmtree(output_folder, True)
@@ -62,22 +98,7 @@ def run(input_folder, output_folder, files_to_compact):
 	# awesome O(n^2) algorithm for generating a topological order
 	# pre-define sprintf, matrix and the core module as they do not follow the 
 	# usual module dependency system.
-	topo_order = ['sprintf-0.7.js','glMatrix.js', 'medea.core.js']
-	deps_handled = set()
-	while len(mods_by_deps) > 0:
-		for k,v in mods_by_deps.items():
-			if not v.issubset(deps_handled):
-				continue
-
-			if not k in topo_order:
-				topo_order.append(k)
-			mods_by_deps.pop(k)
-			deps_handled.add(k)
-			break
-		else:
-			print('error: cyclic dependency in modules, current order is ' + str(topo_order))
-			sys.exit(-2)
-
+	topo_order = derive_topological_order(['sprintf-0.7.js','glMatrix.js', 'medea.core.js'],mods_by_deps)
 	print('writing medea.core-compiled.js')
 	
 	# generate medea.core-compiled.js output file
@@ -92,6 +113,13 @@ def run(input_folder, output_folder, files_to_compact):
 				if n >= 3 and (len(dep) <= 6 or dep[:6] != 'medea.'):
 					outp.write('medea._markScriptAsLoaded("'+dep+'")')
 				outp.write('\n')
+
+		# embed resource files
+		if resources_to_include:
+			outp.write('medea._bakedResources = {}; \n')
+			for k,v in resources_to_include.items():
+				print('embedding: ' + v + ' as ' + k)
+				outp.write(include_resource(k,v))
 
 		outp.write('medea._initLibrary();');
 		outp.write('delete window.medea_is_compiled;');
