@@ -896,7 +896,6 @@ medea = new (function(sdom) {
 	medea_api("IsMouseDown","input");
 	medea_api("IsMouseButtonDown","input");
 	medea_api("IsKeyDown","input");
-	medea_api("IsKeyDownWasUp","input");
 	medea_api("GetMousePosition","input");
 	medea_api("GetMouseDelta","input");
 
