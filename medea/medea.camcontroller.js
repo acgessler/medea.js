@@ -220,10 +220,9 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		panning_mouse_buttons : [1,2],
 
 
-		init : function(enabled) {
+		init : function(enabled, initial_rot_phi, initial_rot_theta) {
 			this._super(enabled);
-			
-			this.Reset();
+			this.Reset(initial_rot_phi, initial_rot_theta);
 		},
 
 
@@ -242,9 +241,17 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		PanningMouseButtons : medea._GetSet('panning_mouse_buttons'),
 
 
-		Reset : function() {
+		Reset : function(initial_rot_phi, initial_rot_theta) {
 
-			this.view = mat4.identity(mat4.create()); // TODO: set initial state
+			this.view = mat4.identity(mat4.create()); 
+			if(initial_rot_phi) {
+				mat4.rotateY(this.view, initial_rot_phi);
+			}
+		
+			if(initial_rot_theta) {
+				mat4.rotateX(this.view, -initial_rot_theta);
+			}
+
 			this.view_with_offset = mat4.identity(mat4.create());
 			this.pan_vector = [0.0,0.0,0.0];
 			this.camera_distance = 2.5;
