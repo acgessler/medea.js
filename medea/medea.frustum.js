@@ -183,7 +183,11 @@ medea._addMod('frustum',[],function(undefined) {
 
 	medea.BBInFrustum = function(f, bb, plane_hint) {
 		if (bb === medea.BB_INFINITE) {
-			return medea.VISIBLE_ALL;
+			// important: if we return medea.VISIBLE_ALL for BB_INFINITE,
+			// then a single element with no well-defined bounding box
+			// would bubble up so the entire scene would be rendered with
+			// no culling at all.
+			return medea.VISIBLE_PARTIAL;
 		}
 
 		if (bb === medea.BB_EMPTY) {
