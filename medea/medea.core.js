@@ -839,6 +839,13 @@ medea = new (function(sdom) {
 
 
 	this._SetFunctionStub = function(name,module_dep) {
+	// #ifdef DEBUG
+			if (this[name]) {
+				medea.DebugAssert("function stub already registered: " + name);
+				return;
+			}
+// #endif
+		
 		_deps[name] = module_dep = module_dep instanceof Array ? module_dep : [module_dep];
 		this[name] = function() {
 // #ifdef DEBUG
@@ -909,7 +916,6 @@ medea = new (function(sdom) {
 
 	medea_api("CreatePassFromShaderPair","material");
 	medea_api("CreateMaterial","material");
-
 	medea_api("CreateSimpleMaterialFromShaderPair","material");
 	medea_api("CreateSimpleMaterialFromColor","material");
 	medea_api("CreateSimpleMaterialFromTexture","material");
