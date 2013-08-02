@@ -12,43 +12,11 @@ medea._addMod('lodtexture',['texture'],function(undefined) {
 
 	var neutral_textures = {}, TEX = gl.TEXTURE_2D;
 
-	var DummyTexture = medea.Resource.extend( {
+	medea._initMod('texture');
+	var DummyTexture = medea.DummyTexture;
+	
 
-		init : function(color) {
-			this.texture = gl.createTexture();
-
-			gl.bindTexture(TEX, this.texture);
-			gl.texImage2D(TEX, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(
-				[
-					Math.floor(color[0]*255),
-					Math.floor(color[1]*255),
-					Math.floor(color[2]*255),
-					Math.floor(color[3]*255)
-				]
-			));
-
-			// #ifdef DEBUG
-			gl.bindTexture(TEX, null);
-			// #endif
-
-			// #ifdef LOG
-			medea.LogDebug("Create neutral 1x1 texture with color: " + color);
-			// #endif
-		},
-
-		GetGlTexture : function() {
-			return this.texture;
-		},
-
-		_Bind : function(slot) {
-			slot = slot || 0;
-			gl.activeTexture(gl.TEXTURE0 + slot);
-			gl.bindTexture(TEX,this.texture);
-			return slot;
-		}
-	});
-
-	var CreateNeutralTexture = function(id) {
+	medea.CreateNeutralTexture = function(id) {
 		if (id === 'normals') {
 			// neutral normal map, i.e. y vector facing upwards as if there
 			// were no normal map at all.
@@ -73,12 +41,13 @@ medea._addMod('lodtexture',['texture'],function(undefined) {
 	};
 
 
-	 medea.LODTexture = medea.Resource.extend( {
+
+	medea.LODTexture = medea.Resource.extend( {
 
 		init : function(tuple, callback, no_client_cache) {
 
 			this.textures = [];
-			this.textures[0] = CreateNeutralTexture(tuple.neutral);
+			this.textures[0] = medea.CreateNeutralTexture(tuple.neutral);
 
 			// load the low-resolution version of the texture and mark the resource
 			// as complete as soon as we have it.

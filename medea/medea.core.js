@@ -926,7 +926,9 @@ medea = new (function(sdom) {
 	medea_api("CreateShader","shader");
 	medea_api("CreateImage","image");
 	medea_api("CreateTexture","texture");
+	medea_api("CreateDefaultTexture","texture");
 	medea_api("CreateLODTexture","lodtexture");
+	medea_api("CreateNeutralTexture","lodtexture");
 	medea_api("CreateCubeTexture","cubetexture");
 
 	medea_api("CreateStandardMesh_Plane","standardmesh");

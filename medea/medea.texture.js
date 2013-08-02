@@ -66,6 +66,44 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 
 	medea.MAX_TEXTURE_SIZE = gl.getParameter(gl.MAX_TEXTURE_SIZE);
 
+
+	medea.DummyTexture = medea.Resource.extend( {
+
+		init : function(color) {
+			this.texture = gl.createTexture();
+
+			gl.bindTexture(TEX, this.texture);
+			gl.texImage2D(TEX, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(
+				[
+					Math.floor(color[0]*255),
+					Math.floor(color[1]*255),
+					Math.floor(color[2]*255),
+					Math.floor(color[3]*255)
+				]
+			));
+
+			// #ifdef DEBUG
+			gl.bindTexture(TEX, null);
+			// #endif
+
+			// #ifdef LOG
+			medea.LogDebug("Create neutral 1x1 texture with color: " + color);
+			// #endif
+		},
+
+		GetGlTexture : function() {
+			return this.texture;
+		},
+
+		_Bind : function(slot) {
+			slot = slot || 0;
+			gl.activeTexture(gl.TEXTURE0 + slot);
+			gl.bindTexture(TEX,this.texture);
+			return slot;
+		}
+	});
+
+
 	medea.Texture = medea.Image.extend( {
 
 		init : function(src_or_img, callback, flags, format, force_width, force_height) {
@@ -243,6 +281,15 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 
 	medea.CreateTexture = function(src_or_image, callback, flags, format, force_width, force_height) {
 		return new medea.Texture(src_or_image, callback, flags, format, force_width, force_height);
+	}
+
+	var default_texture = null;
+	medea.GetDefaultTexture = function() {
+		if (!default_texture ) {
+			// TODO: use signal color for debug builds
+			default_texture = new medea.DummyTexture([0.3,0.3,0.3,1.0]);
+		}
+		return default_texture;
 	}
 });
 
