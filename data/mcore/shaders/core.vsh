@@ -67,7 +67,7 @@
 	
 	/** */
 #define PassPosition(vec3_world_position) \
-	PassVec3(Position, vec3_world_position)
+	PassVec3(WorldPosition, vec3_world_position)
 	
 	/** */
 #define PassNormal(vec3_world_normal) \
