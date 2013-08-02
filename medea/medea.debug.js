@@ -6,9 +6,11 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('debug',['visualizer', 'input'],function() {
+medea._addMod('debug',['visualizer', 'input_handler'],function() {
 	"use strict";
 	var medea = this;
+
+	var input_handler = medea.CreateInputHandler();
 
 	medea._CanvasUtilFillTextMultiline = function(context,text,x,y,lineheight) {
 		lineheight = lineheight || parseInt(context.font)+2;
@@ -159,7 +161,7 @@ medea._addMod('debug',['visualizer', 'input'],function() {
 			ctx.restore();
 
 			// P to toggle wireframe mode
-			if(medea.IsKeyDownWasUp(80,this.input)) {
+			if(input_handler.ConsumeKeyDown(80)) {
 				// #ifdef LOG
 				medea.LogDebug("debugview: toggle wireframe");
 				// #endif LOG
@@ -167,11 +169,11 @@ medea._addMod('debug',['visualizer', 'input'],function() {
 			}
 
 			// N to show normals
-			if(medea.IsKeyDownWasUp(78,this.input)) {
+			if(input_handler.ConsumeKeyDown(78)) {
 				this.ToggleVisualizer('ShowNormals');
 			}
 			// B to show bounding boxes
-			if(medea.IsKeyDownWasUp(66,this.input)) {
+			if(input_handler.ConsumeKeyDown(66)) {
 				this.ToggleVisualizer('ShowBBs', function(vis) {
 					vis.DrawNodes(true);
 					vis.ShowCullState(true);
@@ -220,8 +222,6 @@ medea._addMod('debug',['visualizer', 'input'],function() {
 			for(var i = 0; i < vps.length; ++i) {
 				vps[i].RemoveVisualizer(this.vis[name]);
 			}
-
-			this.vis[name] = null;
 		},
 	});
 });
