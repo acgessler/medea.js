@@ -14,6 +14,8 @@ medea._addMod('camera',['statepool'],function() {
 	medea._CAMERA_DIRTY_VIEW = medea.NODE_FLAG_USER << 1;
 	medea._CAMERA_DIRTY_PROJ = medea.NODE_FLAG_USER << 2;
 
+	var identity = mat4.identity(mat4.create());
+
 
 	// class Camera
 	medea.Camera = medea.Node.extend(
@@ -196,7 +198,7 @@ medea._addMod('camera',['statepool'],function() {
 			// update state pool
 			statepool.Set("V",this.GetViewMatrix());
 			statepool.Set("P",this.GetProjectionMatrix());
-			statepool.Set("W",mat4.identity(mat4.create()));
+			statepool.Set("W",identity);
 
 			statepool.Set("CAM_POS", this.GetWorldPos());
 
