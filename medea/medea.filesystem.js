@@ -6,9 +6,21 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('filesystem',[],function() {
+medea._addMod('filesystem',[],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
+
+	var baked_resources = medea._bakedResources;
+
+	// #ifdef DEBUG
+	if (baked_resources !== undefined) {
+		medea.LogDebug('using embedded resources');
+	}
+	else {
+		medea.LogDebug('embedded resources not available');
+	}
+	// #endif
+
 
 	// find root location for remote files
 	var settings_root = medea.GetSettings()['dataroot'] || 'data';
@@ -231,6 +243,18 @@ medea._addMod('filesystem',[],function() {
 
 	// load a particular resource from any filesystem location
 	medea.Fetch = function(what,callback,onerror) {
+
+		if(baked_resources !== undefined) {
+			var entry = baked_resources[what];
+			if(entry !== undefined) {
+				// #ifdef DEBUG
+				medea.LogDebug('resource is embedded: ' + what);
+				// #endif
+				callback(entry);
+				return;
+			}
+		}
+
 		var tuple = medea.GetFileSystemHandler(what);
 		if (!tuple) {
 			onerror('no handler found for this filesystem location');
