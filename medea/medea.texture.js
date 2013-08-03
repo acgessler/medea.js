@@ -70,6 +70,8 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 	medea.DummyTexture = medea.Resource.extend( {
 
 		init : function(color) {
+			// this marks the resource as complete and disables delay init
+			this._super(); 
 			this.texture = gl.createTexture();
 
 			gl.bindTexture(TEX, this.texture);
@@ -179,7 +181,7 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 		},
 
 		IsRenderable : function() {
-			return this.IsComplete() && this.IsUploaded();
+			return this.IsComplete() && (this.uploaded || !medea.EnsureIsResponsive());
 		},
 
 		_Upload : function() {
@@ -270,18 +272,22 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 			this.uploaded = true;
 		},
 
+ 
+
 		_Bind : function(slot) {
 			if (!this.IsComplete()) {
-				return;
-			}
-
+				return null;
+			} 
 			slot = slot || 0;
 
 			gl.activeTexture(gl.TEXTURE0 + slot);
 			gl.bindTexture(TEX,this.texture);
 
 			// no texture uploads while responsiveness is important
-			if (!this.uploaded && !medea.EnsureIsResponsive()) {
+			if (!this.uploaded) {
+				if(medea.EnsureIsResponsive()) {
+					return null;
+				}
 				this._Upload();
 			}
 			return slot;

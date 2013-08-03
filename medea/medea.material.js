@@ -308,12 +308,20 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 							curval = medea.GetDefaultTexture();
 						}
 
+						// #ifdef DEBUG
+						medea.DebugAssert(curval.IsRenderable(), 
+							'invariant, texture must be renderable');
+						// #endif
+
 						state = state.GetQuick('_gl');
 						state.texage = state.texage || 0;
 
 						// check if this texture is already active, if not get rid of the
 						// oldest texture in the sampler cache.
-						var slots = state.tex_slots || new Array(6), oldest = state.texage+1, oldesti = 0, curgl = curval.GetGlTexture();
+						var slots = state.tex_slots || new Array(6);
+						var oldest = state.texage+1;
+						var oldesti = 0;
+						var curgl = curval.GetGlTexture();
 
 						for(var i = 0; i < slots.length; ++i) {
 							if (!slots[i]) {
@@ -325,7 +333,13 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 								// XXX why do we need _Bind() here? Setting the index should suffice
 								// since the texture is already set.
-								gl.uniform1i(pos, curval._Bind(i));
+								var res = curval._Bind(i);
+								// #ifdef DEBUG
+								medea.DebugAssert(res !== null, 
+									'invariant, bind should not fail (2)');
+								// #endif
+
+								gl.uniform1i(pos, res);
 								return;
 							}
 							else if ( slots[i][0] < oldest && oldest !== state.texage+2) {
@@ -335,8 +349,13 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 						}
 
 						slots[oldesti] = [state.texage++,curgl];
-						gl.uniform1i(pos, curval._Bind(oldesti));
+						var res = curval._Bind(oldesti);
+						// #ifdef DEBUG
+						medea.DebugAssert(res !== null, 
+							'invariant, bind should not fail (1)');
+						// #endif
 
+						gl.uniform1i(pos, res);
 						state.tex_slots = slots;
 					}];
 

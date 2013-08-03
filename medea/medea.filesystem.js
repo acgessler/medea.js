@@ -63,6 +63,11 @@ medea._addMod('filesystem',[],function(undefined) {
 	medea.Resource = medea.Class.extend({
 
 		init : function(src, callback) {
+			if(!src) {
+				this.complete = true;
+				this.src = '';
+				return;
+			}
 			this.callback = callback;
 			this.complete = false;
 			this.src = src;
