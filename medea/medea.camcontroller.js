@@ -72,14 +72,15 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 
 		ProcessMouse : function(dtime, node) {
 			var d = medea.GetMouseDelta();
+			var responsive = false;
 			if(d[2] !== this.last_processed_mdelta) {
-			
-				var prev = medea.EnsureIsResponsive();
 				if (this._ShouldHandleMouseMovements()) {
-					medea.EnsureIsResponsive(true);
+					if (d[0] !== 0 || d[1] !== 0) {
+						responsive = true;
+					}
 					this.ProcessMouseDelta(dtime, node, d);
 				}
-				medea.EnsureIsResponsive(prev);
+				
 				this.last_processed_mdelta = d[2];
 			}
 
@@ -87,6 +88,17 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			if(d[1] !== this.last_processed_mwdelta) {
 				this.ProcessMouseWheel(dtime, node, d[0]);
 				this.last_processed_mwdelta = d[1];
+				if(d[0] !== 0) {
+					responsive = true;
+				}
+			}
+
+			if(responsive) {
+				this._prev_responsive_state = false;
+				medea.EnsureIsResponsive(true);
+			}
+			else if(this._prev_responsive_state !== undefined) {
+				medea.EnsureIsResponsive(this._prev_responsive_state);
 			}
 		},
 		
@@ -144,14 +156,14 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			var mrot = this.scratch_mat;
 
 			// process mouse movement on the y axis
-			if(d[1]) {
+			if(d[1] !== 0) {
 				mrot = mat4.rotate(mat4.identity(mrot),-d[1]*this.turn_speed,n.LocalXAxis());
 				n.LocalYAxis(mat4.multiplyVec3(mrot,n.LocalYAxis()));
 				n.LocalZAxis(mat4.multiplyVec3(mrot,n.LocalZAxis()));
 			}
 
 			// process mouse movement on the x axis
-			if(d[0]) {
+			if(d[0] !== 0) {
 				mrot = mat4.rotate(mat4.identity(mrot),-d[0]*this.turn_speed,[0,1,0]);
 				n.LocalYAxis(mat4.multiplyVec3(mrot,n.LocalYAxis()));
 				n.LocalZAxis(mat4.multiplyVec3(mrot,n.LocalZAxis()));
@@ -309,12 +321,12 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 
 		ProcessMouseDelta : function(dtime, node, d) {
 			// process mouse movement on the x axis
-			if(d[0]) {
+			if(d[0] !== 0) {
 				mat4.rotateY(this.view, -d[0]*this.turn_speed);
 			}
 			
 			// process mouse movement on the y axis
-			if(d[1]) {
+			if(d[1] !== 0) {
 				mat4.rotateX(this.view, -d[1]*this.turn_speed);
 			}
 
@@ -409,7 +421,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 		ProcessMouseDelta : function(dtime, n, d) {
 			
 			// process mouse movement on the x axis
-			if(d[0]) {
+			if(d[0] !== 0) {
 				var mrot = mat4.rotate(mat4.identity(mat4.create()),d[0]*this.turn_speed,[0,1,0]);
 				n.LocalYAxis(mat4.multiplyVec3(mrot,n.LocalYAxis()));
 				n.LocalZAxis(mat4.multiplyVec3(mrot,n.LocalZAxis()));
