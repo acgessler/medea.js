@@ -304,7 +304,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 						// texture object only exists in the Set() closure.
 						var curval = val;
 
-						if (!(curval instanceof medea.Resource) || !curval.IsComplete()) {
+						if (!(curval instanceof medea.Resource) || !curval.IsRenderable()) {
 							curval = medea.GetDefaultTexture();
 						}
 

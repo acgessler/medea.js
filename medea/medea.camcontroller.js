@@ -74,9 +74,12 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 			var d = medea.GetMouseDelta();
 			if(d[2] !== this.last_processed_mdelta) {
 			
+				var prev = medea.EnsureIsResponsive();
 				if (this._ShouldHandleMouseMovements()) {
+					medea.EnsureIsResponsive(true);
 					this.ProcessMouseDelta(dtime, node, d);
 				}
+				medea.EnsureIsResponsive(prev);
 				this.last_processed_mdelta = d[2];
 			}
 

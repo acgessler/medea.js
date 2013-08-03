@@ -151,7 +151,7 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 				// #endif
 			}
 
-			if (!(this.flags & medea.TEXTURE_FLAG_LAZY_UPLOAD)) {
+			if (!(this.flags & medea.TEXTURE_FLAG_LAZY_UPLOAD) && !medea.EnsureIsResponsive()) {
 				this._Upload();
 			}
 
@@ -172,6 +172,14 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 
 		GetGlTexture : function() {
 			return this.texture;
+		},
+
+		IsUploaded : function() {
+			return this.uploaded;
+		},
+
+		IsRenderable : function() {
+			return this.IsComplete() && this.IsUploaded();
 		},
 
 		_Upload : function() {
@@ -272,7 +280,8 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 			gl.activeTexture(gl.TEXTURE0 + slot);
 			gl.bindTexture(TEX,this.texture);
 
-			if (!this.uploaded) {
+			// no texture uploads while responsiveness is important
+			if (!this.uploaded && !medea.EnsureIsResponsive()) {
 				this._Upload();
 			}
 			return slot;

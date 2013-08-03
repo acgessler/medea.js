@@ -358,7 +358,13 @@ medea = new (function(sdom) {
 		} catch(e) {}
 	};
 
-
+	var should_be_responsive = false;
+	this.EnsureIsResponsive = function(enabled) {
+		if (enabled === undefined) {
+			return should_be_responsive;
+		}
+		should_be_responsive = enabled;
+	}
 
 	this.SetDebugPanel = function(where) {
 		this._Require("debug");

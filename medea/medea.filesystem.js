@@ -82,6 +82,10 @@ medea._addMod('filesystem',[],function(undefined) {
 			return this.complete;
 		},
 
+		IsRenderable : function() {
+			return this.IsComplete();
+		},
+
 		OnDelayedInit : function() {
 			this.complete = true;
 

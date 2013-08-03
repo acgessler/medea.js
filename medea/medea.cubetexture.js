@@ -115,6 +115,14 @@ medea._addMod('cubetexture',['filesystem'],function(undefined) {
 			return true;
 		},
 
+		IsUploaded : function() {
+			return this.uploaded;
+		},
+
+		IsRenderable : function() {
+			return this.IsComplete() && this.IsUploaded();
+		},
+
 		_Upload : function() {
 			if (this.uploaded) {
 				return;
@@ -166,7 +174,8 @@ medea._addMod('cubetexture',['filesystem'],function(undefined) {
 			gl.activeTexture(gl.TEXTURE0 + slot);
 			gl.bindTexture(CUBE,this.texture);
 
-			if (!this.uploaded) {
+			// no texture uploads while responsiveness is important
+			if (!this.uploaded && !medea.EnsureIsResponsive()) {
 				this._Upload();
 			}
 
