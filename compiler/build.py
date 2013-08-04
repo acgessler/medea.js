@@ -4,11 +4,23 @@ import re
 import os
 import shutil
 
+primary_compiled_file = 'medea.core-compiled.js'
+
+
 def get_full_file_name(file):
 	# the rules for module names are simple - if the full .js file name
 	# is given, we load it directly. Otherwise, we assume it is a medea
 	# module of the given name and derive the file name from it.
 	return ('medea.' + file + '.js') if not ".js" in file else file
+
+
+def get_google_closure_params():
+	# ADVANCED_OPTIMIZATIONS breaks the medea module dependency system.
+	# TODO: might be possible to fix this, though.
+	return  '// ==ClosureCompiler==\n' +\
+			'// @output_file_name {0}\n'.format(primary_compiled_file[:-2] + 'min.js') +\
+			'// @compilation_level SIMPLE_OPTIMIZATIONS\n' +\
+			'// ==/ClosureCompiler==\n\n'
 
 
 def get_license():
@@ -112,7 +124,8 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 	print('writing medea.core-compiled.js')
 	
 	# generate medea.core-compiled.js output file
-	with open(os.path.join(output_folder, 'medea.core-compiled.js'), 'wt') as outp:
+	with open(os.path.join(output_folder, primary_compiled_file), 'wt') as outp:
+		outp.write(get_google_closure_params())
 		outp.write(get_license())
 		outp.write('medea_is_compiled = true;');
 		for n, dep in enumerate(topo_order):
