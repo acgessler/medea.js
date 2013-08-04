@@ -117,11 +117,19 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		})(i);
 	}
 
+	// TODO: point and spot lights
 
-	// class Pass
+
+	/** @class medea.Pass 
+     *
+     *
+     *
+	 */
 	medea.Pass = medea.Class.extend({
 
 
+		/** @name medea.Pass.init(*) 
+		 */
 		init : function(vs,ps,constants,attr_map,state) {
 			this.vs = vs;
 			this.ps = ps;
@@ -141,6 +149,13 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		},
 
 
+
+		/** @name medea.Pass.Begin(*)
+		 *
+		 *  
+		 *
+		 *  @param statepool 
+		 */
 		Begin : function(statepool) {
 			if (this.program === null) {
 				this._TryAssembleProgram();
@@ -633,6 +648,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				this.name = name;
 			}
 
+			// the first parameter can also be a MaterialGenerator
 			if (passes.Update !== undefined) {
 				this.mat_gen = passes;
 				this.passes = [];

@@ -27,7 +27,7 @@ medea._addMod('camcontroller',['entity','input'],function(undefined) {
 	var medea = this;
 
 	medea._initMod('entity');
-	
+	 
 	
 	medea.CamController = medea.Entity.extend({
 
