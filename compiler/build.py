@@ -11,6 +11,12 @@ def get_full_file_name(file):
 	return ('medea.' + file + '.js') if not ".js" in file else file
 
 
+def get_license():
+	with open( 'LICENSE', 'rt') as inp:
+		# the @license tag instructs minifiers not to strip the comment
+		return "/** @license\n" + inp.read() + '\n*/'
+
+
 def javascript_string_escape(s):
 	# TODO: this does not catch everything.
 	escaped = s.replace('\\','\\\\') 
@@ -100,7 +106,6 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 
 	print('deriving topological order of collated modules')
 
-	# awesome O(n^2) algorithm for generating a topological order
 	# pre-define sprintf, matrix and the core module as they do not follow the 
 	# usual module dependency system.
 	topo_order = derive_topological_order(['sprintf-0.7.js','glMatrix.js', 'medea.core.js'],mods_by_deps)
@@ -108,6 +113,7 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 	
 	# generate medea.core-compiled.js output file
 	with open(os.path.join(output_folder, 'medea.core-compiled.js'), 'wt') as outp:
+		outp.write(get_license())
 		outp.write('medea_is_compiled = true;');
 		for n, dep in enumerate(topo_order):
 			path = os.path.join(input_folder, dep);
