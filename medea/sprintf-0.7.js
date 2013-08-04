@@ -26,8 +26,9 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+**/
 
-
+/*
 Changelog:
 2010.09.06 - 0.7-beta1
   - features: vsprintf, support for named placeholders
@@ -56,7 +57,7 @@ Changelog:
 
 2007.04.03 - 0.1:
  - initial release
-**/
+*/
 
 var sprintf = (function() {
 	function get_type(variable) {
