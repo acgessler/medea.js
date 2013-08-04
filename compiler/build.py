@@ -154,9 +154,3 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 			print('copying ' + file + ' to output folder')
 			shutil.copy2(os.path.join(input_folder, file), os.path.join(output_folder, file))
 
-if __name__ == "__main__":
-	if len(sys.argv) < 3:
-		print('usage: build.py [output-folder] [modules-to-compact...]')
-		sys.exit(-1)
-
-	run('medea', sys.argv[1], sys.argv[2:])
