@@ -48,7 +48,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 
 			this.listeners = {
 				'OnUpdateGlobalTransform' : {},
-				'OnUpdateBB' : {},
+				'OnUpdateBB' : {}
 			};
 
 			this.lmatrix = mat4.identity(mat4.create());
@@ -470,7 +470,7 @@ medea._addMod('node',['frustum'],function(undefined) {
 					l[k].apply(this,arguments);
 				}
 			}
-		},
+		}
 	});
 
 	//

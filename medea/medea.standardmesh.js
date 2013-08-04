@@ -25,7 +25,7 @@ medea._addMod('standardmesh',['mesh'],function(undefined) {
 			  -1.0, 0.0, -1.0,
 			   1.0, 0.0, -1.0,
 			   1.0, 0.0,  1.0,
-			  -1.0, 0.0,  1.0,
+			  -1.0, 0.0,  1.0
 		], // !pos
 
 		uvs: [[
@@ -33,12 +33,12 @@ medea._addMod('standardmesh',['mesh'],function(undefined) {
 			0.0,  0.0,
 			1.0,  0.0,
 			1.0,  1.0,
-			0.0,  1.0,
+			0.0,  1.0
 			]]
 		},
 			 // indices
 			[
-				0, 1, 2,     0, 2, 3,   // bottom
+				0, 1, 2,     0, 2, 3   // bottom
 			],
 		color_or_material || [1.0,0.0,0.0]);
 	};
@@ -90,8 +90,8 @@ medea._addMod('standardmesh',['mesh'],function(undefined) {
 				  -1.0, -1.0, -1.0,
 				  -1.0, -1.0,  1.0,
 				  -1.0,  1.0,  1.0,
-				  -1.0,  1.0, -1.0,
-			], // !pos
+				  -1.0,  1.0, -1.0
+			] // !pos
 		};
 		
 		if(flags & medea.STANDARD_MESH_UVS) {
@@ -166,7 +166,7 @@ medea._addMod('standardmesh',['mesh'],function(undefined) {
 				  -1.0, 0.0, 0.0,
 				  -1.0, 0.0, 0.0,
 				  -1.0, 0.0, 0.0,
-				  -1.0, 0.0, 0.0,
+				  -1.0, 0.0, 0.0
 				];
 		}
 		else if(flags & medea.STANDARD_MESH_SMOOTH_NORMALS) {

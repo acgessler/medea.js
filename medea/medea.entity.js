@@ -80,7 +80,7 @@ medea._addMod('entity',[],function() {
 		_AutoGenBB : function() {
 			// deriving classes should supply a more meaningful implementation
 			this.bb = medea.BB_INFINITE;
-		},
+		}
 	});
 
 	medea.CreateEntity = function(name) {

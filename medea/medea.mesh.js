@@ -60,7 +60,7 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 
 		MaterialId : function() {
 			return this.mesh.material.GetId();
-		},
+		}
 	});
 
 
@@ -220,7 +220,7 @@ medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function
 
 		_AutoGenBB : function() {
 			this.bb = this.vbo.GetMinMaxVerts();
-		},
+		}
 	});
 	
 	

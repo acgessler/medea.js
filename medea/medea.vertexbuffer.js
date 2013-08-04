@@ -359,7 +359,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 
 		GetMinMaxVerts : function() {
 			return this.minmax;
-		},
+		}
 
 	});
 
@@ -518,7 +518,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 			this.state_closure.forEach(function(e) {
 				e(attrMap, statepool);
 			});
-		},
+		}
 	});
 
 

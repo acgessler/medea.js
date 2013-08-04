@@ -42,7 +42,7 @@ medea._addMod('statepool',[],function(undefined) {
 		"WI": function(statepool, old) {
 			return mat4.inverse(statepool.GetQuick("W"),
 				old || mat4.create());
-		},
+		}
 	};
 
 	// class StatePool

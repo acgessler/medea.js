@@ -118,7 +118,7 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 
 		GetEntries : function() {
 			return this.entries;
-		},
+		}
 	});
 
 
@@ -189,7 +189,7 @@ medea._addMod('renderqueue',['renderstate'],function(undefined) {
 
 		GetQueues : function() {
 			return this.queues;
-		},
+		}
 	});
 
 
