@@ -1,37 +1,40 @@
 medea.js
 ========
 
-#### A powerful yet simple WebGL-based 3D engine ####
+#### High-performance WebGL-based 3D engine ####
 
-medea is a scenegraph-based, lightweight and extremely straightforward 3D engine. Obviously it is written in _Javascript_.
+medea is a scenegraph-based, lightweight and highly optimized 3D engine for JavaScript. While all planned features are not yet implemented, the framework is ready for productive use. In a long-term view, the library aims to be a solid, industry-strength platform for use of 3D content on the web.
 
-It is currently in active development, but I try to keep the trunk constantly alive and the API relatively stable, so there is no need to be scared off. 
-Things I focus on: 
+**Major design goals**:
 
+ - _Data-driven material system_ supporting automatic dynamic lighting and shadowing. The framework abstracts both forward and deferred lighting methods while still offering full flexibility to shader authors.
  - _Asynchronous and progressive loading_ to minimize 'hard' loading times.
- - Data-driven _effect framework_ supporting stuff like automatic dynamic lighting whilst still offering a high degree of
-   flexibility to shader authors.
+ - Optimized _scene management and visibility detection_ to minimize rendering time.
  - _Offline content processing_ to save as much bandwidth and runtime overhead as possible. For instance <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
-  (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) is used to import geometry from douzens of common (and also not-so-common) 3D model formats.
- - _Automatic detail management_ so medea-based applications can scale to
-   all platforms, including mobile devices. This is clearly the most difficult point on the list, but also the one of which I believe that developers would benefit the most from.
- 
-Medea's basic structure is very similar to that of other, non browser-based 3D engines (i.e. Ogre), so anyone with some experience in 3D programming will 
-need little time to get to work with it. 
+  (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) is used to import geometry from about thirty 3D model formats.
+ - _Automatic detail management_ so medea-based applications can scale to all platforms, including mobile devices.
+
+
 
 ### Media ###
 
-At the time being there's only a rather boring video showing medea's experimental terrain system.
+A rather boring video showing medea's experimental terrain system (<a href="http://www.youtube.com/watch?v=VGLvI7iFjsE">youtube</a>).
 
 <a href="http://www.youtube.com/watch?v=VGLvI7iFjsE"><img src="http://acgessler.github.com/medea.js/media/splash1.PNG" alt="terrain scene"></a>
 
-_More screenshots will soon be added right here._
+Crytek's Sponza Test Scene with dynamic lighting without shadows running in fullscreen mode (loaded via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>).
 
+<img src="http://www10.pic-upload.de/04.08.13/telps3yuwbt2.png"> </img>
 
+### Documentation ###
 
-### Usage ###
+Medea's basic structure is very similar to that of other, non-browser-based 3D engines, so anyone with some experience in 3D programming will not need much time to get to work with it. 
 
-This is effectively the whole code for the terrain in the video above.
+Documentation will soon be available; for now, have a look at the `samples/` folder.
+
+### Usage Sample ###
+
+This is effectively the whole code for the terrain in the above video.
 
 ```javascript
 medea.Ready("canvas",{dataroot:'../../data'},['camcontroller'],function() {
@@ -48,7 +51,7 @@ medea.Ready("canvas",{dataroot:'../../data'},['camcontroller'],function() {
 	viewport.Camera(cam);
 	
 	// add a first-person-style camera controller (i.e. input handler).
-	// camera controllers are so called entities and can be attached to
+	// camera controllers are entities and can be attached to
 	// arbitrary nodes, not only cameras.
 	var cam_controller = medea.CreateCamController('fps');
 	cam.AddEntity(cam_controller);
@@ -69,13 +72,26 @@ medea.Ready("canvas",{dataroot:'../../data'},['camcontroller'],function() {
 		});
 	});
 	
-	// add skydome
+	// add skydome (the texture will be fetched in the background)
 	medea.FetchMods('skydome',function() {
 		root.AddChild(medea.CreateSkydomeNode('remote:skydome_sample/midmorning/midmorning.png',0.4));
 	});
 }
 ```
 
+### Deployment ###
 
+The `compile.py` script is used to compile all the medea modules that are needed by an application into one file. It optionally embeds textual resources, such as shaders, into the compiled package. The resulting files can then be minified using standard JS minifiers (i.e. `Uglify`).
 
+An _average_ medea distribution is only about `120 KiB`.
+
+### License ###
+
+The license of medea is based on a 3-clause BSD-style license. This means, you are free to use medea even in your commercial websites provided the copyright notice, conditions and disclaimer of the license are included. 
+
+See the `LICENSE file for the full wording.
+
+### Contributions ###
+
+Are very welcome! Fork it on Github, and do a pull request against the main repository.
 
