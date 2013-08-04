@@ -27,7 +27,7 @@ medea._addMod('renderstate',[],function(undefined) {
 		'greater' 		: gl.GREATER,
 		'greater_equal' : gl.GEQUAL,
 		'not_equal' 	: gl.NOTEQUAL,
-		'always'		: gl.ALWAYS,
+		'always'		: gl.ALWAYS
 	};
 
 	var cfm_table = {
@@ -48,7 +48,7 @@ medea._addMod('renderstate',[],function(undefined) {
 		'cull_face'  :  function(v) { setsimple(gl.CULL_FACE,v); },
 		'cull_face_mode'  :  function(v) {
 			gl.cullFace(cfm_table[v]);
-		},
+		}
 	};
 
 

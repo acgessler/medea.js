@@ -161,7 +161,7 @@ medea._addMod('shader',['filesystem','cpp.js'],function(undefined) {
 
 					top_level_decls.push(r[1]);
 					return true;
-				},
+				}
 			};
 
 			var cpp = cpp_js(settings);
@@ -199,7 +199,7 @@ medea._addMod('shader',['filesystem','cpp.js'],function(undefined) {
 				}
 			}
 			return o;
-		},
+		}
 	});
 
 	medea.CreateShader = function(res, defines, callback) {

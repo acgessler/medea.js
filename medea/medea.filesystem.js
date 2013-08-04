@@ -308,7 +308,7 @@ medea._addMod('filesystem',[],function(undefined) {
 
 	// default file system handlers
 	medea._fs_handlers = [
-		new medea.DocumentFileSystemHandler(),
+		new medea.DocumentFileSystemHandler()
 	];
 
 	medea.AddFileSystemHandler(new medea.HTTPRemoteFileSystemHandler(settings_root, "remote"));

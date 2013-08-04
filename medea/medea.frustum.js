@@ -160,7 +160,7 @@ medea._addMod('frustum',[],function(undefined) {
 			 vp[7] - vp[5],
 			 vp[11] - vp[9],
 			 vp[15] - vp[13]
-			],
+			]
 		];
 
 		for (var i = 0; i < 6; ++i) {

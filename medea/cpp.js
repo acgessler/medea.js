@@ -1,4 +1,4 @@
-/*
+/* @license
 
 cpp.js - Simple implementation of the C Preprocessor in Javascript
 

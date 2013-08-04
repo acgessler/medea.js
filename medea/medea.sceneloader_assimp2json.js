@@ -44,7 +44,7 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functi
 				props['shading_model'] = {
 					3 : 'Phong',
 					4 : 'Blinn',
-					5 : 'Toon',
+					5 : 'Toon'
 				}[prop.value] || 'Gouraud';
 			}
 			else if(prop.key === '$tex.file') {
@@ -56,7 +56,7 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functi
 					5 : 'height',
 					6 : 'normal',
 					7 : 'shininess',
-					8 : 'opacity',
+					8 : 'opacity'
 				}[prop.semantic];
 
 				if(n) {

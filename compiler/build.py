@@ -4,11 +4,29 @@ import re
 import os
 import shutil
 
+primary_compiled_file = 'medea.core-compiled.js'
+
+
 def get_full_file_name(file):
 	# the rules for module names are simple - if the full .js file name
 	# is given, we load it directly. Otherwise, we assume it is a medea
 	# module of the given name and derive the file name from it.
 	return ('medea.' + file + '.js') if not ".js" in file else file
+
+
+def get_google_closure_params():
+	# ADVANCED_OPTIMIZATIONS breaks the medea module dependency system.
+	# TODO: might be possible to fix this, though.
+	return  '// ==ClosureCompiler==\n' +\
+			'// @output_file_name {0}\n'.format(primary_compiled_file[:-2] + 'min.js') +\
+			'// @compilation_level SIMPLE_OPTIMIZATIONS\n' +\
+			'// ==/ClosureCompiler==\n\n'
+
+
+def get_license():
+	with open( 'LICENSE', 'rt') as inp:
+		# the @license tag instructs minifiers not to strip the comment
+		return "/** @license\n" + inp.read() + '\n*/'
 
 
 def javascript_string_escape(s):
@@ -100,14 +118,15 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 
 	print('deriving topological order of collated modules')
 
-	# awesome O(n^2) algorithm for generating a topological order
 	# pre-define sprintf, matrix and the core module as they do not follow the 
 	# usual module dependency system.
 	topo_order = derive_topological_order(['sprintf-0.7.js','glMatrix.js', 'medea.core.js'],mods_by_deps)
 	print('writing medea.core-compiled.js')
 	
 	# generate medea.core-compiled.js output file
-	with open(os.path.join(output_folder, 'medea.core-compiled.js'), 'wt') as outp:
+	with open(os.path.join(output_folder, primary_compiled_file), 'wt') as outp:
+		outp.write(get_google_closure_params())
+		outp.write(get_license())
 		outp.write('medea_is_compiled = true;');
 		for n, dep in enumerate(topo_order):
 			path = os.path.join(input_folder, dep);
@@ -135,9 +154,3 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 			print('copying ' + file + ' to output folder')
 			shutil.copy2(os.path.join(input_folder, file), os.path.join(output_folder, file))
 
-if __name__ == "__main__":
-	if len(sys.argv) < 3:
-		print('usage: build.py [output-folder] [modules-to-compact...]')
-		sys.exit(-1)
-
-	run('medea', sys.argv[1], sys.argv[2:])

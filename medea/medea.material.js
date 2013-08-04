@@ -42,7 +42,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		'mat3'	: gl.BOOL_MAT3,
 		'mat4'	: gl.BOOL_MAT4,
 		'sampler2D'	: gl.SAMPLER_2D,
-		'samplerCube'	: gl.SAMPLER_CUBE,
+		'samplerCube'	: gl.SAMPLER_CUBE
 	};
 
 	var glsl_type_picker = [];
@@ -713,7 +713,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				drawfunc(pass);
 				pass.End();
 			});
-		},
+		}
 	});
 
 	medea.CreateSimpleMaterialFromColor = function(color, dummy_light) {

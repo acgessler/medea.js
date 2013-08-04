@@ -291,7 +291,7 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 				this._Upload();
 			}
 			return slot;
-		},
+		}
 	});
 
 	medea.CreateTexture = function(src_or_image, callback, flags, format, force_width, force_height) {
