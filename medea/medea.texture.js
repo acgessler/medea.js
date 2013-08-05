@@ -46,7 +46,7 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 	medea.TEXTURE_FORMAT_RGB         = 'rgb';
 	medea.TEXTURE_FORMAT_LUM         = 'lum';
 	medea.TEXTURE_FORMAT_LUM_ALPHA   = 'luma';
-
+	medea.TEXTURE_FORMAT_DEFAULT	 = medea.TEXTURE_FORMAT_RGBA;
 
 	var texfmt_to_gl = function(f) {
 		switch(f) {
@@ -104,15 +104,30 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 			return slot;
 		}
 	});
+	
+	var texture_cache = {};
+	var GetTextureCacheName = function(src_url, format, flags) {
+		return src_url + '#' + (format || medea.TEXTURE_FORMAT_DEFAULT) + '#' + (flags || 0);
+	};
+	
+	var GetTextureSizeSuffix = function(w,h) {
+		return '#' + w + '#' + h;
+	};
+	
+	var IsEligibleForCaching = function(flags) {
+		// TODO: a copy-on-write approach could enable caching also for textures
+		// with modifyable source images.
+		return !((flags || 0) & medea.TEXTURE_FLAG_KEEP_IMAGE);
+	};
 
-
+	// TODO: Image should be aggregate, not base class because we dispose of it halfway
 	medea.Texture = medea.Image.extend( {
 
 		init : function(src_or_img, callback, flags, format, force_width, force_height) {
 			this.texture = gl.createTexture();
 			this.glwidth = force_width || -1;
 			this.glheight = force_height || -1;
-			this.format = format || medea.TEXTURE_FORMAT_RGBA;
+			this.format = format || medea.TEXTURE_FORMAT_DEFAULT;
 
 			this._super(src_or_img, callback, flags);
 		},
@@ -155,6 +170,14 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 
 			if (!(this.flags & medea.TEXTURE_FLAG_LAZY_UPLOAD) && !medea.EnsureIsResponsive()) {
 				this._Upload();
+			}
+			
+			// also create a cache entry for this texture
+			if(IsEligibleForCaching(this.flags)) {
+				var name = GetTextureCacheName(this.GetSource(), this.format, this.flags) + 
+					GetTextureSizeSuffix(this.width, this.height);
+					
+				texture_cache[name] = this;
 			}
 
 			medea.LogDebug("successfully loaded texture " + this.GetSource());
@@ -249,6 +272,8 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 				gl.texParameteri(TEX, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
 				gl.generateMipmap(TEX);
 
+				// setup anistropic filter
+				// TODO: quality adjust
 				if (aniso_ext) {
 					gl.texParameterf(gl.TEXTURE_2D, aniso_ext.TEXTURE_MAX_ANISOTROPY_EXT, 
 						max_anisotropy);
@@ -266,7 +291,7 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 
 			// this hopefully frees some memory
 			if (!(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE)) {
-				this.img = null;
+				this.DisposeData();
 			}
 
 			this.uploaded = true;
@@ -293,9 +318,55 @@ medea._addMod('texture',['image','filesystem'],function(undefined) {
 			return slot;
 		}
 	});
+	
 
 	medea.CreateTexture = function(src_or_image, callback, flags, format, force_width, force_height) {
-		return new medea.Texture(src_or_image, callback, flags, format, force_width, force_height);
+		medea.DebugAssert((force_width === undefined) === (force_height === undefined), 
+			'explicit size must always be given for both axes');
+			
+		var create = function() {
+			return new medea.Texture(src_or_image, callback, flags, format, force_width, force_height);
+		};
+		if (!(src_or_image instanceof Image) && IsEligibleForCaching(flags)) {
+			// normalize the resource name as it is used to derive the cache key
+			src_or_image = medea.FixResourceName(src_or_image);
+			
+			var cache_name = GetTextureCacheName(src_or_image, format, flags);
+			var cache_name_w = null;
+		
+			// was a specific texture size requested? If so, check if we have a cache entry 
+			// for exactly this texture size. Such entries are created by Texture.DelayedInit()
+			// once the size of the texture is known.
+			if (force_width !== undefined) {
+				cache_name_w = cache_name + GetTextureSizeSuffix(force_width, force_height);
+				var cache_entry_w = texture_cache[cache_name_w];
+				if(cache_entry_w !== undefined) {
+					medea.LogDebug('texture found in cache (1): ' + src_or_image);
+					return cache_entry_w;
+				}
+			}
+		
+			// check regular cache. This is supposed to be the texture at its default
+			// size, which however is not known before the texture is loaded. Therefore,
+			// there is a small possibility that a texture is loaded twice. Browser
+			// caching should make the effect on the loading time negligible though (
+			// the GL texture gets created twice).
+			var cache_entry = texture_cache[cache_name];
+			if(cache_entry === undefined) {
+				if(cache_name_w !== null) {
+					return texture_cache[cache_name_w] = create();
+				}
+				return texture_cache[cache_name] = create();
+			}
+			
+			if (cache_name_w === null || (force_width === cache_entry.GetWidth() 
+				&& force_height === cache_entry.GetHeight())) {
+				
+				medea.LogDebug('texture found in cache (2): ' + src_or_image);
+				return cache_entry;
+			}
+		}
+		return create();
 	}
 
 	var default_texture = null;

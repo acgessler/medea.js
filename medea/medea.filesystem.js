@@ -47,15 +47,24 @@ medea._addMod('filesystem',[],function(undefined) {
 		else if (s.slice(0,4) === 'url:') {
 			s = s.slice(4);
 		}
+		else {
+			return null;
+		}
 
 		// cleanup URL to avoid trouble in some browsers
-		// a) replace backslashes by forward slashes
-		s = s.replace(/\\/,'/');
-		// b) drop double slashes
-		s =  s.replace(/\/\//,'/');
+		s = medea.FixResourceName(s);
 
 		s = AppendUrlParameters(s);
 		return s;
+	};
+	
+	
+	medea.FixResourceName = function(name) {
+		// a) replace backslashes by forward slashes
+		name = name.replace(/\\/,'/');
+		// b) drop double slashes
+		name = name.replace(/\/\//,'/');
+		return name;
 	};
 	
 
@@ -152,7 +161,6 @@ medea._addMod('filesystem',[],function(undefined) {
 	// class LocalFileSystemHandler
 	var _http_cache = {};
 	medea.HTTPRemoteFileSystemHandler = medea.FileSystemHandler.extend({
-	
 	
 		init : function(root_name, prefix) {
 			this.root = root_name;

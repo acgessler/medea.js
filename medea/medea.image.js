@@ -38,7 +38,11 @@ medea._addMod('image',['filesystem'],function(undefined) {
 
 				// XXX this circumvents the filesystem as we have to rely on the browser's
 				// URl resolution. Find a better solution for this.
-				this.img.src = medea.FixURL(src_or_image);
+				var url = medea.FixURL(src_or_image);
+				medea.DebugAssert(url != null, 
+					"not a valid resource name, probably missing url: prefix? :" + 
+					src_or_image);
+				this.img.src = url;
 			}
 		},
 
@@ -55,11 +59,15 @@ medea._addMod('image',['filesystem'],function(undefined) {
 			medea.LogDebug("successfully loaded raw image " + this.GetSource());
 		},
 		// #endif
+		
+		DisposeData : function() {
+			this.img = null;
+		},
 
 		GetData : function() {
 			// #ifdef DEBUG
 			medea.DebugAssert(this.IsComplete(),'texture not loaded yet');
-			medea.DebugAssert(!!this.img,'image data not present, forgot medea.TEXTURE_FLAG_KEEP_IMAGE flag on texture?');
+			medea.DebugAssert(!!this.img,'image data not present, DisposeData() was called before');
 			// #endif
 
 			if (!this.raw) {
@@ -87,14 +95,14 @@ medea._addMod('image',['filesystem'],function(undefined) {
 
 		IsPowerOfTwo : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: texture not loaded yet');
+			medea.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: image not loaded yet');
 			// #endif
 			return this.ispot;
 		},
 
 		IsSquare : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.IsComplete(),'IsSquare() ist not available: texture not loaded yet');
+			medea.DebugAssert(this.IsComplete(),'IsSquare() ist not available: image not loaded yet');
 			// #endif
 			return this.width === this.height;
 		},
