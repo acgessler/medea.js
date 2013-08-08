@@ -428,6 +428,7 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 			});
 
 			va_ext.bindVertexArrayOES(null);
+			this._vao_attrmap = attrMap;
 		},
 
 		GetBufferId : function() {
