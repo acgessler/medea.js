@@ -699,12 +699,14 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		Name : medea._GetSet(this,'name'),
 
 		Use: function(drawfunc,statepool) {
+			var passes = this.passes;
 			if (this.mat_gen) {
-				this.mat_gen.Update(this.passes);
+				this.mat_gen.Update(passes);
 			}
 
 			// invoke the drawing callback once per pass
-			this.passes.forEach(function(pass) {
+			for(var i = 0, e = passes.length; i < e; ++i) {
+				var pass = passes[i];
 				if(!pass.Begin(statepool)) {
 					// XXX substitute a default material?
 					return;
@@ -712,7 +714,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 				drawfunc(pass);
 				pass.End();
-			});
+			}
 		}
 	});
 
