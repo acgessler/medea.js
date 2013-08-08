@@ -475,17 +475,20 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 					var dirty = false;
 					
 					if(attrMap && cached) {
-						// TODO: better way of doing this?
-						for(var key in attrMap) {
-							if (attrMap[key] !== cached[key]) {
-								dirty = true;
-								break;
+						if (attrMap !== cached) {
+						
+							// TODO: better way of doing this?
+							for(var key in attrMap) {
+								if (attrMap[key] !== cached[key]) {
+									dirty = true;
+									break;
+								}
 							}
-						}
-						for(var key in cached) {
-							if (attrMap[key] !== cached[key]) {
-								dirty = true;
-								break;
+							for(var key in cached) {
+								if (attrMap[key] !== cached[key]) {
+									dirty = true;
+									break;
+								}
 							}
 						}
 					}
