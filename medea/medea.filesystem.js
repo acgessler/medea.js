@@ -62,7 +62,7 @@ medea._addMod('filesystem',[],function(undefined) {
 	// class Resource
 	medea.Resource = medea.Class.extend({
 
-		init : function(src, callback) {
+		init : function(src, callback, do_not_load) {
 			if(!src) {
 				this.complete = true;
 				this.src = '';
@@ -72,15 +72,18 @@ medea._addMod('filesystem',[],function(undefined) {
 			this.complete = false;
 			this.src = src;
 
-			var outer = this;
-			(src instanceof Array ? medea.FetchMultiple : medea.Fetch)(src,
-				function() {
-					outer.OnDelayedInit.apply(outer,arguments);
-				},
-				function(error) {
-					medea.Log('failed to delay initialize resource from ' + src + ', resource remains non-complete: '+error, 'error');
-				}
-			);
+			if (!do_not_load) {
+				var outer = this;
+				(src instanceof Array ? medea.FetchMultiple : medea.Fetch)(src,
+					function() {
+						outer.OnDelayedInit.apply(outer,arguments);
+					},
+					function(error) {
+						medea.Log('failed to delay initialize resource from ' + src + 
+							', resource remains non-complete: '+error, 'error');
+					}
+				);
+			}
 		},
 
 		IsComplete : function() {
