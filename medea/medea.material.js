@@ -127,6 +127,8 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	 */
 	medea.Pass = medea.Class.extend({
 
+		wannabe_clones : null,
+
 
 		/** @name medea.Pass.init(*) 
 		 */
@@ -569,7 +571,8 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 					this._Clone( this.wannabe_clones[i].clone_flags, this.wannabe_clones[i] );
 				}
 
-				delete this.wannabe_clones;
+				// do not delete to avoid changing the hidden class
+				this.wannabe_clones = null;
 			}
 		},
 
