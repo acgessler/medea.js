@@ -140,6 +140,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			this.attr_map = attr_map;
 			this.state = state || {};
 			this.program = null;
+			this.clone_flags = null;
 
 // #ifdef DEBUG
 			if (!vs || !ps) {
@@ -431,7 +432,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		},
 
 		IsClone : function() {
-			return 'clone_flags' in this;
+			return this.clone_flags !== null;
 		},
 
 
