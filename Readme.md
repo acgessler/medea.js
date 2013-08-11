@@ -81,7 +81,7 @@ medea.Ready("canvas",{dataroot:'../../data'},['camcontroller'],function() {
 
 ### Deployment ###
 
-The `compile.py` script is used to compile all the medea modules that are needed by an application into one file. It optionally embeds textual resources, such as shaders, into the compiled package. The resulting files can then be minified using standard JS minifiers (i.e. `Uglify`).
+The `compile.py` script is used to compile all the medea modules that are needed by an application into one file. It optionally embeds textual resources, such as shaders, into the compiled package. The resulting files can then be minified using standard JS minifiers (_Google Closure Compiler_ is recommended because it knows how to keep necessary license headers).
 
 An _average_ medea distribution is only about `120 KiB`.
 
