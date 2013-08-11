@@ -311,91 +311,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 				case gl.SAMPLER_2D:
 				case gl.SAMPLER_CUBE:
-
-					// explicitly bound texture - this is a special case because string values
-					// for texture parameters are not eval()ed but requested as textures from
-					// the server.
-					this.auto_setters[k] = [pos,function(prog,pos,state) {
-						// note: constants[k] is not set to be the texture as it is loaded.
-						// this is because the user expects consistent values with the Get/Set
-						// APIs, so we cannot change the object type in the background. The
-						// texture object only exists in the Set() closure.
-						var curval = val;
-
-						if (!(curval instanceof medea.Resource) || !curval.IsRenderable()) {
-							curval = medea.GetDefaultTexture();
-						}
-
-						// #ifdef DEBUG
-						medea.DebugAssert(curval.IsRenderable(), 
-							'invariant, texture must be renderable');
-						// #endif
-
-						state = state.GetQuick('_gl');
-						state.texage = state.texage || 0;
-
-						// check if this texture is already active, if not get rid of the
-						// oldest texture in the sampler cache.
-						var slots = state.tex_slots || new Array(6);
-						var oldest = state.texage+1;
-						var oldesti = 0;
-						var curgl = curval.GetGlTexture();
-
-						for(var i = 0; i < slots.length; ++i) {
-							if (!slots[i]) {
-								oldest = state.texage+2;
-								oldesti = i;
-							}
-							else if (slots[i][1] === curgl) {
-								slots[i][0] = state.texage++;
-
-								// XXX why do we need _Bind() here? Setting the index should suffice
-								// since the texture is already set.
-								var res = curval._Bind(i);
-								// #ifdef DEBUG
-								medea.DebugAssert(res !== null, 
-									'invariant, bind should not fail (2)');
-								// #endif
-
-								gl.uniform1i(pos, res);
-								return;
-							}
-							else if ( slots[i][0] < oldest && oldest !== state.texage+2) {
-								oldest = slots[i][0];
-								oldesti = i;
-							}
-						}
-
-						slots[oldesti] = [state.texage++,curgl];
-						var res = curval._Bind(oldesti);
-						// #ifdef DEBUG
-						medea.DebugAssert(res !== null, 
-							'invariant, bind should not fail (1)');
-						// #endif
-
-						gl.uniform1i(pos, res);
-						state.tex_slots = slots;
-					}];
-
-					if (typeof val === 'string') {
-						// #ifdef DEBUG
-						medea.LogDebug('create texture for shader uniform with string value: ' + k + ', ' + val);
-						// #endif
-						medea.FetchMods(['texture'], function() {
-							// see note above for why c[k] is not changed
-							val = medea.CreateTexture(val);
-						});
-
-					}
-					else if (typeof val === 'object' && val.low) {
-						// #ifdef DEBUG
-						medea.LogDebug('create lod texture for shader uniform with string value: ' + k + ', ' + val);
-						// #endif
-						medea.FetchMods(['lodtexture'], function() {
-							// see note above for why c[k] is not changed
-							val = medea.CreateLODTexture(val);
-						});
-					}
+					this._SetTexture(k,val,pos);
 					break;
 
 				default:
@@ -420,6 +336,93 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 					handler(prog,pos,state,value);
 				}];
+			}
+		},
+
+		_SetTexture : function(k, val, pos) {
+			// explicitly bound texture - this is a special case because string values
+			// for texture parameters are not eval()ed but requested as textures from
+			// the server.
+			this.auto_setters[k] = [pos,function(prog,pos,state) {
+				// note: constants[k] is not set to be the texture as it is loaded.
+				// this is because the user expects consistent values with the Get/Set
+				// APIs, so we cannot change the object type in the background. The
+				// texture object only exists in the Set() closure.
+				var curval = val;
+
+				if (!(curval instanceof medea.Resource) || !curval.IsRenderable()) {
+					curval = medea.GetDefaultTexture();
+				}
+
+				// #ifdef DEBUG
+				medea.DebugAssert(curval.IsRenderable(), 
+					'invariant, texture must be renderable');
+				// #endif
+
+				state = state.GetQuick('_gl');
+				state.texage = state.texage || 0;
+
+				// check if this texture is already active, if not get rid of the
+				// oldest texture in the sampler cache.
+				var slots = state.tex_slots || new Array(6);
+				var oldest = state.texage+1;
+				var oldesti = 0;
+				var curgl = curval.GetGlTexture();
+
+				for(var i = 0; i < slots.length; ++i) {
+					if (!slots[i]) {
+						oldest = state.texage+2;
+						oldesti = i;
+					}
+					else if (slots[i][1] === curgl) {
+						slots[i][0] = state.texage++;
+
+						// XXX why do we need _Bind() here? Setting the index should suffice
+						// since the texture is already set.
+						var res = curval._Bind(i);
+						// #ifdef DEBUG
+						medea.DebugAssert(res !== null, 
+							'invariant, bind should not fail (2)');
+						// #endif
+
+						gl.uniform1i(pos, res);
+						return;
+					}
+					else if ( slots[i][0] < oldest && oldest !== state.texage+2) {
+						oldest = slots[i][0];
+						oldesti = i;
+					}
+				}
+
+				slots[oldesti] = [state.texage++,curgl];
+				var res = curval._Bind(oldesti);
+				// #ifdef DEBUG
+				medea.DebugAssert(res !== null, 
+					'invariant, bind should not fail (1)');
+				// #endif
+
+				gl.uniform1i(pos, res);
+				state.tex_slots = slots;
+			}];
+
+			if (typeof val === 'string') {
+				// #ifdef DEBUG
+				medea.LogDebug('create texture for shader uniform with string value: ' + k + ', ' + val);
+				// #endif
+				medea.FetchMods(['texture'], function() {
+					// see note above for why c[k] is not changed
+					val = medea.CreateTexture(val);
+				});
+
+			}
+			else if (typeof val === 'object' && val.low) {
+				// #ifdef DEBUG
+				medea.LogDebug('create lod texture for shader uniform with string value: ' + k + ', ' + val);
+				// #endif
+				medea.FetchMods(['lodtexture'], function() {
+					// see note above for why c[k] is not changed
+					val = medea.CreateLODTexture(val);
+				});
 			}
 		},
 
