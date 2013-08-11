@@ -53,39 +53,39 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 
 	var setters = medea.ShaderSetters = {
-		CAM_POS :  function(prog, pos, state) {
+		CAM_POS :  function(pos, state) {
 			gl.uniform3fv(pos, state.GetQuick("CAM_POS"));
 		},
 
-		CAM_POS_LOCAL :  function(prog, pos, state) {
+		CAM_POS_LOCAL :  function(pos, state) {
 			gl.uniform3fv(pos, state.Get("CAM_POS_LOCAL"));
 		},
 
-		WVP :  function(prog, pos, state) {
+		WVP :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WVP"));
 		},
 
-		WIT :  function(prog, pos, state) {
+		WIT :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WIT"));
 		},
 
-		WI :  function(prog, pos, state) {
+		WI :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WI"));
 		},
 
-		VP :  function(prog, pos, state) {
+		VP :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("VP"));
 		},
 
-		W :  function(prog, pos, state) {
+		W :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.GetQuick("W"));
 		},
 
-		V :  function(prog, pos, state) {
+		V :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.GetQuick("V"));
 		},
 
-		P :  function(prog, pos, state) {
+		P :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.GetQuick("P"));
 		}
 	};
@@ -96,7 +96,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	for (var i = 0, e = medea.MAX_DIRECTIONAL_LIGHTS; i < e; ++i) {
 		(function(i) { 
 			// LIGHT_Dn_DIR -- global light direction vector
-			setters["LIGHT_D"+i+"_DIR"] = function(prog, pos, state) {
+			setters["LIGHT_D"+i+"_DIR"] = function(pos, state) {
 				var lights = state.Get("DIR_LIGHTS");
 				if(!lights || lights.length <= i) {
 					// TODO: maybe reset it for debug builds
@@ -106,7 +106,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			};
 
 			// LIGHT_Dn_COLOR -- light color
-			setters["LIGHT_D"+i+"_COLOR"] = function(prog, pos, state) {
+			setters["LIGHT_D"+i+"_COLOR"] = function(pos, state) {
 				var lights = state.Get("DIR_LIGHTS");
 				if(!lights || lights.length <= i) {
 					gl.uniform3fv(pos, zero_light);
@@ -236,9 +236,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				return;
 			}
 
-			var c = this.constants;
-			c[k] = val;
-
+			this.constants[k] = val;
 			if (this.program === null) {
 				// do the real work later when we have the actual program
 				return;
@@ -253,58 +251,58 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			}
 
 			var handler = null;
-			var type = this._GetUniformType(k);
+			var prog = this.program;
 
-			switch(type) {
+			switch(this._GetUniformType(k)) {
 				case gl.FLOAT_VEC4:
-					handler = function(prog, pos, state, curval) {
+					handler = function(pos, state, curval) {
 						gl.uniform4fv(pos, curval );
 					};
 					break;
 				case gl.FLOAT_VEC3:
-					handler = function(prog, pos, state, curval) {
+					handler = function(pos, state, curval) {
 						gl.uniform3fv(pos, curval );
 					};
 					break;
 				case gl.FLOAT_VEC2:
-					handler = function(prog, pos, state, curval) {
+					handler = function(pos, state, curval) {
 						gl.uniform2fv(pos, curval );
 					};
 					break;
 
 				case gl.INT_VEC4:
 				case gl.BOOL_VEC4:
-					handler = function(prog, pos, state, curval) {
+					handler = function(pos, state, curval) {
 						gl.uniform4iv(pos, curval );
 					};
 					break;
 				case gl.INT_VEC3:
 				case gl.BOOL_VEC3:
-					handler = function(prog, pos, state, curval) {
+					handler = function(pos, state, curval) {
 						gl.uniform3iv(pos, curval );
 					};
 					break;
 				case gl.INT_VEC2:
 				case gl.BOOL_VEC2:
-					handler = function(prog, pos, state, curval) {
+					handler = function(pos, state, curval) {
 						gl.uniform2iv(pos, curval );
 					};
 					break;
 
 				case gl.FLOAT_MAT4:
-					handler = function(prog, pos, state,curval) {
+					handler = function(pos, state,curval) {
 						gl.uniformMatrix4fv(pos, false, curval);
 					};
 					break;
 
 				case gl.FLOAT_MAT3:
-					handler = function(prog, pos, state,curval) {
+					handler = function(pos, state,curval) {
 						gl.uniformMatrix3fv(pos, false, curval);
 					};
 					break;
 
 				case gl.FLOAT_MAT2:
-					handler = function(prog, pos, state,curval) {
+					handler = function(pos, state,curval) {
 						gl.uniformMatrix2fv(pos, false, curval);
 					};
 					break;
@@ -320,21 +318,28 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 					// #endif
 			}
 
-			if(handler) {
-				this.auto_setters[k] = [pos,function(prog,pos,state) {
-					var value = c[k];
+			if(!handler) {
+				return;
+			}
 
-					if (typeof value === 'string') {
-						try {
-							value = eval(value);
-						} catch (e) {
-							// #ifdef DEBUG
-							medea.DebugAssert('eval()ing constant failed: ' + e + ' name: ' + k + ', type: ' + type);
-							// #endif
-						}
+			if (typeof value === 'string') {
+				this.auto_setters[k] = [pos,function(pos, state) {
+					var val_eval = null;
+
+					try {
+						val_eval = eval(val);
+					} catch (e) {
+						// #ifdef DEBUG
+						medea.DebugAssert('eval()ing constant failed: ' + e + ' name: ' + k + ', type: ' + type);
+						// #endif
 					}
 
-					handler(prog,pos,state,value);
+					handler(pos,state,val_eval);
+				}];
+			}
+			else {
+				this.auto_setters[k] = [pos, function(pos, state) {
+					handler(pos, state, val);
 				}];
 			}
 		},
@@ -343,7 +348,12 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			// explicitly bound texture - this is a special case because string values
 			// for texture parameters are not eval()ed but requested as textures from
 			// the server.
-			this.auto_setters[k] = [pos,function(prog,pos,state) {
+			var prog = this.program;
+			// #ifdef DEBUG
+			medea.DebugAssert(prog, 'program must exist already');
+			// #endif
+
+			this.auto_setters[k] = [pos,function(pos, state) {
 				// note: constants[k] is not set to be the texture as it is loaded.
 				// this is because the user expects consistent values with the Get/Set
 				// APIs, so we cannot change the object type in the background. The
@@ -410,7 +420,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				medea.LogDebug('create texture for shader uniform with string value: ' + k + ', ' + val);
 				// #endif
 				medea.FetchMods(['texture'], function() {
-					// see note above for why c[k] is not changed
+					// see note above for why this.constants[k] is not changed
 					val = medea.CreateTexture(val);
 				});
 
@@ -420,7 +430,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				medea.LogDebug('create lod texture for shader uniform with string value: ' + k + ', ' + val);
 				// #endif
 				medea.FetchMods(['lodtexture'], function() {
-					// see note above for why c[k] is not changed
+					// see note above for why this.constants[k] is not changed
 					val = medea.CreateLODTexture(val);
 				});
 			}
@@ -583,9 +593,10 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		_SetAutoState : function(statepool) {
 
 			// update shader variables automatically
-			for(var k in this.auto_setters) {
-				var v = this.auto_setters[k];
-				v[1](this.program,v[0],statepool);
+			var setters = this.auto_setters;
+			for(var k in setters) {
+				var v = setters[k];
+				v[1](v[0], statepool);
 			}
 
 			// and apply global state blocks
