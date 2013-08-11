@@ -612,12 +612,13 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 			// further escaping should not be needed, name is required to be
 			// a valid GLSL identifier.
-			try {
-				var typename = (rex.exec(vs) || rex.exec(ps))[1];
-			} catch(e) {
+			var typename = rex.exec(vs) || rex.exec(ps);
+			if(typename === null) {
 				// should not happen
 				medea.DebugAssert('could not find type declaration for uniform: ' + name);
 			}
+
+			typename = typename[1];
 
 			// #ifdef DEBUG
 			medea.DebugAssert(!!typename,"failed to determine data type of shader uniform " + name);
