@@ -915,6 +915,7 @@ medea = new (function(sdom) {
 	medea_api("GetViewports","viewport");
 	medea_api("CreateCameraNode","camera");
 
+	medea_api("FixResourceName","filesystem");
 	medea_api("MakeResource","filesystem");
 	medea_api("Fetch","filesystem");
 	medea_api("FetchMultiple","filesystem");

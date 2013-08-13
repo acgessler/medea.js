@@ -53,39 +53,39 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 
 	var setters = medea.ShaderSetters = {
-		CAM_POS :  function(prog, pos, state) {
+		CAM_POS :  function(pos, state) {
 			gl.uniform3fv(pos, state.GetQuick("CAM_POS"));
 		},
 
-		CAM_POS_LOCAL :  function(prog, pos, state) {
+		CAM_POS_LOCAL :  function(pos, state) {
 			gl.uniform3fv(pos, state.Get("CAM_POS_LOCAL"));
 		},
 
-		WVP :  function(prog, pos, state) {
+		WVP :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WVP"));
 		},
 
-		WIT :  function(prog, pos, state) {
+		WIT :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WIT"));
 		},
 
-		WI :  function(prog, pos, state) {
+		WI :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WI"));
 		},
 
-		VP :  function(prog, pos, state) {
+		VP :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.Get("VP"));
 		},
 
-		W :  function(prog, pos, state) {
+		W :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.GetQuick("W"));
 		},
 
-		V :  function(prog, pos, state) {
+		V :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.GetQuick("V"));
 		},
 
-		P :  function(prog, pos, state) {
+		P :  function(pos, state) {
 			gl.uniformMatrix4fv(pos, false, state.GetQuick("P"));
 		}
 	};
@@ -96,7 +96,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 	for (var i = 0, e = medea.MAX_DIRECTIONAL_LIGHTS; i < e; ++i) {
 		(function(i) { 
 			// LIGHT_Dn_DIR -- global light direction vector
-			setters["LIGHT_D"+i+"_DIR"] = function(prog, pos, state) {
+			setters["LIGHT_D"+i+"_DIR"] = function(pos, state) {
 				var lights = state.Get("DIR_LIGHTS");
 				if(!lights || lights.length <= i) {
 					// TODO: maybe reset it for debug builds
@@ -106,7 +106,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			};
 
 			// LIGHT_Dn_COLOR -- light color
-			setters["LIGHT_D"+i+"_COLOR"] = function(prog, pos, state) {
+			setters["LIGHT_D"+i+"_COLOR"] = function(pos, state) {
 				var lights = state.Get("DIR_LIGHTS");
 				if(!lights || lights.length <= i) {
 					gl.uniform3fv(pos, zero_light);
@@ -117,11 +117,21 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		})(i);
 	}
 
+	// TODO: point and spot lights
 
-	// class Pass
+
+	/** @class medea.Pass 
+     *
+     *
+     *
+	 */
 	medea.Pass = medea.Class.extend({
 
+		wannabe_clones : null,
 
+
+		/** @name medea.Pass.init(*) 
+		 */
 		init : function(vs,ps,constants,attr_map,state) {
 			this.vs = vs;
 			this.ps = ps;
@@ -130,6 +140,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			this.attr_map = attr_map;
 			this.state = state || {};
 			this.program = null;
+			this.clone_flags = null;
 
 // #ifdef DEBUG
 			if (!vs || !ps) {
@@ -141,6 +152,13 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		},
 
 
+
+		/** @name medea.Pass.Begin(*)
+		 *
+		 *  
+		 *
+		 *  @param statepool 
+		 */
 		Begin : function(statepool) {
 			if (this.program === null) {
 				this._TryAssembleProgram();
@@ -218,9 +236,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				return;
 			}
 
-			var c = this.constants;
-			c[k] = val;
-
+			this.constants[k] = val;
 			if (this.program === null) {
 				// do the real work later when we have the actual program
 				return;
@@ -235,149 +251,65 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 			}
 
 			var handler = null;
-			var type = this._GetUniformType(k);
+			var prog = this.program;
 
-			switch(type) {
+			switch(this._GetUniformType(k)) {
 				case gl.FLOAT_VEC4:
-					handler = function(prog, pos, state, curval) {
+					handler = function(pos, state, curval) {
 						gl.uniform4fv(pos, curval );
 					};
 					break;
 				case gl.FLOAT_VEC3:
-					handler = function(prog, pos, state, curval) {
+					handler = function(pos, state, curval) {
 						gl.uniform3fv(pos, curval );
 					};
 					break;
 				case gl.FLOAT_VEC2:
-					handler = function(prog, pos, state, curval) {
+					handler = function(pos, state, curval) {
 						gl.uniform2fv(pos, curval );
 					};
 					break;
 
 				case gl.INT_VEC4:
 				case gl.BOOL_VEC4:
-					handler = function(prog, pos, state, curval) {
+					handler = function(pos, state, curval) {
 						gl.uniform4iv(pos, curval );
 					};
 					break;
 				case gl.INT_VEC3:
 				case gl.BOOL_VEC3:
-					handler = function(prog, pos, state, curval) {
+					handler = function(pos, state, curval) {
 						gl.uniform3iv(pos, curval );
 					};
 					break;
 				case gl.INT_VEC2:
 				case gl.BOOL_VEC2:
-					handler = function(prog, pos, state, curval) {
+					handler = function(pos, state, curval) {
 						gl.uniform2iv(pos, curval );
 					};
 					break;
 
 				case gl.FLOAT_MAT4:
-					handler = function(prog, pos, state,curval) {
+					handler = function(pos, state,curval) {
 						gl.uniformMatrix4fv(pos, false, curval);
 					};
 					break;
 
 				case gl.FLOAT_MAT3:
-					handler = function(prog, pos, state,curval) {
+					handler = function(pos, state,curval) {
 						gl.uniformMatrix3fv(pos, false, curval);
 					};
 					break;
 
 				case gl.FLOAT_MAT2:
-					handler = function(prog, pos, state,curval) {
+					handler = function(pos, state,curval) {
 						gl.uniformMatrix2fv(pos, false, curval);
 					};
 					break;
 
 				case gl.SAMPLER_2D:
 				case gl.SAMPLER_CUBE:
-
-					// explicitly bound texture - this is a special case because string values
-					// for texture parameters are not eval()ed but requested as textures from
-					// the server.
-					this.auto_setters[k] = [pos,function(prog,pos,state) {
-						// note: constants[k] is not set to be the texture as it is loaded.
-						// this is because the user expects consistent values with the Get/Set
-						// APIs, so we cannot change the object type in the background. The
-						// texture object only exists in the Set() closure.
-						var curval = val;
-
-						if (!(curval instanceof medea.Resource) || !curval.IsRenderable()) {
-							curval = medea.GetDefaultTexture();
-						}
-
-						// #ifdef DEBUG
-						medea.DebugAssert(curval.IsRenderable(), 
-							'invariant, texture must be renderable');
-						// #endif
-
-						state = state.GetQuick('_gl');
-						state.texage = state.texage || 0;
-
-						// check if this texture is already active, if not get rid of the
-						// oldest texture in the sampler cache.
-						var slots = state.tex_slots || new Array(6);
-						var oldest = state.texage+1;
-						var oldesti = 0;
-						var curgl = curval.GetGlTexture();
-
-						for(var i = 0; i < slots.length; ++i) {
-							if (!slots[i]) {
-								oldest = state.texage+2;
-								oldesti = i;
-							}
-							else if (slots[i][1] === curgl) {
-								slots[i][0] = state.texage++;
-
-								// XXX why do we need _Bind() here? Setting the index should suffice
-								// since the texture is already set.
-								var res = curval._Bind(i);
-								// #ifdef DEBUG
-								medea.DebugAssert(res !== null, 
-									'invariant, bind should not fail (2)');
-								// #endif
-
-								gl.uniform1i(pos, res);
-								return;
-							}
-							else if ( slots[i][0] < oldest && oldest !== state.texage+2) {
-								oldest = slots[i][0];
-								oldesti = i;
-							}
-						}
-
-						slots[oldesti] = [state.texage++,curgl];
-						var res = curval._Bind(oldesti);
-						// #ifdef DEBUG
-						medea.DebugAssert(res !== null, 
-							'invariant, bind should not fail (1)');
-						// #endif
-
-						gl.uniform1i(pos, res);
-						state.tex_slots = slots;
-					}];
-
-					if (typeof val === 'string') {
-						// #ifdef DEBUG
-						medea.LogDebug('create texture for shader uniform with string value: ' + k + ', ' + val);
-						// #endif
-						medea.FetchMods(['texture'], function() {
-							// see note above for why c[k] is not changed
-							val = medea.CreateTexture(val);
-						});
-
-					}
-					else if (typeof val === 'object' && val.low) {
-						// #ifdef DEBUG
-						medea.LogDebug('create lod texture for shader uniform with string value: ' + k + ', ' + val);
-						// #endif
-						medea.FetchMods(['lodtexture'], function() {
-							// see note above for why c[k] is not changed
-							val = medea.CreateLODTexture(val);
-						});
-					}
+					this._SetTexture(k,val,pos);
 					break;
 
 				default:
@@ -386,22 +318,121 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 					// #endif
 			}
 
-			if(handler) {
-				this.auto_setters[k] = [pos,function(prog,pos,state) {
-					var value = c[k];
+			if(!handler) {
+				return;
+			}
 
-					if (typeof value === 'string') {
-						try {
-							value = eval(value);
-						} catch (e) {
-							// #ifdef DEBUG
-							medea.DebugAssert('eval()ing constant failed: ' + e + ' name: ' + k + ', type: ' + type);
-							// #endif
-						}
+			if (typeof value === 'string') {
+				this.auto_setters[k] = [pos,function(pos, state) {
+					var val_eval = null;
+
+					try {
+						val_eval = eval(val);
+					} catch (e) {
+						// #ifdef DEBUG
+						medea.DebugAssert('eval()ing constant failed: ' + e + ' name: ' + k + ', type: ' + type);
+						// #endif
 					}
 
-					handler(prog,pos,state,value);
+					handler(pos,state,val_eval);
 				}];
+			}
+			else {
+				this.auto_setters[k] = [pos, function(pos, state) {
+					handler(pos, state, val);
+				}];
+			}
+		},
+
+		_SetTexture : function(k, val, pos) {
+			// explicitly bound texture - this is a special case because string values
+			// for texture parameters are not eval()ed but requested as textures from
+			// the server.
+			var prog = this.program;
+			// #ifdef DEBUG
+			medea.DebugAssert(prog, 'program must exist already');
+			// #endif
+
+			this.auto_setters[k] = [pos,function(pos, state) {
+				// note: constants[k] is not set to be the texture as it is loaded.
+				// this is because the user expects consistent values with the Get/Set
+				// APIs, so we cannot change the object type in the background. The
+				// texture object only exists in the Set() closure.
+				var curval = val;
+
+				if (!(curval instanceof medea.Resource) || !curval.IsRenderable()) {
+					curval = medea.GetDefaultTexture();
+				}
+
+				// #ifdef DEBUG
+				medea.DebugAssert(curval.IsRenderable(), 
+					'invariant, texture must be renderable');
+				// #endif
+
+				state = state.GetQuick('_gl');
+				state.texage = state.texage || 0;
+
+				// check if this texture is already active, if not get rid of the
+				// oldest texture in the sampler cache.
+				var slots = state.tex_slots || new Array(6);
+				var oldest = state.texage+1;
+				var oldesti = 0;
+				var curgl = curval.GetGlTexture();
+
+				for(var i = 0; i < slots.length; ++i) {
+					if (!slots[i]) {
+						oldest = state.texage+2;
+						oldesti = i;
+					}
+					else if (slots[i][1] === curgl) {
+						slots[i][0] = state.texage++;
+
+						// XXX why do we need _Bind() here? Setting the index should suffice
+						// since the texture is already set.
+						var res = curval._Bind(i);
+						// #ifdef DEBUG
+						medea.DebugAssert(res !== null, 
+							'invariant, bind should not fail (2)');
+						// #endif
+
+						gl.uniform1i(pos, res);
+						return;
+					}
+					else if ( slots[i][0] < oldest && oldest !== state.texage+2) {
+						oldest = slots[i][0];
+						oldesti = i;
+					}
+				}
+
+				slots[oldesti] = [state.texage++,curgl];
+				var res = curval._Bind(oldesti);
+				// #ifdef DEBUG
+				medea.DebugAssert(res !== null, 
+					'invariant, bind should not fail (1)');
+				// #endif
+
+				gl.uniform1i(pos, res);
+				state.tex_slots = slots;
+			}];
+
+			if (typeof val === 'string') {
+				// #ifdef DEBUG
+				medea.LogDebug('create texture for shader uniform with string value: ' + k + ', ' + val);
+				// #endif
+				medea.FetchMods(['texture'], function() {
+					// see note above for why this.constants[k] is not changed
+					val = medea.CreateTexture(val);
+				});
+
+			}
+			else if (typeof val === 'object' && val.low) {
+				// #ifdef DEBUG
+				medea.LogDebug('create lod texture for shader uniform with string value: ' + k + ', ' + val);
+				// #endif
+				medea.FetchMods(['lodtexture'], function() {
+					// see note above for why this.constants[k] is not changed
+					val = medea.CreateLODTexture(val);
+				});
 			}
 		},
 
@@ -414,7 +445,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		},
 
 		IsClone : function() {
-			return 'clone_flags' in this;
+			return this.clone_flags !== null;
 		},
 
 
@@ -554,16 +585,18 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 					this._Clone( this.wannabe_clones[i].clone_flags, this.wannabe_clones[i] );
 				}
 
-				delete this.wannabe_clones;
+				// do not delete to avoid changing the hidden class
+				this.wannabe_clones = null;
 			}
 		},
 
 		_SetAutoState : function(statepool) {
 
 			// update shader variables automatically
-			for(var k in this.auto_setters) {
-				var v = this.auto_setters[k];
-				v[1](this.program,v[0],statepool);
+			var setters = this.auto_setters;
+			for(var k in setters) {
+				var v = setters[k];
+				v[1](v[0], statepool);
 			}
 
 			// and apply global state blocks
@@ -593,12 +626,13 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 			// further escaping should not be needed, name is required to be
 			// a valid GLSL identifier.
-			try {
-				var typename = (rex.exec(vs) || rex.exec(ps))[1];
-			} catch(e) {
+			var typename = rex.exec(vs) || rex.exec(ps);
+			if(typename === null) {
 				// should not happen
 				medea.DebugAssert('could not find type declaration for uniform: ' + name);
 			}
+
+			typename = typename[1];
 
 			// #ifdef DEBUG
 			medea.DebugAssert(!!typename,"failed to determine data type of shader uniform " + name);
@@ -633,6 +667,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 				this.name = name;
 			}
 
+			// the first parameter can also be a MaterialGenerator
 			if (passes.Update !== undefined) {
 				this.mat_gen = passes;
 				this.passes = [];
@@ -683,12 +718,14 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 		Name : medea._GetSet(this,'name'),
 
 		Use: function(drawfunc,statepool) {
+			var passes = this.passes;
 			if (this.mat_gen) {
-				this.mat_gen.Update(this.passes);
+				this.mat_gen.Update(passes);
 			}
 
 			// invoke the drawing callback once per pass
-			this.passes.forEach(function(pass) {
+			for(var i = 0, e = passes.length; i < e; ++i) {
+				var pass = passes[i];
 				if(!pass.Begin(statepool)) {
 					// XXX substitute a default material?
 					return;
@@ -696,7 +733,7 @@ medea._addMod('material',['shader','texture'],function(undefined) {
 
 				drawfunc(pass);
 				pass.End();
-			});
+			}
 		}
 	});
 
