@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('indexbuffer',[],function(undefined) {
+medea.define('indexbuffer',[],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

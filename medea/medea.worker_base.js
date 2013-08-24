@@ -9,7 +9,7 @@
 try {
 	medea; // this should throw ReferenceError etc. from within a web worker
 
-	medea._addMod('worker_base',[], function() {
+	medea.define('worker_base',[], function() {
 	});
 }
 catch (e) {
@@ -18,7 +18,7 @@ catch (e) {
 	}
 	// subset of medea's core interface that is available to workers
 	medea = {
-		_addMod : function(a,b,clb) {
+		define : function(a,b,clb) {
 			clb.apply(medea);
 		},
 

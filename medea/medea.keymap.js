@@ -5,7 +5,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('keymap',[],function(undefined) {
+medea.define('keymap',[],function(undefined) {
 	"use strict";
 	var medea = this;
 

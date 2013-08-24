@@ -595,7 +595,7 @@ medea = new (function(sdom) {
 
 
 
-	this._addMod = function(name,deps,init,symbols) {
+	this.define = function(name,deps,init,symbols) {
 		if(_stubs[name] !== undefined) {
 			medea.DebugAssert('module already present: ' + name);
 			return;
@@ -741,7 +741,7 @@ medea = new (function(sdom) {
 					document.getElementsByTagName('head')[0].appendChild(sc);
 					*/
 
-					// non medea modules won't call _addMod, so we need to mimic parts of its behaviour
+					// non medea modules won't call define, so we need to mimic parts of its behaviour
 					// to satisfy all listeners and to keep the file from being loaded twice.
 					if(!is_medea_mod) {
 						var w = _waiters[n];

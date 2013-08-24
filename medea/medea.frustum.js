@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('frustum',[],function(undefined) {
+medea.define('frustum',[],function(undefined) {
 	"use strict";
 	var medea = this, min = Math.min, max = Math.max;
 

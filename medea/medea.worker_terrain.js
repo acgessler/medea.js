@@ -10,7 +10,7 @@
  // This file is usable both as regular medea module and as
  // web worker running in parallel to the main page.
 
- medea._addMod('worker_terrain',[],function(undefined) {
+ medea.define('worker_terrain',[],function(undefined) {
 	"use strict";
 	var medea = this;
 

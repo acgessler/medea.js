@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('terrainheightpath',['entity'],function(undefined) {
+medea.define('terrainheightpath',['entity'],function(undefined) {
 	"use strict";
 	var medea = this;
 

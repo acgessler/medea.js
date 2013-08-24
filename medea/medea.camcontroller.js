@@ -22,7 +22,7 @@ medea.CAMCONTROLLER_MOUSE_STYLE_ON_LEFT_MBUTTON = 0x4;
 
 
 
-medea._addMod('camcontroller',['entity','input'],function(undefined) {
+medea.define('camcontroller',['entity','input'],function(undefined) {
 	"use strict";
 	var medea = this;
 

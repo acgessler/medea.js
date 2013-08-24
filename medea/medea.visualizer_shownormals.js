@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('visualizer_shownormals',[ 'visualizer','material'],function() {
+medea.define('visualizer_shownormals',[ 'visualizer','material'],function() {
 	"use strict";
 	var medea = this;
 	var ordinal = 10;

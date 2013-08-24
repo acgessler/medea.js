@@ -5,7 +5,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('mesh',['vertexbuffer','indexbuffer','material','entity'],function(undefined) {
+medea.define('mesh',['vertexbuffer','indexbuffer','material','entity'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('material',['shader','texture'],function(undefined) {
+medea.define('material',['shader','texture'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('lodtexture',['texture'],function(undefined) {
+medea.define('lodtexture',['texture'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
