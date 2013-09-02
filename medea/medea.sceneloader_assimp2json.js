@@ -83,6 +83,13 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functi
 			throw "expect pure, triangulated meshes with only a single type of primitives";
 		}
 
+		// the same applies to the number of unique vertices in the mesh -
+		// with the original assimp2json tool, we can always fit them 
+		// into 16 bit index buffers.
+		if(inmesh.vertices.length >= 65536) {
+			throw "mesh size is too big, need to be able to use 16 bit indices";
+		}
+
 		var indices = new Array(inmesh.faces.length*inmesh.faces[0].length);
 		for(var i = 0, n = 0; i < inmesh.faces.length; ++i) {
 			var f = inmesh.faces[i];
