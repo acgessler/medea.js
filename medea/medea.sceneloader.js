@@ -28,13 +28,18 @@ medea._addMod('sceneloader',['filesystem', 'material'],function(undefined) {
 	};
 
 	//
-	medea.LoadScene = function(src,anchor,format_hint,callback, material_resolver,url_root) {
+	medea.LoadScene = function(src,anchor,format_hint,callback, material_resolver, url_root) {
 		format_hint = format_hint || 'assimp2json';
 		material_resolver = material_resolver || CreateDefaultMaterialResolver(url_root);
 
+		if((new String(format_hint)).slice(0,8) === 'function') {
+			format_hint(src, anchor, callback, material_resolver);
+			return;
+		}
+			
 		// XXX we need better (read: some) error handling here
 		medea._FetchDeps('sceneloader_'+format_hint,function() {
-				medea['_LoadScene_'+format_hint](src,anchor,callback, material_resolver);
+				medea['_LoadScene_'+format_hint](src, anchor, callback, material_resolver);
 		});
 	};
 
