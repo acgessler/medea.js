@@ -27,8 +27,10 @@ medea._addMod('sceneloader',['filesystem', 'material'],function(undefined) {
 		};
 	};
 
-	//
-	medea.LoadScene = function(src,anchor,format_hint,callback, material_resolver, url_root) {
+	/** note: callback is called with either true or false depending whether 
+	 *  loading was successful or not. 
+	 */
+	medea.LoadScene = function(src, anchor, format_hint, callback, material_resolver, url_root) {
 		format_hint = format_hint || 'assimp2json';
 		material_resolver = material_resolver || CreateDefaultMaterialResolver(url_root);
 
@@ -43,18 +45,26 @@ medea._addMod('sceneloader',['filesystem', 'material'],function(undefined) {
 		});
 	};
 
-	//
-	medea.LoadSceneFromResource = function(src,anchor,format_hint,callback, material_resolver) {
+	/** note: callback is called with either true or false depending whether 
+	 *  loading was successful or not. 
+	 */
+	medea.LoadSceneFromResource = function(src, anchor, format_hint, callback, material_resolver) {
 		material_resolver = material_resolver || CreateDefaultMaterialResolver(src.replace(/^(.*[\\\/])?(.*)/,'$1'));
 		medea.Fetch(src,function(data) {
-			medea.LoadScene(data,anchor,format_hint,function() {
+			if(!data) {
+				callback(false);
+				return;
+			}
+			medea.LoadScene(data,anchor,format_hint,function(status) {
+				if(!status) {
+					callback(false);
+					return;
+				}
 				// #ifdef LOG
 				medea.LogDebug("sceneloader: scene hierarchy is present, but dependent resources may still be pending: " + src);
 				// #endif
-				callback();
+				callback(true);
 			}, material_resolver);
-		}, function() {
-			// XXX handle error
 		});
 	};
 });

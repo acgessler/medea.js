@@ -150,7 +150,7 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functi
 		};
 
 		LoadNode(working,anchor,scene.rootnode);
-		callback();
+		callback(true);
 	};
 
 
@@ -165,6 +165,7 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functi
 			catch(e) {
 				// #ifdef DEBUG
 				medea.DebugAssert("Failed to read assimp2json scene from JSON, JSON.parse failed: " + e);
+				callback(false);
 				// #endif
 				return;
 			}
@@ -176,6 +177,7 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functi
 		catch(e) {
 			// #ifdef DEBUG
 			medea.DebugAssert("Failed to read assimp2json scene: " + e);
+			callback(false);
 			// #endif
 			return;
 		}
