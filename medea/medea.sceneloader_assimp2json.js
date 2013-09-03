@@ -91,9 +91,9 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functi
 		}
 
 		var indices = new Array(inmesh.faces.length*inmesh.faces[0].length);
-		for(var i = 0, n = 0; i < inmesh.faces.length; ++i) {
+		for(var i = 0, n = 0, end = inmesh.faces.length; i < end; ++i) {
 			var f = inmesh.faces[i];
-			for(var j = 0; j < f.length; ++j, ++n) {
+			for(var j = 0, e = f.length; j < e; ++j, ++n) {
 				indices[n] = f[j];
 			}
 		}
@@ -107,7 +107,7 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functi
 		if(inmesh['uvs']) {
 			for(var i = 0; i < inmesh['uvs'].length; ++i) {
 				var uv = inmesh['uvs'][i], c = inmesh['numuvcomponents'][i];
-				for(var n = 0; n < uv.length/c; ++n) {
+				for(var n = 0, e = uv.length/c; n < e; ++n) {
 					uv[n*c+1] = 1.0-uv[n*c+1];
 				}
 			}
@@ -143,31 +143,35 @@ medea._addMod('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functi
 		var working = {
 			callback : callback,
 			scene : scene,
-			material_resolver : material_resolver
+			material_resolver : material_resolver,
+
+			meshes : new Array(scene.meshes.length),
+			materials : new Array(scene.materials.length)
 		};
 
-		working['meshes'] = new Array(scene.meshes.length);
-		working['materials'] = new Array(scene.materials.length);
-
 		LoadNode(working,anchor,scene.rootnode);
-
 		callback();
 	};
 
 
 	medea._LoadScene_assimp2json = function(src,anchor,callback,material_resolver) {
-		try {
-			var scene = JSON.parse(src);
-		}
-		catch(e) {
-			// #ifdef DEBUG
-			medea.DebugAssert("Failed to read assimp2json scene from JSON, JSON.parse failed: " + e);
-			// #endif
-			return;
+		medea.DebugAssert(material_resolver, "need a valid material resolver");
+
+		// see if we got a JSON DOM or a unparsed string
+		if(src.rootnode === undefined) {
+			try {
+				src = JSON.parse(src);
+			}
+			catch(e) {
+				// #ifdef DEBUG
+				medea.DebugAssert("Failed to read assimp2json scene from JSON, JSON.parse failed: " + e);
+				// #endif
+				return;
+			}
 		}
 
 		try {
-			LoadScene(scene,anchor,callback,material_resolver);
+			LoadScene(src, anchor, callback, material_resolver);
 		}
 		catch(e) {
 			// #ifdef DEBUG
