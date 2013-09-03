@@ -151,7 +151,9 @@ medea._addMod('filesystem',[],function(undefined) {
 					callback(e.target.result);
 				};
 
-				reader.onerror = onerror;
+				reader.onerror = onerror || function() {
+					callback(null);
+				};
 				reader.readAsText(fileEntry);
 				return true;
 			},
@@ -175,7 +177,7 @@ medea._addMod('filesystem',[],function(undefined) {
 			return prefix == this.prefix;
 		},
 
-		Load : function(what_orig,callback, onerror,no_session_cache) {
+		Load : function(what_orig, callback, onerror, no_session_cache) {
 
 			var what = this.root + AppendUrlParameters(what_orig);
 			
@@ -202,6 +204,9 @@ medea._addMod('filesystem',[],function(undefined) {
 				if (status >= 300 || status < 200) {
 					if (onerror) {
 						onerror(status);
+					}
+					else {
+						callback(null);
 					}
 					return;
 				}
@@ -230,7 +235,12 @@ medea._addMod('filesystem',[],function(undefined) {
 		Load : function(name,callback,onerror) {
 			var element = document.getElementById(name);
 			if (!element) {
-				onerror('element not found in DOM: ' + name);
+				if(onerror) {
+					onerror('element not found in DOM: ' + name);
+				}
+				else {
+					callback(null);
+				}
 			}
 
 			callback(element.innerHTML);
@@ -277,7 +287,12 @@ medea._addMod('filesystem',[],function(undefined) {
 
 		var tuple = medea.GetFileSystemHandler(what);
 		if (!tuple) {
-			onerror('no handler found for this filesystem location');
+			if(onerror) {
+				onerror('no handler found for this filesystem location');
+			}
+			else {
+				callback(null);
+			}
 			return;
 		}
 
@@ -297,6 +312,11 @@ medea._addMod('filesystem',[],function(undefined) {
 				}
 				if (ok.length()) {
 					callback(ok);
+				}
+				else if (!onerror) {
+					// if onerror is not given, the main callback receives the
+					// sad truth.
+					callback(null);
 				}
 // #ifdef DEBUG
 				ok = error = null;
