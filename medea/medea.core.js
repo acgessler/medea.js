@@ -921,11 +921,13 @@ medea = new (function(sdom) {
 	medea_api("FetchMultiple","filesystem");
 
 	medea_api("CreatePassFromShaderPair","material");
+	medea_api("CloneMaterial","material");
+	medea_api("ClonePass","material");
 	medea_api("CreateMaterial","material");
 	medea_api("CreateSimpleMaterialFromShaderPair","material");
 	medea_api("CreateSimpleMaterialFromColor","material");
 	medea_api("CreateSimpleMaterialFromTexture","material");
-	medea_api("CreateSimpleMaterialFromVertexColors","material");
+	medea_api("CreateSimpleMaterialFromVertexColor","material");
 
 	medea_api("CreateVertexBuffer","vertexbuffer");
 	medea_api("CreateIndexBuffer","indexbuffer");
