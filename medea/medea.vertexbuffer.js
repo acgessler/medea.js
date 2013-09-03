@@ -253,7 +253,8 @@ medea._addMod('vertexbuffer',[],function(undefined) {
 					view[im+2] = p[i3+2];
 
 					// #ifdef DEBUG
-					medea.DebugAssert(!isNaN(p[i3+0]) && !isNaN(p[i3+1]) && !isNaN(p[i3+2]),'found NaN vertex position ('+i+') - this is rather a "NotAVertex"');
+					medea.DebugAssert(!isNaN(p[i3+0]) && !isNaN(p[i3+1]) && !isNaN(p[i3+2]),
+						'found NaN vertex position ('+i+') - this is rather a "NotAVertex"');
 					// #endif
 
 					// gather minimum and maximum vertex values, those will be used to derive a suitable BB
