@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('terraintile',['worker_terrain','image','mesh'],function(undefined) {
+medea.define('terraintile',['worker_terrain','image','mesh'],function(undefined) {
 	"use strict";
 	var medea = this;
 

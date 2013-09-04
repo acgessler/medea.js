@@ -5,7 +5,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('renderqueue',['renderstate'],function(undefined) {
+medea.define('renderqueue',['renderstate'],function(undefined) {
 	"use strict";
 	var medea = this;
 

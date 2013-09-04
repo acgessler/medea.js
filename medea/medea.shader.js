@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('shader',['filesystem','cpp.js'],function(undefined) {
+medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

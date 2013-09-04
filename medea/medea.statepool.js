@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('statepool',[],function(undefined) {
+medea.define('statepool',[],function(undefined) {
 	"use strict";
 	var medea = this;
 

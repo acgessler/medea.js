@@ -5,7 +5,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('light',['entity'],function(undefined) {
+medea.define('light',['entity'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

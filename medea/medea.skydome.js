@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('skydome',['mesh'],function(undefined) {
+medea.define('skydome',['mesh'],function(undefined) {
 	"use strict";
 	var medea = this;
 

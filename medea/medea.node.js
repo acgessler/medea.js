@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea._addMod('node',['frustum'],function(undefined) {
+medea.define('node',['frustum'],function(undefined) {
 	"use strict";
 
 	medea.BB_INFINITE = 'i';

@@ -60,4 +60,4 @@ medea.KeyCode = {
   PERIOD: 190
 };
 
-medea._addMod('keycodes',[],function() {}); // this is just a dummy module
+medea.define('keycodes',[],function() {}); // this is just a dummy module
