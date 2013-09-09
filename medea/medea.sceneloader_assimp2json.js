@@ -86,7 +86,7 @@ medea.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functio
 		// the same applies to the number of unique vertices in the mesh -
 		// with the original assimp2json tool, we can always fit them 
 		// into 16 bit index buffers.
-		if(inmesh.vertices.length >= 65536) {
+		if(inmesh.vertices.length > 65536 * 3) {
 			throw "mesh size is too big, need to be able to use 16 bit indices";
 		}
 
