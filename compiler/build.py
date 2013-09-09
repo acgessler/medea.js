@@ -101,9 +101,9 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 			contents = inp.read()
 
 			l = None
-			for match in re.finditer(r"medea\._addMod\(.*?,\[(.*?)\]", contents):
+			for match in re.finditer(r"medea\.define\(.*?,\[(.*?)\]", contents):
 				if not l is None:
-					print('unexpected input: two _addMod calls in one file')
+					print('unexpected input: two define calls in one file')
 					break
 				l = match.group(1)
 				l = frozenset(get_full_file_name(l.strip()[1:-1]) for l in l.split(',') \
