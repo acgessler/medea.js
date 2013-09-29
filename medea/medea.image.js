@@ -61,6 +61,9 @@ medea.define('image',['filesystem'],function(undefined) {
 		// #endif
 		
 		DisposeData : function() {
+			if(this.img) {
+				this.img.src = null;
+			}
 			this.img = null;
 		},
 
@@ -109,6 +112,10 @@ medea.define('image',['filesystem'],function(undefined) {
 
 		GetSource : function() {
 			return this.src;
+		},
+
+		GetImage : function() {
+			return this.img;
 		},
 
 		Pixel : function(x,y, rgba) {

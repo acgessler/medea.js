@@ -120,8 +120,9 @@ medea.define('texture',['image','filesystem'],function(undefined) {
 		return !((flags || 0) & medea.TEXTURE_FLAG_KEEP_IMAGE);
 	};
 
-	// TODO: Image should be aggregate, not base class because we dispose of it halfway
-	medea.Texture = medea.Image.extend( {
+	// note: textures can be created from, but need not necessarily be backed by Image objects.
+	// standalone texturs utilize ImageStreamLoader for their loading business.
+	medea.Texture = medea.Resource.extend( {
 
 		init : function(src_or_img, callback, flags, format, force_width, force_height) {
 			this.texture = gl.createTexture();
@@ -129,7 +130,27 @@ medea.define('texture',['image','filesystem'],function(undefined) {
 			this.glheight = force_height || -1;
 			this.format = format || medea.TEXTURE_FORMAT_DEFAULT;
 
-			this._super(src_or_img, callback, flags);
+			// sentinel size as long as we don't know the real value yet
+			this.width = this.height = -1;
+			this.flags = flags;
+
+			// if the input is a Image object, take it as data source
+			// TODO: also support medea.Image object as data source
+			if(src_or_img instanceof Image) {
+				// TODO: what if the Image is not fully loaded yet
+				this.img = src_or_img;
+				this.OnDelayedInit();
+				return;
+			}
+			
+			// image data requires special handling, so instruct the Resource
+			// base class not to ajax-fetch the URI.
+			this._super(src_or_img, callback, true);
+			var self = this;
+			var outer_img = medea.CreateImage(src_or_img, function() {
+				self.img = outer_img.GetImage();
+				self.OnDelayedInit();
+			});
 		},
 
 		OnDelayedInit : function() {
@@ -195,8 +216,28 @@ medea.define('texture',['image','filesystem'],function(undefined) {
 			return [this.width / this.glwidth, this.height / this.glheight];
 		},
 
+		GetWidth : function() {
+			return this.width;
+		},
+
+		GetHeight : function() {
+			return this.height;
+		},
+
 		GetGlTexture : function() {
 			return this.texture;
+		},
+
+		GetSource : function() {
+			return this.src;
+		},
+
+		IsPowerOfTwo : function() {
+			return true;
+		},
+
+		IsSquared : function() {
+			return true;
 		},
 
 		IsUploaded : function() {
@@ -204,7 +245,7 @@ medea.define('texture',['image','filesystem'],function(undefined) {
 		},
 
 		IsRenderable : function() {
-			return this.IsComplete() && (this.uploaded || !medea.EnsureIsResponsive());
+			return this.IsComplete() && (this.IsUploaded() || !medea.EnsureIsResponsive());
 		},
 
 		_Upload : function() {
@@ -291,7 +332,11 @@ medea.define('texture',['image','filesystem'],function(undefined) {
 
 			// this hopefully frees some memory
 			if (!(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE)) {
-				this.DisposeData();
+				// TODO: use shared pool of Image instances
+				if(this.img) {
+					this.img.src = null;
+				}
+				this.img = null;
 			}
 
 			this.uploaded = true;
