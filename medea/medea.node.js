@@ -260,6 +260,12 @@ medea.define('node',['frustum'],function(undefined) {
 			return this;
 		},
 
+		TransformBy : function(mat) {
+			mat4.multiply(this.lmatrix, mat, this.lmatrix);
+			this._SetTrafoDirty();
+			return this;
+		},
+
 		Rotate: function(angle,axis) {
 			// #ifdef DEBUG
 			medea.DebugAssert(!(this.flags & medea.NODE_FLAG_NO_ROTATION),'node cannot be rotated');
