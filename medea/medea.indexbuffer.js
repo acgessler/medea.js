@@ -69,8 +69,15 @@ medea.define('indexbuffer',[],function(undefined) {
 
 			this.itemcount = init_data.length;
 
+			var arr = init_data;
+			if(!(arr instanceof Uint32Array) && !(arr instanceof Uint16Array)) {
+				// TODO: maybe this would be a better spot for a debug check on exceeded index ranges
+				// than the scene loader code.
+				arr = new (this.flags & medea.INDEXBUFFER_LARGE_MESH ? Uint32Array : Uint16Array)(init_data)
+			}
+
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.buffer);
-			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new (this.flags & medea.INDEXBUFFER_LARGE_MESH ? Uint32Array : Uint16Array)(init_data),
+			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,arr,
 				this.flags & medea.INDEXBUFFER_USAGE_DYNAMIC ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
 
 			if (this.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA) {
