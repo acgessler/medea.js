@@ -132,7 +132,7 @@ medea.define('texture',['nativeimagepool','filesystem'],function(undefined) {
 
 			// sentinel size as long as we don't know the real value yet
 			this.width = this.height = -1;
-			this.flags = flags;
+			this.flags = flags || 0;
 			
 			// image data requires special handling, so instruct the Resource
 			// base class not to ajax-fetch the URI.
