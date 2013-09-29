@@ -47,7 +47,7 @@ medea.define('indexbuffer',[],function(undefined) {
 			this.flags = flags || 0;
 
 			// #ifdef DEBUG
-			this.flags |= medea.INDEXBUFFER_PRESERVE_CREATION_DATA;
+			//this.flags |= medea.INDEXBUFFER_PRESERVE_CREATION_DATA;
 			// #endif
 
 			// #ifdef DEBUG

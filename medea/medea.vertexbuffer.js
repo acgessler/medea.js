@@ -385,7 +385,7 @@ medea.define('vertexbuffer',[],function(undefined) {
 			this.flags = flags | 0;
 
 			// #ifdef DEBUG
-			this.flags |= medea.VERTEXBUFFER_PRESERVE_CREATION_DATA;
+			//this.flags |= medea.VERTEXBUFFER_PRESERVE_CREATION_DATA;
 			// #endif
 
 			this.Fill(init_data);
