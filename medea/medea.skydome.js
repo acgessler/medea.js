@@ -18,14 +18,25 @@ medea.define('skydome',['mesh'],function(undefined) {
 
 		rings = rings || 35;
 		lower_amount = lower_amount || 0.0;
-		var pcnt = round(rings*0.5*rings*2*pi);
 
-		var pos = new Array(pcnt*3);
-		var nor = new Array(pcnt*3);
-		var uv = new Array(pcnt*2);
+		// gather storage requirements upfront and populate ring_info
 		var ring_info = new Array(rings);
-
 		ring_info[0] = [0,0.0];
+
+		var lat = 0.0, lad = pi*0.5/rings, fac = pi*2.0/sin(lad), pcnt = 1;
+		for(var r = 1; r < rings; ++r) {
+			lat += lad;
+
+			var rad = sin(lat)*fac, nmp = round(rad);
+			ring_info[r] = [nmp,nmp - ring_info[r-1][0]];
+			pcnt += nmp;
+		}
+
+		var pos = new Float32Array(pcnt*3);
+		var nor = new Float32Array(pcnt*3);
+		var uv = new Float32Array(pcnt*2);
+		
+		// pole
 		pos[0] = 0;
 		pos[1] = 1.0 - lower_amount;
 		pos[2] = 0;
@@ -38,12 +49,11 @@ medea.define('skydome',['mesh'],function(undefined) {
 		uv[1] = 0.5;
 
 		// generate vertices
-		var ipos = 3, iuv = 2, lat = 0.0, lad = pi*0.5/rings, fac = pi*2.0/sin(lad), x,z,y, l;
+		var ipos = 3, iuv = 2;
+		lat = 0.0;
 		for(var r = 1; r < rings; ++r) {
 			lat += lad;
-
-			var rad = sin(lat)*fac, nmp = round(rad);
-			ring_info[r] = [nmp,nmp - ring_info[r-1][0]];
+			nmp = ring_info[r][0];
 
 			var sinlat = sin(lat);
 			var coslat = cos(lat);
@@ -51,15 +61,15 @@ medea.define('skydome',['mesh'],function(undefined) {
 			var lon = 0.0, ldf = pi*2.0/nmp;
 			for(var p = 0; p < nmp; ++p, lon += ldf) {
 
-				x = pos[ipos+0] = cos(lon) * sinlat;
-				y = pos[ipos+1] = coslat - lower_amount;
-				z = pos[ipos+2] = sin(lon) * sinlat;
+				var x = pos[ipos+0] = cos(lon) * sinlat;
+				var y = pos[ipos+1] = coslat - lower_amount;
+				var z = pos[ipos+2] = sin(lon) * sinlat;
 
 				if(y < 0) {
 					y = 0;
 				}
 
-				l = -sqrt( x*x + y*y + z*z );
+				var l = -sqrt( x*x + y*y + z*z );
 				nor[ipos++] = x/l;
 				nor[ipos++] = y/l;
 				nor[ipos++] = z/l;
@@ -69,10 +79,8 @@ medea.define('skydome',['mesh'],function(undefined) {
 			}
 		}
 
-		// XXX
-		pos.length = ipos;
-		nor.length = ipos;
-		uv.length = iuv;
+		// assert(pcnt * 3 == ipos);	
+		// assert(pcnt * 2 == iuv);
 
 		var n = 0;
 		for(var i = 1; i < rings; ++i) {
