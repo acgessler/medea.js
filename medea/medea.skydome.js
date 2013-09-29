@@ -27,18 +27,18 @@ medea.define('skydome',['mesh'],function(undefined) {
 
 		ring_info[0] = [0,0.0];
 		pos[0] = 0;
-		pos[1] = 1.0;
+		pos[1] = 1.0 - lower_amount;
 		pos[2] = 0;
 
 		nor[0] = 0;
 		nor[1] = -1.0;
 		nor[2] = 0;
 
-		uv[0] = 1.0;
-		uv[1] = 0.0;
+		uv[0] = 0.5;
+		uv[1] = 0.5;
 
 		// generate vertices
-		var ipos = 3, iuv = 3, lat = 0.0, lad = pi*0.5/rings, fac = pi*2.0/sin(lad), x,z,y, l;
+		var ipos = 3, iuv = 2, lat = 0.0, lad = pi*0.5/rings, fac = pi*2.0/sin(lad), x,z,y, l;
 		for(var r = 1; r < rings; ++r) {
 			lat += lad;
 
@@ -62,8 +62,8 @@ medea.define('skydome',['mesh'],function(undefined) {
 				nor[ipos++] = y/l;
 				nor[ipos++] = z/l;
 
-				uv[iuv++] = (x + 1.0)*0.485;
-				uv[iuv++] = (z + 1.0)*0.485;
+				uv[iuv++] = (x + 1.0)*0.5;
+				uv[iuv++] = (z + 1.0)*0.5;
 			}
 		}
 
@@ -85,6 +85,7 @@ medea.define('skydome',['mesh'],function(undefined) {
 		for(var i = 1; i < rings; ++i) {
 
 			var rinfo = ring_info[i], fs = abs(rinfo[0]/rinfo[1]), spaces = 0, ct1s = ct1, ct2s = ct2, ns = 0;
+			console.log(fs);
 			for(var j = 0; j < rinfo[0]; ++j) {
 
 				if (j === 0 && rinfo[1] > 0) {
@@ -173,6 +174,7 @@ medea.define('skydome',['mesh'],function(undefined) {
 		ind.length = n;
 		return medea.CreateSimpleMesh({ positions:pos, normals:nor, uvs:[uv] }, ind, mat);
 	};
+
 
 	/* --{
 	@entry medea CreateSkydomeNode
