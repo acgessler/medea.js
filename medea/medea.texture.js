@@ -6,11 +6,12 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('texture',['nativeimagepool','filesystem'],function(undefined) {
+medea.define('texture',['nativeimagepool','filesystem', 'imagestream'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
 	medea._initMod('filesystem');
+	medea._initMod('imagestream');
 	medea._initMod('nativeimagepool');
 
 	// check for presence of the EXT_texture_filter_anisotropic extension,
@@ -137,14 +138,25 @@ medea.define('texture',['nativeimagepool','filesystem'],function(undefined) {
 			// image data requires special handling, so instruct the Resource
 			// base class not to ajax-fetch the URI.
 			this._super(src_or_img, callback, true);
-			var img = this.img = medea._GetNativeImageFromPool();
-			img.src = medea.FixURL(src_or_img);
 
-			var self = this;
-			img.onload = function() {
-				self.OnDelayedInit();
-			};
-			// do not Dispose() of outer_img as we keep accessing the Image
+			if(src_or_img instanceof Image) {
+				// TODO: who owns the Image? 
+				// Appearantly we do, because OnDelatedInit disposes it. This
+				// makes no sense, however, if the user keeps modifying or
+				// accessing the source image.
+				this.img = src_or_img;
+				this.OnDelayedInit();
+				return;
+			}
+
+			var outer = this;
+			medea._ImageStreamLoad(medea.FixURL(src_or_img), function(img) {
+				outer.img = img;
+				outer.OnDelayedInit();
+				// return true to indicate ownership of the Image
+				// (if the LAZY flag was not specified, we already disposed of it)
+				return true;
+			});
 		},
 
 		OnDelayedInit : function() {
