@@ -95,7 +95,6 @@ medea.define('skydome',['mesh'],function(undefined) {
 		for(var i = 1; i < rings; ++i) {
 
 			var rinfo = ring_info[i], fs = abs(rinfo[0]/rinfo[1]), spaces = 0, ct1s = ct1, ct2s = ct2, ns = 0;
-			console.log(fs);
 			for(var j = 0; j < rinfo[0]; ++j) {
 
 				if (j === 0 && rinfo[1] > 0) {
