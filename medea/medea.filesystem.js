@@ -48,6 +48,10 @@ medea.define('filesystem',[],function(undefined) {
 			s = s.slice(4);
 		}
 		else {
+			// #ifdef DEBUG
+			medea.DebugAssert(false, 
+				"not a valid resource name, probably missing url: prefix? :" + s);
+			// #endif 
 			return null;
 		}
 

@@ -6,13 +6,12 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('texture',['nativeimagepool','filesystem', 'image'],function(undefined) {
+medea.define('texture',['nativeimagepool','filesystem'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
 	medea._initMod('filesystem');
-	medea._initMod('image');
-
+	medea._initMod('nativeimagepool');
 
 	// check for presence of the EXT_texture_filter_anisotropic extension,
 	// which enables us to use anistropic filtering.
@@ -36,10 +35,10 @@ medea.define('texture',['nativeimagepool','filesystem', 'image'],function(undefi
 	var TEX = medea.TEXTURE_TYPE_2D = gl.TEXTURE_2D;
 
 	// flags specific to medea.Texture
-	medea.TEXTURE_FLAG_KEEP_IMAGE    = medea.IMAGE_FLAG_USER;
-	medea.TEXTURE_FLAG_LAZY_UPLOAD   = medea.IMAGE_FLAG_USER << 1;
-	medea.TEXTURE_FLAG_NPOT_PAD      = medea.IMAGE_FLAG_USER << 2;
-	medea.TEXTURE_FLAG_NO_MIPS       = medea.IMAGE_FLAG_USER << 3;
+	medea.TEXTURE_FLAG_KEEP_IMAGE    = 0x1;
+	medea.TEXTURE_FLAG_LAZY_UPLOAD   = 0x2;
+	medea.TEXTURE_FLAG_NPOT_PAD      = 0x4;
+	medea.TEXTURE_FLAG_NO_MIPS       = 0x8;
 
 	// possible values for the `format` parameter
 	medea.TEXTURE_FORMAT_RGBA        = 'rgba';
@@ -121,6 +120,7 @@ medea.define('texture',['nativeimagepool','filesystem', 'image'],function(undefi
 	};
 
 	// note: textures can be created from, but need not necessarily be backed by Image objects.
+	// use CreateTexture(image.GetImage()) to create from a Texture
 	// standalone textures utilize ImageStreamLoader for their loading business.
 	medea.Texture = medea.Resource.extend( {
 
@@ -137,11 +137,13 @@ medea.define('texture',['nativeimagepool','filesystem', 'image'],function(undefi
 			// image data requires special handling, so instruct the Resource
 			// base class not to ajax-fetch the URI.
 			this._super(src_or_img, callback, true);
+			var img = this.img = medea._GetNativeImageFromPool();
+			img.src = medea.FixURL(src_or_img);
+
 			var self = this;
-			var outer_img = medea.CreateImage(src_or_img, function() {
-				self.img = outer_img.GetImage();
+			img.onload = function() {
 				self.OnDelayedInit();
-			});
+			};
 			// do not Dispose() of outer_img as we keep accessing the Image
 		},
 

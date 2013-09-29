@@ -43,9 +43,6 @@ medea.define('image',['filesystem', 'nativeimagepool'],function(undefined) {
 				// XXX this circumvents the filesystem as we have to rely on the browser's
 				// URl resolution. Find a better solution for this.
 				var url = medea.FixURL(src_or_image);
-				medea.DebugAssert(url != null, 
-					"not a valid resource name, probably missing url: prefix? :" + 
-					src_or_image);
 				this.img.src = url;
 			}
 		},
