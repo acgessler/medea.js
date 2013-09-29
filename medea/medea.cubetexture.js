@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('cubetexture',['filesystem', 'nativeimagepool'],function(undefined) {
+medea.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -17,6 +17,7 @@ medea.define('cubetexture',['filesystem', 'nativeimagepool'],function(undefined)
 	];
 
 	medea._initMod('filesystem');
+	medea._initMod('imagestream');
 	medea._initMod('nativeimagepool');
 
 	medea.CubeTexture = medea.Resource.extend( {
@@ -50,12 +51,14 @@ medea.define('cubetexture',['filesystem', 'nativeimagepool'],function(undefined)
 
 			for(var i = 0; i < 6; ++i) {
 				(function(i) {
-				outer.img[i] = medea._GetNativeImageFromPool();
-				outer.img[i].onload = function() {
+
+				medea._ImageStreamLoad(medea.FixURL(src[i]), function(img) {
+					outer.img[i] = img;
 					outer.OnDelayedInit(i);
-				};
-				outer.img[i].src = medea.FixURL(src[i]);
-				}(i));
+					// return true to indicate ownership of the Image
+					// (if the LAZY flag was not specified, we already disposed of it)
+					return true;
+				});
 			}
 		},
 
