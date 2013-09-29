@@ -45,13 +45,15 @@ medea.define('skydome',['mesh'],function(undefined) {
 			var rad = sin(lat)*fac, nmp = round(rad);
 			ring_info[r] = [nmp,nmp - ring_info[r-1][0]];
 
+			var sinlat = sin(lat);
+			var coslat = cos(lat);
 
 			var lon = 0.0, ldf = pi*2.0/nmp;
 			for(var p = 0; p < nmp; ++p, lon += ldf) {
 
-				x = pos[ipos+0] = cos(lon) * sin(lat);
-				y = pos[ipos+1] = cos(lat) - lower_amount;
-				z = pos[ipos+2] = sin(lon) * sin(lat);
+				x = pos[ipos+0] = cos(lon) * sinlat;
+				y = pos[ipos+1] = coslat - lower_amount;
+				z = pos[ipos+2] = sin(lon) * sinlat;
 
 				if(y < 0) {
 					y = 0;
