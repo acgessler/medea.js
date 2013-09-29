@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('cubetexture',['filesystem'],function(undefined) {
+medea.define('cubetexture',['filesystem', 'nativeimagepool'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -17,6 +17,8 @@ medea.define('cubetexture',['filesystem'],function(undefined) {
 	];
 
 	medea._initMod('filesystem');
+	medea._initMod('nativeimagepool');
+
 	medea.CubeTexture = medea.Resource.extend( {
 
 		init : function(src, callback, flags) {
@@ -48,7 +50,7 @@ medea.define('cubetexture',['filesystem'],function(undefined) {
 
 			for(var i = 0; i < 6; ++i) {
 				(function(i) {
-				outer.img[i] = new Image();
+				outer.img[i] = medea._GetNativeImageFromPool();
 				outer.img[i].onload = function() {
 					outer.OnDelayedInit(i);
 				};
@@ -158,9 +160,13 @@ medea.define('cubetexture',['filesystem'],function(undefined) {
 
 			// this hopefully frees some memory
 			if (!(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE)) {
-				this.img = null;
+				if(this.img) {
+					for(var i = 0; i < 6; ++i) {
+						medea._ReturnNativeImageToPool(this.img[i]);
+					}
+					this.img = null;
+				}
 			}
-
 			this.uploaded = true;
 		},
 

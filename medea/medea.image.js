@@ -6,15 +6,18 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('image',['filesystem'],function(undefined) {
+medea.define('image',['filesystem', 'nativeimagepool'],function(undefined) {
 	"use strict";
 	var medea = this;
 
 	medea.IMAGE_FLAG_USER = 0x1000;
 
 	medea._initMod('filesystem');
+	medea._initMod('nativeimagepool');
+
 	medea.Image = medea.Resource.extend( {
 
+		// note: takes ownership of passed Image
 		init : function(src_or_image, callback, flags) {
 			this.flags = flags || 0;
 
@@ -30,7 +33,8 @@ medea.define('image',['filesystem'],function(undefined) {
 			}
 			else {
 				this.src = src_or_image;
-				this.img = new Image();
+				this.img = medea._GetNativeImageFromPool();
+
 				var outer = this;
 				this.img.onload = function() {
 					outer.OnDelayedInit();
@@ -60,11 +64,11 @@ medea.define('image',['filesystem'],function(undefined) {
 		},
 		// #endif
 		
-		DisposeData : function() {
+		Dispose : function() {
 			if(this.img) {
-				this.img.src = null;
+				medea._ReturnNativeImageToPool(this.img);
+				this.img = null;
 			}
-			this.img = null;
 		},
 
 		GetData : function() {

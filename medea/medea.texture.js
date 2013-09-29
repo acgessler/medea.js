@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('texture',['image','filesystem'],function(undefined) {
+medea.define('texture',['nativeimagepool','filesystem', 'image'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -121,7 +121,7 @@ medea.define('texture',['image','filesystem'],function(undefined) {
 	};
 
 	// note: textures can be created from, but need not necessarily be backed by Image objects.
-	// standalone texturs utilize ImageStreamLoader for their loading business.
+	// standalone textures utilize ImageStreamLoader for their loading business.
 	medea.Texture = medea.Resource.extend( {
 
 		init : function(src_or_img, callback, flags, format, force_width, force_height) {
@@ -133,15 +133,6 @@ medea.define('texture',['image','filesystem'],function(undefined) {
 			// sentinel size as long as we don't know the real value yet
 			this.width = this.height = -1;
 			this.flags = flags;
-
-			// if the input is a Image object, take it as data source
-			// TODO: also support medea.Image object as data source
-			if(src_or_img instanceof Image) {
-				// TODO: what if the Image is not fully loaded yet
-				this.img = src_or_img;
-				this.OnDelayedInit();
-				return;
-			}
 			
 			// image data requires special handling, so instruct the Resource
 			// base class not to ajax-fetch the URI.
@@ -151,6 +142,7 @@ medea.define('texture',['image','filesystem'],function(undefined) {
 				self.img = outer_img.GetImage();
 				self.OnDelayedInit();
 			});
+			// do not Dispose() of outer_img as we keep accessing the Image
 		},
 
 		OnDelayedInit : function() {
@@ -332,11 +324,10 @@ medea.define('texture',['image','filesystem'],function(undefined) {
 
 			// this hopefully frees some memory
 			if (!(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE)) {
-				// TODO: use shared pool of Image instances
 				if(this.img) {
-					this.img.src = null;
+					medea._ReturnNativeImageToPool(this.img);
+					this.img = null;
 				}
-				this.img = null;
 			}
 
 			this.uploaded = true;
