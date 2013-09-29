@@ -72,12 +72,13 @@ medea.define('input',[],function(undefined) {
 	medea.canvas.onmouseup = HandleMouseUp;
 	medea.canvas.onmousemove = HandleMouseMove;
 
+	// TODO: should these really be global?
 	window.addEventListener('keydown', HandleKeyDown, true);
 	window.addEventListener('keyup', HandleKeyUp, true);
 
 	// cross browser mouse wheel
-	window.addEventListener('DOMMouseScroll', HandleMouseWheel, false); // Gecko
-	medea.canvas.onmousewheel = HandleMouseWheel;
+	var wheel = /Firefox/i.test(navigator.userAgent) ? "DOMMouseScroll" : "mousewheel";
+	medea.canvas.addEventListener(wheel, HandleMouseWheel, false); 
 
 	var settings = medea.settings;
 
