@@ -91,11 +91,11 @@ medea.define('cubetexture',['filesystem'],function(undefined) {
 			return this.height;
 		},
 
-		GetGlWidth : function() {
+		GetGlTextureWidth : function() {
 			return this.glwidth;
 		},
 
-		GetGlHeight : function() {
+		GetGlTextureHeight : function() {
 			return this.glheight;
 		},
 
