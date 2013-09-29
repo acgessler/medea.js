@@ -177,6 +177,91 @@ medea.define('skydome',['mesh'],function(undefined) {
 		return medea.CreateSimpleMesh({ positions:pos, normals:nor, uvs:[uv] }, ind, mat);
 	};
 
+	/*
+
+	// second version, creates rings with equal triangle counts and thus much 
+	// higher density at the pole than at the equator.
+	var CreateDomeMesh2 = function(mat, lower_amount, rings, hres) {
+		var pi = Math.PI, sin = Math.sin, cos = Math.cos, sqrt = Math.sqrt, round = Math.round, abs = Math.abs;
+
+		hres = hres || rings;
+
+		var pcnt = hres * rings + 1;
+
+		var pos = new Array(pcnt*3);
+		var nor = new Array(pcnt*3);
+		var uv = new Array(pcnt*2);
+		
+		pos[0] = 0;
+		pos[1] = 1.0 - lower_amount;
+		pos[2] = 0;
+
+		nor[0] = 0;
+		nor[1] = -1.0;
+		nor[2] = 0;
+
+		uv[0] = 0.5;
+		uv[1] = 0.5;
+
+		// generate vertices and indices
+		var ipos = 3, iuv = 3, lat = 0.0, lad = pi*0.5/rings, x,z,y, l;
+		for(var r = 0; r < rings; ++r) {
+			lat += lad;
+
+			var sinlat = sin(lat);
+			var coslat = cos(lat);
+
+			var lon = 0.0, ldf = pi*2.0/hres;
+			for(var p = 0; p < hres; ++p) {
+
+				x = pos[ipos+0] = Math.cos(lon) * sinlat;
+				y = pos[ipos+1] = coslat - lower_amount;
+				z = pos[ipos+2] = Math.sin(lon) * sinlat;
+
+				if(y < 0) {
+					y = 0;
+				}
+
+				l = -sqrt( x*x + y*y + z*z );
+				nor[ipos++] = x/l;
+				nor[ipos++] = y/l;
+				nor[ipos++] = z/l;
+
+				uv[iuv++] = (x + 1.0)*0.485;
+				uv[iuv++] = (z + 1.0)*0.485;
+				lon += ldf;
+			}
+		}
+
+		// generate indices
+		var ind = new Array( ((rings-2) * hres * 2 + hres ) * 3 );
+		var il = ind.length;
+		var n = 0;
+		var base_src = 1;
+		for(var r = 0; r < rings - 1; ++r) {
+			if(r === 0) {
+				for(var i = 0; i < hres; ++i) {
+					ind[n++] = base_src + i;
+					ind[n++] = 0;
+					ind[n++] = base_src + (i + 1) % hres;
+				}
+			}
+			else {
+				for(var i = 0; i < hres; ++i) {
+					ind[n++] = base_src + i;
+					ind[n++] = base_src + i - hres;
+					ind[n++] = base_src + (i + 1) % hres;
+
+					ind[n++] = base_src + (i + 1) % hres;
+					ind[n++] = base_src + i - hres;
+					ind[n++] = base_src + ((i + 1) % hres) - hres;
+				}
+			}
+			base_src += hres;
+		}
+		return medea.CreateSimpleMesh({ positions:pos, normals:nor, uvs:[uv] }, ind, mat);
+	} */
+
 
 	/* --{
 	@entry medea CreateSkydomeNode
