@@ -205,6 +205,9 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream'],function(
 				// #endif
 			}
 
+			// mark this texture as complete
+			this._super();
+
 			if (!(this.flags & medea.TEXTURE_FLAG_LAZY_UPLOAD) && !medea.EnsureIsResponsive()) {
 				this._Upload();
 			}
@@ -218,9 +221,6 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream'],function(
 			}
 
 			medea.LogDebug("successfully loaded texture " + this.GetSource());
-
-			// mark this resource as complete
-			this._super();
 		},
 
 		GetGlTextureWidth : function() {
