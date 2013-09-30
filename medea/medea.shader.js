@@ -32,7 +32,6 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 	medea.Shader = medea.Resource.extend( {
 
 		init : function(src, defines, callback) {
-
 			this.type = src.split('.').pop() == 'ps'
 				? medea.SHADER_TYPE_PIXEL
 				: medea.SHADER_TYPE_VERTEX;

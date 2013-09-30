@@ -41,12 +41,11 @@ medea.define('lodtexture',['texture'],function(undefined) {
 	};
 
 
-
 	medea.LODTexture = medea.Resource.extend( {
 
 		init : function(tuple, callback, no_client_cache) {
 
-			this.textures = [];
+			this.textures = [null,null,null];
 			this.textures[0] = medea.CreateNeutralTexture(tuple.neutral);
 
 			// load the low-resolution version of the texture and mark the resource
@@ -65,6 +64,13 @@ medea.define('lodtexture',['texture'],function(undefined) {
 				}, no_client_cache );
 			};
 			this.cur = 0;
+		},
+
+		Dispose : function() {
+			for(var i = this.textures.length-1; i >= 0; --i) {
+				this.textures[i].Dispose();
+				this.textures[i] = null;
+			}
 		},
 
 		OnDelayedInit : function() {

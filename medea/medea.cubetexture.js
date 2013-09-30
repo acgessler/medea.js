@@ -128,6 +128,13 @@ medea.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],func
 			return this.IsComplete() && (this.IsUploaded() || !medea.EnsureIsResponsive());
 		},
 
+		Dispose : function() {
+			if(this.texture) {
+				gl.deleteTexture(this.texture);
+				this.texture = null;
+			}
+		},
+
 		_Upload : function() {
 			if (this.uploaded) {
 				return;

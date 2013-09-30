@@ -93,6 +93,13 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream'],function(
 			// #endif
 		},
 
+		Dispose : function() {
+			if(this.texture) {
+				gl.deleteTexture(this.texture);
+				this.texture = null;
+			}
+		},
+
 		GetGlTexture : function() {
 			return this.texture;
 		},
@@ -254,6 +261,13 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream'],function(
 			return this.IsComplete() && (this.IsUploaded() || !medea.EnsureIsResponsive());
 		},
 
+		Dispose : function() {
+			if(this.texture) {
+				gl.deleteTexture(this.texture);
+				this.texture = null;
+			}
+		},
+
 		_Upload : function() {
 			if (this.uploaded) {
 				return;
@@ -377,6 +391,7 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream'],function(
 		var create = function() {
 			return new medea.Texture(src_or_image, callback, flags, format, force_width, force_height);
 		};
+
 		if (!(src_or_image instanceof Image) && IsEligibleForCaching(flags)) {
 			// normalize the resource name as it is used to derive the cache key
 			src_or_image = medea.FixResourceName(src_or_image);
