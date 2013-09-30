@@ -31,7 +31,14 @@ medea.define('nativeimagepool',[],function(undefined) {
 
 		// reset the src attribute in the hope that this frees memory allocated
 		// for the Image.
-		image.src = null;
+		image.src = "";
+
+		// #ifdef DEBUG
+		image.onload = function() {
+			medea.DebugAssert(false, "onload() called for pooled Image");
+		};
+		// #endif
+
 		pool.push(image);
 	};
 });
