@@ -144,7 +144,7 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream'],function(
 			
 			// image data requires special handling, so instruct the Resource
 			// base class not to ajax-fetch the URI.
-			this._super(src_or_img, callback, true);
+			this._super(src_or_img.src || src_or_img, callback, true);
 
 			if(src_or_img instanceof Image) {
 				// TODO: who owns the Image? 
@@ -167,10 +167,13 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream'],function(
 		},
 
 		OnDelayedInit : function() {
-			// mark this resource as complete
-			this._super();
+			
+			this.width = this.img.width;
+			this.height = this.img.height;
 
-			if (this.IsPowerOfTwo()) {
+			this.ispot = medea._IsPow2(this.width) && medea._IsPow2(this.height);
+
+			if (this.ispot) {
 				if (this.glwidth === -1) {
 					this.glwidth = this.width;
 				}
@@ -215,6 +218,9 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream'],function(
 			}
 
 			medea.LogDebug("successfully loaded texture " + this.GetSource());
+
+			// mark this resource as complete
+			this._super();
 		},
 
 		GetGlTextureWidth : function() {
@@ -246,11 +252,17 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream'],function(
 		},
 
 		IsPowerOfTwo : function() {
-			return true;
+			// #ifdef DEBUG
+			medea.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: texture not loaded yet');
+			// #endif
+			return this.ispot;
 		},
 
-		IsSquared : function() {
-			return true;
+		IsSquare : function() {
+			// #ifdef DEBUG
+			medea.DebugAssert(this.IsComplete(),'IsSquare() ist not available: texture not loaded yet');
+			// #endif
+			return this.width === this.height;
 		},
 
 		IsUploaded : function() {
