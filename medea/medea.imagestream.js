@@ -34,7 +34,7 @@ medea.define('imagestream',['nativeimagepool','filesystem'],function(undefined) 
 
 	    if (remaining_slots > 0) {
 	        var img = get_pool_image();
-	        img.addEventListener("load", function() { 
+	        img.onload = function() { 
 	        	if(!callback(img, src)) {
 	        		return_pool_image(img);
 	        	}
@@ -45,7 +45,7 @@ medea.define('imagestream',['nativeimagepool','filesystem'],function(undefined) 
 			        load(req[0], req[1]);
 			    } 
 
-	        }, false);
+	        };
 	        img.src = src;
 	        --remaining_slots;
 	    } 
