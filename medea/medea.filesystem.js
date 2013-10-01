@@ -75,6 +75,8 @@ medea.define('filesystem',[],function(undefined) {
 	// class Resource
 	medea.Resource = medea.Class.extend({
 
+		ref_count : 1,
+
 		init : function(src, callback, do_not_load) {
 			if(!src) {
 				this.complete = true;
@@ -97,6 +99,26 @@ medea.define('filesystem',[],function(undefined) {
 					}
 				);
 			}
+		},
+
+		AddRef : function() {
+			// #ifdef DEBUG
+			medea.DebugAssert(this.ref_count > 0);
+			// #endif
+			this.ref_count++;
+		},
+
+		Release : function() {
+			// #ifdef DEBUG
+			medea.DebugAssert(this.ref_count > 0);
+			// #endif
+			if(--this.ref_count === 0) {
+				this.Dispose();
+			}
+		},
+
+		Dispose : function() {
+			// TODO: suitable debug behaviour 
 		},
 
 		IsComplete : function() {
