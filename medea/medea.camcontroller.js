@@ -232,16 +232,22 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 		dirty_trafo : true,
 		pan_enable : true,
 		zoom_enable : true,
-		panning_mouse_buttons : [1,2],
+		panning_mouse_buttons : null,
+		axes_enabled : (1 | 2),
+		phi : 0,
+		theta : 0,
 
 
 		init : function(enabled, initial_rot_phi, initial_rot_theta) {
+			this.panning_mouse_buttons = [1,2];
 			this._super(enabled);
+
 			this.Reset(initial_rot_phi, initial_rot_theta);
 		},
 
+		// 1 bit set is x, 2 bit set is y
+		AxesEnabled : medea._GetSet('axes_enabled'),
 
-		
 		TurnSpeed : medea._GetSet('turn_speed'),
 		ZoomSpeed : medea._GetSet('zoom_speed'),
 		PanSpeed : medea._GetSet('pan_speed'),
@@ -257,17 +263,14 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 
 
 		Reset : function(initial_rot_phi, initial_rot_theta) {
-
-			this.view = mat4.identity(mat4.create()); 
 			if(initial_rot_phi) {
-				mat4.rotateY(this.view, initial_rot_phi);
+				this.phi = initial_rot_phi;
 			}
 		
 			if(initial_rot_theta) {
-				mat4.rotateX(this.view, -initial_rot_theta);
+				this.theta = initial_rot_theta;
 			}
 
-			this.view_with_offset = mat4.identity(mat4.create());
 			this.pan_vector = [0.0,0.0,0.0];
 			this.camera_distance = 2.5;
 			this.dirty_trafo = true;
@@ -321,13 +324,13 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 
 		ProcessMouseDelta : function(dtime, node, d) {
 			// process mouse movement on the x axis
-			if(d[0] !== 0) {
-				mat4.rotateY(this.view, -d[0]*this.turn_speed);
+			if(d[0] !== 0 && (this.axes_enabled & 0x1)) {
+				this.phi += d[0]*this.turn_speed;
 			}
 			
 			// process mouse movement on the y axis
-			if(d[1] !== 0) {
-				mat4.rotateX(this.view, -d[1]*this.turn_speed);
+			if(d[1] !== 0 && (this.axes_enabled & 0x2)) {
+				this.theta -= d[1]*this.turn_speed;
 			}
 
 			this.dirty_trafo = true;
@@ -362,45 +365,73 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
         },
 		
 		
-		_UpdateNodeTransformation : function(node) {
-			if (this.dirty_trafo === false) {
-				return;
-			}
-			var vo = this.view_with_offset;
-			var v  = this.view;
-			var dist = this.camera_distance;
+		_UpdateNodeTransformation : (function() {
+			var	view_with_offset 	= mat4.create()
+			, 	vup 				= vec3.create()
+			, 	vright 				= vec3.create()
+			,	veye 				= vec3.create()
+			;
 
-			mat4.identity(vo);
-			
-			var veye = [v[8]  * dist, v[9]  * dist, v[10] * dist];
-			vo[8]  = v[8];
-			vo[9]  = v[9];
-			vo[10] = v[10];
-			
-			var vup = [0, 1, 0];
-			
-			var vright = vec3.cross(vup, veye, vec3.create());
-			vec3.normalize(vright);
-			vo[0]  = vright[0];
-			vo[1]  = vright[1];
-			vo[2]  = vright[2];
+			return function(node) {
+				if (this.dirty_trafo === false) {
+					return;
+				}
+				var	vo 			= view_with_offset
+				,	dist 		= this.camera_distance
+				,	phi 		= this.phi
+				,	theta 		= this.theta
+				,	sintheta 	= Math.sin(theta)
+				;
 
-			vec3.cross(veye, vright, vup);
-			vec3.normalize(vup);
-			vo[4]  = vup[0];
-			vo[5]  = vup[1];
-			vo[6]  = vup[2];
+				veye[0] = Math.cos(phi)*sintheta;
+				veye[1] = Math.cos(theta);
+				veye[2] = Math.sin(phi)*sintheta;
+				vec3.normalize(veye);
 
-			// TODO: optimize
-			mat4.multiply(mat4.translate(mat4.identity(mat4.create()), veye), vo, vo);
+				vo[8]  = veye[0];
+				vo[9]  = veye[1];
+				vo[10] = veye[2];
+				vo[11] = 0;
 
-			if(this.pan_enable) {
-				mat4.translate(vo, this.pan_vector, vo);
-			}
+				vup[0] = 0;
+				vup[1] = 1;
+				vup[2] = 0;
+				
+				vec3.cross(vup, veye, vright);
+				vec3.normalize(vright); 
 
-			node.LocalTransform(vo);
-			this.dirty_trafo = false;
-		}
+				vo[0]  = vright[0];
+				vo[1]  = vright[1];
+				vo[2]  = vright[2];
+				vo[3]  = 0;
+
+				vec3.cross(veye, vright, vup);
+				vec3.normalize(vup);
+
+				vo[4]  = vup[0];
+				vo[5]  = vup[1];
+				vo[6]  = vup[2];
+				vo[7]  = 0;
+
+				vo[12]  = 0;
+				vo[13]  = 0;
+				vo[14]  = 0;
+				vo[15]  = 1;
+
+				// TODO: optimize
+				veye[0] *= dist;
+				veye[1] *= dist;
+				veye[2] *= dist;
+				mat4.multiply(mat4.translate(mat4.identity(mat4.create()), veye), vo, vo);
+
+				if(this.pan_enable) {
+					mat4.translate(vo, this.pan_vector, vo);
+				}
+
+				node.LocalTransform(vo);
+				this.dirty_trafo = false;
+			};
+		})()
 	});
 	
 	
