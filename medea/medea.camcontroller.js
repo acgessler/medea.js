@@ -388,6 +388,9 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 				veye[2] = Math.sin(phi)*sintheta;
 				vec3.normalize(veye);
 
+				// note: the following is basically what gluLookAt() does
+
+				// z-axis
 				vo[8]  = veye[0];
 				vo[9]  = veye[1];
 				vo[10] = veye[2];
@@ -400,6 +403,7 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 				vec3.cross(vup, veye, vright);
 				vec3.normalize(vright); 
 
+				// x axis
 				vo[0]  = vright[0];
 				vo[1]  = vright[1];
 				vo[2]  = vright[2];
@@ -408,6 +412,7 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 				vec3.cross(veye, vright, vup);
 				vec3.normalize(vup);
 
+				// y axis
 				vo[4]  = vup[0];
 				vo[5]  = vup[1];
 				vo[6]  = vup[2];
@@ -418,11 +423,10 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 				vo[14]  = 0;
 				vo[15]  = 1;
 
-				// TODO: optimize
-				veye[0] *= dist;
-				veye[1] *= dist;
-				veye[2] *= dist;
-				mat4.multiply(mat4.translate(mat4.identity(mat4.create()), veye), vo, vo);
+				// translation
+				vo[12] = veye[0] * dist;
+				vo[13] = veye[1] * dist;
+				vo[14] = veye[2] * dist;
 
 				if(this.pan_enable) {
 					mat4.translate(vo, this.pan_vector, vo);
