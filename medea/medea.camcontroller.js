@@ -137,6 +137,7 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 		enabled: false,
 		turn_speed : 0.005,
 		walk_speed : 5.5,
+		scratch_mat : null,
 
 		hispeed_on_shift : true,
 		terrain_entity : null,
