@@ -22,6 +22,13 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 	var sh_cache = {
 	};
 
+	// cache for shader source code
+	var sh_source_cache = {
+	};
+
+	var sh_source_waiters = {
+	};
+
 	// predefined macros
 	var default_defines = {
 		'GL_ES' : ''
@@ -39,9 +46,33 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 			this.shader = 0;
 			this.defines = medea.Merge(defines || {},default_defines);
 
+			var	self = this
+			,	cached_source = sh_source_cache[src]
+			,	complete
+			;
+
+			if(cached_source) {
+				this._super(src, callback, true);
+
+				complete = function() {
+					self.OnDelayedInit(sh_source_cache[self.src]);
+				};
+
+				if(Array.isArray(cached_source)) {
+					cached_source.push(complete);
+				}
+				else {
+					complete();
+				}
+				return;
+			}
+
+			sh_source_cache[src] = [];
+
 			// trigger deferred loading
 			this._super(src, callback);
 		},
+
 
 		OnDelayedInit : function(data) {
 // #ifdef DEBUG
@@ -51,12 +82,19 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 // #endif
 			this.source = data;
 
+			var source_cache_entry = sh_source_cache[this.src];
+			sh_source_cache[this.src] = data;
+			if(Array.isArray(source_cache_entry)) {
+				source_cache_entry.forEach(function(e) {
+					e();
+				});
+			}
+
 			// _super() is dynamically assigned and ceases to exist as soon
 			// as OnDelayedInit returns, so we need to grab a ref.
 			var self = this;
 			var call_outer_super = self._super;
 	
-
 			// check if the shader has already been loaded or is currently
 			// being fetched/compiled.
 			var c = this._GetCacheName();
@@ -84,7 +122,6 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 			// #pragma toplevel. Each time cpp.js encounters one, it invokes
 			// settings.pragma_func.
 			var top_level_decls = [];
-
 
 			// preprocessing shaders is asynchronous
 			var settings = {
