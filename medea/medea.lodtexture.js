@@ -6,47 +6,18 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('lodtexture',['texture'],function(undefined) {
+medea.define('lodtexture',['texture', 'dummytexture'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
 	var neutral_textures = {}, TEX = gl.TEXTURE_2D;
-
-	medea._initMod('texture');
-	var DummyTexture = medea.DummyTexture;
-	
-
-	medea.CreateNeutralTexture = function(id) {
-		if (id === 'normals') {
-			// neutral normal map, i.e. y vector facing upwards as if there
-			// were no normal map at all.
-			id = [0.0,0.0,1.0,0.0];
-		}
-		else if (id.length === 3) {
-			id = [id[0],id[1],id[2],1.0];
-		}
-
-		if (id.length === 4) {
-			if (id in neutral_textures) {
-				return neutral_textures[id];
-			}
-			return neutral_textures[id] = new DummyTexture(id);
-		}
-
-		// #ifdef LOG
-		medea.LogDebug("neutral texture name not recognized: " + id);
-		// #endif
-
-		return medea.CreateDefaultTexture();
-	};
-
 
 	medea.LODTexture = medea.Resource.extend( {
 
 		init : function(tuple, callback, no_client_cache) {
 
 			this.textures = [null,null,null];
-			this.textures[0] = medea.CreateNeutralTexture(tuple.neutral);
+			this.textures[0] = medea.CreateDummyTexture(tuple.neutral);
 
 			// load the low-resolution version of the texture and mark the resource
 			// as complete as soon as we have it.

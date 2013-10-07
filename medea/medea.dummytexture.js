@@ -56,4 +56,30 @@ medea.define('dummytexture',['filesystem'],function(undefined) {
 			return slot;
 		}
 	});
+
+
+	medea.CreateDummyTexture = function(id) {
+		if (id === 'normals') {
+			// neutral normal map, i.e. y vector facing upwards as if there
+			// were no normal map at all.
+			id = [0.0,0.0,1.0,0.0];
+		}
+		else if (id.length === 3) {
+			id = [id[0],id[1],id[2],1.0];
+		}
+
+		if (id.length === 4) {
+			if (id in neutral_textures) {
+				return neutral_textures[id];
+			}
+			return neutral_textures[id] = new medea.DummyTexture(id);
+		}
+
+		// #ifdef LOG
+		medea.LogDebug("neutral texture name not recognized: " + id);
+		// #endif
+
+		return medea.CreateDefaultTexture();
+	};
+
 });

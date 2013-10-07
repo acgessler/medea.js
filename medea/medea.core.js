@@ -909,6 +909,7 @@ medea = new (function(sdom) {
 
 	medea_api("CreateViewport","viewport");
 	medea_api("GetViewports","viewport");
+
 	medea_api("CreateCameraNode","camera");
 
 	medea_api("FixResourceName","filesystem");
@@ -917,8 +918,9 @@ medea = new (function(sdom) {
 	medea_api("FetchMultiple","filesystem");
 
 	medea_api("CreatePassFromShaderPair","pass");
-	medea_api("CloneMaterial","material");
 	medea_api("ClonePass","pass");
+
+	medea_api("CloneMaterial","material");
 	medea_api("CreateMaterial","material");
 	medea_api("CreateSimpleMaterialFromShaderPair","material");
 	medea_api("CreateSimpleMaterialFromColor","material");
@@ -928,13 +930,17 @@ medea = new (function(sdom) {
 	medea_api("CreateVertexBuffer","vertexbuffer");
 	medea_api("CreateIndexBuffer","indexbuffer");
 
-	medea_api("CreateShader","shader");
 	medea_api("CreateImage","image");
+
+	medea_api("CreateShader","shader");
 	medea_api("CreateTexture","texture");
 	medea_api("CreateDefaultTexture","texture");
+
 	medea_api("CreateLODTexture","lodtexture");
-	medea_api("CreateNeutralTexture","lodtexture");
+
 	medea_api("CreateCubeTexture","cubetexture");
+
+	medea_api("CreateDummyTexture","dummytexture");
 
 	medea_api("CreateStandardMesh_Plane","standardmesh");
 	medea_api("CreateStandardMesh_Cube","standardmesh");
@@ -945,9 +951,11 @@ medea = new (function(sdom) {
 
 	medea_api("SetState","renderstate");
 	medea_api("SetDefaultState","renderstate");
+
 	medea_api("CreateRenderQueueManager","renderqueue");
 
 	medea_api("CreateCamera","camera");
+	
 	medea_api("CreateCamController","camcontroller");
 
 	medea_api("CreateBB","frustum");
