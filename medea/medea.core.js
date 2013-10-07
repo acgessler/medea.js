@@ -107,6 +107,11 @@ medea = new (function(sdom) {
 		// And make this class extendable
 		Class.extend = arguments.callee;
 
+		// always set the _super() attribute to make sure it exists
+		// in the object. This is to keep the hidden class (v8) from
+		// changing.
+		prototype._super = null;
+
 		return Class;
 	  };
 
