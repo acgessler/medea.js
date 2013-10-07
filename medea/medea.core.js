@@ -916,9 +916,9 @@ medea = new (function(sdom) {
 	medea_api("Fetch","filesystem");
 	medea_api("FetchMultiple","filesystem");
 
-	medea_api("CreatePassFromShaderPair","material");
+	medea_api("CreatePassFromShaderPair","pass");
 	medea_api("CloneMaterial","material");
-	medea_api("ClonePass","material");
+	medea_api("ClonePass","pass");
 	medea_api("CreateMaterial","material");
 	medea_api("CreateSimpleMaterialFromShaderPair","material");
 	medea_api("CreateSimpleMaterialFromColor","material");
