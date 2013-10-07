@@ -16,7 +16,14 @@ medea.define('pass',['shader','texture'],function(undefined) {
 
 	medea.MATERIAL_CLONE_COPY_CONSTANTS 	= 0x4;
 	medea.MATERIAL_CLONE_SHARE_CONSTANTS 	= 0x8;
-	
+
+
+	medea.PASS_SEMANTIC_COLOR_FORWARD_LIGHTING 	= 0x1;
+	medea.PASS_SEMANTIC_SHADOWMAP 				= 0x2;
+	medea.PASS_SEMANTIC_DEPTH_PREPASS 			= 0x4;
+	medea.PASS_SEMANTIC_DEFERRED_COLOR 			= 0x8;
+	medea.PASS_SEMANTIC_DEFERRED_NORMAL 		= 0x10;
+
 
 	/** medea.MAX_DIRECTIONAL_LIGHTS 
 	 *
@@ -129,6 +136,15 @@ medea.define('pass',['shader','texture'],function(undefined) {
 	medea.Pass = medea.Class.extend({
 
 		wannabe_clones : null,
+		vs : null,
+		ps : null,
+		constants : null,
+		auto_setters : null,
+		attr_map : null,
+		state : null,
+		program : null,
+		clone_flags : null,
+		semantic : medea.PASS_SEMANTIC_COLOR_FORWARD_LIGHTING,
 
 
 		/** @name medea.Pass.init(*) 
@@ -152,6 +168,17 @@ medea.define('pass',['shader','texture'],function(undefined) {
 			this._TryAssembleProgram();
 		},
 
+
+		Semantic: medea._GetSet('semantic'),
+		
+
+		AddSemantic : function(sem) {
+			this.semantic |= sem;
+		},
+
+		RemoveSemantic : function(sem) {
+			this.semantic &= ~sem;
+		},
 
 
 		/** @name medea.Pass.Begin(*)

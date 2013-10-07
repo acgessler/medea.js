@@ -78,7 +78,8 @@ medea.define('material',['pass'],function(undefined) {
 
 		Name : medea._GetSet(this,'name'),
 
-		Use: function(drawfunc,statepool) {
+		Use: function(drawfunc, statepool, semantic) {
+			semantic = semantic|0xffffffff;
 			var passes = this.passes;
 			if (this.mat_gen) {
 				this.mat_gen.Update(passes);
@@ -87,6 +88,9 @@ medea.define('material',['pass'],function(undefined) {
 			// invoke the drawing callback once per pass
 			for(var i = 0, e = passes.length; i < e; ++i) {
 				var pass = passes[i];
+				if(!(pass.semantic & semantic)) {
+					continue;
+				}
 				if(!pass.Begin(statepool)) {
 					// XXX substitute a default material?
 					return;
@@ -141,7 +145,7 @@ medea.define('material',['pass'],function(undefined) {
 	medea.CreateMaterial = function(passes, name) {
 		return new medea.Material(passes, name);
 	};
-	
+
 
 	medea.CloneMaterial = function(mat, name, clone_flags) {
 		var passes = mat.Passes(), newp = new Array(passes.length);
