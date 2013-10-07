@@ -74,7 +74,8 @@ medea = new (function(sdom) {
 			typeof _super[name] == "function" && fnTest.test(prop[name]) ?
 			(function(name, fn){
 			  return function() {
-				var tmp = this._super;
+			  	// omitted for performance reasons
+				//var tmp = this._super;
 
 				// Add a new ._super() method that is the same method
 				// but on the super-class
@@ -83,7 +84,9 @@ medea = new (function(sdom) {
 				// The method only need to be bound temporarily, so we
 				// remove it when we're done executing
 				var ret = fn.apply(this, arguments);
-				this._super = tmp;
+
+				// omitted for performance reasons
+				//this._super = tmp;
 
 				return ret;
 			  };
