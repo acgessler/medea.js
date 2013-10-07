@@ -19,27 +19,28 @@ medea.define('statepool',[],function(undefined) {
 
 	var _DefaultDerivedStates = {
 
-		"CAM_POS_LOCAL": function(statepool, old) {
+		CAM_POS_LOCAL: function(statepool, old) {
+			"use asm" 
 			return mat4.multiplyVec3(statepool.Get("WI"),statepool.GetQuick("CAM_POS"),
 				old || vec3.create());
 		},
 
-		"VP": function(statepool, old) {
+		VP: function(statepool, old) {
 			return mat4.multiply(statepool.GetQuick("P"),statepool.GetQuick("V"),
 				old || mat4.create());
 		},
 
-		"WVP": function(statepool, old) {
+		WVP: function(statepool, old) {
 			return mat4.multiply(statepool.Get("VP"),statepool.GetQuick("W"),
 				old || mat4.create());
 		},
 
-		"WIT": function(statepool, old) {
+		WIT: function(statepool, old) {
 			return mat4.transpose(statepool.Get("WI"),
 				old || mat4.create());
 		},
 
-		"WI": function(statepool, old) {
+		WI: function(statepool, old) {
 			return mat4.inverse(statepool.GetQuick("W"),
 				old || mat4.create());
 		}
@@ -48,8 +49,14 @@ medea.define('statepool',[],function(undefined) {
 	// class StatePool
 	medea.StatePool = medea.Class.extend({
 
+		deps : null,
+		derived_states : null,
+		dirty : null,
+
 		init : function(deps,derived_states) {
-			this.states = { _gl : {} };
+			this.states = { 
+				_gl : {}
+			 };
 			this.deps = deps || _DefaultStateDependencies;
 			this.derived_states = derived_states || _DefaultDerivedStates;
 			this.dirty = {};
@@ -59,7 +66,7 @@ medea.define('statepool',[],function(undefined) {
 			var dep_entry = this.deps[key];
 			if (dep_entry !== undefined) {
 				var dirty = this.dirty;
-				for(var i = 0, e = dep_entry.length; i < e; ++i) {
+				for(var i = dep_entry.length - 1; i >= 0; --i) {
 					dirty[dep_entry[i]] = true;
 				}
 			}
