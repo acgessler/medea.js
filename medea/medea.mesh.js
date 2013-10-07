@@ -60,7 +60,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity'],function(
 			this.ibo = ibo;
 			this.material = material;
 			this.rq_idx = rq === undefined ? medea.RENDERQUEUE_DEFAULT : rq;
-			this.pt = pt | medea.PT_TRIANGLES;
+			this.pt = pt || medea.PT_TRIANGLES;
 
 // #ifdef DEBUG
 			medea.DebugAssert(!!this.vbo,"need valid vbo for mesh to be complete");
@@ -144,7 +144,6 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity'],function(
 					// regular drawing
 					if(!wf || outer.pt != medea.PT_TRIANGLES && outer.pt != medea.PT_TRIANGLES_STRIPS) {
 						if (outer.ibo) {
-
 							gl.drawElements(outer.pt,iboc,outer.ibo.GetGlType(),0);
 							st.primitives_frame += outer._Calc_pt(iboc);
 						}
