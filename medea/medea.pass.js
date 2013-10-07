@@ -170,7 +170,7 @@ medea.define('pass',['shader','texture'],function(undefined) {
 
 
 		Semantic: medea._GetSet('semantic'),
-		
+
 
 		AddSemantic : function(sem) {
 			this.semantic |= sem;
@@ -594,9 +594,37 @@ medea.define('pass',['shader','texture'],function(undefined) {
 			// from the attribute names, assuming their names are recognized.
 			if(!this.attr_map) {
 				var a = this.attr_map = {};
+				/*
+				// TODO: this triggers a warning in chrome when the index for getActiveAttrib()
+				// is out of range. So while this is not fixed, we duplicate the list of
+				// known vertex attributes from medea.vertexbuffer.js with up to four
+				// UV coord sets.
 				for(var i = 0, n; n = gl.getActiveAttrib(p,i); ++i) {
 					a[n.name] = i;
-				}
+				} */
+
+				var known_attrs = [
+						"POSITION"
+	 				,	"NORMAL"
+					,	"TANGENT"
+					,	"BITANGENT"
+					,	"TEXCOORD0"
+					,	"COLOR0"
+					,	"TEXCOORD1"
+					,	"COLOR1"
+					,	"TEXCOORD2"
+					,	"COLOR2"
+					,	"TEXCOORD3"
+					,	"COLOR3"
+				];
+
+				known_attrs.forEach(function(attr) {
+					var loc = gl.getAttribLocation(p, attr);
+					if(loc !== -1) {
+						a[attr] = loc;
+					}
+				});
+
 
 				// #ifdef DEBUG
 				if(a['POSITION'] === undefined) {
