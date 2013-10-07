@@ -162,9 +162,6 @@ medea = new (function(sdom) {
 	var _initial_deps = ['node','viewport'];
 	var _initial_pre_deps = []; 
 
-	if (window.sprintf === undefined) {
-		_initial_pre_deps.push('sprintf-0.7.js');
-	}
 	if (window.mat4 === undefined) {
 		_initial_pre_deps.push('glMatrix.js');
 	}
@@ -181,7 +178,6 @@ medea = new (function(sdom) {
 
 		// first initialization phase -- create webgl canvas and prepare environment
 		_callback_pre = function() {
-			this.sprintf = sprintf;
 			this.canvas  = document.getElementById(where);
 
 			// #if DEBUG

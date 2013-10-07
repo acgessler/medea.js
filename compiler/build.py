@@ -120,7 +120,7 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 
 	# pre-define sprintf, matrix and the core module as they do not follow the 
 	# usual module dependency system.
-	topo_order = derive_topological_order(['sprintf-0.7.js','glMatrix.js', 'medea.core.js'],mods_by_deps)
+	topo_order = derive_topological_order(['glMatrix.js', 'medea.core.js'],mods_by_deps)
 	print('writing medea.core-compiled.js')
 	
 	# generate medea.core-compiled.js output file

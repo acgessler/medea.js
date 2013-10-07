@@ -80,9 +80,8 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity'],function(
 // #endif
 
 // #ifdef LOG
-			medea.LogDebug(medea.sprintf("create mesh, %s items in VBO, %s items in IBO",
-				this.vbo.GetItemCount(),
-				this.ibo ? this.ibo.GetItemCount() : -1));
+			medea.LogDebug("create mesh, " + this.vbo.GetItemCount() + " items in VBO, " + 
+				(this.ibo ? this.ibo.GetItemCount() : -1) + " items in IBO");
 // #endif
 		},
 

@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('debug',['visualizer', 'input_handler'],function() {
+medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js'],function() {
 	"use strict";
 	var medea = this;
 

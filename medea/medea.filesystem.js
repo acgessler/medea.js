@@ -226,7 +226,7 @@ medea.define('filesystem',[],function(undefined) {
 			medea.LogDebug("begin loading: " + what + " via HTTP");
 			medea._AjaxFetch(what,function(response,status) {
 
-				medea.LogDebug(medea.sprintf("end loading %s, got HTTP status %s",what,status));
+				medea.LogDebug("end loading " + what + ", HTTP status " + status);
 				if (status >= 300 || status < 200) {
 					if (onerror) {
 						onerror(status);
