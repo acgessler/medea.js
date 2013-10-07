@@ -176,12 +176,12 @@ medea.define('camera',['statepool'],function() {
 			return this.proj;
 		},
 
-		_Render : function(rq) {
+		_FillRenderQueues : function(rq, statepool) {
 			var frustum = null;
 			if (this.culling) {
 				frustum = this.GetFrustum();
 			}
-			var statepool = medea.GetDefaultStatePool(), outer = this;
+			var outer = this;
 
 			// (hack) check if the (logical) canvas size changed, if so, dirty the projection
 			// matrix in case the angle depends on it.

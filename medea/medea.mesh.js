@@ -19,35 +19,23 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity'],function(
 	medea.PT_LINE_STRIPS = gl.LINE_STRIPS;
 
 	// class RenderJob
-	this.RenderJob = medea.Class.extend({
+	var MeshRenderJob = medea.Class.extend({
 
-		distance: null,
+		distance 	: null,
+		mesh 		: null,
+		entity 		: null,
+		node 		: null,
+		viewport 	: null,
 
 		init : function(mesh,entity,node,viewport) {
 			this.mesh = mesh;
 			this.entity = entity;
 			this.node = node;
 			this.viewport = viewport;
-			this.Draw = function(statepool) {
+		},
 
-				// update the current world matrix to the node's global transformation matrix
-				statepool.Set("W",node.GetGlobalTransform());
-
-				// Always set WI and WIT. Lighting naturally relies on
-				// it, so we can assume that this is always needed.
-				// By using the node's intelligent update mechanism
-				// we can thus save lots of matrix math.
-				var wi = node.GetInverseGlobalTransform();
-				statepool.Set("WI",wi);
-				var wit = statepool.Get("WIT");
-				if(wit === undefined) {
-					wit = mat4.create();
-				}
-				mat4.transpose(wi, wit);
-				statepool.SetQuick("WIT",wit);
-
-				mesh.DrawNow(statepool);
-			};
+		Draw : function(renderer, statepool) {
+			renderer.DrawMesh(this, statepool);
 		},
 
 		// required methods for automatic sorting of renderqueues
@@ -87,7 +75,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity'],function(
 
 		Render : function(viewport,entity,node,rqmanager) {
 			// construct a renderable capable of drawing this mesh upon request by the render queue manager
-			rqmanager.Push(this.rq_idx,new medea.RenderJob(this,entity,node,viewport));
+			rqmanager.Push(this.rq_idx,new MeshRenderJob(this,entity,node,viewport));
 		},
 
 		Update : function() {

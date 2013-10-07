@@ -28,10 +28,10 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 		clearFlags : gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT,
 		enabled : 0xdeadbeef,
 		updated : true,
-		rqManager : null,
+		renderer : null,
 
-
-		init : function(name,x,y,w,h,zorder,camera,enable) {
+		// no rendering happens until Renderer() is set to valid value
+		init : function(name,x,y,w,h,zorder,camera,enable,renderer) {
 			this.x = x || 0;
 			this.y = y || 0;
 			this.w = w || 1.0;
@@ -40,6 +40,7 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 			this.visualizers = [];
 			this.id = id_source++;
 			this.name = name || 'UnnamedViewport_' + this.id;
+			this.renderer = renderer;
 
 			this.Camera(camera || medea.CreateCameraNode(this.name+'_DefaultCam'));
 
@@ -76,6 +77,7 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 
 
 		Name: medea._GetSet('name'),
+		Renderer: medea._GetSet('renderer'),
 
 		Enabled: function(f) {
 			if(f === undefined) {
@@ -212,15 +214,18 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 		},
 
 		Render: function(dtime) {
-			if (!this.enabled) {
+			if (!this.enabled || !this.renderer) {
 				return;
 			}
 
-			if (!this.rqManager) {
-				this.rqManager = medea.CreateRenderQueueManager();
-			}
-
-			var rq = this.rqManager;
+			var renderer = this.renderer
+			, rq = renderer.GetRQManager()
+			, statepool = medea.GetDefaultStatePool()
+			, cw
+			, ch
+			, cx
+			, cy
+			;
 
 			// setup the viewport - we usually only need to do this if we're competing with other viewports
 			if (enabled_viewports>1 || (medea.frame_flags & medea.FRAME_VIEWPORT_UPDATED) || this.updated) {
@@ -247,12 +252,14 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 			}
 
 			// let the camera class decide which items to render
-			var statepool = this.camera._Render(rq);
+			this.camera._FillRenderQueues(rq, statepool);
+			renderer.Render(statepool);
 
+			// TODO: restore visualizers
+			/*
 			// ... and the default behaviour is to simply dispatch all render queues to the GPU
 			var RenderProxy = function() {
 				rq.Flush(statepool);
-
 			}, RenderWithVisualizers = RenderProxy;
 
 			// ... but we invoke all visualizers in the right order to have them inject their custom logic, if they wish
@@ -260,8 +267,9 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 				RenderWithVisualizers = this.visualizers[i].Apply(RenderWithVisualizers,RenderProxy,rq,this);
 			}
 
-			RenderWithVisualizers();
+			RenderWithVisualizers(); */
 
+			// TODO: is calling gl.flush() beneficial - or not?
 			gl.flush();
 			this.updated = false;
 		}
@@ -269,7 +277,6 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 
 
 	medea.CreateViewport = function(name,x,y,w,h,zorder,camera,enable) {
-
 		// if no z-order is given, default to stacking
 		// viewports on top of each other in creation order.
 		if (zorder === undefined) {

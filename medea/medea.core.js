@@ -891,6 +891,8 @@ medea = new (function(sdom) {
 
 	medea_api("CreateDirectionalLight","light");
 
+	medea_api("CreateForwardRenderer","forwardrenderer");
+
 	medea_api("FullscreenMode","fullscreen");
 	medea_api("FullscreenModeKey","fullscreen");
 

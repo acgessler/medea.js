@@ -11,72 +11,29 @@ medea.define('light',['entity'],function(undefined) {
 
 	medea._initMod('entity');
 
+	// class LightJob
+	medea.LightJob = medea.Class.extend({
 
-	// class ForwardLightJob
-	this.ForwardLightJob = medea.Class.extend({
+		distance 	: null,
+		light 		: null,
+		entity 		: null,
+		node 		: null,
+		viewport 	: null,
 
-		distance: null,
+		Draw : function(renderer, statepool) {
+			renderer.DrawLight(this, statepool);
+		},
+
 
 		init : function(light,entity,node,viewport) {
 			this.light = light;
 			this.entity = entity;
 			this.node = node;
 			this.viewport = viewport;
-
-			this.Draw = function(statepool) {
-
-				var light = this.light;
-				var list_name = null;
-
-				var light_info = {
-					color : light.color
-				};
-
-				// add this light to the statepool so that materials will find it
-				if(light instanceof medea.DirectionalLight) {
-					list_name = 'DIR_LIGHTS';
-
-					light_info.world_dir = vec3.create();
-					mat4.multiplyVec3(node.GetGlobalTransform(), light_dir, light_info.world_dir);
-				}
-				/* else if(light instanceof medea.PointLight) {
-					list_name = 'POINT_LIGHTS';
-				}
-				else if(light instanceof medea.SpotLight) {
-					list_name = 'SPOT_LIGHTS';
-				} */
-				else {
-					medea.DebugAssert('unknown kind of light');
-				}
-
-				var lights = statepool.GetQuick(list_name);
-				if(lights === undefined) {
-					dlights = statepool.Set(list_name,[]);
-				}
-				lights.append(light_info);
-			};
 		},
 	});
 
 
-	// class DeferredLightJob
-	this.DeferredLightJob = medea.Class.extend({
-
-		distance: null,
-
-		init : function(light,entity,node,viewport) {
-			this.light = light;
-			this.entity = entity;
-			this.node = node;
-			this.viewport = viewport;
-
-			this.Draw = function(statepool) {
-
-				// TODO
-			};
-		},
-	});
-	
 
 	// class Light
 	this.Light = medea.Light.extend(
@@ -93,7 +50,7 @@ medea.define('light',['entity'],function(undefined) {
 
 		Render : function(viewport,entity,node,rqmanager) {
 			// construct a renderable capable of drawing this light upon request by the render queue manager
-			rqmanager.Push(this.rq_idx,new medea.ForwardLightJob(this,entity,node,viewport));
+			rqmanager.Push(this.rq_idx,new medea.LightJob(this,entity,node,viewport));
 		},
 
 

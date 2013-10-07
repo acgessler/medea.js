@@ -26,24 +26,6 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 	this.RENDERQUEUE_LAST = 19;
 
 
-	this._initial_state_depth_test_enabled = {
-		'depth_test' : true,
-		'depth_func' : 'less_equal',
-
-		// culling is turned on by default
-		'cull_face' : true,
-		'cull_face_mode' : 'back'
-	};
-
-	this._initial_state_depth_test_disabled = {
-		'depth_test' : false,
-
-		// culling is turned on by default
-		'cull_face' : true,
-		'cull_face_mode' : 'back'
-	};
-
-
 	// class DistanceSorter
 	this.DistanceSorter = medea.Class.extend({
 
@@ -87,7 +69,7 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 			this.entries.push(e);
 		},
 
-		Flush: function(statepool) {
+		Flush: function(renderer, statepool) {
 			if (this.default_state) {
 				medea.SetDefaultState(this.default_state,statepool);
 			}
@@ -97,24 +79,13 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 			}
 
 			this.entries.forEach(function(e) {
-				e.Draw(statepool);
+				e.Draw(renderer, statepool);
 			});
 			this.entries = [];
 		},
 
-		Sorter : function(sorter) {
-			if(!sorter) {
-				return this.sorter;
-			}
-			this.sorter = sorter;
-		},
-
-		DefaultState : function(default_state) {
-			if(!default_state) {
-				return this.default_state;
-			}
-			this.default_state = default_state;
-		},
+		Sorter : medea._GetSet('sorter'),
+		DefaultState : medea._GetSet('default_state'),
 
 		GetEntries : function() {
 			return this.entries;
@@ -126,33 +97,12 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 	this.RenderQueueManager = medea.Class.extend({
 
 		init : function(name) {
-			// allocates queues, by default all queues use the same implementation
+			// allocates queues, by default all queues have no further configuration
+			// setting sorters and default states is done by the renderer.
 			this.queues = new Array(medea.RENDERQUEUE_LAST+1);
 			for(var i = 0, l = this.queues.length; i < l; ++i) {
 				this.queues[i] = new medea.RenderQueue();
 			}
-
-			// choose some suitable default sorting algorithms
-			var distance_sorter = new medea.DistanceSorter();
-			var material_sorter = new medea.MaterialSorter();
-			var no_sorter = new medea.NoSorter();
-
-			var light_queue = this.queues[medea.RENDERQUEUE_LIGHT];
-			light_queue.Sorter(no_sorter);
-
-			var defs = [medea.RENDERQUEUE_DEFAULT_EARLY,medea.RENDERQUEUE_DEFAULT,medea.RENDERQUEUE_DEFAULT_LATE], outer = this;
-			defs.forEach(function(s) {
-				s = outer.queues[s];
-				s.Sorter(material_sorter);
-				s.DefaultState(medea._initial_state_depth_test_enabled);
-			});
-
-			defs = [medea.RENDERQUEUE_ALPHA_EARLY,medea.RENDERQUEUE_ALPHA,medea.RENDERQUEUE_ALPHA_LATE];
-			defs.forEach(function(s) {
-				s = outer.queues[s];
-				s.Sorter(distance_sorter);
-				s.DefaultState(medea._initial_state_depth_test_disabled);
-			});
 		},
 
 		Push : function(idx,renderable) {
@@ -166,19 +116,9 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 			this.queues[idx].Push(renderable);
 		},
 
-		Flush : function(statepool) {
-
-			// (hack) insert default light into light render queue
-			var light_queue = this.queues[medea.RENDERQUEUE_LIGHT];
-			if(light_queue.GetEntries().length === 0) {
-				statepool.Set("DIR_LIGHTS",[{
-					  world_dir :  [0.309,1.209,-0.709]
-					, color : [1,1,1]
-				}]);
-			}
-
+		Flush : function(renderer, statepool) {
 			this.queues.forEach(function(e) {
-				e.Flush(statepool);
+				e.Flush(renderer, statepool);
 			});
 		},
 
