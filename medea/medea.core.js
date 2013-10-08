@@ -453,9 +453,14 @@ medea = new (function(sdom) {
 
 
 	this.DoSingleFrame = function(dtime) {
+		var debug_panel = this.debug_panel;
 		if (!this.CanRender()) {
 			this.NotifyFatal("Not ready for rendering; need a GL context and a viewport");
 			return;
+		}
+
+		if (debug_panel) {
+			debug_panel.BeginFrame();
 		}
 
 		// get time delta if not specified
@@ -524,9 +529,8 @@ medea = new (function(sdom) {
 			viewports[vn].Render(this,dtime);
 		}
 
-		// draw debug pannel
-		if (this.debug_panel) {
-			this.debug_panel.Update();
+		if (debug_panel) {
+			debug_panel.EndFrame();
 		}
 
 		this.frame_flags = 0;
