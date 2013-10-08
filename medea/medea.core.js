@@ -466,7 +466,7 @@ medea = new (function(sdom) {
 		// get time delta if not specified
 		if (!dtime) {
 			var old = this.time || 0;
-			this.time = (new Date).getTime() * 0.001;
+			this.time = Date.now() * 0.001;
 
 			dtime = this.time - old;
 		}
