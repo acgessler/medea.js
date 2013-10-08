@@ -17,6 +17,7 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 		win 	: null,
 		input 	: null,
 		vis 	: null,
+		last_update_time : 0.0,
 
 		init : function(where,win) {
 			this.where = where;
@@ -56,10 +57,18 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 		},
 
 		EndFrame: function() {
-			var stats = medea.GetStatistics();
-			this.fps_stats.update(stats.smoothed_fps);
-			this.primitives_stats.update(stats.primitives_frame);
-			this.batches_stats.update(stats.batches_frame);
+			var stats = medea.GetStatistics()
+			,	time = medea.GetTime()
+			;
+
+			// update stats every 1/10th second to save DOM cost
+			if (time - this.last_update_time >= 0.1) {
+				this.last_update_time =  time;
+
+				this.fps_stats.update(stats.smoothed_fps);
+				this.primitives_stats.update(stats.primitives_frame);
+				this.batches_stats.update(stats.batches_frame);
+			}
 		},
 
 		ToggleVisualizer : function(name, clb) {
