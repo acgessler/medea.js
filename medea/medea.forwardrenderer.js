@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('forwardrenderer',['renderqueue', 'statepool'],function(undefined) {
+medea.define('forwardrenderer',['renderer'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -29,22 +29,19 @@ medea.define('forwardrenderer',['renderqueue', 'statepool'],function(undefined) 
 		'cull_face_mode' : 'back'
 	};
 
-	medea._initMod('renderqueue');
+	medea._initMod('renderer');
 
-	var ForwardRenderer = medea.Class.extend({
-		rq : null,
+	var ForwardRenderer = medea.Renderer.extend({
 
 		init : function() {
+			this._super();
+
 			var	outer = this
 			,	distance_sorter = new medea.DistanceSorter()
 			,	material_sorter = new medea.MaterialSorter()
 			,	no_sorter = new medea.NoSorter()
 			,	light_queue 
 			;
-
-			// create a render queue manager for the renderer.
-			// this creates the full set of render queues
-			this.rq = medea.CreateRenderQueueManager();
 
 			// setup default render states for all render queues and also pick
 			// appropriate sorting algorithm implementations.
@@ -74,13 +71,11 @@ medea.define('forwardrenderer',['renderqueue', 'statepool'],function(undefined) 
 		},
 
 
-		GetRQManager : function() {
-			return this.rq;
-		},
-
-
 		Render : function(statepool) {
 			var	rq = this.rq
+			,	outer = this
+			,	RenderProxy
+			,	RenderWithVisualizers
 			;
 
 			// (hack) insert default light into statepool if there is no light in the scene
@@ -92,7 +87,19 @@ medea.define('forwardrenderer',['renderqueue', 'statepool'],function(undefined) 
 				}]);
 			}
 
-			rq.Flush(this, statepool);
+			// the default behaviour is to simply dispatch all render queues to the GPU
+			var RenderProxy = function() {
+				rq.Flush(outer, statepool);
+			}, RenderWithVisualizers = RenderProxy;
+
+			// but we invoke all visualizers in the right order to have them change this
+			// by injecting their own logic. They also get access to the original rq.
+			this.visualizers.forEach(function(vis) {
+				RenderWithVisualizers = vis.Apply(RenderWithVisualizers,RenderProxy,rq,this);
+			});
+			
+
+			RenderWithVisualizers(); 
 		},
 
 

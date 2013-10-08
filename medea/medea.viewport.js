@@ -37,7 +37,6 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 			this.w = w || 1.0;
 			this.h = h || 1.0;
 			this.zorder = zorder || 0;
-			this.visualizers = [];
 			this.id = id_source++;
 			this.name = name || 'UnnamedViewport_' + this.id;
 			this.renderer = renderer;
@@ -47,32 +46,6 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 			// viewports are initially enabled since this is what
 			// users will most likely want.
 			this.Enable(enable);
-		},
-
-
-		AddVisualizer : function(vis) {
-			if (this.visualizers.indexOf(vis) !== -1) {
-				return;
-			}
-
-			var ord = vis.GetOrdinal();
-			for (var i = 0; i < this.visualizers.length; ++i) {
-				if (ord > this.visualizers[i].GetOrdinal()) {
-					this.visualizers.insert(i,vis);
-					vis._AddViewport(this);
-					return;
-				}
-			}
-			this.visualizers.push(vis);
-			vis._AddViewport(this);
-		},
-
-		RemoveVisualizer : function(vis) {
-			var idx = this.visualizers.indexOf(vis);
-			if(idx !== -1) {
-				vis._RemoveViewport(this);
-				this.visualizers.splice(idx,1);
-			}
 		},
 
 
@@ -254,20 +227,6 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 			// let the camera class decide which items to render
 			this.camera._FillRenderQueues(rq, statepool);
 			renderer.Render(statepool);
-
-			// TODO: restore visualizers
-			/*
-			// ... and the default behaviour is to simply dispatch all render queues to the GPU
-			var RenderProxy = function() {
-				rq.Flush(statepool);
-			}, RenderWithVisualizers = RenderProxy;
-
-			// ... but we invoke all visualizers in the right order to have them inject their custom logic, if they wish
-			for( var i = 0; i < this.visualizers.length; ++i) {
-				RenderWithVisualizers = this.visualizers[i].Apply(RenderWithVisualizers,RenderProxy,rq,this);
-			}
-
-			RenderWithVisualizers(); */
 
 			// TODO: is calling gl.flush() beneficial - or not?
 			gl.flush();
