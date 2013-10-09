@@ -24,39 +24,13 @@ medea.define('renderer',['renderqueue'],function(undefined) {
 		},
 
 
-		AddVisualizer : function(vis) {
-			if (this.visualizers.indexOf(vis) !== -1) {
-				return;
-			}
-
-			var ord = vis.GetOrdinal();
-			for (var i = 0; i < this.visualizers.length; ++i) {
-				if (ord > this.visualizers[i].GetOrdinal()) {
-					this.visualizers.insert(i,vis);
-					vis._AddViewport(this);
-					return;
-				}
-			}
-			this.visualizers.push(vis);
-			vis._AddViewport(this);
-		},
-
-
-		RemoveVisualizer : function(vis) {
-			var idx = this.visualizers.indexOf(vis);
-			if(idx !== -1) {
-				vis._RemoveViewport(this);
-				this.visualizers.splice(idx,1);
-			}
-		},
-
 
 		GetRQManager : function() {
 			return this.rq;
 		},
 
 
-		Render : null,   // function(statepool) {}
+		Render : null,   // function(viewport, statepool) {}
 		DrawMesh : null, // function(meshjob, statepool) {}
 		DrawLight : null // function(lightjob, statepool) {}
 	});

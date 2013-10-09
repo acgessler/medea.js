@@ -34,7 +34,7 @@ medea.define('visualizer_showbbs',[ 'visualizer','material','frustum'],function(
 	};
 
 	medea._initMod('visualizer');
-	this.VisualizerShowBBs = medea.Visualizer.extend({
+	var VisualizerShowBBs = medea.Visualizer.extend({
 
 		init : function(name, draw_range, draw_nodes, show_cull_state) {
 			this._super(name);
@@ -68,7 +68,7 @@ medea.define('visualizer_showbbs',[ 'visualizer','material','frustum'],function(
 			this.show_cull_state = fr;
 		},
 
-		Apply : function(render_stub,original_render_stub,rq, viewport) {
+		Apply : function(render_stub,original_render_stub,rq, renderer, viewport) {
 			var outer = this;
 			return function() {
 				var cam = viewport.Camera(), cp = cam.GetWorldPos();
@@ -225,8 +225,8 @@ medea.define('visualizer_showbbs',[ 'visualizer','material','frustum'],function(
 	});
 
 
-	medea.CreateVisualizer_ShowBBs = function(name) {
-		return new this.VisualizerShowBBs(name);
+	medea.CreateVisualizer_showbbs = function(name) {
+		return new VisualizerShowBBs(name);
 	};
 });
 

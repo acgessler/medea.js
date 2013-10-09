@@ -29,6 +29,7 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 		enabled : 0xdeadbeef,
 		updated : true,
 		renderer : null,
+		visualizers : null,
 
 		// no rendering happens until Renderer() is set to valid value
 		init : function(name,x,y,w,h,zorder,camera,enable,renderer) {
@@ -40,12 +41,45 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 			this.id = id_source++;
 			this.name = name || 'UnnamedViewport_' + this.id;
 			this.renderer = renderer;
+			this.visualizers = [];
 
 			this.Camera(camera || medea.CreateCameraNode(this.name+'_DefaultCam'));
 
 			// viewports are initially enabled since this is what
 			// users will most likely want.
 			this.Enable(enable);
+		},
+
+
+		AddVisualizer : function(vis) {
+			if (this.visualizers.indexOf(vis) !== -1) {
+				return;
+			}
+
+			var ord = vis.GetOrdinal();
+			for (var i = 0; i < this.visualizers.length; ++i) {
+				if (ord > this.visualizers[i].GetOrdinal()) {
+					this.visualizers.insert(i,vis);
+					vis._AddRenderer(this);
+					return;
+				}
+			}
+			this.visualizers.push(vis);
+			vis._AddViewport(this);
+		},
+
+
+		RemoveVisualizer : function(vis) {
+			var idx = this.visualizers.indexOf(vis);
+			if(idx !== -1) {
+				vis._RemoveViewport(this);
+				this.visualizers.splice(idx,1);
+			}
+		},
+
+
+		GetVisualizers : function() {
+			return this.visualizers;
 		},
 
 
@@ -226,7 +260,7 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 
 			// let the camera class decide which items to render
 			this.camera._FillRenderQueues(rq, statepool);
-			renderer.Render(statepool);
+			renderer.Render(this, statepool);
 
 			// TODO: is calling gl.flush() beneficial - or not?
 			gl.flush();

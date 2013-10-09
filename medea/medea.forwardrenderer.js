@@ -71,7 +71,7 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 		},
 
 
-		Render : function(statepool) {
+		Render : function(viewport, statepool) {
 			var	rq = this.rq
 			,	outer = this
 			,	RenderProxy
@@ -88,16 +88,17 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 			}
 
 			// the default behaviour is to simply dispatch all render queues to the GPU
-			var RenderProxy = function() {
+			RenderProxy = function() {
 				rq.Flush(outer, statepool);
-			}, RenderWithVisualizers = RenderProxy;
+			};
+
+			RenderWithVisualizers = RenderProxy;
 
 			// but we invoke all visualizers in the right order to have them change this
 			// by injecting their own logic. They also get access to the original rq.
-			this.visualizers.forEach(function(vis) {
-				RenderWithVisualizers = vis.Apply(RenderWithVisualizers,RenderProxy,rq,this);
+			viewport.GetVisualizers().forEach(function(vis) {
+				RenderWithVisualizers = vis.Apply(RenderWithVisualizers,RenderProxy,rq,outer,viewport);
 			});
-			
 
 			RenderWithVisualizers(); 
 		},

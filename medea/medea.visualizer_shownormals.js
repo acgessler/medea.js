@@ -29,7 +29,7 @@ medea.define('visualizer_shownormals',[ 'visualizer','material'],function() {
 	];
 
 	medea._initMod('visualizer');
-	this.VisualizerShowNormals = medea.Visualizer.extend({
+	var VisualizerShowNormals = medea.Visualizer.extend({
 
 		init : function(name, draw_range, full_ts) {
 			this._super(name);
@@ -55,7 +55,7 @@ medea.define('visualizer_shownormals',[ 'visualizer','material'],function() {
 			this.full_ts = fr;
 		},
 
-		Apply : function(render_stub,original_render_stub,rq, viewport) {
+		Apply : function(render_stub,original_render_stub, rq, renderer, viewport) {
 			var outer = this;
 			return function() {
 
@@ -191,8 +191,8 @@ medea.define('visualizer_shownormals',[ 'visualizer','material'],function() {
 	});
 
 
-	medea.CreateVisualizer_ShowNormals = function(name) {
-		return new this.VisualizerShowNormals(name);
+	medea.CreateVisualizer_shownormals = function(name) {
+		return new VisualizerShowNormals(name);
 	};
 });
 
