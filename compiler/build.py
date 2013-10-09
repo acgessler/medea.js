@@ -11,7 +11,8 @@ def get_full_file_name(file):
 	# the rules for module names are simple - if the full .js file name
 	# is given, we load it directly. Otherwise, we assume it is a medea
 	# module of the given name and derive the file name from it.
-	return ('medea.' + file + '.js') if not ".js" in file else file
+	return ('medea.' + file + '.js') if not ".js" in file.lower()\
+		 else os.path.join('3rdparty',file)
 
 
 def get_google_closure_params():
@@ -71,11 +72,13 @@ def derive_topological_order(initial, mods_by_deps):
 
 
 def run(input_folder, output_folder, files_to_compact, resources_to_include = {}):
+	input_folder_3rdparty = os.path.join(input_folder, '3rdparty')
+	output_folder_3rdparty = os.path.join(output_folder, '3rdparty')
 
 	# cleanup previous compiler output
 	shutil.rmtree(output_folder, True)
 	try:
-		os.mkdir(output_folder)
+		os.makedirs(output_folder_3rdparty)
 	except:
 		pass
 
@@ -106,21 +109,21 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 					print('unexpected input: two define calls in one file')
 					break
 				l = match.group(1)
-				l = frozenset(get_full_file_name(l.strip()[1:-1]) for l in l.split(',') \
-					if len(l.strip()) > 0)
+				l = frozenset(l.strip()[1:-1] for l in l.split(',') if len(l.strip()) > 0)
 
 				for dep in l:
 					all_deps.add(dep)
-					if not dep in mods_by_deps:
+					if not dep in mods_by_deps and not dep in files_to_compact:
 						files_to_compact.append(dep)
+						print full_file_name + ' depends on ' + dep
 
-			mods_by_deps[full_file_name] = l or frozenset()
+			mods_by_deps[file] = l or frozenset()
 
 	print('deriving topological order of collated modules')
 
 	# pre-define sprintf, matrix and the core module as they do not follow the 
 	# usual module dependency system.
-	topo_order = derive_topological_order(['glMatrix.js', 'medea.core.js'],mods_by_deps)
+	topo_order = derive_topological_order(['glMatrix.js', 'core'],mods_by_deps)
 	print('writing medea.core-compiled.js')
 	
 	# generate medea.core-compiled.js output file
@@ -129,7 +132,7 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 		outp.write(get_license())
 		outp.write('medea_is_compiled = true;');
 		for n, dep in enumerate(topo_order):
-			path = os.path.join(input_folder, dep);
+			path = os.path.join(input_folder, get_full_file_name(dep));
 			print('collating: ' + path)
 
 			with open(path, 'rt') as inp:
@@ -148,9 +151,16 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 		outp.write('medea._initLibrary();');
 		outp.write('delete window.medea_is_compiled;');
 
+	topo_order = [get_full_file_name(e) for e in topo_order]
+
 	# copy all other files
 	for file in os.listdir(input_folder):
 		if not file in topo_order and ".js" in file:
 			print('copying ' + file + ' to output folder')
 			shutil.copy2(os.path.join(input_folder, file), os.path.join(output_folder, file))
+
+	for file in os.listdir(input_folder_3rdparty):
+		if not os.path.join('3rdparty',file) in topo_order and ".js" in file:
+			print('copying ' + file + ' to output folder')
+			shutil.copy2(os.path.join(input_folder_3rdparty, file), os.path.join(output_folder_3rdparty, file))
 
