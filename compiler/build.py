@@ -123,7 +123,8 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 
 	# pre-define sprintf, matrix and the core module as they do not follow the 
 	# usual module dependency system.
-	topo_order = derive_topological_order(['glMatrix.js', 'core'],mods_by_deps)
+	topo_order = derive_topological_order(['core', 'glMatrix.js'],mods_by_deps)
+	print topo_order
 	print('writing medea.core-compiled.js')
 	
 	# generate medea.core-compiled.js output file
@@ -135,10 +136,11 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 			path = os.path.join(input_folder, get_full_file_name(dep));
 			print('collating: ' + path)
 
+
 			with open(path, 'rt') as inp:
 				outp.write(inp.read())
-				if n >= 3 and (len(dep) <= 6 or dep[:6] != 'medea.'):
-					outp.write('medea._markScriptAsLoaded("'+dep+'")')
+				if '.js' in dep:
+					outp.write('medea._markScriptAsLoaded("'+ dep +'");')
 				outp.write('\n')
 
 		# embed resource files
