@@ -78,10 +78,10 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 
 
 		BeginFrame : function() {
-			if(this.show_bbs) {
-				this.ToggleVisualizer('show_bbs');
-			}
+			this._SetVisualizer('showbbs', this.show_bbs);
+			this._SetVisualizer('shownormals', this.show_normals);
 		},
+
 
 		EndFrame: function() {
 			var stats = medea.GetStatistics()
@@ -98,27 +98,27 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 			}
 		},
 
-		ToggleVisualizer : function(name, clb) {
-			if (this.vis[name] === false) {
+
+		_SetVisualizer : function(name, state, clb) {
+			var vis = this.vis;
+			if (vis[name] === false) {
 				return;
 			}
 
-			// #ifdef LOG
-			medea.LogDebug("debugview: toggle visualizer: " + name);
-			// #endif LOG
-
-			if (!this.vis[name]) {
-				this.vis[name] = false;
+			if (state && !vis[name]) {
+				vis[name] = false;
 
 				var outer = this;
 				medea.CreateVisualizer(name,'debug_panel_visualizer:'+name,function(vis) {
 					outer.vis[name] = vis;
 					outer._AddVisualizer(name);
-					clb(vis);
+					if(clb) {
+						clb(vis);
+					}
 				});
 			}
-			if (this.vis[name]) {
-				if (this.vis[name].GetViewports().length) {
+			else if (vis[name]) {
+				if (!state) {
 					this._RemoveVisualizer(name);
 				}
 				else {
@@ -127,12 +127,14 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 			}
 		},
 
+
 		_AddVisualizer : function(name) {
 			var vps = medea.GetViewports();
 			for(var i = 0; i < vps.length; ++i) {
 				vps[i].AddVisualizer(this.vis[name]);
 			}
 		},
+
 
 		_RemoveVisualizer : function(name) {
 			var vps = this.vis[name].GetViewports().slice(0);
