@@ -9,9 +9,10 @@
 medea.define('node',['frustum'],function(undefined) {
 	"use strict";
 
+	var medea = this;
+
 	medea.BB_INFINITE = 'i';
 	medea.BB_EMPTY = 'e';
-
 
 	medea._NODE_FLAG_DIRTY = 0x1;
 	medea._NODE_FLAG_DIRTY_BB = 0x2;
@@ -24,7 +25,7 @@ medea.define('node',['frustum'],function(undefined) {
 
 	var id_source = 0;
 
-	this.Node = medea.Class.extend({
+	medea.Node = medea.Class.extend({
 
 		// this is to allow subclasses to have their own flags set when the node's transformation
 		// matrix is altered. By default we only set DIRTY.
