@@ -20,7 +20,7 @@ medea.define('indexbuffer',[],function(undefined) {
 	medea.INDEXBUFFER_LARGE_MESH = 0x2;
 
 	// enable GetSourceData()
-	medea.VERTEXBUFFER_PRESERVE_CREATION_DATA = 0x2;
+	medea.INDEXBUFFER_PRESERVE_CREATION_DATA = 0x4;
 
 
 
@@ -47,7 +47,8 @@ medea.define('indexbuffer',[],function(undefined) {
 			this.flags = flags || 0;
 
 			// #ifdef DEBUG
-			//this.flags |= medea.INDEXBUFFER_PRESERVE_CREATION_DATA;
+			// TODO: necessary for now in order to be able to display wireframes
+			this.flags |= medea.INDEXBUFFER_PRESERVE_CREATION_DATA;
 			// #endif
 
 			// #ifdef DEBUG
@@ -127,5 +128,39 @@ medea.define('indexbuffer',[],function(undefined) {
 
 	medea.CreateIndexBuffer = function(indices,flags) {
 		return new medea.IndexBuffer(indices,flags);
+	};
+
+	medea.CreateLineListIndexBufferFromTriListIndices = function(indices,flags) {
+		if(indices instanceof medea.IndexBuffer) {
+			flags = indices.flags;
+			indices = indices.GetSourceData();
+			
+			// #ifdef DEBUG
+			medea.DebugAssert(!!indices, 'source index buffer must specify medea.INDEXBUFFER_PRESERVE_CREATION_DATA');
+			// #endif
+		}
+		var tri_count = indices.length / 3
+		,	line_indices = new Uint16Array(tri_count * 6)
+		,	tri = 0
+		,	cur = 0
+		,	a
+		,	b
+		,	c
+		;
+
+		for(; tri < tri_count; ++tri) {
+			a = indices[tri * 3 + 0];
+			b = indices[tri * 3 + 1];
+			c = indices[tri * 3 + 2];
+
+			line_indices[cur++] = a;
+			line_indices[cur++] = b;
+			line_indices[cur++] = c;
+			line_indices[cur++] = a;
+			line_indices[cur++] = b;
+			line_indices[cur++] = c;
+		}
+
+		return new medea.IndexBuffer(line_indices,flags);
 	};
 });

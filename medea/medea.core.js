@@ -943,6 +943,7 @@ medea = new (function(sdom) {
 
 	medea_api("CreateVertexBuffer","vertexbuffer");
 	medea_api("CreateIndexBuffer","indexbuffer");
+	medea_api("CreateLineListIndexBufferFromTriListIndices","indexbuffer");
 
 	medea_api("CreateImage","image");
 

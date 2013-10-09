@@ -55,12 +55,20 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity'],function(
 	// class Mesh
 	this.Mesh = medea.Entity.extend(
 	{
-		init : function(vbo,ibo,material,rq, pt) {
+		vbo : null,
+		ibo : null,
+		material : null,
+		rq_idx : -1,
+		pt : -1,
+		line_ibo : null,
+
+		init : function(vbo, ibo, material, rq, pt, line_ibo) {
 			this.vbo = vbo;
 			this.ibo = ibo;
 			this.material = material;
 			this.rq_idx = rq === undefined ? medea.RENDERQUEUE_DEFAULT : rq;
 			this.pt = pt || medea.PT_TRIANGLES;
+			this.line_ibo = line_ibo;
 
 // #ifdef DEBUG
 			medea.DebugAssert(!!this.vbo,"need valid vbo for mesh to be complete");
@@ -157,7 +165,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity'],function(
 					// of course, substituting gl.LINES does *not* give correct results, but
 					// it is relatively fast so it is enabled by default.
 					else {
-						if (true) {
+						if (false) {
 							if (outer.ibo) {
 
 								gl.drawElements(gl.LINES,iboc,outer.ibo.GetGlType(),0);
@@ -170,9 +178,30 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity'],function(
 							}
 						}
 						else {
-							if (outer.pt == medea.PT_TRIANGLES) {
-								for (var i = 0; i < iboc/3; ++i) {
-									gl.drawElements(gl.LINE_STRIPS,3,outer.ibo.GetGlType(),i*3);
+							medea._initMod('indexbuffer');
+
+							// TODO: track changes
+							if(outer.ibo.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA || outer.line_ibo != null) {
+								if(outer.line_ibo == null) {
+									// #ifdef LOG
+									medea.LogDebug('creating auxiliary index buffer to hold wireframe line mesh');
+									// #endif
+
+									outer.line_ibo = medea.CreateLineListIndexBufferFromTriListIndices(outer.ibo);
+
+									// #ifdef DEBUG
+									medea.DebugAssert(!!outer.line_ibo, 'invariant');
+									// #endif
+								}
+
+								outer.line_ibo._Bind(statepool);
+								gl.drawElements(gl.LINES,iboc * 2,outer.line_ibo.GetGlType(),0);
+							}
+							else {
+								if (outer.pt == medea.PT_TRIANGLES) {
+									for (var i = 0; i < iboc/3; ++i) {
+										gl.drawElements(gl.LINE_STRIPS,3,outer.ibo.GetGlType(),i*3);
+									}
 								}
 							}
 						}
