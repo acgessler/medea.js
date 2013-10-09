@@ -31,6 +31,7 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 				, left 		: 0
 				, top 		: 0
 				, style     : 0
+				, autorange	: 50
 			});
 
 			this.primitives_stats = new MiniStatsDisplay({
@@ -39,6 +40,7 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 				, left 		: 0
 				, top 		: 46
 				, style     : 1
+				, autorange	: 50
 			});
 
 
@@ -48,6 +50,7 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 				, left 		: 0
 				, top 		: 92
 				, style     : 3
+				, autorange	: 50
 			});
 		},
 
