@@ -6,20 +6,30 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStatsDisplay.js'],function() {
+medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStatsDisplay.js', 'dat.gui.min.js'],function() {
 	"use strict";
 	var medea = this;
 
 
 	this.DebugPanel = medea.Class.extend({
 
-		where 	: null,
-		win 	: null,
-		input 	: null,
-		vis 	: null,
-		last_update_time : 0.0,
+		  where 						: null
+		, win 							: null
+		, input 						: null
+		, vis 							: null
+		, show_normals 					: false
+		, show_bbs 						: false
+		, show_bbs_draw_range 			: 50
+		, show_bbs_draw_nodes 			: true
+		, show_bbs_show_cull_state 		: true
+		, show_ministats 				: true
+		, last_update_time 				: 0.0
+		,
+
 
 		init : function(where,win) {
+			var f1, f2;
+
 			this.where = where;
 			this.win = win;
 			this.input = {};
@@ -52,11 +62,25 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 				, style     : 3
 				, autorange	: 50
 			});
+
+			this.gui = new dat.GUI();
+			var f1 = this.gui.addFolder('Visualizers');
+			f1.add(this, 'show_normals');
+
+			f1.add(this, 'show_bbs');
+				f2 = f1.addFolder('show_bbs Settings');
+				f2.add(this, 'show_bbs_draw_range');
+				f2.add(this, 'show_bbs_draw_nodes');
+				f2.add(this, 'show_bbs_show_cull_state');
+
+			f1.add(this, 'show_ministats');
 		},
 
 
 		BeginFrame : function() {
-			
+			if(this.show_bbs) {
+				this.ToggleVisualizer('show_bbs');
+			}
 		},
 
 		EndFrame: function() {
