@@ -722,7 +722,7 @@ medea = new (function(sdom) {
 				}
 
 				(function(n,is_medea_mod) {
-				medea._AjaxFetch(medea.root_url+(is_medea_mod ? 'medea.' +n + '.js' : n),function(text,status) {
+				medea._AjaxFetch(medea.root_url+(is_medea_mod ? 'medea.' +n + '.js' : '3rdparty/' + n),function(text,status) {
 					if(status !== 200) {
 						medea.DebugAssert('failure loading script ' + n);
 						return;
