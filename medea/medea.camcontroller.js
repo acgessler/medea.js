@@ -237,6 +237,7 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 		axes_enabled : (1 | 2),
 		phi : 0,
 		theta : 0,
+		theta_pole_dead_angle : 0.1,
 
 
 		init : function(enabled, initial_rot_phi, initial_rot_theta) {
@@ -249,6 +250,7 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 		// 1 bit set is x, 2 bit set is y
 		AxesEnabled : medea._GetSet('axes_enabled'),
 
+		ThetaPoleDeadAngle : medea._GetSet('theta_pole_dead_angle'),
 		TurnSpeed : medea._GetSet('turn_speed'),
 		ZoomSpeed : medea._GetSet('zoom_speed'),
 		PanSpeed : medea._GetSet('pan_speed'),
@@ -324,6 +326,11 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 
 
 		ProcessMouseDelta : function(dtime, node, d) {
+			var	theta = this.theta
+			,	theta_pole_dead_angle = this.theta_pole_dead_angle
+			,	pi = Math.PI
+			;
+
 			// process mouse movement on the x axis
 			if(d[0] !== 0 && (this.axes_enabled & 0x1)) {
 				this.phi += d[0]*this.turn_speed;
@@ -331,7 +338,14 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 			
 			// process mouse movement on the y axis
 			if(d[1] !== 0 && (this.axes_enabled & 0x2)) {
-				this.theta -= d[1]*this.turn_speed;
+				theta -= d[1]*this.turn_speed;
+				if(theta < theta_pole_dead_angle) {
+					theta = theta_pole_dead_angle;
+				}
+				else if(theta > pi - theta_pole_dead_angle) {
+					theta = pi - theta_pole_dead_angle;
+				}
+				this.theta = theta;
 			}
 
 			this.dirty_trafo = true;
