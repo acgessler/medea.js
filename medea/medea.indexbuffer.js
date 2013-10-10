@@ -44,7 +44,7 @@ medea.define('indexbuffer',[],function(undefined) {
 		gltype : 0,
 
 		init : function(init_data,flags) {
-			this.flags = flags || 0;
+			this.flags = flags | 0;
 
 			// #ifdef DEBUG
 			// TODO: necessary for now in order to be able to display wireframes
@@ -82,7 +82,7 @@ medea.define('indexbuffer',[],function(undefined) {
 				this.flags & medea.INDEXBUFFER_USAGE_DYNAMIC ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
 
 			if (this.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA) {
-				this.init_data = init_data;
+				this.init_data = arr;
 			}
 		},
 
