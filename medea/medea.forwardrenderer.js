@@ -55,7 +55,7 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 			].forEach(function(s) {
 				s = outer.rq.queues[s];
 				s.Sorter(material_sorter);
-				s.DefaultState(medea._initial_state_depth_test_enabled);
+				s.DefaultState(_initial_state_depth_test_enabled);
 			});
 
 
@@ -66,7 +66,7 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 			].forEach(function(s) {
 				s = outer.rq.queues[s];
 				s.Sorter(distance_sorter);
-				s.DefaultState(medea._initial_state_depth_test_disabled);
+				s.DefaultState(_initial_state_depth_test_disabled);
 			});
 		},
 
