@@ -130,13 +130,13 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 		},
 
 		DrawNow : function(statepool) {
-			var st = medea.GetStatistics()
+			var outer = this
+			,	st = medea.GetStatistics()
 			,	vboc = this.vbo.GetItemCount()
 			,	iboc = this.ibo ? this.ibo.GetItemCount() : null
 			;
 
-			var outer = this;
-			if(!medea.Wireframe() || this.pt != medea.PT_TRIANGLES && this.pt != medea.PT_TRIANGLES_STRIPS) {
+			if(!medea.Wireframe() || this.pt !== medea.PT_TRIANGLES && this.pt !== medea.PT_TRIANGLES_STRIPS) {
 				// non-wireframe, regular drawing
 				if (this.ibo) {
 					this.ibo._Bind(statepool);
@@ -162,12 +162,14 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 				}, statepool);
 				return;
 			}
+
+			return;
 			
 			// wireframe is tricky because WebGl does not support the usual
 			// gl API for setting the poly mode.
 
 			medea._initMod('indexbuffer');
-			if(this.pt == medea.PT_TRIANGLES_STRIPS) {
+			if(this.pt === medea.PT_TRIANGLES_STRIPS) {
 				// #ifdef DEBUG
 				medea.LogDebug('not supported: wireframe and medea.PT_TRIANGLES_STRIPS');
 				// #endif
@@ -200,7 +202,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 			this.material.Use(function(pass) {
 				outer.vbo._Bind(pass.GetAttributeMap(), statepool);
 				// TODO: this is super-slow
-				if (outer.pt == medea.PT_TRIANGLES) {
+				if (outer.pt === medea.PT_TRIANGLES) {
 					for (var i = 0; i < iboc/3; ++i) {
 						gl.drawElements(gl.LINE_STRIPS,3,outer.ibo.GetGlType(),i*3);
 					}
@@ -223,7 +225,9 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 				this.line_ibo = medea.CreateLineListIndexBufferFromTriListIndices(this.ibo);
 			}
 			else {
-				// TODO
+				this.line_ibo = medea.CreateLineListIndexBufferForUnindexedTriList( 
+					this.vbo.GetItemCount() / 3 
+				);
 			}
 
 			// #ifdef DEBUG

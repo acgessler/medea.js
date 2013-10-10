@@ -132,7 +132,7 @@ medea.define('indexbuffer',[],function(undefined) {
 
 	medea.CreateLineListIndexBufferFromTriListIndices = function(indices,flags) {
 		if(indices instanceof medea.IndexBuffer) {
-			flags = indices.flags;
+			flags = flags || indices.flags;
 			indices = indices.GetSourceData();
 			
 			// #ifdef DEBUG
@@ -140,7 +140,9 @@ medea.define('indexbuffer',[],function(undefined) {
 			// #endif
 		}
 		var tri_count = indices.length / 3
-		,	line_indices = new Uint16Array(tri_count * 6)
+		,	line_indices = new ((flags | 0) & medea.INDEXBUFFER_LARGE_MESH 
+			? Uint32Array 
+			: Uint16Array)(tri_count * 6)
 		,	tri = 0
 		,	cur = 0
 		,	a
@@ -161,6 +163,33 @@ medea.define('indexbuffer',[],function(undefined) {
 			line_indices[cur++] = c;
 		}
 
+		return new medea.IndexBuffer(line_indices,flags);
+	};
+
+	medea.CreateLineListIndexBufferForUnindexedTriList = function(tri_count, flags) {
+		var in_cur = 0
+		,	line_indices = new (tri_count * 3 > (1 << 16) || ((flags | 0) & medea.INDEXBUFFER_LARGE_MESH) 
+			? Uint32Array 
+			: Uint16Array)(tri_count * 6)
+		,	tri = 0
+		,	cur = 0
+		,	a
+		,	b
+		,	c
+		;
+
+		for(; tri < tri_count; ++tri) {
+			a = incur++;
+			b = incur++;
+			c = incur++;
+
+			line_indices[cur++] = a;
+			line_indices[cur++] = b;
+			line_indices[cur++] = c;
+			line_indices[cur++] = a;
+			line_indices[cur++] = b;
+			line_indices[cur++] = c;
+		}
 		return new medea.IndexBuffer(line_indices,flags);
 	};
 });

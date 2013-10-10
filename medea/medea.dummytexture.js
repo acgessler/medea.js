@@ -34,7 +34,7 @@ medea.define('dummytexture',['filesystem'],function(undefined) {
 			// #endif
 
 			// #ifdef LOG
-			medea.LogDebug("Create neutral 1x1 texture with color: " + color);
+			medea.LogDebug("Create dummy 1x1 texture with color: " + color);
 			// #endif
 		},
 
