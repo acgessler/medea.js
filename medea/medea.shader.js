@@ -144,7 +144,13 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 					// #ifdef DEBUG
 					medea.DebugAssert(!!data,'unexpected null');
 					// #endif
-					self.gen_source = top_level_decls.join('\n') + '\n' + data;
+
+					var arr = [];
+					for(var e in top_level_decls) {
+						arr.push(e);
+					}
+
+					self.gen_source = arr.join('\n') + '\n' + data;
 					s = self.shader = gl.createShader(self.type);
 
 					self.shader_id = ++shader_id_counter;
@@ -195,7 +201,7 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 						return null;
 					}
 
-					top_level_decls.push(r[1]);
+					top_level_decls[r[1]] = 1;
 					return true;
 				}
 			};
