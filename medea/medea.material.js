@@ -79,7 +79,7 @@ medea.define('material',['pass'],function(undefined) {
 		Name : medea._GetSet(this,'name'),
 
 		Use: function(drawfunc, statepool, semantic) {
-			semantic = semantic|0xffffffff;
+			semantic = semantic || 0xffffffff;
 			var passes = this.passes;
 			if (this.mat_gen) {
 				this.mat_gen.Update(passes);
