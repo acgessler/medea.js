@@ -5,7 +5,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('mesh',['vertexbuffer','indexbuffer','material','entity'],function(undefined) {
+medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderqueue'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -130,84 +130,82 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity'],function(
 		},
 
 		DrawNow : function(statepool) {
-
-			var st = medea.GetStatistics();
-			var vboc = this.vbo.GetItemCount();
-			var iboc = this.ibo ? this.ibo.GetItemCount() : null, wf = medea.Wireframe();
-
+			var st = medea.GetStatistics()
+			,	vboc = this.vbo.GetItemCount()
+			,	iboc = this.ibo ? this.ibo.GetItemCount() : null
+			;
 
 			var outer = this;
-			this.material.Use(function(pass) {
+			if(!medea.Wireframe() || this.pt != medea.PT_TRIANGLES && this.pt != medea.PT_TRIANGLES_STRIPS) {
+				// non-wireframe, regular drawing
+				if (this.ibo) {
+					this.ibo._Bind(statepool);
+				}
+
+				this.material.Use(function(pass) {
 					// set vbo and ibo if needed
 					outer.vbo._Bind(pass.GetAttributeMap(), statepool);
-
-					if (outer.ibo) {
-						outer.ibo._Bind(statepool);
-					}
 
 					// update statistics
 					st.vertices_frame += vboc;
 					++st.batches_frame;
 
 					// regular drawing
-					if(!wf || outer.pt != medea.PT_TRIANGLES && outer.pt != medea.PT_TRIANGLES_STRIPS) {
-						if (outer.ibo) {
-							gl.drawElements(outer.pt,iboc,outer.ibo.GetGlType(),0);
-							st.primitives_frame += outer._Calc_pt(iboc);
-						}
-						else {
-
-							gl.drawArrays(outer.pt,0,vboc);
-							st.primitives_frame += outer._Calc_pt(vboc);
-						}
+					if (outer.ibo) {
+						gl.drawElements(outer.pt,iboc,outer.ibo.GetGlType(),0);
+						st.primitives_frame += outer._Calc_pt(iboc);
 					}
-					// since we don't have glPolygonMode in WebGL, we need to do it manually.
-					// of course, substituting gl.LINES does *not* give correct results, but
-					// it is relatively fast so it is enabled by default.
 					else {
-						if (false) {
-							if (outer.ibo) {
-
-								gl.drawElements(gl.LINES,iboc,outer.ibo.GetGlType(),0);
-								st.primitives_frame += outer._Calc_pt(iboc);
-							}
-							else {
-
-								gl.drawArrays(gl.LINES,0,vboc);
-								st.primitives_frame += outer._Calc_pt(vboc);
-							}
-						}
-						else {
-							medea._initMod('indexbuffer');
-
-							// TODO: track changes
-							if(outer.ibo.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA || outer.line_ibo != null) {
-								if(outer.line_ibo == null) {
-									// #ifdef LOG
-									medea.LogDebug('creating auxiliary index buffer to hold wireframe line mesh');
-									// #endif
-
-									outer.line_ibo = medea.CreateLineListIndexBufferFromTriListIndices(outer.ibo);
-
-									// #ifdef DEBUG
-									medea.DebugAssert(!!outer.line_ibo, 'invariant');
-									// #endif
-								}
-
-								outer.line_ibo._Bind(statepool);
-								gl.drawElements(gl.LINES,iboc * 2,outer.line_ibo.GetGlType(),0);
-							}
-							else {
-								if (outer.pt == medea.PT_TRIANGLES) {
-									for (var i = 0; i < iboc/3; ++i) {
-										gl.drawElements(gl.LINE_STRIPS,3,outer.ibo.GetGlType(),i*3);
-									}
-								}
-							}
-						}
+						gl.drawArrays(outer.pt,0,vboc);
+						st.primitives_frame += outer._Calc_pt(vboc);
 					}
-			},statepool);
+				}, statepool);
+				return;
+			}
+			
+			// wireframe is tricky because WebGl does not support the usual
+			// gl API for setting the poly mode.
 
+			medea._initMod('indexbuffer');
+			if(this.pt == medea.PT_TRIANGLES_STRIPS) {
+				// #ifdef DEBUG
+				medea.LogDebug('not supported: wireframe and medea.PT_TRIANGLES_STRIPS');
+				// #endif
+				return;
+			}
+
+			// TODO: track changes to ibo, display proper wireframe also for meshes
+			// with no index buffer.
+			if(this.line_ibo != null || !this.ibo || (this.ibo.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA)) {
+				// we can use a substitute ibo that indexes the geometry such that 
+				// a wireframe can be drawn using gl.LINES
+				if(this.line_ibo == null) {
+					this._CreateLineIBO();
+				}
+
+				this.line_ibo._Bind(statepool);
+				this.material.Use(function(pass) {
+					outer.vbo._Bind(pass.GetAttributeMap(), statepool);
+					gl.drawElements(gl.LINES,iboc * 2,outer.line_ibo.GetGlType(),0);
+				}, statepool);
+				return;
+			}
+
+			// #ifdef DEBUG
+			medea.DebugAssert(this.ibo && !(this.ibo.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA), 'inv');
+			// #endif
+
+			// we have an ibo, but its creation data was not preserved
+			this.ibo._Bind(statepool);
+			this.material.Use(function(pass) {
+				outer.vbo._Bind(pass.GetAttributeMap(), statepool);
+				// TODO: this is super-slow
+				if (outer.pt == medea.PT_TRIANGLES) {
+					for (var i = 0; i < iboc/3; ++i) {
+						gl.drawElements(gl.LINE_STRIPS,3,outer.ibo.GetGlType(),i*3);
+					}
+				}
+			}, statepool);
 		},
 
 		// updating BBs is well-defined for meshes, so make this functionality public
@@ -215,6 +213,23 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity'],function(
 			this._AutoGenBB();
 		},
 
+
+		_CreateLineIBO : function() {
+			// #ifdef LOG
+			medea.LogDebug('creating auxiliary index buffer to hold wireframe line mesh');
+			// #endif
+
+			if(this.ibo) {
+				this.line_ibo = medea.CreateLineListIndexBufferFromTriListIndices(this.ibo);
+			}
+			else {
+				// TODO
+			}
+
+			// #ifdef DEBUG
+			medea.DebugAssert(!!this.line_ibo, 'invariant');
+			// #endif
+		},
 
 		_Calc_pt : function(v) {
 			switch(this.pt) {
