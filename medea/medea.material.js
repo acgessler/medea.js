@@ -102,6 +102,7 @@ medea.define('material',['pass'],function(undefined) {
 		}
 	});
 
+
 	medea.CreateSimpleMaterialFromColor = function(color, dummy_light) {
 		if(color.length === 3) { 
 			color = [color[0],color[1],color[2],1.0];
@@ -129,13 +130,19 @@ medea.define('material',['pass'],function(undefined) {
 	};
 	
 
-	medea.CreateSimpleMaterialFromTexture = function(texture, dummy_light) {
-		var name = "remote:mcore/shaders/simple-textured", constants = {
-			texture:texture
-		};
+	medea.CreateSimpleMaterialFromTexture = function(texture, dummy_light, shininess) {
+		var	name = "remote:mcore/shaders/simple-textured"
+		,	constants = {
+				texture:texture
+			}
+		;
 
 		if(dummy_light) {
 			name += '-lit';
+			if(shininess) {
+				name += '-spec';
+				constants.shininess = shininess;
+			}
 		}
 
 		return new medea.Material(medea.CreatePassFromShaderPair(name,constants));

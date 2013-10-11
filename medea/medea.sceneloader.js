@@ -14,7 +14,9 @@ medea.define('sceneloader',['filesystem', 'material'],function(undefined) {
 	var DefaultMaterialResolver = function(mat_params, root) {
 		// for now, just distinguish between textured and non-textured materials and leave more sophisticated stuff for later
 		if(mat_params.diffuse_texture) {
-			return medea.CreateSimpleMaterialFromTexture(root+'/'+ mat_params.diffuse_texture.replace(/^\.(\\|\/)(.*)/,'$2'),true);
+			return medea.CreateSimpleMaterialFromTexture(root+'/'+ mat_params.diffuse_texture.replace(/^\.(\\|\/)(.*)/,'$2'),
+				true,
+				mat_params.shininess);
 		}
 
 		return medea.CreateSimpleMaterialFromColor( mat_params.diffuse || [0.2,0.2,0.2,1.0], true );
