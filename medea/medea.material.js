@@ -141,7 +141,8 @@ medea.define('material',['pass'],function(undefined) {
 			name += '-lit';
 			if(shininess) {
 				name += '-spec';
-				constants.shininess = shininess;
+				// cap shininess at 64 to avoid excessive exponentiation
+				constants.shininess = Math.min(64, shininess);
 			}
 		}
 
