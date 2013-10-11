@@ -19,7 +19,9 @@ medea.define('sceneloader',['filesystem', 'material'],function(undefined) {
 				mat_params.shininess);
 		}
 
-		return medea.CreateSimpleMaterialFromColor( mat_params.diffuse || [0.2,0.2,0.2,1.0], true );
+		return medea.CreateSimpleMaterialFromColor( mat_params.diffuse || [0.2,0.2,0.2,1.0], 
+			true,
+			mat_params.shininess);
 	};
 
 	var CreateDefaultMaterialResolver = function(url) {

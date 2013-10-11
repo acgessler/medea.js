@@ -103,16 +103,34 @@ medea.define('material',['pass'],function(undefined) {
 	});
 
 
-	medea.CreateSimpleMaterialFromColor = function(color, dummy_light) {
+	medea.CreateSimpleMaterialFromColor = function(color, dummy_light, shininess, spec_color) {
 		if(color.length === 3) { 
 			color = [color[0],color[1],color[2],1.0];
 		}
-		var name = "remote:mcore/shaders/simple-color", constants = {
-			color:color
-		};
+
+		var name = "remote:mcore/shaders/simple-color"
+		,	constants = {
+				color:color
+			}
+		;
 
 		if(dummy_light) {
 			name += '-lit';
+			if(shininess) {
+				name += '-spec';
+
+				if(!spec_color) { 
+					spec_color = [1,1,1];
+				}
+
+				// cap shininess at 64 to avoid excessive exponentiation
+				constants.spec_color_shininess = [
+					spec_color[0],
+					spec_color[1],
+					spec_color[2],
+					Math.min(64, shininess)
+				];
+			}
 		}
 		return new medea.Material(medea.CreatePassFromShaderPair(name,constants));
 	};
@@ -130,7 +148,7 @@ medea.define('material',['pass'],function(undefined) {
 	};
 	
 
-	medea.CreateSimpleMaterialFromTexture = function(texture, dummy_light, shininess) {
+	medea.CreateSimpleMaterialFromTexture = function(texture, dummy_light, shininess, spec_color) {
 		var	name = "remote:mcore/shaders/simple-textured"
 		,	constants = {
 				texture:texture
@@ -141,8 +159,17 @@ medea.define('material',['pass'],function(undefined) {
 			name += '-lit';
 			if(shininess) {
 				name += '-spec';
+				if(!spec_color) { 
+					spec_color = [1,1,1];
+				}
+
 				// cap shininess at 64 to avoid excessive exponentiation
-				constants.shininess = Math.min(64, shininess);
+				constants.spec_color_shininess = [
+					spec_color[0],
+					spec_color[1],
+					spec_color[2],
+					Math.min(64, shininess)
+				];
 			}
 		}
 
