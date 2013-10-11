@@ -37,6 +37,9 @@ medea.define('pass',['shader','texture'],function(undefined) {
 
 	// map from GLSL type identifiers to the corresponding GL enumerated types
 	var glsl_typemap = {
+		'float'	: gl.FLOAT,
+		'int'	: gl.INT,
+		'bool'	: gl.BOOL,
 		'vec2'	: gl.FLOAT_VEC2,
 		'vec3'	: gl.FLOAT_VEC3,
 		'vec4'	: gl.FLOAT_VEC4,
@@ -280,6 +283,20 @@ medea.define('pass',['shader','texture'],function(undefined) {
 			var prog = this.program;
 
 			switch(this._GetUniformType(k)) {
+
+				case gl.FLOAT:
+					handler = function(pos, state, curval) {
+						gl.uniform1f(pos, curval );
+					};
+					break;
+
+				case gl.INT:
+				case gl.BOOL:
+					handler = function(pos, state, curval) {
+						gl.uniform1i(pos, curval );
+					};
+					break;
+
 				case gl.FLOAT_VEC4:
 					handler = function(pos, state, curval) {
 						gl.uniform4fv(pos, curval );
