@@ -5,7 +5,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('light',['entity'],function(undefined) {
+medea.define('light', ['entity'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -36,7 +36,7 @@ medea.define('light',['entity'],function(undefined) {
 
 
 	// class Light
-	this.Light = medea.Light.extend(
+	this.Light = medea.Entity.extend(
 	{
 		cast_shadows : false,
 		shadowmap_res_bias : 0,
@@ -64,8 +64,8 @@ medea.define('light',['entity'],function(undefined) {
 	{
 		init : function(color, dir) {
 			this._super(color);
-			this.dir = dir || [0,-1,0]; 
-			vec3.norm(this.dir);
+			this.dir = vec3.create(dir || [0,-1,0]); 
+			vec3.normalize(this.dir);
 		},
 	});
 

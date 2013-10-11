@@ -154,7 +154,7 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 
 			var lights = statepool.GetQuick(list_name);
 			if(lights === undefined) {
-				dlights = statepool.Set(list_name,[]);
+				lights = statepool.Set(list_name,[]);
 			}
 			lights.append(light_info);
 		}
