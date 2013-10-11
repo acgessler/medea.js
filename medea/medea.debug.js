@@ -24,6 +24,7 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 		, show_bbs_show_cull_state 		: true
 		, show_ministats 				: true
 		, last_update_time 				: 0.0
+		, wireframe 					: false
 		,
 
 
@@ -64,7 +65,10 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 			});
 
 			this.gui = new dat.GUI();
-			var f1 = this.gui.addFolder('Visualizers');
+			f1 = this.gui.addFolder('Core');
+			f1.add(this, 'wireframe');
+
+			f1 = this.gui.addFolder('Visualizers');
 			f1.add(this, 'show_normals');
 
 			f1.add(this, 'show_bbs');
@@ -80,6 +84,8 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 		BeginFrame : function() {
 			this._SetVisualizer('showbbs', this.show_bbs);
 			this._SetVisualizer('shownormals', this.show_normals);
+
+			medea.Wireframe(this.wireframe);
 		},
 
 
