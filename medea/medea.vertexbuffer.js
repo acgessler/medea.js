@@ -273,6 +273,9 @@ medea.define('vertexbuffer',[],function(undefined) {
 
 
 			if (this.normals) {
+				// #ifdef DEBUG
+				medea.DebugAssert(this.normals.length === this.itemcount*3, 'size mismatch: normals');
+				// #endif
 				var view = new Float32Array(ab,offset);
 				for(var i = 0, i3 = 0, im = 0, p = this.normals; i < end; ++i, i3 += 3, im += mul) {
 					view[im+0] = p[i3+0];
@@ -286,6 +289,9 @@ medea.define('vertexbuffer',[],function(undefined) {
 
 
 			if (this.tangents) {
+				// #ifdef DEBUG
+				medea.DebugAssert(this.tangents.length === this.itemcount*3, 'size mismatch: tangents');
+				// #endif
 				var view = new Float32Array(ab,offset);
 				for(var i = 0, i3 = 0, im = 0, p = this.tangents; i < end; ++i, i3 += 3, im += mul) {
 					view[im+0] = p[i3+0];
@@ -296,6 +302,10 @@ medea.define('vertexbuffer',[],function(undefined) {
 				addStateEntry(medea.ATTR_TANGENT,idx++);
 				offset += 3*4;
 				if (this.bitangents) {
+					// #ifdef DEBUG
+					medea.DebugAssert(this.bitangents.length === this.itemcount*3, 'size mismatch: bitangents');
+					// #endif
+
 					view = new Float32Array(ab,offset);
 					for(var i = 0, i3 = 0, im = 0, p = this.bitangents; i < end; ++i, i3 += 3, im += mul) {
 						view[im+0] = p[i3+0];
@@ -312,6 +322,10 @@ medea.define('vertexbuffer',[],function(undefined) {
 				this.colors.forEach(function(u,ii) {
 					var elems = Math.floor(u.length / this.itemcount), type = medea._GLUtilIDForArrayType(u);
 
+					// #ifdef DEBUG
+					medea.DebugAssert(elems >= 3 && u.length === this.itemcount * elems, 'size mismatch: colors');
+					// #endif
+
 					var view = new Float32Array(ab,offset);
 					for(var i = 0; i < end; ++i) {
 						for(var n = 0; n < elems; ++n) {
@@ -327,6 +341,10 @@ medea.define('vertexbuffer',[],function(undefined) {
 			if (this.uvs) {
 				this.uvs.forEach(function(u,ii) {
 					var elems = Math.floor(u.length / this.itemcount), type = medea._GLUtilIDForArrayType(u);
+
+					// #ifdef DEBUG
+					medea.DebugAssert(elems >= 2 && u.length === this.itemcount * elems, 'size mismatch: uvs');
+					// #endif
 
 					var view = new Float32Array(ab,offset);
 					for(var i = 0, im = 0; i < end; ++i, im += mul) {
