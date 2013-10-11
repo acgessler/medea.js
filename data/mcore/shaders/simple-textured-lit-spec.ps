@@ -34,7 +34,9 @@ void main()
 	// final lighting term, using the half-lambert term from source 
 	float lighting = min(specular + ((diffuse + 1.0) * 0.5), 1.0);
 
+	vec3 tex = texture2D(texture, FetchTexCoord()).rgb;
+
     gl_FragColor.a = 1.0;
-	gl_FragColor.rgb = texture2D(texture, FetchTexCoord()).rgb * lighting;
+	gl_FragColor.rgb = tex * lighting * lighting;
 }
 

@@ -139,7 +139,7 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 				list_name = 'DIR_LIGHTS';
 
 				light_info.world_dir = vec3.create();
-				mat4.multiplyVec3(lightjob.node.GetGlobalTransform(), light_dir, light_info.world_dir);
+				mat4.multiplyVec3(lightjob.node.GetGlobalTransform(), light.dir, light_info.world_dir);
 			}
 			/* else if(light instanceof medea.PointLight) {
 				list_name = 'POINT_LIGHTS';
@@ -156,7 +156,7 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 			if(lights === undefined) {
 				lights = statepool.Set(list_name,[]);
 			}
-			lights.append(light_info);
+			lights.push(light_info);
 		}
 	});
 

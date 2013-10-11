@@ -62,6 +62,8 @@ medea.define('light', ['entity'],function(undefined) {
 	// class DirectionalLight
 	this.DirectionalLight = medea.Light.extend(
 	{
+		dir : null,
+		
 		init : function(color, dir) {
 			this._super(color);
 			this.dir = vec3.create(dir || [0,-1,0]); 

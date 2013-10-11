@@ -116,10 +116,8 @@ medea.define('pass',['shader','texture'],function(undefined) {
 					// TODO: maybe reset it for debug builds
 					return;
 				}
-				// important: pass the INVERSE light direction to save a 
-				// negation (albeit cheap / free) in shader code.
-				dir = lights[i].world_dir;
-				gl.uniform3f(pos, -dir[0], -dir[1], -dir[2]);
+	
+				gl.uniform3fv(pos, lights[i].world_dir);
 			};
 
 			// LIGHT_Dn_COLOR -- light color
