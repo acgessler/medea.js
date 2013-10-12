@@ -393,6 +393,7 @@ medea = new (function(sdom) {
 
 		if (!cond) {
 			what = "Medea DEBUG ASSERTION: " + what;
+			console.error(what);
 			alert(what);
 			throw new medea.AssertionError(what);
 		}
