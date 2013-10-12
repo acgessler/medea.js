@@ -16,6 +16,6 @@ void main()
 	PassClipPosition(ModelToClipSpace(FetchPosition()));
 	PassNormal(ModelDirToWorldDir(FetchNormal()));
 
-	eye = ModelToWorldSpace(FetchPosition()) - CAM_POS;
+	eye = CAM_POS - ModelToWorldSpace(FetchPosition());
 }
 
