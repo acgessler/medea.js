@@ -120,9 +120,8 @@ medea.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functio
 	};
 
 	var LoadNode = function(w,anchor,node) {
-
 		var outnd = anchor.AddChild(node.name);
-		outnd.LocalTransform(mat4.transpose(mat4.create(node.transformation)));
+		outnd.LocalTransform(mat4.transpose(mat4.create(node.transformation)), true);
 
 		if(node.meshes) {
 			for(var i = 0; i < node.meshes.length; ++i) {
