@@ -136,33 +136,43 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 			,	iboc = this.ibo ? this.ibo.GetItemCount() : null
 			;
 
-			if(!medea.Wireframe() || this.pt !== medea.PT_TRIANGLES && this.pt !== medea.PT_TRIANGLES_STRIPS) {
-				// non-wireframe, regular drawing
-				if (this.ibo) {
-					this.ibo._Bind(statepool);
-				}
-
-				this.material.Use(function(pass) {
-					// set vbo and ibo if needed
-					outer.vbo._Bind(pass.GetAttributeMap(), statepool);
-
-					// update statistics
-					st.vertices_frame += vboc;
-					++st.batches_frame;
-
-					// regular drawing
-					if (outer.ibo) {
-						gl.drawElements(outer.pt,iboc,outer.ibo.GetGlType(),0);
-						st.primitives_frame += outer._Calc_pt(iboc);
-					}
-					else {
-						gl.drawArrays(outer.pt,0,vboc);
-						st.primitives_frame += outer._Calc_pt(vboc);
-					}
-				}, statepool);
+			if(medea.Wireframe() && (this.pt === medea.PT_TRIANGLES || this.pt === medea.PT_TRIANGLES_STRIPS)) {
+				this._DrawNowWireframe(statepool);
 				return;
 			}
-			
+
+			// non-wireframe, regular drawing:
+			if (this.ibo) {
+				this.ibo._Bind(statepool);
+			}
+
+			this.material.Use(function(pass) {
+				// set vbo and ibo if needed
+				outer.vbo._Bind(pass.GetAttributeMap(), statepool);
+
+				// update statistics
+				st.vertices_frame += vboc;
+				++st.batches_frame;
+
+				// regular drawing
+				if (outer.ibo) {
+					gl.drawElements(outer.pt,iboc,outer.ibo.GetGlType(),0);
+					st.primitives_frame += outer._Calc_pt(iboc);
+				}
+				else {
+					gl.drawArrays(outer.pt,0,vboc);
+					st.primitives_frame += outer._Calc_pt(vboc);
+				}
+			}, statepool);
+		},
+
+		_DrawNowWireframe : function(statepool) {
+			var outer = this
+			,	st = medea.GetStatistics()
+			,	vboc = this.vbo.GetItemCount()
+			,	iboc = this.ibo ? this.ibo.GetItemCount() : null
+			;
+
 			// wireframe is tricky because WebGl does not support the usual
 			// gl API for setting the poly mode.
 
@@ -186,7 +196,12 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 				this.line_ibo._Bind(statepool);
 				this.material.Use(function(pass) {
 					outer.vbo._Bind(pass.GetAttributeMap(), statepool);
+
 					gl.drawElements(gl.LINES,iboc * 2,outer.line_ibo.GetGlType(),0);
+
+					++st.batches_frame;
+					st.primitives_frame += iboc;
+
 				}, statepool);
 				return;
 			}
@@ -199,11 +214,13 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 			this.ibo._Bind(statepool);
 			this.material.Use(function(pass) {
 				outer.vbo._Bind(pass.GetAttributeMap(), statepool);
-				// TODO: this is super-slow
+				// TODO: this is super-slow, and it only draws 2/3 of each triangle
 				if (outer.pt === medea.PT_TRIANGLES) {
 					for (var i = 0; i < iboc/3; ++i) {
+						++st.batches_frame;
 						gl.drawElements(gl.LINE_STRIPS,3,outer.ibo.GetGlType(),i*3);
 					}
+					st.primitives_frame += Math.floor(iboc*2/3);
 				}
 			}, statepool);
 		},
