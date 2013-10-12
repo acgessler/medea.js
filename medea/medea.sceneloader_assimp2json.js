@@ -106,7 +106,7 @@ medea.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functio
 		// flip v component of UV coordinates
 		if(inmesh['uvs']) {
 			for(var i = 0; i < inmesh['uvs'].length; ++i) {
-				var uv = inmesh['uvs'][i], c = inmesh['numuvcomponents'][i];
+				var uv = inmesh['uvs'][i], c = inmesh['numuvcomponents'][i] || 2;
 				for(var n = 0, e = uv.length/c; n < e; ++n) {
 					uv[n*c+1] = 1.0-uv[n*c+1];
 				}
