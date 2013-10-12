@@ -162,8 +162,6 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 				}, statepool);
 				return;
 			}
-
-			return;
 			
 			// wireframe is tricky because WebGl does not support the usual
 			// gl API for setting the poly mode.
