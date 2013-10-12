@@ -33,7 +33,6 @@ void main()
 
 	// final diffuse term, using the half-lambert term from source 
 	diffuse = (diffuse + 1.0) * 0.5;
-	diffuse *= diffuse;
 
 	vec3 tex = texture2D(texture, FetchTexCoord()).rgb;
 
