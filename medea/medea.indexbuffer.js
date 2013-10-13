@@ -57,8 +57,8 @@ medea.define('indexbuffer',[],function(undefined) {
 			}
 			// #endif
 
-			this.Fill(init_data);
 			this.gltype = this.flags & medea.INDEXBUFFER_LARGE_MESH ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+			this.Fill(init_data);
 		},
 
 		// medea.VERTEXBUFFER_USAGE_DYNAMIC recommended if this function is used
@@ -74,7 +74,7 @@ medea.define('indexbuffer',[],function(undefined) {
 			if(!(arr instanceof Uint32Array) && !(arr instanceof Uint16Array)) {
 				// TODO: maybe this would be a better spot for a debug check on exceeded index ranges
 				// than the scene loader code.
-				arr = new (this.flags & medea.INDEXBUFFER_LARGE_MESH ? Uint32Array : Uint16Array)(init_data)
+				arr = new (this.flags & medea.INDEXBUFFER_LARGE_MESH ? Uint32Array : Uint16Array)(init_data);
 			}
 
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.buffer);

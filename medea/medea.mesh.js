@@ -141,14 +141,18 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 				return;
 			}
 
-			// non-wireframe, regular drawing:
-			if (this.ibo) {
-				this.ibo._Bind(statepool);
-			}
-
 			this.material.Use(function(pass) {
 				// set vbo and ibo if needed
 				outer.vbo._Bind(pass.GetAttributeMap(), statepool);
+
+				// non-wireframe, regular drawing:
+				// NOTE: this must happen AFTER the VBO is bound, as Chrome validates the
+				// indices when binding the index buffer, leading to undefined 
+				// ELEMENT_ARRAY_BUFFER status if the old ARRAY_BUFFER is too small.
+				// TODO: find out if this is WebGl per se, or a Chrome bug.
+				if (outer.ibo) {
+					outer.ibo._Bind(statepool);
+				}
 
 				// update statistics
 				st.vertices_frame += vboc;
