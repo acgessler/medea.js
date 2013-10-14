@@ -137,7 +137,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 			;
 
 			if(medea.Wireframe() && (this.pt === medea.PT_TRIANGLES || this.pt === medea.PT_TRIANGLES_STRIPS)) {
-				this._DrawNowWireframe(statepool);
+				this._DrawNowWireframe(statepool, change_flags);
 				return;
 			}
 
@@ -170,7 +170,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 			}, statepool, 0xffffffff, change_flags);
 		},
 
-		_DrawNowWireframe : function(statepool) {
+		_DrawNowWireframe : function(statepool, change_flags) {
 			var outer = this
 			,	st = medea.GetStatistics()
 			,	vboc = this.vbo.GetItemCount()
@@ -197,16 +197,18 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 					this._CreateLineIBO();
 				}
 
-				this.line_ibo._Bind(statepool);
 				this.material.Use(function(pass) {
 					outer.vbo._Bind(pass.GetAttributeMap(), statepool);
+
+					// see note in DrawNode()
+					outer.line_ibo._Bind(statepool);
 
 					gl.drawElements(gl.LINES,iboc * 2,outer.line_ibo.GetGlType(),0);
 
 					++st.batches_frame;
 					st.primitives_frame += iboc;
 
-				}, statepool);
+				}, statepool, 0xffffffff, change_flags);
 				return;
 			}
 
