@@ -9,6 +9,8 @@
 uniform vec3 LIGHT_D0_DIR;
 
 uniform sampler2D texture;
+uniform sampler2D normal_texture;
+
 uniform vec4 spec_color_shininess;
 
 varying vec3 eye;
@@ -19,14 +21,22 @@ varying vec3 eye;
 void main()
 {
 	vec3 N = normalize(FetchNormal());
+	vec3 T = normalize(FetchTangent());
+	vec3 B = normalize(FetchBitangent());
+
+	// compute adjusted normal as linear combination of the TBN matrix
+	vec3 tb = (texture2D(normal_texture, FetchTexCoord()).rgb - 0.5) * 2.0;
+	N = normalize(N + tb.r * T + tb.g * B );
+
+	vec3 tex = texture2D(texture, FetchTexCoord()).rgb;
 
 	// diffuse contribution
-	float diffuse = dot(normalize(LIGHT_D0_DIR),N);
+	float diffuse = max(0.0,dot(normalize(LIGHT_D0_DIR),N));
 
 	// specular contribution (blinn)
 	vec3 E = normalize(eye);
 	vec3 H = normalize(LIGHT_D0_DIR + E);
-	float specular = pow( max(dot(H, N), 0.0), spec_color_shininess.a );
+	float specular = pow( max(dot(H, N), 0.0), spec_color_shininess.a ) * length(tex) * 0.2;
 
 	// self-shadowing
 	specular *= clamp(diffuse*4.0, 0.0, 1.0);
@@ -34,9 +44,7 @@ void main()
 	// final diffuse term, using the half-lambert term from source 
 	//diffuse = (diffuse + 1.0) * 0.5;
 
-	vec3 tex = texture2D(texture, FetchTexCoord()).rgb;
-
     gl_FragColor.a = 1.0;
-	gl_FragColor.rgb = tex * diffuse * diffuse + spec_color_shininess.rgb * specular;
+	gl_FragColor.rgb = tex * diffuse + spec_color_shininess.rgb * specular;
 }
 

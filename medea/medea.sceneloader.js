@@ -11,12 +11,23 @@ medea.define('sceneloader',['filesystem', 'material'],function(undefined) {
 	var medea = this;
 
 
+	var FixTexturePath = function(path, root) {
+		return root+'/'+ path.replace(/^\.(\\|\/)(.*)/,'$2');
+	};
+
+
 	var DefaultMaterialResolver = function(mat_params, root) {
 		// for now, just distinguish between textured and non-textured materials and leave more sophisticated stuff for later
 		if(mat_params.diffuse_texture) {
-			return medea.CreateSimpleMaterialFromTexture(root+'/'+ mat_params.diffuse_texture.replace(/^\.(\\|\/)(.*)/,'$2'),
+			var nm = mat_params.normal_texture || mat_params.height_texture;
+			if(nm) {
+				nm = FixTexturePath(nm, root);
+			}
+			return medea.CreateSimpleMaterialFromTexture(FixTexturePath(mat_params.diffuse_texture, root),
 				true,
-				mat_params.shininess);
+				mat_params.shininess,
+				false,
+				nm);
 		}
 
 		return medea.CreateSimpleMaterialFromColor( mat_params.diffuse || [0.2,0.2,0.2,1.0], 

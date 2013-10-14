@@ -74,6 +74,14 @@
 	PassVec3(Normal, vec3_world_normal)
 
 	/** */
+#define PassTangent(vec3_world_tangent) \
+	PassVec3(Tangent, vec3_world_tangent)
+
+	/** */
+#define PassBitangent(vec3_world_bitangent) \
+	PassVec3(Bitangent, vec3_world_bitangent)
+
+	/** */
 #define PassTexCoordN(vec2_texcoord, channel) \
 	PassVec2(concat(TexCoord,channel), vec2_texcoord)
 	

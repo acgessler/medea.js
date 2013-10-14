@@ -148,7 +148,7 @@ medea.define('material',['pass'],function(undefined) {
 	};
 	
 
-	medea.CreateSimpleMaterialFromTexture = function(texture, dummy_light, shininess, spec_color) {
+	medea.CreateSimpleMaterialFromTexture = function(texture, dummy_light, shininess, spec_color, normal_texture) {
 		var	name = "remote:mcore/shaders/simple-textured"
 		,	constants = {
 				texture:texture
@@ -170,6 +170,11 @@ medea.define('material',['pass'],function(undefined) {
 					spec_color[2],
 					Math.min(64, shininess)
 				];
+
+				if(normal_texture) {
+					constants.normal_texture = normal_texture;
+					name += '-nm';
+				}
 			}
 		}
 
