@@ -202,9 +202,15 @@ medea.define('pass',['shader','texture'],function(undefined) {
 				}
 			}
 
-			gl.useProgram(this.program);
-			this._SetAutoState(statepool);
+			var gl_state = statepool.GetQuick("_gl")
+			,	program = this.program
+			;
 
+			if(gl_state.program !== program) {
+				gl_state.program = program;
+				gl.useProgram(program);
+			}
+			this._SetAutoState(statepool);
 			return true;
 		},
 
