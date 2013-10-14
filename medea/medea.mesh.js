@@ -129,7 +129,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 			return medea.CreateSimpleMesh(this.vbo, this.ibo, material_or_color);
 		},
 
-		DrawNow : function(statepool) {
+		DrawNow : function(statepool, change_flags) {
 			var outer = this
 			,	st = medea.GetStatistics()
 			,	vboc = this.vbo.GetItemCount()
@@ -167,7 +167,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 					gl.drawArrays(outer.pt,0,vboc);
 					st.primitives_frame += outer._Calc_pt(vboc);
 				}
-			}, statepool);
+			}, statepool, 0xffffffff, change_flags);
 		},
 
 		_DrawNowWireframe : function(statepool) {

@@ -64,39 +64,66 @@ medea.define('pass',['shader','texture'],function(undefined) {
 
 
 	var setters = medea.ShaderSetters = {
-		CAM_POS :  function(pos, state) {
+		CAM_POS :  function(pos, state, change_flags) {
+			if(change_flags & 0x2) { // no cam changes
+				return;
+			}
 			gl.uniform3fv(pos, state.GetQuick("CAM_POS"));
 		},
 
-		CAM_POS_LOCAL :  function(pos, state) {
+		CAM_POS_LOCAL :  function(pos, state, change_flags) {
+			if(change_flags & 0x2) { // no cam changes
+				return;
+			}
 			gl.uniform3fv(pos, state.Get("CAM_POS_LOCAL"));
 		},
 
-		WVP :  function(pos, state) {
+		WVP :  function(pos, state, change_flags) {
+			if(change_flags & 0x7 === 0x7) { // no cam, no world and no projection changes
+				return;
+			}
 			gl.uniformMatrix4fv(pos, false, state.Get("WVP"));
 		},
 
-		WIT :  function(pos, state) {
+		WIT :  function(pos, state, change_flags) {
+			if(change_flags & 0x1) { // no world changes
+				return;
+			}
 			gl.uniformMatrix4fv(pos, false, state.Get("WIT"));
 		},
 
-		WI :  function(pos, state) {
+		WI :  function(pos, state, change_flags) {
+			if(change_flags & 0x1) { // no world changes
+				return;
+			}
 			gl.uniformMatrix4fv(pos, false, state.Get("WI"));
 		},
 
-		VP :  function(pos, state) {
+		VP :  function(pos, state, change_flags) {
+			if(change_flags & 0x6 === 0x6) { // no cam and no projection changes
+				return;
+			}
 			gl.uniformMatrix4fv(pos, false, state.Get("VP"));
 		},
 
-		W :  function(pos, state) {
+		W :  function(pos, state, change_flags) {
+			if(change_flags & 0x1) { // no world changes
+				return;
+			}
 			gl.uniformMatrix4fv(pos, false, state.GetQuick("W"));
 		},
 
-		V :  function(pos, state) {
+		V :  function(pos, state, change_flags) {
+			if(change_flags & 0x2) { // no cam changes
+				return;
+			}
 			gl.uniformMatrix4fv(pos, false, state.GetQuick("V"));
 		},
 
-		P :  function(pos, state) {
+		P :  function(pos, state, change_flags) {
+			if(change_flags & 0x4) { // no projection changes
+				return;
+			}
 			gl.uniformMatrix4fv(pos, false, state.GetQuick("P"));
 		}
 	};
@@ -194,7 +221,7 @@ medea.define('pass',['shader','texture'],function(undefined) {
 		 *
 		 *  @param statepool 
 		 */
-		Begin : function(statepool) {
+		Begin : function(statepool, change_flags) {
 			if (this.program === null) {
 				this._TryAssembleProgram();
 				if(!this.IsComplete()) {
@@ -209,8 +236,11 @@ medea.define('pass',['shader','texture'],function(undefined) {
 			if(gl_state.program !== program) {
 				gl_state.program = program;
 				gl.useProgram(program);
+
+				// program changes invalidates 'state not changed' flags
+				change_flags = 0;
 			}
-			this._SetAutoState(statepool);
+			this._SetAutoState(statepool, change_flags);
 			return true;
 		},
 
@@ -673,13 +703,13 @@ medea.define('pass',['shader','texture'],function(undefined) {
 			}
 		},
 
-		_SetAutoState : function(statepool) {
+		_SetAutoState : function(statepool, change_flags) {
 
 			// update shader variables automatically
 			var setters = this.auto_setters;
 			for(var k in setters) {
 				var v = setters[k];
-				v[1](v[0], statepool);
+				v[1](v[0], statepool, change_flags);
 			}
 
 			// and apply global state blocks

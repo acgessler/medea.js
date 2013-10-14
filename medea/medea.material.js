@@ -78,7 +78,7 @@ medea.define('material',['pass'],function(undefined) {
 
 		Name : medea._GetSet(this,'name'),
 
-		Use: function(drawfunc, statepool, semantic) {
+		Use: function(drawfunc, statepool, semantic, change_flags) {
 			semantic = semantic || 0xffffffff;
 			var passes = this.passes;
 			if (this.mat_gen) {
@@ -91,7 +91,7 @@ medea.define('material',['pass'],function(undefined) {
 				if(!(pass.semantic & semantic)) {
 					continue;
 				}
-				if(!pass.Begin(statepool)) {
+				if(!pass.Begin(statepool, change_flags)) {
 					// XXX substitute a default material?
 					return;
 				}

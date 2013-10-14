@@ -105,24 +105,46 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 
 
 		DrawMesh : function(meshjob, statepool) {
+			var old_w = statepool.GetQuick("W")
+			,	new_w = meshjob.node.GetGlobalTransform()
+			,	i
+			,	abs = Math.abs
+			,	change_flags = 0x4 | 0x2 /* no view, projection changes */
+			;
+
 			// update the current world matrix to the node's global transformation matrix
-			statepool.Set("W",meshjob.node.GetGlobalTransform());
-
-			// Always set WI and WIT. Lighting naturally relies on
-			// it, so we can assume that this is always needed.
-			// By using the node's intelligent update mechanism
-			// we can thus save lots of matrix math.
-			var wi = meshjob.node.GetInverseGlobalTransform();
-			statepool.Set("WI",wi);
-			var wit = statepool.Get("WIT");
-			if(wit === undefined) {
-				wit = mat4.create();
+			// if it is different than the previously set matrix
+			if (old_w) {
+				for(i = 15; i >= 0; --i) {
+					// TODO: optimize comparison order - deviation is most
+					// likely for the translational part and the main diagonal.
+					if(abs(new_w[i] - old_w[i]) >= 1e-5) {
+						old_w = null;
+						break;
+					}
+				}
 			}
+			if(old_w) {
+				change_flags |= 0x1; /* no world, view, projection changes */
+			}
+			else {
+				statepool.Set("W",new_w);
 
-			mat4.transpose(wi, wit);
-			statepool.SetQuick("WIT",wit);
+				// Always set WI and WIT. Lighting naturally relies on
+				// it, so we can assume that this is always needed.
+				// By using the node's intelligent update mechanism
+				// we can thus save lots of matrix math.
+				var wi = meshjob.node.GetInverseGlobalTransform();
+				statepool.Set("WI",wi);
+				var wit = statepool.Get("WIT");
+				if(wit === undefined) {
+					wit = mat4.create();
+				}
 
-			meshjob.mesh.DrawNow(statepool);
+				mat4.transpose(wi, wit);
+				statepool.SetQuick("WIT",wit);
+			}
+			meshjob.mesh.DrawNow(statepool, change_flags);
 		},
 
 

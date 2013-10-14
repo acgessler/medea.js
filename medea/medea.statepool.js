@@ -20,7 +20,6 @@ medea.define('statepool',[],function(undefined) {
 	var _DefaultDerivedStates = {
 
 		CAM_POS_LOCAL: function(statepool, old) {
-			"use asm" 
 			return mat4.multiplyVec3(statepool.Get("WI"),statepool.GetQuick("CAM_POS"),
 				old || vec3.create());
 		},
