@@ -85,6 +85,12 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 			this._SetVisualizer('showbbs', this.show_bbs);
 			this._SetVisualizer('shownormals', this.show_normals);
 
+			if(this.vis.showbbs) {
+				this.vis.showbbs.ShowCullState(this.show_bbs_show_cull_state);
+				this.vis.showbbs.DrawNodes(this.show_bbs_draw_nodes);
+				this.vis.showbbs.DrawRange(this.show_bbs_draw_range);
+			}
+
 			medea.Wireframe(this.wireframe);
 		},
 
