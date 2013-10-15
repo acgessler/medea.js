@@ -161,6 +161,10 @@ medea.define('pass',['shader','texture'],function(undefined) {
 		})(i);
 	}
 
+	// for every program (keyed on the cache name) the pass
+	// instance that this material was last used with.
+	var pass_last_used_with = {};
+
 	// TODO: point and spot lights
 
 
@@ -181,6 +185,7 @@ medea.define('pass',['shader','texture'],function(undefined) {
 		program : null,
 		clone_flags : null,
 		semantic : medea.PASS_SEMANTIC_COLOR_FORWARD_LIGHTING,
+		cache_name : null,
 
 
 		/** @name medea.Pass.init(*) 
@@ -231,6 +236,7 @@ medea.define('pass',['shader','texture'],function(undefined) {
 
 			var gl_state = statepool.GetQuick("_gl")
 			,	program = this.program
+			,	cache_name = this.cache_name
 			;
 
 			if(gl_state.program !== program) {
@@ -240,7 +246,21 @@ medea.define('pass',['shader','texture'],function(undefined) {
 				// program changes invalidates 'state not changed' flags
 				change_flags = 0;
 			}
-			this._SetAutoState(statepool, change_flags);
+
+			// if this program was last used with _this_ pass, we can 
+			// sometimes completely re-use shader state.
+			else if(pass_last_used_with[cache_name] === this) {
+				change_flags |= 0x8;
+			}
+			else {
+				pass_last_used_with[cache_name] = this;
+			}
+
+			// TODO: currently, flag 0x8 is not checked for in the shader
+			// setting closure.
+			if(change_flags !== 0xf) {
+				this._SetAutoState(statepool, change_flags);
+			}
 			return true;
 		},
 
@@ -571,6 +591,8 @@ medea.define('pass',['shader','texture'],function(undefined) {
 				return out;
 			}
 
+			out.cache_name = this.cache_name;
+
 			// program reference can be shared (XXX but this does not play well
 			// with explicit disposal semantics).
 			out.program = this.program;
@@ -612,7 +634,7 @@ medea.define('pass',['shader','texture'],function(undefined) {
 			}
 
 			// first check if we do already have a linked copy of this shader program
-			var cache_name =  this.vs.GetShaderId() + '#' + this.ps.GetShaderId();
+			var cache_name = this.cache_name =  this.vs.GetShaderId() + '#' + this.ps.GetShaderId();
 			var p = program_cache[cache_name];
 			if(p === undefined) {
 				// there is none, so we have to link the program
