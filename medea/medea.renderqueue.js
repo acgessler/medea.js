@@ -31,7 +31,7 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 
 		Run : function(entries) {
 			entries.sort(function(a,b) {
-				return a.DistanceEstimate() < b.DistanceEstimate();
+				return a.DistanceEstimate() - b.DistanceEstimate();
 			});
 		}
 	});
@@ -42,7 +42,7 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 
 		Run : function(entries) {
 			entries.sort(function(a,b) {
-				return a.MaterialId() < b.MaterialId();
+				return a.MaterialId() - b.MaterialId();
 			});
 		}
 	});
