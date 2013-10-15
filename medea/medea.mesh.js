@@ -26,12 +26,14 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 		entity 		: null,
 		node 		: null,
 		viewport 	: null,
+		sort_matid  : -1,
 
 		init : function(mesh,entity,node,viewport) {
 			this.mesh = mesh;
 			this.entity = entity;
 			this.node = node;
 			this.viewport = viewport;
+			this.sort_matid = mesh.material.GetId();
 		},
 
 		Draw : function(renderer, statepool) {
@@ -47,7 +49,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 		},
 
 		MaterialId : function() {
-			return this.mesh.material.GetId();
+			return this.sort_matid;
 		}
 	});
 

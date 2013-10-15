@@ -32,8 +32,11 @@ medea.define('pass',['shader','texture'],function(undefined) {
 	medea.MAX_DIRECTIONAL_LIGHTS = 8;
 
 
-	// cache for gl program objects, indexed by "vs_id" + "ps_id"
+	// cache for gl program objects and their ids, keyed by "vs_id" + "ps_id" (
+	// corresponding to pass.cache_id)
 	var program_cache = {};
+	var program_ids = {};
+	var program_id_counter = 0;
 
 	// map from GLSL type identifiers to the corresponding GL enumerated types
 	var glsl_typemap = {
@@ -269,6 +272,10 @@ medea.define('pass',['shader','texture'],function(undefined) {
 
 		GetAttributeMap : function() {
 			return this.attr_map;
+		},
+
+		GetProgramId : function() {
+			return this.program_id;
 		},
 
 		State : function(state) {
@@ -591,6 +598,7 @@ medea.define('pass',['shader','texture'],function(undefined) {
 				return out;
 			}
 
+			out.program_id = this.program_id;
 			out.cache_name = this.cache_name;
 
 			// program reference can be shared (XXX but this does not play well
@@ -642,6 +650,10 @@ medea.define('pass',['shader','texture'],function(undefined) {
 				gl.attachShader(p,this.vs.GetGlShader());
 				gl.attachShader(p,this.ps.GetGlShader());
 
+				// increment program id to get a unique value
+				// (unfortunately, there does not seem to be an easy way to directly
+				//  derive an id from the program)
+				this.program_id = program_ids[cache_name] = program_id_counter++;
 
 				gl.linkProgram(p);
 				if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
@@ -661,6 +673,7 @@ medea.define('pass',['shader','texture'],function(undefined) {
 				// #endif
 			}
 			else {
+				this.program_id = program_ids[cache_name];
 				this.program = p;
 				gl.useProgram(this.program);
 			}

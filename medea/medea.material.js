@@ -73,7 +73,12 @@ medea.define('material',['pass'],function(undefined) {
 		},
 
 		GetId: function() {
-			return 0;
+			var id = 0
+			,	passes = this.passes;
+			for(var i = passes.length - 1; i >= 0; --i) {
+				id ^= passes[i].GetProgramId();
+			}
+			return id;
 		},
 
 		Name : medea._GetSet(this,'name'),
