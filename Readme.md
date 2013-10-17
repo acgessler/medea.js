@@ -89,7 +89,7 @@ An _average_ medea distribution is only about `120 KiB`.
 
 The license of medea is based on a 3-clause BSD-style license. This means, you are free to use medea even in your commercial websites provided the copyright notice, conditions and disclaimer of the license are included. 
 
-See the `LICENSE file for the full wording.
+See the `LICENSE` file for the full wording.
 
 ### Contributions ###
 
