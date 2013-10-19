@@ -7,24 +7,22 @@ medea is a scenegraph-based, lightweight and highly optimized 3D engine for Java
 
 **Major design goals**:
 
- - _Data-driven material system_ supporting automatic dynamic lighting and shadowing. The framework abstracts both forward and deferred lighting methods while still offering full flexibility to shader authors.
- - _Asynchronous and progressive loading_ to minimize 'hard' loading times.
- - Optimized _scene management and visibility detection_ to minimize rendering time.
- - _Offline content processing_ to save as much bandwidth and runtime overhead as possible. For instance <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
+ - Provide a _full content pipeline_ for distributing 3D content on the web. 3D data from authoring tools can be converted offline to a representation that is maximally optimized for loading at runtime.  <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
   (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) is used to import geometry from about thirty 3D model formats.
  - _Automatic detail management_ so medea-based applications can scale to all platforms, including mobile devices.
-
-
+ - Optimized _scene management and visibility detection_.
+ - _Data-driven material system_ supporting automatic dynamic lighting and shadowing. The framework abstracts both forward and deferred lighting methods while still offering full flexibility to shader authors.
 
 ### Media ###
 
-A rather boring video showing medea's experimental terrain system (<a href="http://www.youtube.com/watch?v=VGLvI7iFjsE">youtube</a>).
+
+Crytek's Sponza Test Scene with dynamic lighting without shadows with medea debug tools enabled (loaded via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>).
+
+<img src="http://www7.pic-upload.de/19.10.13/bxig953ohjh7.png"> </img>
+
+A video showing medea's experimental terrain system (<a href="http://www.youtube.com/watch?v=VGLvI7iFjsE">youtube</a>).
 
 <a href="http://www.youtube.com/watch?v=VGLvI7iFjsE"><img src="http://acgessler.github.com/medea.js/media/splash1.PNG" alt="terrain scene"></a>
-
-Crytek's Sponza Test Scene with dynamic lighting without shadows running in fullscreen mode (loaded via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>).
-
-<img src="http://www10.pic-upload.de/04.08.13/telps3yuwbt2.png"> </img>
 
 ### Documentation ###
 
@@ -89,7 +87,7 @@ An _average_ medea distribution is only about `120 KiB`.
 
 The license of medea is based on a 3-clause BSD-style license. This means, you are free to use medea even in your commercial websites provided the copyright notice, conditions and disclaimer of the license are included. 
 
-See the `LICENSE file for the full wording.
+See the `LICENSE` file for the full wording.
 
 ### Contributions ###
 
