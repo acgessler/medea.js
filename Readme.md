@@ -18,13 +18,14 @@ medea is a scenegraph-based, lightweight and highly optimized 3D engine for Java
 
 ### Media ###
 
-A rather boring video showing medea's experimental terrain system (<a href="http://www.youtube.com/watch?v=VGLvI7iFjsE">youtube</a>).
+
+Crytek's Sponza Test Scene with dynamic lighting without shadows with medea debug tools enabled (loaded via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>).
+
+<img src="http://www7.pic-upload.de/19.10.13/bxig953ohjh7.png"> </img>
+
+A video showing medea's experimental terrain system (<a href="http://www.youtube.com/watch?v=VGLvI7iFjsE">youtube</a>).
 
 <a href="http://www.youtube.com/watch?v=VGLvI7iFjsE"><img src="http://acgessler.github.com/medea.js/media/splash1.PNG" alt="terrain scene"></a>
-
-Crytek's Sponza Test Scene with dynamic lighting without shadows running in fullscreen mode (loaded via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>).
-
-<img src="http://www10.pic-upload.de/04.08.13/telps3yuwbt2.png"> </img>
 
 ### Documentation ###
 
