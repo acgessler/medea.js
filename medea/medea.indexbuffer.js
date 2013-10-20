@@ -63,6 +63,9 @@ medea.define('indexbuffer',[],function(undefined) {
 
 		// medea.VERTEXBUFFER_USAGE_DYNAMIC recommended if this function is used
 		Fill : function(init_data) {
+			var arr = init_data
+			,	old = gl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING)
+			;
 
 			if (this.buffer === -1) {
 				this.buffer = gl.createBuffer();
@@ -70,7 +73,6 @@ medea.define('indexbuffer',[],function(undefined) {
 
 			this.itemcount = init_data.length;
 
-			var arr = init_data;
 			if(!(arr instanceof Uint32Array) && !(arr instanceof Uint16Array)) {
 				// TODO: maybe this would be a better spot for a debug check on exceeded index ranges
 				// than the scene loader code.
@@ -80,6 +82,13 @@ medea.define('indexbuffer',[],function(undefined) {
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.buffer);
 			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,arr,
 				this.flags & medea.INDEXBUFFER_USAGE_DYNAMIC ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
+
+			// restore state - this is crucial, as redundant buffer changes are
+			// optimized away based on info in medea's statepool, 
+			// not glGetInteger()
+			if(old) {
+				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,old);
+			}
 
 			if (this.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA) {
 				this.init_data = arr;
@@ -117,11 +126,12 @@ medea.define('indexbuffer',[],function(undefined) {
 
 		_Bind : function(statepool) {
 			var id = this.GetBufferId(), gls = statepool.GetQuick('_gl');
+
 			if (gls.eab === id) {
 				return;
 			}
-
 			gls.eab = id;
+
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,id);
 		}
 	});
@@ -139,6 +149,11 @@ medea.define('indexbuffer',[],function(undefined) {
 			medea.DebugAssert(!!indices, 'source index buffer must specify medea.INDEXBUFFER_PRESERVE_CREATION_DATA');
 			// #endif
 		}
+
+		// #ifdef DEBUG
+		medea.DebugAssert(indices.length % 3 === 0, 'source index count must be a multiple of 3');
+		// #endif
+
 		var tri_count = indices.length / 3
 		,	line_indices = new ((flags | 0) & medea.INDEXBUFFER_LARGE_MESH 
 			? Uint32Array 
