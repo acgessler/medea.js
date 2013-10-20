@@ -554,37 +554,52 @@ medea = new (function(sdom) {
 
 	var worker_index_source = 0;
 	this.CreateWorker = function(name, callback) {
+		var Blob =  window.Blob
+		,	BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder
+		,	URL = window.URL || window.webkitURL;
+		;
 
-		var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
-		if (!BlobBuilder) {
-			medea.LogDebug('BlobBuilder not available, can\t use web worker');
+
+		if (!Blob && !BlobBuilder) {
+			medea.LogDebug('BlobBuilder not available, cannot use web worker');
 			callback(null);
 			return false;
 		}
 
 		if (!Worker) {
-			medea.LogDebug('Worker not available, can\t use web worker');
+			medea.LogDebug('Worker not available, cannot use web worker');
 			callback(null);
 			return false;
 		}
 
-		var URL = window.URL || window.webkitURL;
+		
 		if (!URL || !URL.createObjectURL) {
-			medea.LogDebug('URL.createObjectURL not available, can\t use web worker');
+			medea.LogDebug('URL.createObjectURL not available, cannot use web worker');
 			callback(null);
 			return false;
 		}
 
 		medea.FetchMods('worker_base', function() {
-			var bb = new BlobBuilder();
-			bb.append([medea.GetModSource('worker_base'),medea.GetModSource(name )].join('\n'));
+			var source = [medea.GetModSource('worker_base'),'\n',medea.GetModSource(name )]
+			,	bb
+			,	worker 
+			,	worker_index
+			,	msg
+			;
 
-			var blobURL = URL.createObjectURL(bb.getBlob());
-			var worker = new Worker(blobURL);
+			if (Blob) {
+				blobURL = URL.createObjectURL(new Blob(source));
+			}
+			else {
+				bb = new BlobBuilder();
+				bb.append(source.join());
+				blobURL = URL.createObjectURL(bb.getBlob());
+			}
 
-			var worker_index = worker_index_source++;
+			worker = new Worker(blobURL);
+			worker_index = worker_index_source++;
 
-			var msg = callback(worker, worker_index) || function() {};
+			msg = callback(worker, worker_index) || function() {};
 			worker.onmessage = function(e) {
 
 				if (e.data[0] === 'log') {
