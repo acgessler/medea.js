@@ -94,7 +94,7 @@ medea.define('terraintile',['worker_terrain','image','mesh'],function(undefined)
 		// #endif DEBUG
 
 		var c = (w+1)*(h+1);
-		var pos = new Array(c*3);
+		var pos = new Float32Array(c*3);
 
 		// this is the index of the "up" output component, left flexible for now.
 		v = v === undefined ? 1 : v;
@@ -169,7 +169,7 @@ medea.define('terraintile',['worker_terrain','image','mesh'],function(undefined)
 		// #endif DEBUG
 
 		var c = w*h;
-		var pos = new Array(c*3);
+		var pos = new Float32Array(c*3);
 
 		// this is the index of the "up" output component, left flexible for now.
 		v = v === undefined ? 1 : v;
