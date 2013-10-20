@@ -7,14 +7,11 @@ medea is a scenegraph-based, lightweight and highly optimized 3D engine for Java
 
 **Major design goals**:
 
- - _Data-driven material system_ supporting automatic dynamic lighting and shadowing. The framework abstracts both forward and deferred lighting methods while still offering full flexibility to shader authors.
- - _Asynchronous and progressive loading_ to minimize 'hard' loading times.
- - Optimized _scene management and visibility detection_ to minimize rendering time.
- - _Offline content processing_ to save as much bandwidth and runtime overhead as possible. For instance <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
+ - Provide a _full content pipeline_ for distributing 3D content on the web. 3D data from authoring tools can be converted offline to a representation that is maximally optimized for loading at runtime.  <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
   (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) is used to import geometry from about thirty 3D model formats.
  - _Automatic detail management_ so medea-based applications can scale to all platforms, including mobile devices.
-
-
+ - Optimized _scene management and visibility detection_.
+ - _Data-driven material system_ supporting automatic dynamic lighting and shadowing. The framework abstracts both forward and deferred lighting methods while still offering full flexibility to shader authors.
 
 ### Media ###
 

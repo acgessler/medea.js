@@ -248,6 +248,7 @@ medea.define('pass',['shader','texture'],function(undefined) {
 
 				// program changes invalidates 'state not changed' flags
 				change_flags = 0;
+				pass_last_used_with[cache_name] = this;
 			}
 
 			// if this program was last used with _this_ pass, we can 
