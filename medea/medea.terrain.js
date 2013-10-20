@@ -42,7 +42,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 	};
 
 	var TerrainDefaultSettings = {
-		use_vertex_fetch : true,
+		use_vertex_fetch : false,
 		use_worker : true,
 		camera_timeout : 1000,
 		update_treshold : 0.4,
@@ -474,7 +474,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 
 			if (h <= 0 || w <= 0 || yofsr >= oh || xofsr >= ow) {
 				// completely out of range, return dummy data
-				var pos = new Array(oh*ow*3);
+				var pos = new Float32Array(oh*ow*3);
 				for (var yy = 0, c = 0; yy < oh; ++yy) {
 					for (var xx = 0; xx < ow; ++xx) {
 						pos[c++] = xx * xzs;
@@ -493,7 +493,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 				// #endif
 
 				// partly out of range, move the height field and pad with dummy data
-				var pos = new Array(oh*ow*3);
+				var pos = new Float32Array(oh*ow*3);
 				for (var yy = 0, c = 0; yy < oh; ++yy) {
 					for (var xx = 0; xx < ow; ++xx) {
 						pos[c++] = xx * xzs;
@@ -695,7 +695,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 					return ib_cached;
 				}
 
-				var indices = new Array(w*h*2*3);
+				var indices = new Uint16Array(w*h*2*3);
 				medea._GenHeightfieldIndicesLOD(indices,w,h);
 
 				return terrain_ib_cache[ib_key] = medea.CreateIndexBuffer(indices, 0);
@@ -761,7 +761,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 				return ib_cached;
 			}
 
-			var indices = new Array((w-wh)*(h-hh)*2*3);
+			var indices = new Uint16Array((w-wh)*(h-hh)*2*3 * 4); // TODO: *4 is just a rough upper bound
 			var c = (this.lod === t.data.GetLODCount()-1
 				? medea._GenHeightfieldIndicesWithHole
 				: medea._GenHeightfieldIndicesWithHoleLOD)
@@ -771,8 +771,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 			medea.LogDebug('populate terrain IB cache: ' + ib_key);
 			// #endif
 
-			indices.length = c;
-			return terrain_ib_cache[ib_key] = medea.CreateIndexBuffer(indices);
+			return terrain_ib_cache[ib_key] = medea.CreateIndexBuffer(indices.subarray(0, c));
 		},
 
 		_GetIBCacheKey : function(w,h,whs,hhs,wh,hh,lod) {
