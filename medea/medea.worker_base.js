@@ -9,11 +9,12 @@
 try {
 	medea; // this should throw ReferenceError etc. from within a web worker
 
-	medea.define('worker_base',[], function() {
+	medea.define('worker_base',[], function(undefined) {
 	});
 }
 catch (e) {
 	if (!(e instanceof ReferenceError)) {
+		console.log(e);
 		return;
 	}
 	// subset of medea's core interface that is available to workers

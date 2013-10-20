@@ -115,14 +115,14 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 				return null;
 			}
 
-			var iw = map._cached_img.GetWidth(), ih = map._cached_img.GetHeight();
+			var iw = map._cached_img[0].GetWidth(), ih = map._cached_img[0].GetHeight();
 			var xx = Math.floor(iw * x/this.desc.size[0]), yy = Math.floor(ih * y/this.desc.size[1]);
 
 			// sample the 9 surrounding pixels using a (somewhat) gaussian convolution kernel
 			var h = 0.0, hs = this.desc.base_hscale, weights = sample_3x3_weights;
 			for( var n = -1; n <= 1; ++n) {
 				for( var m = -1; m <= 1; ++m) {
-					h += map._cached_img.PixelComponent(xx+n, yy+m,0) * hs * weights[n+1][m+1];
+					h += map._cached_img[0].PixelComponent(xx+n, yy+m,0) * hs * weights[n+1][m+1];
 				}
 			}
 
@@ -200,7 +200,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 
 			var sbase = real_scale/want_scale;
 
-			var hf = this._CreateHeightField(match._cached_img, xx, yy, ww, hh,
+			var hf = this._CreateHeightField(match._cached_img[0], xx, yy, ww, hh,
 				sbase*this.desc.scale[1]*this.desc.base_hscale,
 				sbase*this.desc.scale[0]);
 
@@ -235,7 +235,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 				"LOD images with different aspect ratios than the main terrain are not supported");
 			// #endif
 
-			var tex = match._cached_img;
+			var tex = match._cached_img[1];
 			
 			var want_scale = 1/ilod;
 			var ub = this.desc.unitbase, iub = 1/ub, ox = x, oy = y;
@@ -332,52 +332,54 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 				var outer = this, map = this.fetch_queue[match][0], clbs = this.fetch_queue[match][1];
 
 				this.fetch_queue[match][2] = true;
-				medea.CreateTexture(this.url_root + '/' + map.img, function(img) {
-					map._cached_img = img;
-					outer._RegisterMap(map);
+				medea.CreateImage(this.url_root + '/' + map.img, function(image) {;
+					medea.CreateTexture(image.GetImage(), function(tex) {
+						map._cached_img = [image, tex];
+						outer._RegisterMap(map);
 
-					for( var i = 0; i < clbs.length; ++i) {
-						clbs[i]();
-					}
-
-					for( var i = 0; i < outer.fetch_queue.length; ++i) {
-						if (outer.fetch_queue[i][0] == map) {
-							outer.fetch_queue.splice(i,1);
-							break;
+						for( var i = 0; i < clbs.length; ++i) {
+							clbs[i]();
 						}
-					}
-				},
 
-				// Flags:
+						for( var i = 0; i < outer.fetch_queue.length; ++i) {
+							if (outer.fetch_queue[i][0] == map) {
+								outer.fetch_queue.splice(i,1);
+								break;
+							}
+						}
+					},
 
-				// preserve the original image data (even if vertex fetching is active,
-				// we need it for height queries.
-				medea.TEXTURE_FLAG_KEEP_IMAGE |
+					// Flags:
 
-				// we don't know whether we need the texture data on the GPU
-				medea.TEXTURE_FLAG_LAZY_UPLOAD |
+					// preserve the original image data (even if vertex fetching is active,
+					// we need it for height queries.
+					medea.TEXTURE_FLAG_KEEP_IMAGE |
 
-				// no MIP maps, if any, we need only vertex shader access where
-				// the gradients for MIP map sampling aren't available anyway.
-				medea.TEXTURE_FLAG_NO_MIPS |
+					// we don't know whether we need the texture data on the GPU
+					medea.TEXTURE_FLAG_LAZY_UPLOAD |
 
-				// non power of two input data should be padded, not scaled
-				// to preserve the original pixel data. The down side is that we
-				// need to do some manual corrections in the shaders.
-				medea.TEXTURE_FLAG_NPOT_PAD,
+					// no MIP maps, if any, we need only vertex shader access where
+					// the gradients for MIP map sampling aren't available anyway.
+					medea.TEXTURE_FLAG_NO_MIPS |
 
-
-				// Format:
-
-				// only one component needed, input image is grayscale anyway
-				medea.TEXTURE_FORMAT_LUM,
+					// non power of two input data should be padded, not scaled
+					// to preserve the original pixel data. The down side is that we
+					// need to do some manual corrections in the shaders.
+					medea.TEXTURE_FLAG_NPOT_PAD,
 
 
-				// Overwrite size to make sure 4097x407 inputs won't get padded
-				// to 8096x8096, which kills almost all memory limits.
-				map.size[0] * this.desc.unitbase,
-				map.size[1] * this.desc.unitbase
-				);
+					// Format:
+
+					// only one component needed, input image is grayscale anyway
+					medea.TEXTURE_FORMAT_LUM,
+
+
+					// Overwrite size to make sure 4097x407 inputs won't get padded
+					// to 8096x8096, which kills almost all memory limits.
+					map.size[0] * outer.desc.unitbase,
+					map.size[1] * outer.desc.unitbase
+					);
+				});
 			}
 		},
 

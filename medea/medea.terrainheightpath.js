@@ -10,6 +10,8 @@ medea.define('terrainheightpath',['entity'],function(undefined) {
 	"use strict";
 	var medea = this;
 
+	medea._initMod('entity');
+
 	var TerrainHeightPath = medea.Entity.extend(
 	{
 		init : function(terrain, height_offset, smooth_factor) {
