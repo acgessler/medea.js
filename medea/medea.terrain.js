@@ -607,7 +607,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 					return;
 				}
 
-				outer._BuildHeightfieldMesh(tup, ilod, ppos);
+				outer._BuildHeightfieldMesh(tup, outer.material, ilod, ppos);
 			});
 		},
 
