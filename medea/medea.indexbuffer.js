@@ -127,11 +127,15 @@ medea.define('indexbuffer',[],function(undefined) {
 		_Bind : function(statepool) {
 			var id = this.GetBufferId(), gls = statepool.GetQuick('_gl');
 
-			if (gls.eab === id) {
-				return;
-			}
-			gls.eab = id;
+			// note: caching eab's causes Chrome and Firefox warnings when the ab is changed.
+		// it seems, after every ab change, eab's need to be rebound to pass some validation.
+		// have to find out if this is only temporary behaviour, or per spec.
 
+		//	if (gls.eab === id) {
+		//		return;
+		//	}
+		//	gls.eab = id;
+		
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,id);
 		}
 	});
