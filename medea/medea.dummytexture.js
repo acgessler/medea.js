@@ -10,7 +10,9 @@ medea.define('dummytexture',['filesystem'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
-	var TEX = gl.TEXTURE_2D;
+	var TEX = gl.TEXTURE_2D
+	,	neutral_textures = {}
+	;
 
 	medea.DummyTexture = medea.Resource.extend( {
 

@@ -10,7 +10,7 @@ medea.define('lodtexture',['texture', 'dummytexture'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
-	var neutral_textures = {}, TEX = gl.TEXTURE_2D;
+	var TEX = gl.TEXTURE_2D;
 
 	medea.LODTexture = medea.Resource.extend( {
 
