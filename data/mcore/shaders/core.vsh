@@ -16,9 +16,10 @@
 
 #define MEDEA_VERTEX_SHADER_LIB
 
- // Set default floating-point precision to medium
+ // Set default floating-point precision to high
 #ifdef GL_ES
-#pragma toplevel("precision mediump float;")
+#pragma toplevel("precision highp float;")
+#pragma toplevel("precision highp int;")
 #endif
 
 
