@@ -21,6 +21,6 @@ void main()
 	PassTangent(ModelNormalToWorldSpace(FetchTangent()));
 	PassBitangent(ModelNormalToWorldSpace(FetchBitangent()));
 
-	eye = CAM_POS - ModelToWorldSpace(FetchPosition());
+	PassVec3(eye, CAM_POS - ModelToWorldSpace(FetchPosition()));
 }
 

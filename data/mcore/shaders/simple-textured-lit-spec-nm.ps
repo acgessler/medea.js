@@ -1,4 +1,5 @@
 
+
 /* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
  * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
  *
@@ -13,30 +14,27 @@ uniform sampler2D normal_texture;
 
 uniform vec4 spec_color_shininess;
 
-varying vec3 eye;
 
 #include <remote:mcore/shaders/core.psh>
+#include <remote:mcore/shaders/lighting.psh>
 
 // currently all lighting computation happens in worldspace
 void main()
 {
 	vec3 N = normalize(FetchNormal());
-	vec3 T = normalize(FetchTangent());
-	vec3 B = normalize(FetchBitangent());
-
-	// compute adjusted normal as linear combination of the TBN matrix
-	vec3 tb = (texture2D(normal_texture, FetchTexCoord()).rgb - 0.5) * 2.0;
-	N = normalize(N + tb.r * T + tb.g * B );
-
-	vec3 tex = texture2D(texture, FetchTexCoord()).rgb;
+	N = ApplyNormalMap_WS(normal_texture, FetchTexCoord(), N);
 
 	// diffuse contribution
-	float diffuse = max(0.0,dot(normalize(LIGHT_D0_DIR),N));
+	float diffuse = ComputeLambertDiffuseCoeff(N, LIGHT_D0_DIR);
 
-	// specular contribution (blinn)
-	vec3 E = normalize(eye);
-	vec3 H = normalize(LIGHT_D0_DIR + E);
-	float specular = pow( max(dot(H, N), 0.0), spec_color_shininess.a ) * length(tex) * 0.2;
+	// specular contribution (blinn) 
+	vec3 tex = texture2D(texture, FetchTexCoord()).rgb;
+	float specular = ComputeBlinnSpecularCoeff(
+		FetchVec3(eye),
+		N,
+		LIGHT_D0_DIR,
+		spec_color_shininess.a
+	) * length(tex) * 0.2;
 
 	// self-shadowing
 	specular *= clamp(diffuse*4.0, 0.0, 1.0);
