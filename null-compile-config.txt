@@ -1,0 +1,7 @@
+[general]
+output=compiled
+
+[modules]
+
+
+[resources]
