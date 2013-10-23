@@ -123,6 +123,6 @@ if __name__ == "__main__":
 				resources = dict(parse_res(k) for k in sys.argv[n+1:]);
 				break
 
-	assert modules
+	modules = modules or []
 	assert output
 	compiler.run('medea', output, modules, resources)
