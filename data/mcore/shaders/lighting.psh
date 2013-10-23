@@ -22,9 +22,18 @@ float ComputeBlinnSpecularCoeff(vec3 eye, vec3 normal, vec3 light_dir, float shi
 
 
 // ------------------------------------------------------
-float ComputeLambertDiffuseCoeff(vec3 normal, vec3 light_dir) 
+float ComputeLambertDiffuseCoeff(vec3 light_dir, vec3 normal) 
 {
 	return max(0.0,dot(light_dir, normal));
+}
+
+
+// ------------------------------------------------------
+float ComputeHalfLambertDiffuseCoeff(vec3 normal, vec3 light_dir) 
+{
+	float f = dot(light_dir, normal);
+	f * 0.5 + 0.5;
+	return f*f;
 }
 
 
@@ -36,21 +45,5 @@ vec3 ApplyNormalMap_WS(sampler2D source, vec2 uv, vec3 normal, vec3 tangent, vec
 	return normalize(normal + tb.r * tangent + tb.g * bitangent );
 }
 
-
-// ------------------------------------------------------
-vec3 ApplyNormalMap_WS(sampler2D source, vec2 uv, vec3 normal) 
-{
-	return ApplyNormalMap_WS(source, uv, normal, 
-		normalize(FetchTangent()), 
-		normalize(FetchBitangent())
-	);
-}
-
-
-// ------------------------------------------------------
-vec3 ApplyNormalMap_WS(sampler2D source, vec2 uv) 
-{
-	return ApplyNormalMap_WS(source, uv, normalize(FetchNormal()));
-}
 
 #endif 

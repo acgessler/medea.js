@@ -22,10 +22,12 @@ uniform vec4 spec_color_shininess;
 void main()
 {
 	vec3 N = normalize(FetchNormal());
-	N = ApplyNormalMap_WS(normal_texture, FetchTexCoord(), N);
+	vec3 T = normalize(FetchTangent());
+	vec3 B = normalize(FetchBitangent());
+	N = ApplyNormalMap_WS(normal_texture, FetchTexCoord(), N, T, B);
 
 	// diffuse contribution
-	float diffuse = ComputeLambertDiffuseCoeff(N, LIGHT_D0_DIR);
+	float diffuse = ComputeLambertDiffuseCoeff(LIGHT_D0_DIR, N);
 
 	// specular contribution (blinn) 
 	vec3 tex = texture2D(texture, FetchTexCoord()).rgb;
