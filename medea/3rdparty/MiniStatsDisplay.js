@@ -69,6 +69,9 @@ var MiniStatsDisplay = function (config) {
 	}
 
 	return {
+
+		container : container,
+
 		range : function(lower, upper) {
 			range = [lower|0, upper|0];
 			range_changed = true;

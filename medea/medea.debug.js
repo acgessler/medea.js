@@ -25,6 +25,8 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 		, show_ministats 				: true
 		, last_update_time 				: 0.0
 		, wireframe 					: false
+		, last_show_ministats			: null
+		, stats_shortlist				: null
 		,
 
 
@@ -64,6 +66,12 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 				, autorange	: 50
 			});
 
+			this.stats_shortlist = [
+				this.fps_stats,
+				this.primitives_stats,
+				this.batches_stats
+			];
+
 			this.gui = new dat.GUI();
 			f1 = this.gui.addFolder('Core');
 			f1.add(this, 'wireframe');
@@ -77,6 +85,7 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 				f2.add(this, 'show_bbs_draw_nodes');
 				f2.add(this, 'show_bbs_show_cull_state');
 
+			f1 = this.gui.addFolder('Debug');
 			f1.add(this, 'show_ministats');
 		},
 
@@ -89,6 +98,13 @@ medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStat
 				this.vis.showbbs.ShowCullState(this.show_bbs_show_cull_state);
 				this.vis.showbbs.DrawNodes(this.show_bbs_draw_nodes);
 				this.vis.showbbs.DrawRange(this.show_bbs_draw_range);
+			}
+
+			if(this.show_ministats !== this.last_show_ministats){
+				for(var i = this.stats_shortlist.length - 1; i >= 0; --i) {
+					this.stats_shortlist[i].container.style.display = this.show_ministats ? 'block' : 'none';
+				}
+				this.last_show_ministats = this.show_ministats;
 			}
 
 			medea.Wireframe(this.wireframe);
