@@ -18,6 +18,6 @@ void main()
 	PassNormal(ModelNormalToWorldSpace(FetchNormal()));
 	PassTexCoord(FetchTexCoord());
 
-	eye = CAM_POS - ModelToWorldSpace(FetchPosition());
+	PassVec3(eye, CAM_POS - ModelToWorldSpace(FetchPosition()));
 }
 

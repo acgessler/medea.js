@@ -35,10 +35,11 @@ Documentation will soon be available; for now, have a look at the `samples/` fol
 This is effectively the whole code for the terrain in the above video.
 
 ```javascript
-medea.Ready("canvas",{dataroot:'../../data'},['camcontroller'],function() {
+medea.Ready("canvas",{dataroot:'../../data'},['camcontroller', 'forwardrenderer'],function() {
 
 	// create a viewport to fill the entire <canvas>
 	var viewport = medea.CreateViewport();
+	viewport.Renderer(medea.CreateForwardRenderer());
 	viewport.ClearColor([1.0,1.0,1.0]);
  
 	var root = medea.RootNode();

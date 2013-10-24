@@ -8,9 +8,10 @@
 
 function run() {
 
-	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes','camcontroller'],function() {
+	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes','camcontroller','forwardrenderer'],function() {
 		var vp1 = medea.CreateViewport();
 		vp1.ClearColor([1.0,1.0,1.0]);
+		vp1.Renderer(medea.CreateForwardRenderer());
      
         var root = medea.RootNode();
 		

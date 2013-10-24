@@ -205,6 +205,14 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytex
 			return this.src;
 		},
 
+		GetImage : function() {
+			// #ifdef DEBUG
+			medea.DebugAssert(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE,'GetImage() ist not available: '+
+				'TEXTURE_FLAG_KEEP_IMAGE not specified');
+			// #endif
+			return this.img;
+		},
+
 		IsPowerOfTwo : function() {
 			// #ifdef DEBUG
 			medea.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: texture not loaded yet');

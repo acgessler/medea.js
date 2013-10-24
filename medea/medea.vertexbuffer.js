@@ -411,15 +411,24 @@ medea.define('vertexbuffer',[],function(undefined) {
 
 		// medea.VERTEXBUFFER_USAGE_DYNAMIC recommended if this function is used
 		Fill : function(init_data, same_layout) {
+			var old = gl.getParameter(gl.ARRAY_BUFFER_BINDING)
+			,	access
+			;
 
 			if (this.buffer === -1) {
 				this.buffer = gl.createBuffer();
 			}
-
 			gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);
 
-			var access = new medea._VBOInitDataAccessor(init_data,this.flags, same_layout ? this.state_closure : null );
+			access = new medea._VBOInitDataAccessor(init_data,this.flags, same_layout ? this.state_closure : null );
 			access.SetupGlData();
+
+			// restore state - this is crucial, as redundant buffer changes are
+			// optimized away based on info in medea's statepool, 
+			// not glGetInteger()
+			if(old) {
+				gl.bindBuffer(gl.ARRAY_BUFFER,old);
+			}
 
 			this.itemcount = access.GetItemCount();
 			this.state_closure = access.GetStateClosure();
@@ -434,6 +443,9 @@ medea.define('vertexbuffer',[],function(undefined) {
 			if (!va_ext) {
 				return;
 			}
+
+			var old = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
+
 			this.vao = va_ext.createVertexArrayOES();
 			if(!this.vao) {
 				return;
@@ -448,6 +460,10 @@ medea.define('vertexbuffer',[],function(undefined) {
 
 			va_ext.bindVertexArrayOES(null);
 			this._vao_attrmap = attrMap;
+
+			if(old) {
+				gl.bindBuffer(gl.ARRAY_BUFFER,old);
+			}
 		},
 
 		GetBufferId : function() {

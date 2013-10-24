@@ -4,6 +4,8 @@ import re
 import os
 import shutil
 
+import preprocessor
+
 primary_compiled_file = 'medea.core-compiled.js'
 
 
@@ -138,7 +140,7 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 
 
 			with open(path, 'rt') as inp:
-				outp.write(inp.read())
+				outp.write(preprocessor.run(inp.read(), input_folder))
 				if '.js' in dep:
 					outp.write('medea._markScriptAsLoaded("'+ dep +'");')
 				outp.write('\n')
