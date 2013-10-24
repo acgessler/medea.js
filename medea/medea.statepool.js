@@ -8,7 +8,13 @@
 
 medea.define('statepool',[],function(undefined) {
 	"use strict";
-	var medea = this;
+	var medea = this
+
+		// every statepool instance has a _gl member, which is a dictionary
+		// that they all share. OpenGl state is global relative to a Gl
+		// context (~= one medea context).
+	,	_global_gl_state = {}
+	;
 
 	var _DefaultStateDependencies = {
 		W : ["WVP","WV","WI","WIT",'CAM_POS_LOCAL'],
@@ -54,7 +60,7 @@ medea.define('statepool',[],function(undefined) {
 
 		init : function(deps,derived_states) {
 			this.states = { 
-				_gl : {}
+				_gl : _global_gl_state
 			 };
 			this.deps = deps || _DefaultStateDependencies;
 			this.derived_states = derived_states || _DefaultDerivedStates;
