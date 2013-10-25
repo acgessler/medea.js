@@ -21,7 +21,7 @@ medealib.define('terrainheightpath',['entity'],function(undefined) {
 			this.seen = {};
 
 // #ifdef DEBUG
-			medea.DebugAssert(this.terrain instanceof medea.TerrainNode, "need valid terrain node");
+			medealib.DebugAssert(this.terrain instanceof medea.TerrainNode, "need valid terrain node");
 // #endif
 		},
 

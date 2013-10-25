@@ -53,7 +53,7 @@ medealib.define('indexbuffer',[],function(undefined) {
 
 			// #ifdef DEBUG
 			if (this.flags & medea.INDEXBUFFER_LARGE_MESH) {
-				medea.DebugAssert('32 bit indices not currently supported');
+				medealib.DebugAssert('32 bit indices not currently supported');
 			}
 			// #endif
 
@@ -150,12 +150,12 @@ medealib.define('indexbuffer',[],function(undefined) {
 			indices = indices.GetSourceData();
 			
 			// #ifdef DEBUG
-			medea.DebugAssert(!!indices, 'source index buffer must specify medea.INDEXBUFFER_PRESERVE_CREATION_DATA');
+			medealib.DebugAssert(!!indices, 'source index buffer must specify medea.INDEXBUFFER_PRESERVE_CREATION_DATA');
 			// #endif
 		}
 
 		// #ifdef DEBUG
-		medea.DebugAssert(indices.length % 3 === 0, 'source index count must be a multiple of 3');
+		medealib.DebugAssert(indices.length % 3 === 0, 'source index count must be a multiple of 3');
 		// #endif
 
 		var tri_count = indices.length / 3

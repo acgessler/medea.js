@@ -171,7 +171,7 @@ medealib.define('forwardrenderer',['renderer'],function(undefined) {
 			} */
 
 			else {
-				medea.DebugAssert('unknown kind of light');
+				medealib.DebugAssert('unknown kind of light');
 			}
 
 			var lights = statepool.GetQuick(list_name);

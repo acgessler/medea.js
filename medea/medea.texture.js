@@ -23,12 +23,12 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 	// #ifdef DEBUG
 	var max_anisotropy;
 	if (aniso_ext) {
-		medea.LogDebug('using EXT_texture_filter_anisotropic extension');
+		medealib.LogDebug('using EXT_texture_filter_anisotropic extension');
 		max_anisotropy = gl.getParameter(aniso_ext.
 			MAX_TEXTURE_MAX_ANISOTROPY_EXT);
 	}
 	else {
-		medea.LogDebug('EXT_texture_filter_anisotropic extension not available');
+		medealib.LogDebug('EXT_texture_filter_anisotropic extension not available');
 	}
 	// #endif
 
@@ -60,7 +60,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				return gl.LUMINANCE_ALPHA;
 		}
 		// #ifdef DEBUG
-		medea.DebugAssert('unrecognized texture format: ' + f);
+		medealib.DebugAssert('unrecognized texture format: ' + f);
 		// #endif
 	}
 
@@ -174,7 +174,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				texture_cache[name] = this;
 			}
 
-			medea.LogDebug("successfully loaded texture " + this.GetSource());
+			medealib.LogDebug("successfully loaded texture " + this.GetSource());
 		},
 
 		GetGlTextureWidth : function() {
@@ -207,7 +207,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 
 		GetImage : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE,'GetImage() ist not available: '+
+			medealib.DebugAssert(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE,'GetImage() ist not available: '+
 				'TEXTURE_FLAG_KEEP_IMAGE not specified');
 			// #endif
 			return this.img;
@@ -215,14 +215,14 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 
 		IsPowerOfTwo : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: texture not loaded yet');
+			medealib.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: texture not loaded yet');
 			// #endif
 			return this.ispot;
 		},
 
 		IsSquare : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.IsComplete(),'IsSquare() ist not available: texture not loaded yet');
+			medealib.DebugAssert(this.IsComplete(),'IsSquare() ist not available: texture not loaded yet');
 			// #endif
 			return this.width === this.height;
 		},
@@ -359,7 +359,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 	
 
 	medea.CreateTexture = function(src_or_image, callback, flags, format, force_width, force_height) {
-		medea.DebugAssert((force_width === undefined) === (force_height === undefined), 
+		medealib.DebugAssert((force_width === undefined) === (force_height === undefined), 
 			'explicit size must always be given for both axes');
 			
 		var create = function() {
@@ -380,7 +380,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				cache_name_w = cache_name + GetTextureSizeSuffix(force_width, force_height);
 				var cache_entry_w = texture_cache[cache_name_w];
 				if(cache_entry_w !== undefined) {
-					medea.LogDebug('texture found in cache (1): ' + src_or_image);
+					medealib.LogDebug('texture found in cache (1): ' + src_or_image);
 					return cache_entry_w;
 				}
 			}
@@ -401,7 +401,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			if (cache_name_w === null || (force_width === cache_entry.GetWidth() 
 				&& force_height === cache_entry.GetHeight())) {
 				
-				medea.LogDebug('texture found in cache (2): ' + src_or_image);
+				medealib.LogDebug('texture found in cache (2): ' + src_or_image);
 				return cache_entry;
 			}
 		}

@@ -76,7 +76,7 @@ medealib.define('sceneloader',['filesystem', 'material'],function(undefined) {
 					return;
 				}
 				// #ifdef LOG
-				medea.LogDebug("sceneloader: scene hierarchy is present, but dependent resources may still be pending: " + src);
+				medealib.LogDebug("sceneloader: scene hierarchy is present, but dependent resources may still be pending: " + src);
 				// #endif
 				callback(true);
 			}, material_resolver);

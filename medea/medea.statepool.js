@@ -77,7 +77,7 @@ medealib.define('statepool',[],function(undefined) {
 
 		SetQuick : function(key,value) {
 // #ifdef DEBUG
-			medea.DebugAssert(!(key in this.deps),"only states with no dependent states can be set using SetQuick(): " + key);
+			medealib.DebugAssert(!(key in this.deps),"only states with no dependent states can be set using SetQuick(): " + key);
 // #endif
 			if(key in this.derived_states) {
 				this.dirty[key] = false;
@@ -88,7 +88,7 @@ medealib.define('statepool',[],function(undefined) {
 		Get : function(key) {
 			if (this.dirty[key] === true) {
 // #ifdef DEBUG
-				medea.DebugAssert(key in this.derived_states,"only derived states can be 'dirty': " + key);
+				medealib.DebugAssert(key in this.derived_states,"only derived states can be 'dirty': " + key);
 // #endif
 				this.dirty[key] = false;
 				return this.states[key] = this.derived_states[key](this, this.states[key]);
@@ -99,7 +99,7 @@ medealib.define('statepool',[],function(undefined) {
 
 		GetQuick : function(key) {
 // #ifdef DEBUG
-			medea.DebugAssert(!(key in this.derived_states),"only non-derived states can be queried using GetQuick(): " + key);
+			medealib.DebugAssert(!(key in this.derived_states),"only non-derived states can be queried using GetQuick(): " + key);
 // #endif
 			return this.states[key];
 		}

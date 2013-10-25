@@ -73,12 +73,12 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			this.line_ibo = line_ibo;
 
 // #ifdef DEBUG
-			medea.DebugAssert(!!this.vbo,"need valid vbo for mesh to be complete");
-			medea.DebugAssert(!!this.material,"need valid material for mesh to be complete");
+			medealib.DebugAssert(!!this.vbo,"need valid vbo for mesh to be complete");
+			medealib.DebugAssert(!!this.material,"need valid material for mesh to be complete");
 // #endif
 
 // #ifdef LOG
-			medea.LogDebug("create mesh, " + this.vbo.GetItemCount() + " items in VBO, " + 
+			medealib.LogDebug("create mesh, " + this.vbo.GetItemCount() + " items in VBO, " + 
 				(this.ibo ? this.ibo.GetItemCount() : -1) + " items in IBO");
 // #endif
 		},
@@ -127,7 +127,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 		},
 		
 		_Clone : function(material_or_color, deep_copy) {
-			medea.DebugAssert(!deep_copy, 'not implemented yet');
+			medealib.DebugAssert(!deep_copy, 'not implemented yet');
 			return medea.CreateSimpleMesh(this.vbo, this.ibo, material_or_color);
 		},
 
@@ -185,7 +185,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			medea._initMod('indexbuffer');
 			if(this.pt === medea.PT_TRIANGLES_STRIPS) {
 				// #ifdef DEBUG
-				medea.LogDebug('not supported: wireframe and medea.PT_TRIANGLES_STRIPS');
+				medealib.LogDebug('not supported: wireframe and medea.PT_TRIANGLES_STRIPS');
 				// #endif
 				return;
 			}
@@ -215,7 +215,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			}
 
 			// #ifdef DEBUG
-			medea.DebugAssert(this.ibo && !(this.ibo.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA), 'inv');
+			medealib.DebugAssert(this.ibo && !(this.ibo.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA), 'inv');
 			// #endif
 
 			// we have an ibo, but its creation data was not preserved
@@ -241,7 +241,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 
 		_CreateLineIBO : function() {
 			// #ifdef LOG
-			medea.LogDebug('creating auxiliary index buffer to hold wireframe line mesh');
+			medealib.LogDebug('creating auxiliary index buffer to hold wireframe line mesh');
 			// #endif
 
 			if(this.ibo) {
@@ -254,7 +254,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			}
 
 			// #ifdef DEBUG
-			medea.DebugAssert(!!this.line_ibo, 'invariant');
+			medealib.DebugAssert(!!this.line_ibo, 'invariant');
 			// #endif
 		},
 
@@ -271,7 +271,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			};
 
 			// #ifdef DEBUG
-			medea.DebugAssert('unrecognized primitive type: ' + this.pt);
+			medealib.DebugAssert('unrecognized primitive type: ' + this.pt);
 			// #endif
 		},
 

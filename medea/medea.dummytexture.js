@@ -36,7 +36,7 @@ medealib.define('dummytexture',['filesystem'],function(undefined) {
 			// #endif
 
 			// #ifdef LOG
-			medea.LogDebug("Create dummy 1x1 texture with color: " + color);
+			medealib.LogDebug("Create dummy 1x1 texture with color: " + color);
 			// #endif
 		},
 
@@ -78,7 +78,7 @@ medealib.define('dummytexture',['filesystem'],function(undefined) {
 		}
 
 		// #ifdef LOG
-		medea.LogDebug("neutral texture name not recognized: " + id);
+		medealib.LogDebug("neutral texture name not recognized: " + id);
 		// #endif
 
 		return medea.CreateDefaultTexture();

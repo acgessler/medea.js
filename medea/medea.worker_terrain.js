@@ -96,7 +96,7 @@
 	// public worker interface
 	medea._workers.GenHeightfieldTangentSpace = function(pos,wv,hv) {
 		// #ifdef LOG
-		medea.LogDebug('gen-tangents ' + wv + ' ' + hv);
+		medealib.LogDebug('gen-tangents ' + wv + ' ' + hv);
 		// #endif
 
 		var nor = new Float32Array(pos.length);

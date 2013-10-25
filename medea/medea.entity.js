@@ -47,7 +47,7 @@ medealib.define('entity',[],function() {
 					this._AutoGenBB();
 				}
 				// #ifdef DEBUG
-				medea.DebugAssert(!!this.bb,'failed to generate BB for entity');
+				medealib.DebugAssert(!!this.bb,'failed to generate BB for entity');
 				// #endif
 				return this.bb;
 			}

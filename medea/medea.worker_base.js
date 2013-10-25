@@ -63,7 +63,7 @@ catch (e) {
 			});
 		}
 		else {
-			medea.DebugAssert(false,'command ' + call + ' not recognized');
+			medealib.DebugAssert(false,'command ' + call + ' not recognized');
 		}
 	};
  }

@@ -76,7 +76,7 @@ medealib.define('shader',['filesystem','cpp.js'],function(undefined) {
 
 		OnDelayedInit : function(data) {
 // #ifdef DEBUG
-			medea.DebugAssert(typeof data === "string","got unexpected argument, perhaps "
+			medealib.DebugAssert(typeof data === "string","got unexpected argument, perhaps "
 				+ "the source for the shader was not a single resource?"
 			);
 // #endif
@@ -142,7 +142,7 @@ medealib.define('shader',['filesystem','cpp.js'],function(undefined) {
 
 				completion_func : function(data) {
 					// #ifdef DEBUG
-					medea.DebugAssert(!!data,'unexpected null');
+					medealib.DebugAssert(!!data,'unexpected null');
 					// #endif
 
 					var arr = [];
@@ -168,7 +168,7 @@ medealib.define('shader',['filesystem','cpp.js'],function(undefined) {
 					gl.compileShader(s);
 
 					if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-						medea.NotifyFatal("failure compiling shader " +  self.src
+						medealib.NotifyFatal("failure compiling shader " +  self.src
 							+ ", error log: " + gl.getShaderInfoLog(s)
 						);
 						return;
@@ -182,13 +182,13 @@ medealib.define('shader',['filesystem','cpp.js'],function(undefined) {
 						waiters[i](entry);
 					}
 
-					medea.LogDebug("successfully compiled shader "
+					medealib.LogDebug("successfully compiled shader "
 						+ self.src
 					);
 				},
 
 				error_func : function(message) {
-					medea.NotifyFatal("failure preprocessing shader "
+					medealib.NotifyFatal("failure preprocessing shader "
 						+ ": " + message
 					);
 					return;
@@ -197,7 +197,7 @@ medealib.define('shader',['filesystem','cpp.js'],function(undefined) {
 				pragma_func : function(pragma_text) {
 					var r = re_toplevel.exec(pragma_text);
 					if (!r) {
-						medea.NotifyFatal("syntax error in #pragma toplevel: " + pragma_text);
+						medealib.NotifyFatal("syntax error in #pragma toplevel: " + pragma_text);
 						return null;
 					}
 

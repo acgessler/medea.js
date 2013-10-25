@@ -57,7 +57,7 @@ medealib.define('materialgen',['shader','material'],function(undefined) {
 		Update : function(statepool, passes) {
 
 			// #ifdef DEBUG
-			medea.DebugAssert (passes.length > 1, 'not a generated pass');
+			medealib.DebugAssert (passes.length > 1, 'not a generated pass');
 			// #endif
 
 			if(passes.length === 0) {

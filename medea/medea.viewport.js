@@ -203,7 +203,7 @@ medealib.define('viewport',['camera','renderqueue','statepool'],function(undefin
 
 		GetAspect: function() {
 			var c = medea.canvas;
-			medea.DebugAssert(c.width !== 0 && c.height !== 0, 'canvas width and height may not be 0');
+			medealib.DebugAssert(c.width !== 0 && c.height !== 0, 'canvas width and height may not be 0');
 			return (this.w*c.width)/(this.h*c.height);
 		},
 

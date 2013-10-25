@@ -403,20 +403,20 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 
 
 			if (!Blob && !BlobBuilder) {
-				medea.LogDebug('BlobBuilder not available, cannot use web worker');
+				medealib.LogDebug('BlobBuilder not available, cannot use web worker');
 				callback(null);
 				return false;
 			}
 
 			if (!Worker) {
-				medea.LogDebug('Worker not available, cannot use web worker');
+				medealib.LogDebug('Worker not available, cannot use web worker');
 				callback(null);
 				return false;
 			}
 
 			
 			if (!URL || !URL.createObjectURL) {
-				medea.LogDebug('URL.createObjectURL not available, cannot use web worker');
+				medealib.LogDebug('URL.createObjectURL not available, cannot use web worker');
 				callback(null);
 				return false;
 			}
@@ -449,7 +449,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 						return;
 					}
 					else if (e.data[0] === 'assert') {
-						medea.DebugAssert('(worker ' + worker_index + ') ' + e.data[1]);
+						medealib.DebugAssert('(worker ' + worker_index + ') ' + e.data[1]);
 						return;
 					}
 					return msg(e);

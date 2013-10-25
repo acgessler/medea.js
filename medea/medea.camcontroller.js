@@ -125,7 +125,7 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 					return medea.IsMouseDown();
 			}
 			// #ifdef DEBUG
-			medea.DebugAssert(false, 'mouse style not recognized: ' + this.mouse_style);
+			medealib.DebugAssert(false, 'mouse style not recognized: ' + this.mouse_style);
 			// #endif 
 		}
 	});
@@ -495,7 +495,7 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 			return new medea.RotateXCamController(enabled);
 		}
 		else {
-			medea.DebugAssert("camcontroller mode not recognized: " + kind);
+			medealib.DebugAssert("camcontroller mode not recognized: " + kind);
 			return null;
 		}
 	};

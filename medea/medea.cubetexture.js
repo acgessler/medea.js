@@ -69,8 +69,8 @@ medealib.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],f
 			// cube textures must be POTs and all faces must be squares. Anything else
 			// doesn't make sense unlike for 2D textures.
 			// #ifdef DEBUG
-			medea.DebugAssert(w === h && medea._IsPow2(w) && medea._IsPow2(h),'cube texture faces must be squared and POTs');
-			medea.DebugAssert(this.counter === 6 || (w === this.width && h === this.height),'cube texture faces must be all of the same size');
+			medealib.DebugAssert(w === h && medea._IsPow2(w) && medea._IsPow2(h),'cube texture faces must be squared and POTs');
+			medealib.DebugAssert(this.counter === 6 || (w === this.width && h === this.height),'cube texture faces must be all of the same size');
 			// #endif
 
 			this.width = this.glwidth = w;
@@ -84,7 +84,7 @@ medealib.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],f
 					this._Upload();
 				}
 
-				medea.LogDebug("successfully loaded cube texture " + this.GetSource());
+				medealib.LogDebug("successfully loaded cube texture " + this.GetSource());
 			}
 		},
 

@@ -108,7 +108,7 @@ medealib.define('renderqueue',['renderstate'],function(undefined) {
 		Push : function(idx,renderable) {
 // #ifdef DEBUG
 			if (idx < 0 || idx >= this.queues.length) {
-				medea.NotifyFatal("render queue does not exist: " + idx);
+				medealib.NotifyFatal("render queue does not exist: " + idx);
 				return;
 			}
 // #endif

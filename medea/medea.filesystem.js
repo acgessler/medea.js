@@ -14,10 +14,10 @@ medealib.define('filesystem',[],function(undefined) {
 
 	// #ifdef DEBUG
 	if (baked_resources !== undefined) {
-		medea.LogDebug('using embedded resources');
+		medealib.LogDebug('using embedded resources');
 	}
 	else {
-		medea.LogDebug('embedded resources not available');
+		medealib.LogDebug('embedded resources not available');
 	}
 	// #endif
 
@@ -49,7 +49,7 @@ medealib.define('filesystem',[],function(undefined) {
 		}
 		else {
 			// #ifdef DEBUG
-			medea.DebugAssert(false, 
+			medealib.DebugAssert(false, 
 				"not a valid resource name, probably missing url: prefix? :" + s);
 			// #endif 
 			return null;
@@ -103,14 +103,14 @@ medealib.define('filesystem',[],function(undefined) {
 
 		AddRef : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.ref_count > 0);
+			medealib.DebugAssert(this.ref_count > 0);
 			// #endif
 			this.ref_count++;
 		},
 
 		Release : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.ref_count > 0);
+			medealib.DebugAssert(this.ref_count > 0);
 			// #endif
 			if(--this.ref_count === 0) {
 				this.Dispose();
@@ -158,7 +158,7 @@ medealib.define('filesystem',[],function(undefined) {
 			this.root = root || settings_root;
 // #ifdef DEBUG
 			if (!this.root) {
-				medea.DebugAssert("need a valid filesystem handle for local file support");
+				medealib.DebugAssert("need a valid filesystem handle for local file support");
 			}
 // #endif
 		},
@@ -168,7 +168,7 @@ medealib.define('filesystem',[],function(undefined) {
 		},
 
 		Load : function(what,callback,onerror) {
-			medea.LogDebug("begin loading: " + what + " from local disk");
+			medealib.LogDebug("begin loading: " + what + " from local disk");
 
 			this.root.getFile(what, {}, function(fileEntry) {
 
@@ -206,10 +206,10 @@ medealib.define('filesystem',[],function(undefined) {
 			var what = this.root + AppendUrlParameters(what_orig);
 		
 
-			medea.LogDebug("begin loading: " + what + " via HTTP");
+			medealib.LogDebug("begin loading: " + what + " via HTTP");
 			medea._AjaxFetch(what,function(response,status) {
 
-				medea.LogDebug("end loading " + what + ", HTTP status " + status);
+				medealib.LogDebug("end loading " + what + ", HTTP status " + status);
 				if (status >= 300 || status < 200) {
 					if (onerror) {
 						onerror(status);
@@ -278,7 +278,7 @@ medealib.define('filesystem',[],function(undefined) {
 			var entry = baked_resources[what];
 			if(entry !== undefined) {
 				// #ifdef DEBUG
-				medea.LogDebug('resource is embedded: ' + what);
+				medealib.LogDebug('resource is embedded: ' + what);
 				// #endif
 				callback(entry);
 				return;

@@ -101,7 +101,7 @@ medealib.define('frustum',[],function(undefined) {
 
 		var l = Math.sqrt( p[0]*p[0] + p[1]*p[1] + p[2]*p[2] );
 		// #ifdef DEBUG
-		medea.DebugAssert(l > 1e-8,'length of plane normal is 0');
+		medealib.DebugAssert(l > 1e-8,'length of plane normal is 0');
 		// #endif
 
 		p_out[0] = p[0] / l;

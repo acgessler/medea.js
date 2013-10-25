@@ -98,7 +98,7 @@ describe("medea.core", function() {
 		expect(medea.Shader).not.toBeDefined();
 
 		runs(function() {
-			medea._RegisterMods(['node', 'mesh', 'shader'], function() {
+			medea.LoadModules(['node', 'mesh', 'shader'], function() {
 				ok = true;
 			});
 		});

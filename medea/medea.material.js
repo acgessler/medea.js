@@ -43,7 +43,7 @@ medealib.define('material',['pass'],function(undefined) {
 			}
 // #ifdef DEBUG
 			if (!this.passes) {
-				medea.DebugAssert("need at least one pass for a material to be complete");
+				medealib.DebugAssert("need at least one pass for a material to be complete");
 			}
 // #endif
 		},
@@ -58,7 +58,7 @@ medealib.define('material',['pass'],function(undefined) {
 			}
 			// #ifdef DEBUG
 			else if (n > this.passes.length) {
-				medea.DebugAssert('pass index out of range, cannot add pass if there is no pass that preceedes it: ' + n);
+				medealib.DebugAssert('pass index out of range, cannot add pass if there is no pass that preceedes it: ' + n);
 				return;
 			}
 			// #endif

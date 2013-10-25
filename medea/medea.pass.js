@@ -203,7 +203,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 
 // #ifdef DEBUG
 			if (!vs || !ps) {
-				medea.DebugAssert("need valid vertex and pixel shader");
+				medealib.DebugAssert("need valid vertex and pixel shader");
 			}
 // #endif
 
@@ -344,7 +344,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 			var pos = gl.getUniformLocation(this.program, k);
 			if (!pos) {
 				// #ifdef DEBUG
-				medea.DebugAssert("uniform variable location not found: " + k);
+				medealib.DebugAssert("uniform variable location not found: " + k);
 				// #endif
 				return;
 			}
@@ -427,7 +427,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 
 				default:
 					// #ifdef DEBUG
-					medea.DebugAssert('constant type not recognized, ignoring: ' + k);
+					medealib.DebugAssert('constant type not recognized, ignoring: ' + k);
 					// #endif
 			}
 
@@ -443,7 +443,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 						val_eval = eval(val);
 					} catch (e) {
 						// #ifdef DEBUG
-						medea.DebugAssert('eval()ing constant failed: ' + e + ' name: ' + k + ', type: ' + type);
+						medealib.DebugAssert('eval()ing constant failed: ' + e + ' name: ' + k + ', type: ' + type);
 						// #endif
 					}
 
@@ -463,7 +463,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 			// the server.
 			var prog = this.program;
 			// #ifdef DEBUG
-			medea.DebugAssert(prog, 'program must exist already');
+			medealib.DebugAssert(prog, 'program must exist already');
 			// #endif
 
 			this.auto_setters[k] = [pos,function(pos, state) {
@@ -478,7 +478,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 				}
 
 				// #ifdef DEBUG
-				medea.DebugAssert(curval.IsRenderable(), 
+				medealib.DebugAssert(curval.IsRenderable(), 
 					'invariant, texture must be renderable');
 				// #endif
 
@@ -504,7 +504,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 						// since the texture is already set.
 						var res = curval._Bind(i);
 						// #ifdef DEBUG
-						medea.DebugAssert(res !== null, 
+						medealib.DebugAssert(res !== null, 
 							'invariant, bind should not fail (2)');
 						// #endif
 
@@ -520,7 +520,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 				slots[oldesti] = [state.texage++,curgl];
 				var res = curval._Bind(oldesti);
 				// #ifdef DEBUG
-				medea.DebugAssert(res !== null, 
+				medealib.DebugAssert(res !== null, 
 					'invariant, bind should not fail (1)');
 				// #endif
 
@@ -530,7 +530,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 
 			if (typeof val === 'string') {
 				// #ifdef DEBUG
-				medea.LogDebug('create texture for shader uniform with string value: ' + k + ', ' + val);
+				medealib.LogDebug('create texture for shader uniform with string value: ' + k + ', ' + val);
 				// #endif
 				medea.FetchMods(['texture'], function() {
 					// see note above for why this.constants[k] is not changed
@@ -540,7 +540,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 			}
 			else if (typeof val === 'object' && val.low) {
 				// #ifdef DEBUG
-				medea.LogDebug('create lod texture for shader uniform with string value: ' + k + ', ' + val);
+				medealib.LogDebug('create lod texture for shader uniform with string value: ' + k + ', ' + val);
 				// #endif
 				medea.FetchMods(['lodtexture'], function() {
 					// see note above for why this.constants[k] is not changed
@@ -658,19 +658,19 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 
 				gl.linkProgram(p);
 				if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
-					medea.NotifyFatal("failure linking program, error log: " + gl.getProgramInfoLog(p));
+					medealib.NotifyFatal("failure linking program, error log: " + gl.getProgramInfoLog(p));
 					return;
 				}
 
 				// #ifdef DEBUG
 				gl.validateProgram(p);
 				if (!gl.getProgramParameter(p, gl.VALIDATE_STATUS)) {
-					medea.NotifyFatal("failure validating program, error log: " + gl.getProgramInfoLog(p));
+					medealib.NotifyFatal("failure validating program, error log: " + gl.getProgramInfoLog(p));
 					return;
 				}
 
 				// #ifdef DEBUG
-				medea.LogDebug('successfully linked program #' +p);
+				medealib.LogDebug('successfully linked program #' +p);
 				// #endif
 			}
 			else {
@@ -721,7 +721,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 
 				// #ifdef DEBUG
 				if(a['POSITION'] === undefined) {
-					medea.LogDebug('failed to derive automatic attribute mapping table, '
+					medealib.LogDebug('failed to derive automatic attribute mapping table, '
 						+'at least there is no POSITION input defined.');
 				}
 				// #endif
@@ -778,13 +778,13 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 			var typename = rex.exec(vs) || rex.exec(ps);
 			if(typename === null) {
 				// should not happen
-				medea.DebugAssert('could not find type declaration for uniform: ' + name);
+				medealib.DebugAssert('could not find type declaration for uniform: ' + name);
 			}
 
 			typename = typename[1];
 
 			// #ifdef DEBUG
-			medea.DebugAssert(!!typename,"failed to determine data type of shader uniform " + name);
+			medealib.DebugAssert(!!typename,"failed to determine data type of shader uniform " + name);
 			// #endif
 
 			return glsl_typemap[typename];

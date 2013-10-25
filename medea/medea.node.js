@@ -86,7 +86,7 @@ medealib.define('node',['frustum'],function(undefined) {
 
 		AddEntity: function(ent) {
 			// #ifdef DEBUG
-			medea.DebugAssert(ent instanceof medea.Entity,'need valid entity to attach');
+			medealib.DebugAssert(ent instanceof medea.Entity,'need valid entity to attach');
 			// #endif
 
 			this.entities.push(ent);
@@ -161,7 +161,7 @@ medealib.define('node',['frustum'],function(undefined) {
 
 		AddChild: function(child) {
 			// #ifdef DEBUG
-			medea.DebugAssert(child !== this,'cannot attach a node to itself');
+			medealib.DebugAssert(child !== this,'cannot attach a node to itself');
 			// #endif
 
 			if(typeof child !== 'object' || !( child instanceof medea.Node )) {
@@ -183,7 +183,7 @@ medealib.define('node',['frustum'],function(undefined) {
 			var idx = this.children.indexOf(child);
 			if(idx !== -1) {
 				// #ifdef DEBUG
-				medea.DebugAssert(child.parent === this,'inconsistent value for child.parent');
+				medealib.DebugAssert(child.parent === this,'inconsistent value for child.parent');
 				// #endif
 
 				this._SetBBDirty();
@@ -196,7 +196,7 @@ medealib.define('node',['frustum'],function(undefined) {
 
 		OnAttach : function(parent) {
 			// #ifdef DEBUG
-			medea.DebugAssert(parent !== this,'cannot attach node to itself');
+			medealib.DebugAssert(parent !== this,'cannot attach node to itself');
 			// #endif
 
 			this.parent = parent;
@@ -269,7 +269,7 @@ medealib.define('node',['frustum'],function(undefined) {
 
 		Rotate: function(angle,axis) {
 			// #ifdef DEBUG
-			medea.DebugAssert(!(this.flags & medea.NODE_FLAG_NO_ROTATION),'node cannot be rotated');
+			medealib.DebugAssert(!(this.flags & medea.NODE_FLAG_NO_ROTATION),'node cannot be rotated');
 			// #endif
 
 			mat4.rotate(this.lmatrix,angle,axis);
@@ -279,7 +279,7 @@ medealib.define('node',['frustum'],function(undefined) {
 
 		Scale: function(s) {
 			// #ifdef DEBUG
-			medea.DebugAssert(!(this.flags & medea.NODE_FLAG_NO_SCALING),'node cannot be scaled');
+			medealib.DebugAssert(!(this.flags & medea.NODE_FLAG_NO_SCALING),'node cannot be scaled');
 			// #endif
 
 			mat4.scale(this.lmatrix, typeof s === 'number' ? [s,s,s] : s);
@@ -289,7 +289,7 @@ medealib.define('node',['frustum'],function(undefined) {
 
 		ScaleToFit : function(s) {
 			var bb = this.GetBB(), m = Math.max, e;
-			medea.DebugAssert(bb.length === 2, 'must be AABB');
+			medealib.DebugAssert(bb.length === 2, 'must be AABB');
 			e = m(-bb[0][0],bb[1][0]);
 			e = m(e,m(-bb[0][1],bb[1][1]));
 			e = m(e,m(-bb[0][2],bb[1][2]));
@@ -300,7 +300,7 @@ medealib.define('node',['frustum'],function(undefined) {
 
 		Center : function(s) {
 			var bb = this.GetBB();
-			medea.DebugAssert(bb.length === 2, 'must be AABB');
+			medealib.DebugAssert(bb.length === 2, 'must be AABB');
 			var x = bb[1][0] - bb[0][0];
 			var y = bb[1][1] - bb[0][1];
 			var z = bb[1][2] - bb[0][2];
@@ -382,7 +382,7 @@ medealib.define('node',['frustum'],function(undefined) {
 		AddListener : function(what,l, key) {
 			// #ifdef DEBUG
 			if(!(what in this.listeners)) {
-				medea.DebugAssert('listener not recognized ' + what);
+				medealib.DebugAssert('listener not recognized ' + what);
 			}
 			// #endif
 			this.listeners[what][key] = l;
@@ -463,7 +463,7 @@ medealib.define('node',['frustum'],function(undefined) {
 			this.bb = medea.MergeBBs(bbs);
 
 			// #ifdef DEBUG
-			medea.DebugAssert(!!this.bb,"bounding box computation failed, but it shouldn't have");
+			medealib.DebugAssert(!!this.bb,"bounding box computation failed, but it shouldn't have");
 			// #endif
 
 			this._FireListener("OnUpdateBB");
