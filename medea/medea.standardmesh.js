@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('standardmesh',['mesh'],function(undefined) {
+medealib.define('standardmesh',['mesh'],function(undefined) {
 	"use strict";
 	var medea = this;
 

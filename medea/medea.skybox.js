@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('skybox',['material','standardmesh','cubetexture'],function(undefined) {
+medealib.define('skybox',['material','standardmesh','cubetexture'],function(undefined) {
 	"use strict";
 	var medea = this;
 

@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('node',['frustum'],function(undefined) {
+medealib.define('node',['frustum'],function(undefined) {
 	"use strict";
 
 	var medea = this;

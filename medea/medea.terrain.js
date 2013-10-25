@@ -7,7 +7,7 @@
  */
 
  // note: json2.js may be needed for contemporary browsers with incomplete HTML5 support
-medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(undefined) {
+medealib.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(undefined) {
 	"use strict";
 	var medea = this;
 

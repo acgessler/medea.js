@@ -151,7 +151,6 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 				print('embedding: ' + v + ' as ' + k)
 				outp.write(include_resource(k,v))
 
-		outp.write('medea._initLibrary();');
 		outp.write('delete window.medea_is_compiled;');
 
 	topo_order = [get_full_file_name(e) for e in topo_order]

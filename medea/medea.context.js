@@ -7,7 +7,7 @@
  */
 
 
-// note: this file is compiletime-included by medea.core.js and not used as a module.
+// note: medeactx file is compiletime-included by medea.core.js and not used as a module.
 // the Context API is always available.
 
 
@@ -21,27 +21,24 @@
  *
  **/
  // ---------------------------------------------------------------------------
-var Context = this.Context = function(where, settings, deps, user_on_ready, user_on_failure) {
-	var medea = this;
+var Context = medea.Context = function(where, settings, deps, user_on_ready, user_on_failure) {
+	var medeactx = this;
 
-	if(!(this instanceof Context)) {
+	if(!(medeactx instanceof Context)) {
 		return new Context(where, settings, deps, user_on_ready, user_on_failure);
 	}
 
 	// TODO: restructure constants
 	// constants
-	this.FRAME_VIEWPORT_UPDATED = 0x1;
-	this.FRAME_CANVAS_SIZE_CHANGED = this.FRAME_VIEWPORT_UPDATED | 0x2;
+	medeactx.FRAME_VIEWPORT_UPDATED = 0x1;
+	medeactx.FRAME_CANVAS_SIZE_CHANGED = medeactx.FRAME_VIEWPORT_UPDATED | 0x2;
 
-	this.VISIBLE_NONE = 0x0;
-	this.VISIBLE_ALL = 0x1;
-	this.VISIBLE_PARTIAL = 0x2;
+	medeactx.VISIBLE_NONE = 0x0;
+	medeactx.VISIBLE_ALL = 0x1;
+	medeactx.VISIBLE_PARTIAL = 0x2;
 
-	var scripts = document.getElementsByTagName('script');
-	this.root_url = scripts[scripts.length-1].src.replace(/^(.*[\\\/])?(.*)/,'$1');
-
-	this.statepool = {};
-	this._workers = {};
+	medeactx.statepool = {};
+	medeactx._workers = {};
 
 	// collect initial dependencies - for example the scenegraph module and the mathlib is always needed
 	var _initial_deps = ['node','viewport'];
@@ -53,12 +50,11 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 
 	var _callback = undefined, _callback_pre = undefined, readyness = 0;
 
-
 	// ---------------------------------------------------------------------------
 	/** TODO: documentation 
 	*/
 	// ---------------------------------------------------------------------------
-	this._initMod = function(name) {
+	medeactx._initMod = function(name) {
 		var s = _stubs[name];
 		if(!s) {
 			return;
@@ -68,7 +64,7 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 		medea.LogDebug("initmod: " + name);
 		// #endif
 
-		s.apply(this);
+		s.apply(medeactx);
 		_stubs[name] = null;
 	};
 
@@ -78,8 +74,8 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.GetSettings = function() {
-		return this.settings;
+	medeactx.GetSettings = function() {
+		return medeactx.settings;
 	};
 
 
@@ -87,11 +83,11 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.RootNode = function(s) {
+	medeactx.RootNode = function(s) {
 		if(s === undefined) {
-			return this.scene_root;
+			return medeactx.scene_root;
 		}
-		this.scene_root = s;
+		medeactx.scene_root = s;
 	};
 
 
@@ -99,8 +95,8 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.GetStatistics = function() {
-		return this.statistics;
+	medeactx.GetStatistics = function() {
+		return medeactx.statistics;
 	};
 
 
@@ -108,8 +104,8 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.SetTickCallback = function(clb,key) {
-		this.tick_callbacks[key] = clb;
+	medeactx.SetTickCallback = function(clb,key) {
+		medeactx.tick_callbacks[key] = clb;
 	};
 
 
@@ -117,9 +113,9 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.RemoveTickCallback = function(key) {
+	medeactx.RemoveTickCallback = function(key) {
 		try {
-			delete this.tick_callbacks[key];
+			delete medeactx.tick_callbacks[key];
 		} catch(e) {}
 	};
 
@@ -128,7 +124,7 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.EnsureIsResponsive = (function() {
+	medeactx.EnsureIsResponsive = (function() {
 		var should_be_responsive = false;
 		return function(enabled) {
 			if (enabled === undefined) {
@@ -143,9 +139,9 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.SetDebugPanel = function(where) {
-		this._Require("debug");
-		this.debug_panel = new this.DebugPanel(where);
+	medeactx.SetDebugPanel = function(where) {
+		medeactx._Require("debug");
+		medeactx.debug_panel = new medeactx.DebugPanel(where);
 	};
 
 
@@ -153,20 +149,20 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.Start = function() {
-		if (!this.stop_asap) {
+	medeactx.Start = function() {
+		if (!medeactx.stop_asap) {
 			window.requestAnimationFrame(function() { 
 				medea.Start(); 
-			}, this.canvas);
+			}, medeactx.canvas);
 
-			if (this.debug_panel) {
+			if (medeactx.debug_panel) {
 				//setTimeout(function(){medea.debug_panel.Update();},1000);
 			}
 		}
 
 		// commented due to Chrome swallowing the stacktrace
 	//	try {
-			this.DoSingleFrame();
+			medeactx.DoSingleFrame();
 	//	}
 	//	catch(a) {
 	//		// resume if an assertion occured during frame processing, greater good stems from the
@@ -182,8 +178,8 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.StopNextFrame = function(unset_marker) {
-		this.stop_asap = !unset_marker;
+	medeactx.StopNextFrame = function(unset_marker) {
+		medeactx.stop_asap = !unset_marker;
 	};
 
 
@@ -191,8 +187,8 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.IsStopMarkerSet = function() {
-		return this.stop_asap;
+	medeactx.IsStopMarkerSet = function() {
+		return medeactx.stop_asap;
 	};
 
 
@@ -200,8 +196,8 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.CanRender = function() {
-		return this.gl && this.GetViewports().length;
+	medeactx.CanRender = function() {
+		return medeactx.gl && medeactx.GetViewports().length;
 	};
 
 
@@ -209,12 +205,12 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.Wireframe = function(wf) {
+	medeactx.Wireframe = function(wf) {
 		if (wf === undefined) {
-			return this.wireframe;
+			return medeactx.wireframe;
 		}
-		this.wireframe = wf;
-		// this would be nice: this.gl.polygonMode( this.gl.FRONT_AND_BACK, wf?this.gl.LINE:this.gl.FILL );
+		medeactx.wireframe = wf;
+		// medeactx would be nice: medeactx.gl.polygonMode( medeactx.gl.FRONT_AND_BACK, wf?medeactx.gl.LINE:medeactx.gl.FILL );
 		// .. but unfortunately we don't have glPolygonMode in WebGL. So leave the
 		// implementation to the mesh drawing routines, which might use GL_LINES
 		// to achieve the same effect.
@@ -226,8 +222,8 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.GetTime = function() {
-		return this.time;
+	medeactx.GetTime = function() {
+		return medeactx.time;
 	};
 
 
@@ -235,10 +231,10 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.DoSingleFrame = function(dtime) {
-		var debug_panel = this.debug_panel;
-		if (!this.CanRender()) {
-			this.NotifyFatal("Not ready for rendering; need a GL context and a viewport");
+	medeactx.DoSingleFrame = function(dtime) {
+		var debug_panel = medeactx.debug_panel;
+		if (!medeactx.CanRender()) {
+			medeactx.NotifyFatal("Not ready for rendering; need a GL context and a viewport");
 			return;
 		}
 
@@ -248,46 +244,46 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 
 		// get time delta if not specified
 		if (!dtime) {
-			var old = this.time || 0;
-			this.time = Date.now() * 0.001;
+			var old = medeactx.time || 0;
+			medeactx.time = Date.now() * 0.001;
 
-			dtime = this.time - old;
+			dtime = medeactx.time - old;
 		}
 
 		// check if the canvas sized changed
-		if(this.cached_cw != this.canvas.width) {
-			this.cached_cw = this.canvas.width;
-			this.frame_flags |= this.FRAME_CANVAS_SIZE_CHANGED;
+		if(medeactx.cached_cw != medeactx.canvas.width) {
+			medeactx.cached_cw = medeactx.canvas.width;
+			medeactx.frame_flags |= medeactx.FRAME_CANVAS_SIZE_CHANGED;
 		}
-		if(this.cached_ch != this.canvas.height) {
-			this.cached_ch = this.canvas.height;
-			this.frame_flags |= this.FRAME_CANVAS_SIZE_CHANGED;
+		if(medeactx.cached_ch != medeactx.canvas.height) {
+			medeactx.cached_ch = medeactx.canvas.height;
+			medeactx.frame_flags |= medeactx.FRAME_CANVAS_SIZE_CHANGED;
 		}
 
-		this._UpdateFrameStatistics(dtime);
+		medeactx._UpdateFrameStatistics(dtime);
 
 		// call user-defined logic, operate on a copy of the dictionary just in case
 		// somebody changed its contents while we're iterating it.
 		var temp_callbacks = [];
-		for(var k in this.tick_callbacks) {
-			temp_callbacks.push(this.tick_callbacks[k]);
+		for(var k in medeactx.tick_callbacks) {
+			temp_callbacks.push(medeactx.tick_callbacks[k]);
 		}
 		for(var i = 0; i < temp_callbacks.length; ++i) {
 			if(!temp_callbacks[i](dtime)) {
-				this.StopNextFrame();
+				medeactx.StopNextFrame();
 				return;
 			}
 		}
 
 		// perform update
-		this.VisitGraph(this.scene_root,function(node) {
+		medeactx.VisitGraph(medeactx.scene_root,function(node) {
 			if(!node.Enabled()) {
 				return true;
 			}
 			var e = node.GetEntities();
-			// if entities return medea.ENTITY_UPDATE_WAS_REMOVED  from Update(), this means they removed
+			// if entities return medea.ENTITY_UPDATE_WAS_REMOVED  from Update(), medeactx means they removed
 			for(var i = 0; i < e.length; ++i) {
-				if(e[i].Update(dtime,node) === medea.ENTITY_UPDATE_WAS_REMOVED) {
+				if(e[i].Update(dtime,node) === medeactx.ENTITY_UPDATE_WAS_REMOVED) {
 					--i;
 				}
 			}
@@ -297,26 +293,26 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 		});
 
 		// adjust render settings if we switched to multiple viewports or vice versa
-		if (this.frame_flags & medea.FRAME_VIEWPORT_UPDATED) {
+		if (medeactx.frame_flags & medea.FRAME_VIEWPORT_UPDATED) {
 			if (medea.GetEnabledViewportCount()>1) {
-				this.gl.enable(this.gl.SCISSOR_TEST);
+				medeactx.gl.enable(medeactx.gl.SCISSOR_TEST);
 			}
 			else {
-				this.gl.disable(this.gl.SCISSOR_TEST);
+				medeactx.gl.disable(medeactx.gl.SCISSOR_TEST);
 			}
 		}
 
 		// perform rendering
-		var viewports = this.GetViewports();
+		var viewports = medeactx.GetViewports();
 		for(var vn = 0; vn < viewports.length; ++vn) {
-			viewports[vn].Render(this,dtime);
+			viewports[vn].Render(medeactx,dtime);
 		}
 
 		if (debug_panel) {
 			debug_panel.EndFrame();
 		}
 
-		this.frame_flags = 0;
+		medeactx.frame_flags = 0;
 	};
 
 
@@ -324,7 +320,7 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.VisitGraph = function(node,visitor,status_in) {
+	medeactx.VisitGraph = function(node,visitor,status_in) {
 		var status = visitor(node,status_in);
 		if (!status) {
 			return false;
@@ -332,7 +328,7 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 
 		var c = node.GetChildren();
 		for(var i = 0; i < c.length; ++i) {
-			this.VisitGraph(c[i],visitor,status);
+			medeactx.VisitGraph(c[i],visitor,status);
 		}
 
 		return true;
@@ -343,7 +339,7 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.CreateWorker = function() {
+	medeactx.CreateWorker = function() {
 		var worker_index_source = 0;
 		return function(name, callback) {
 			var Blob =  window.Blob
@@ -411,65 +407,90 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 	};
 
 
-	this._UpdateFrameStatistics = function(dtime) {
-		this.statistics.count_frames += 1;
-		var e = this.statistics.exact_fps = 1/dtime;
+	// ------------------------------------------------------------------------
+	/** TODO: documentation 
+	*/
+	// ------------------------------------------------------------------------
+	medeactx._UpdateFrameStatistics = function(dtime) {
+		medeactx.statistics.count_frames += 1;
+		var e = medeactx.statistics.exact_fps = 1/dtime;
 
-		this.dtmin_fps = Math.min(this.dtmin_fps,e);
-		this.dtmax_fps = Math.max(this.dtmin_fps,e);
+		medeactx.dtmin_fps = Math.min(medeactx.dtmin_fps,e);
+		medeactx.dtmax_fps = Math.max(medeactx.dtmin_fps,e);
 
-		this.dtacc += dtime;
-		++this.dtcnt;
+		medeactx.dtacc += dtime;
+		++medeactx.dtcnt;
 
-		if (this.dtacc > 0.5) {
-			if ( this.statistics.smoothed_fps > 0) {
-				this.statistics.smoothed_fps = this.statistics.smoothed_fps*0.3+ 0.7/(this.dtacc/this.dtcnt);
+		if (medeactx.dtacc > 0.5) {
+			if ( medeactx.statistics.smoothed_fps > 0) {
+				medeactx.statistics.smoothed_fps = medeactx.statistics.smoothed_fps*0.3+ 0.7/(medeactx.dtacc/medeactx.dtcnt);
 			}
 			else {
-				this.statistics.smoothed_fps = this.dtcnt/this.dtacc;
+				medeactx.statistics.smoothed_fps = medeactx.dtcnt/medeactx.dtacc;
 			}
 
-			this.dtcnt *= 0.33;
-			this.dtacc *= 0.33;
+			medeactx.dtcnt *= 0.33;
+			medeactx.dtacc *= 0.33;
 
-			this.statistics.min_fps = this.dtmin_fps;
-			this.statistics.max_fps = this.dtmax_fps;
+			medeactx.statistics.min_fps = medeactx.dtmin_fps;
+			medeactx.statistics.max_fps = medeactx.dtmax_fps;
 		}
 
-		this.statistics.vertices_frame = this.statistics.primitives_frame = this.statistics.batches_frame = 0;
+		medeactx.statistics.vertices_frame = medeactx.statistics.primitives_frame = medeactx.statistics.batches_frame = 0;
 	};
 
-	this._GetSet = function(what) {
+
+	// ------------------------------------------------------------------------
+	/** TODO: documentation 
+	*/
+	// ------------------------------------------------------------------------
+	medeactx._GetSet = function(what) {
 		return function(f) {
 			if (f === undefined) {
-				return this[what];
+				return medeactx[what];
 			}
-			this[what] = f;
+			medeactx[what] = f;
 		};
 	};
 
 
-	this._NextPow2 = function( s ){
+	// ------------------------------------------------------------------------
+	/** TODO: documentation 
+	*/
+	// ------------------------------------------------------------------------
+	medeactx._NextPow2 = function( s ){
 		// dumb way, might use the bit fiddling hack some day?
 		return Math.pow( 2, Math.ceil( Math.log( s ) / Math.log( 2 ) ) );
 	};
 
-	this._IsPow2 = function(w) {
+
+	// ------------------------------------------------------------------------
+	/** TODO: documentation 
+	*/
+	// ------------------------------------------------------------------------
+	medeactx._IsPow2 = function(w) {
 		return w !== 0 && (w & (w - 1)) === 0;
 	};
 
-	this._GetPath = function(src) {
+
+	// ------------------------------------------------------------------------
+	/** TODO: documentation 
+	*/
+	// ------------------------------------------------------------------------
+	medeactx._GetPath = function(src) {
 		return src.replace(/^(.*[\\\/])?(.*)/,'$1');
 	}
 
 
+
+	// ------------------------------------------------------------------------
 	// for internal use by build.py only
-	this._initLibrary = function() {
+	medeactx._initLibrary = function() {
 
 		// Initialization has two phases, the first of which is used to load utility libraries
-		// that all medea modules may depend upon. This also involves creating a webgl canvas
+		// that all medea modules may depend upon. medeactx also involves creating a webgl canvas
 		// (which is accessible through the medea.gl namespace)
-		this._FetchDeps(_initial_pre_deps, function() {
+		medealib._RegisterMods(_initial_pre_deps, function() {
 			if (_callback_pre) {
 				if(!_callback_pre.apply(medea)) {
 					return;
@@ -477,7 +498,7 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 			}
 
 			++readyness;
-			medea._FetchDeps(deps, function() {
+			medealib._RegisterMods(deps, function() {
 				++readyness;
 				if (_callback) {
 					_callback.apply(medea);
@@ -485,15 +506,17 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 			});
 		});
 
-		this._initLibrary = null;
+		medeactx._initLibrary = null;
 	};
 
+
+	// ------------------------------------------------------------------------
 	// first initialization phase -- create webgl canvas and prepare environment
 	_callback_pre = function() {
-		this.canvas  = document.getElementById(where);
+		medeactx.canvas  = document.getElementById(where);
 
 		// #if DEBUG
-		//this.Assert(this.canvas != null, "element with #id \"" + where + "\" not found");
+		//medeactx.Assert(medeactx.canvas != null, "element with #id \"" + where + "\" not found");
 		// #endif
 
 		// create a webgl
@@ -502,7 +525,7 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 		var context = null;
 		for (var i = 0; i < candidates.length; ++i) {
 			try {
-				context = this.canvas.getContext(candidates[i]);
+				context = medeactx.canvas.getContext(candidates[i]);
 
 			} catch(ex) {
 
@@ -516,11 +539,11 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 
 		if(!context) {
 			// #if LOG
-			this.Log('webgl initialization failed','error');
+			medeactx.Log('webgl initialization failed','error');
 			// #endif
 			_callback = undefined;
-			if(failure_callback) {
-				failure_callback();
+			if(user_on_failure) {
+				user_on_failure();
 			}
 			return false;
 		}
@@ -530,20 +553,22 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 			context = WebGLDebugUtils.makeDebugContext(context);
 		}
 
-		this.gl = context;
+		medeactx.gl = context;
 		return true;
 	};
 
+
+	// ------------------------------------------------------------------------
 	// second phase of initialization -- prepare the rest and invoke the Ready() callback
 	// to pass control to the user.
 	_callback = function() {
-		this.cached_cw = this.canvas.width, this.cached_ch = this.canvas.height;
+		medeactx.cached_cw = medeactx.canvas.width, medeactx.cached_ch = medeactx.canvas.height;
 
-		this.settings = settings || {};
-		this.settings.fps = this.settings.fps || 60;
-		this.wireframe = false;
+		medeactx.settings = settings || {};
+		medeactx.settings.fps = medeactx.settings.fps || 60;
+		medeactx.wireframe = false;
 
-		this.statistics = {
+		medeactx.statistics = {
 			  count_frames : 0
 			, smoothed_fps : -1
 			, exact_fps    : -1
@@ -554,26 +579,26 @@ var Context = this.Context = function(where, settings, deps, user_on_ready, user
 			, batches_frame : 0
 		};
 
-		this.dtacc = 0.0;
-		this.dtcnt = 0;
-		this.dtmin_fps = 1e6;
-		this.dtmax_fps = 0;
+		medeactx.dtacc = 0.0;
+		medeactx.dtcnt = 0;
+		medeactx.dtmin_fps = 1e6;
+		medeactx.dtmax_fps = 0;
 
 
-		this.tick_callbacks = {};
-		this.stop_asap = false;
+		medeactx.tick_callbacks = {};
+		medeactx.stop_asap = false;
 
-		this.frame_flags = 0;
-		this.debug_panel = null;
+		medeactx.frame_flags = 0;
+		medeactx.debug_panel = null;
 
 		// always allocate a default root node for the visual scene
-		this.scene_root = medea.CreateNode("root");
+		medeactx.scene_root = medea.CreateNode("root");
 
 		_callback = _initial_deps = undefined;
-		user_on_ready(this);
+		user_on_ready(medeactx);
 	};
 
 	if (window.medea_is_compiled === undefined) {
-		this._initLibrary();
+		medeactx._initLibrary();
 	}
 };

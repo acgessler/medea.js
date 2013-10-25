@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('camera',['statepool'],function() {
+medealib.define('camera',['statepool'],function() {
 	"use strict";
 	var medea = this;
 

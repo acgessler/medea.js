@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytexture'],function(undefined) {
+medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytexture'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

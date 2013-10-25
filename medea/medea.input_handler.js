@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('input_handler',['input'],function(undefined) {
+medealib.define('input_handler',['input'],function(undefined) {
 	"use strict";
 	var medea = this;
 

@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('visualizer_showbbs',[ 'visualizer','material','frustum'],function() {
+medealib.define('visualizer_showbbs',[ 'visualizer','material','frustum'],function() {
 	"use strict";
 	var medea = this;
 	var ordinal = 10;

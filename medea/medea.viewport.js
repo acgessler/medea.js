@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('viewport',['camera','renderqueue','statepool'],function(undefined) {
+medealib.define('viewport',['camera','renderqueue','statepool'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

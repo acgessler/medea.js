@@ -1,14 +1,15 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
+/* medealib - an Open Source, WebGL-based 3d engine for next-generation browser games.
  * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
  *
- * medea is (c) 2011, Alexander C. Gessler
+ * medealib is (c) 2011, Alexander C. Gessler
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
 
-var medea = (function() {
-	var medea = this
+/** {{medealib}} */
+var medealib = (function() {
+	var medealib = this
 	, _waiters = {}
 	, _deps = {}
 	, _stubs = {}
@@ -24,22 +25,24 @@ var medea = (function() {
 
 	// #include "snippets/request_anim_frame_shim.js"
 
-	// #include "snippets/global_eval.js"
+	// #include "snippets/global_eval_shim.js"
 
 
-	this.AssertionError = function(what) {this.what = what;};
-	this.FatalError = function(what) {this.what = what;};
+	medealib.AssertionError = function(what) {medealib.what = what;};
+	medealib.FatalError = function(what) {medealib.what = what;};
 
 
 	// ---------------------------------------------------------------------------
-	/** TODO: documentation 
+	/** {{medealib.NotifyFatal}}
+	 *
+	 * @param {String} what
 	*/
 	// ---------------------------------------------------------------------------
-	this.NotifyFatal = function(what) {
-		what = "Medea: " + what;
-		medea.LogDebug(what);
+	medealib.NotifyFatal = function(what) {
+		what = "medealib: " + what;
+		medealib.LogDebug(what);
 		alert(what);
-		throw new medea.FatalError(what);
+		throw new medealib.FatalError(what);
 	};
 
 
@@ -48,20 +51,20 @@ var medea = (function() {
 	*/
 	// ---------------------------------------------------------------------------
 // #ifndef DEBUG
-	this.DebugAssert = function(what) {
+	medealib.DebugAssert = function(what) {
 	};
 // #else
-	this.DebugAssert = function(cond,what) {
+	medealib.DebugAssert = function(cond,what) {
 		if (what === undefined) {
 			what = cond;
 			cond = false;
 		}
 
 		if (!cond) {
-			what = "Medea DEBUG ASSERTION: " + what;
+			what = "medealib DEBUG ASSERTION: " + what;
 			console.error(what);
 			alert(what);
-			throw new medea.AssertionError(what);
+			throw new medealib.AssertionError(what);
 		}
 	};
 // #endif
@@ -72,9 +75,9 @@ var medea = (function() {
 	*/
 	// ---------------------------------------------------------------------------
 // #ifndef LOG
-	this.Log = this.LogDebug = function() {};
+	medealib.Log = medealib.LogDebug = function() {};
 // #else
-	this.Log = function(message, kind) {
+	medealib.Log = function(message, kind) {
 		console.log((kind||'info')+': ' + message);
 	};
 // #endif
@@ -84,9 +87,9 @@ var medea = (function() {
 	*/
 	// ---------------------------------------------------------------------------
 // #ifndef DEBUG
-	this.LogDebug = function() {};
+	medealib.LogDebug = function() {};
 // #else
-	this.LogDebug = function(message) {
+	medealib.LogDebug = function(message) {
 		console.log('debug: ' + message);
 	};
 // #endif
@@ -98,12 +101,12 @@ var medea = (function() {
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	this.Merge = function(inp,template,out_opt) {
+	medealib.Merge = function(inp,template,out_opt) {
 		var out = out_opt || {};
 		for(var k in inp) {
 			var v = inp[v];
 			if (typeof v === 'object') {
-				out[k] = this.Merge(v,template[k] || {});
+				out[k] = medealib.Merge(v,template[k] || {});
 			}
 			else {
 				out[k] = v;
@@ -116,7 +119,7 @@ var medea = (function() {
 
 			var v = template[k];
 			if (typeof v === 'object') {
-				out[k] = this.Merge(template[k],{});
+				out[k] = medealib.Merge(template[k],{});
 			}
 			else {
 				out[k] = v;
@@ -128,15 +131,15 @@ var medea = (function() {
 
 
 	// ---------------------------------------------------------------------------
-	/** Register a medea module. 
+	/** Register a medealib module. 
 	 *
-	 *  Medea modules are registered/defined globally, but they need to be bound
+	 *  medealib modules are registered/defined globally, but they need to be bound
 	 *  to a context using @see
 	*/
 	// ---------------------------------------------------------------------------
-	this.define = function(name, deps, init) {
-		if(_modules[name] !== undefined) {
-			medea.DebugAssert('module already present: ' + name);
+	medealib.define = function(name, deps, init) {
+		if(_stubs[name] !== undefined) {
+			medealib.DebugAssert('module already present: ' + name);
 			return;
 		}
 
@@ -163,13 +166,13 @@ var medea = (function() {
 				}
 			}
 		}
-		medea.LogDebug("addmod: " + name + s);
+		medealib.LogDebug("addmod: " + name + s);
 	// #endif
 
 		// fetch dependencies
-		medea._FetchDeps(deps,function() {
+		medealib._RegisterMods(deps,function() {
 			// #ifdef LOG
-			medea.LogDebug('modready: ' + name);
+			medealib.LogDebug('modready: ' + name);
 			// #endif
 
 			var w = _waiters[name];
@@ -191,35 +194,35 @@ var medea = (function() {
 	/** Get the source code for a given module.
 	 *
 	 *  @param {String} name Module name, i.e. "viewport" or "someMod.js". See
-	 *     {medea._FetchMods()} for more information on package references.
+	 *     {medealib._FetchMods()} for more information on package references.
 	 *  @return {String} undefined iff the module is not loaded yet
 	*/
 	// ---------------------------------------------------------------------------
-	this.GetModSource = function(name) {
+	medealib.GetModSource = function(name) {
 		return _sources[n];
 	},
 
 
 	// ---------------------------------------------------------------------------
 	/** Fetch a set of modules, run them and invoke a callback once they are
-	 *  loaded. For loading medea extension modules, this only registers the 
+	 *  loaded. For loading medealib extension modules, medealib only registers the 
 	 *  modules. To actually call their APIs, apply them to a 
-	 *  @see {medea.Context} using @see {medea.Context.Fetch()}.
+	 *  @see {medealib.Context} using @see {medealib.Context.Fetch()}.
 	 *
 	 *  @param {String} String or list of strings containing the names of the
 	 *    modules to be fetched. There are two kinds of modules:
-	 *     a) medea modules, which are referred to with their name suffixes and
+	 *     a) medealib modules, which are referred to with their name suffixes and
 	 *        without the file extension and -
-	 *     b) JS files from /medea/3rdparty, which are referred to by their file 
+	 *     b) JS files from /medealib/3rdparty, which are referred to by their file 
 	 *        name, including their file extension, i.e. "someMod.js". 
 	 *
 	 *  @param {Function} Callback to be invoked once all the modules have 
-	 *    been registered. This may happen immediately in case they are all available.
+	 *    been registered. medealib may happen immediately in case they are all available.
 	 *
 	 *  @private
 	 */
 	// ---------------------------------------------------------------------------
-	this._FetchMods = function(whom, callback) {
+	medealib._RegisterMods = function(whom, callback) {
 		callback = callback || function() {};
 		var whom = whom instanceof Array ? whom : [whom];
 		var cnt = 0, nodelay = true;
@@ -245,7 +248,7 @@ var medea = (function() {
 			// see if the file has already been loaded, in which case `init` should 
 			// be either null or a function.
 			if (init === undefined) {
-				var is_medea_mod = !/\.js$/i.test(whom[i]);
+				var is_medealib_mod = !/\.js$/i.test(whom[i]);
 
 				++cnt;
 				nodelay = false;
@@ -262,24 +265,21 @@ var medea = (function() {
 					continue;
 				}
 
-				(function(n,is_medea_mod) {
-				medea._AjaxFetch(medea.root_url+(is_medea_mod ? 'medea.' +n + '.js' : '3rdparty/' + n), function(text,status) {
+				(function(n,is_medealib_mod) {
+				medealib._AjaxFetch(medealib.root_url+(is_medealib_mod ? 'medea.' +n + '.js' : '3rdparty/' + n), function(text,status) {
 					if(status !== 200) {
-						medea.DebugAssert('failure loading script ' + n);
+						medealib.DebugAssert('failure loading script ' + n);
 						return;
 					}
 
 					// #ifdef LOG
-					medea.LogDebug("run: " + n);
+					medealib.LogDebug("run: " + n);
 					// #endif LOG
 
 					_sources[n] = text;
 
 					// TODO: which way of evaluating scripts is best for debugging
-					var prev_medea = window.medea;
-					window.medea = medea;
 					globalEval(text);
-					window.medea = prev_medea;
 
 					/*
 					var sc = document.createElement( 'script' );
@@ -291,9 +291,9 @@ var medea = (function() {
 					document.getElementsByTagName('head')[0].appendChild(sc);
 					*/
 
-					// non medea modules won't call define, so we need to mimic parts of its behaviour
+					// non medealib modules won't call define, so we need to mimic parts of its behaviour
 					// to satisfy all listeners and to keep the file from being loaded twice.
-					if(!is_medea_mod) {
+					if(!is_medealib_mod) {
 						var w = _waiters[n];
 						delete _waiters[n];
 
@@ -304,7 +304,7 @@ var medea = (function() {
 					}
 
 				});
-				}(n,is_medea_mod));
+				}(n,is_medealib_mod));
 			}
 		}
 
@@ -318,21 +318,21 @@ var medea = (function() {
 	/** TODO: documentation 
 	*/
 	// ---------------------------------------------------------------------------
-	this._Require = function(whom,callback) {
+	medealib._Require = function(whom,callback) {
 		var whom = whom instanceof Array ? whom : [whom];
 		var cnt = 0;
 
 		for(var i = 0; i < whom.length; ++i) {
 			var init = _stubs[whom[i]];
 			if (init === undefined) {
-				medea.DebugAssert('init stub missing for file ' + whom[i] + ', maybe not loaded yet?');
+				medealib.DebugAssert('init stub missing for file ' + whom[i] + ', maybe not loaded yet?');
 				continue;
 			}
 			if (!init) {
 				continue;
 			}
 
-			medea._initMod(whom[i]);
+			medealib._initMod(whom[i]);
 		}
 	};
 
@@ -341,7 +341,7 @@ var medea = (function() {
 	/** TODO: documentation 
 	*/
 	// ---------------------------------------------------------------------------
-	this._AjaxFetch = function(url, callback, no_client_cache) {
+	medealib._AjaxFetch = function(url, callback, no_client_cache) {
 		// #ifdef DEBUG
 		if (no_client_cache === undefined) {
 			no_client_cache = true;
@@ -369,6 +369,10 @@ var medea = (function() {
 
 	// global initialization code
 	(function() {
+
+		var scripts = document.getElementsByTagName('script');
+		medealib.root_url = scripts[scripts.length-1].src.replace(/^(.*[\\\/])?(.*)/,'$1');
+
 		// check if we need the JSON polyfill
 		if(typeof JSON !== undefined) {
 			_stubs['json2.js'] = function() {};
@@ -378,5 +382,5 @@ var medea = (function() {
 
 	// #include "medea.context.js"
 
-	return this;
+	return medealib;
 })();

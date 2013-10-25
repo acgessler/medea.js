@@ -12,14 +12,14 @@ describe("medea.core", function() {
 	function ensureContextInit() {
 		waitsFor(function() {
 			return ok;
-		}, 'çontext should have been created' ,DEFAULT_TIMEOUT);
+		}, 'context should have been created' ,DEFAULT_TIMEOUT);
 	}
 
 
 	beforeEach(function() {
 		ok = false;
-    	dom_element = .. TODO
-    	medea = new MedeaContext(dom_element, {}, function() {
+    	dom_element = 'canvas';
+    	medea = new medealib.Context(dom_element, {}, function() {
 			ok = true;
 		},
 		function() {
@@ -28,7 +28,7 @@ describe("medea.core", function() {
 	});	
 
 	afterEach(function() {
-		medea.Dispose();
+		//medea.Dispose();
 		medea = null;
 	});
 
@@ -36,23 +36,23 @@ describe("medea.core", function() {
 	it("should be able to create a context", function () {
 		ensureContextInit();
 		expect(fail).toBe(false);
-		expext(context.CanRender()).toBe(true);
-	};
+		expect(medea.CanRender()).toBe(true);
+	});
 
 	it("should have valid defaults", function () {
 		ensureContextInit();
 
 		expect(medea.Node).toBeTruthy();
 		expect(medea.RootNode()).toBeTruthy();
-		expext(medea.EnsureIsResponsive()).toBeFalse();
-	};
+		expect(medea.EnsureIsResponsive()).toBe(false);
+	});
 
 	it("should have loaded the <node> and <viewport> modules", function () {
 		ensureContextInit();
 
 		expect(medea.Node).toBeTruthy();
 		expect(medea.Viewport).toBeTruthy();
-	};
+	});
 
 	it("should be able to define() more modules and resolve their dependencies", function () {
 		var init2 = false
@@ -63,20 +63,20 @@ describe("medea.core", function() {
 		ensureContextInit();
 
 		// core itself should be loaded too
-		medea.define('__test2', ['__test1', 'core'], function() {
+		medealib.define('__test2', ['__test1', 'core'], function() {
 			expect(init1).toBeFalse();
 			init2 = true;
 		});
 
 		expect(init2).toBeFalse();
-		medea.define('__test1', ['node'], function() {
+		medealib.define('__test1', ['node'], function() {
 			expect(init2).toBeTruthy();
 			init1 = true;
 		});
 		expect(init2).toBeTruthy();
 		expect(init1).toBeTruthy();
 
-		medea.FetchMods(['__test1', '__test2'], function() {
+		medealib.FetchMods(['__test1', '__test2'], function() {
 			called = true;
 		});
 		expect(called).toBeTruthy();
@@ -104,7 +104,7 @@ describe("medea.core", function() {
 		expect(medea.Node).toBeDefined(); // still here
 		expect(medea.Mesh).toBeDefined();
 		expect(medea.Shader).toBeDefined();
-	};
+	});
 
 	it("should be able to do a single frame", function () {
 	});

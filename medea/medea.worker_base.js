@@ -9,7 +9,7 @@
 try {
 	medea; // this should throw ReferenceError etc. from within a web worker
 
-	medea.define('worker_base',[], function(undefined) {
+	medealib.define('worker_base',[], function(undefined) {
 	});
 }
 catch (e) {

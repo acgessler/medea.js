@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('entity',[],function() {
+medealib.define('entity',[],function() {
 	"use strict";
 	var medea = this;
 

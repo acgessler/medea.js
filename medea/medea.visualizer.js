@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('visualizer',[],function() {
+medealib.define('visualizer',[],function() {
 	"use strict";
 	var medea = this;
 

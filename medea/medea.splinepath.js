@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('splinepath',['entity'],function(undefined) {
+medealib.define('splinepath',['entity'],function(undefined) {
 	"use strict";
 	var medea = this;
 

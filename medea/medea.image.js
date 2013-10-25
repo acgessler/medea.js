@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('image',['filesystem', 'nativeimagepool'],function(undefined) {
+medealib.define('image',['filesystem', 'nativeimagepool'],function(undefined) {
 	"use strict";
 	var medea = this;
 
