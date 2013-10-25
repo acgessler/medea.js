@@ -11,7 +11,7 @@ medealib.define('renderer',['renderqueue'],function(undefined) {
 
 	medea._initMod('renderqueue');
 
-	medea.Renderer = medea.Class.extend({
+	medea.Renderer = medealib.Class.extend({
 		rq : null,
 		visualizers : null,
 

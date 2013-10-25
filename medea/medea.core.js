@@ -7,7 +7,16 @@
  */
 
 
-/** {{medealib}} */
+/** Defines core functionality for medea, and contains the {{Context}} class in which
+ *  all the rendering magic happens. 
+ *
+ *  medealib globally holds a registry of all loaded medea and 3rdparty modules
+ *  and contains some debugging and logging functions.
+ *
+ *  Functions prefixed with _ are for private use by {{Context}}
+ *
+ * TODO
+ */
 var medealib = (function() {
 	var medealib = this
 	, _waiters = {}
@@ -169,15 +178,20 @@ var medealib = (function() {
 		medealib.LogDebug("addmod: " + name + s);
 	// #endif
 
+		// mark the module as pending
+		if(!_waiters[name]) {
+			_waiters[name] = [];
+		}
+
 		// fetch dependencies
-		medealib._RegisterMods(deps,function() {
-			// #ifdef LOG
+		medealib._RegisterMods(deps, function() {
+	// #ifdef LOG
 			medealib.LogDebug('modready: ' + name);
-			// #endif
+	// #endif
 
 			var w = _waiters[name];
 
-			_stubs[name] = init;
+			_stubs[name] = [init, deps];
 			delete _waiters[name];
 
 			if (w) { 
@@ -189,12 +203,34 @@ var medealib = (function() {
 	};
 
 
+	// ---------------------------------------------------------------------------
+	/** Checks if a module has been registered with _RegisterMods() and been
+	 *  fetched successfully.
+	 *  
+	 *  @param {String} name of the module
+	 */
+	// ---------------------------------------------------------------------------
+	medealib.IsModuleRegistered = function(name) {
+		return !!_stubs[name];
+	},
+
+
+	// ---------------------------------------------------------------------------
+	/**
+	 *
+	 *  @private
+	 */
+	// ---------------------------------------------------------------------------
+	medealib._GetModuleInfo = function(name) {
+		return _stubs[name];
+	},
+
 
 	// ---------------------------------------------------------------------------
 	/** Get the source code for a given module.
 	 *
 	 *  @param {String} name Module name, i.e. "viewport" or "someMod.js". See
-	 *     {medealib._FetchMods()} for more information on package references.
+	 *     {medealib._FetchMods()} for more information on module references.
 	 *  @return {String} undefined iff the module is not loaded yet
 	*/
 	// ---------------------------------------------------------------------------
@@ -204,10 +240,12 @@ var medealib = (function() {
 
 
 	// ---------------------------------------------------------------------------
-	/** Fetch a set of modules, run them and invoke a callback once they are
-	 *  loaded. For loading medealib extension modules, medealib only registers the 
-	 *  modules. To actually call their APIs, apply them to a 
-	 *  @see {medealib.Context} using @see {medealib.Context.Fetch()}.
+	/** Register a set of modules with medealib. This does not make them available 
+	 *  for direct use, though. To actually call their APIs, apply them to a 
+	 *  @see {medealib.Context} using @see {medealib.Context.LoadModules}.
+	 *
+	 *  This function also fetches all dependencies of the modules requested 
+	 *  recursively.
 	 *
 	 *  @param {String} String or list of strings containing the names of the
 	 *    modules to be fetched. There are two kinds of modules:
@@ -217,36 +255,43 @@ var medealib = (function() {
 	 *        name, including their file extension, i.e. "someMod.js". 
 	 *
 	 *  @param {Function} Callback to be invoked once all the modules have 
-	 *    been registered. medealib may happen immediately in case they are all available.
+	 *    been registered. This may happen immediately in case they are all available.
 	 *
 	 *  @private
 	 */
 	// ---------------------------------------------------------------------------
 	medealib._RegisterMods = function(whom, callback) {
 		callback = callback || function() {};
-		var whom = whom instanceof Array ? whom : [whom];
-		var cnt = 0, nodelay = true;
+		
+		var whom = Array.isArray(whom) ? whom : [whom]
+		,	cnt = 0
+		,	nodelay = true
+		,	countdown_proxy = null
+		;
 
 		if(!whom.length) {
-			callback();
+			if(callback) {
+				callback();
+			}
 			return;
 		}
 
-		var proxy = function() {
-			if(--cnt === 0) {
-				callback();
+		if(callback) {
+			countdown_proxy = function() {
+				if(--cnt === 0) {
+					callback();
+				};
 			};
-		};
+		}
 
 		for(var i = 0; i < whom.length; ++i) {
-			var n=whom[i], init = _stubs[n];
+			var n = whom[i], init = _stubs[n];
 
 			if(!n) {
 				continue;
 			}
 
-			// see if the file has already been loaded, in which case `init` should 
-			// be either null or a function.
+			// see if the file has already been loaded, in which case `init` should be defined
 			if (init === undefined) {
 				var is_medealib_mod = !/\.js$/i.test(whom[i]);
 
@@ -259,51 +304,49 @@ var medealib = (function() {
 					b = true;
 				}
 
-				_waiters[n].push(proxy);
+				if(countdown_proxy) {
+					_waiters[n].push(countdown_proxy);
+				}
 
 				if(!b) {
 					continue;
 				}
 
 				(function(n,is_medealib_mod) {
-				medealib._AjaxFetch(medealib.root_url+(is_medealib_mod ? 'medea.' +n + '.js' : '3rdparty/' + n), function(text,status) {
-					if(status !== 200) {
-						medealib.DebugAssert('failure loading script ' + n);
-						return;
-					}
-
-					// #ifdef LOG
-					medealib.LogDebug("run: " + n);
-					// #endif LOG
-
-					_sources[n] = text;
-
-					// TODO: which way of evaluating scripts is best for debugging
-					globalEval(text);
-
-					/*
-					var sc = document.createElement( 'script' );
-					sc.type = 'text/javascript';
-
-					// make sure to enclose the script source in CDATA blocks
-					// to make XHTML parsers happy.
-					sc.innerHTML = '//<![CDATA[\n' + text  + '\n//]]>';
-					document.getElementsByTagName('head')[0].appendChild(sc);
-					*/
-
-					// non medealib modules won't call define, so we need to mimic parts of its behaviour
-					// to satisfy all listeners and to keep the file from being loaded twice.
-					if(!is_medealib_mod) {
-						var w = _waiters[n];
-						delete _waiters[n];
-
-						_stubs[n] = null;
-						for(var i = 0; i < w.length; ++i) {
-							w[i]();
+					var filename = medealib.root_url+(is_medealib_mod ? 'medea.' +n + '.js' : '3rdparty/' + n);
+					
+					medealib._AjaxFetch(filename, function(text, status) {
+						if(status !== 200) {
+							medealib.DebugAssert('failure loading script ' + n);
+							return;
 						}
-					}
+						_sources[n] = text;
 
-				});
+						// TODO: which way of evaluating scripts is best for debugging
+						globalEval(text);
+
+						/*
+						var sc = document.createElement( 'script' );
+						sc.type = 'text/javascript';
+
+						// make sure to enclose the script source in CDATA blocks
+						// to make XHTML parsers happy.
+						sc.innerHTML = '//<![CDATA[\n' + text  + '\n//]]>';
+						document.getElementsByTagName('head')[0].appendChild(sc);
+						*/
+
+						// non medealib modules won't call define, so we need to mimic parts of its behaviour
+						// to satisfy all listeners and to keep the file from being loaded twice.
+						if(!is_medealib_mod) {
+							var w = _waiters[n];
+							delete _waiters[n];
+
+							_stubs[n] = null;
+							for(var i = 0; i < w.length; ++i) {
+								w[i]();
+							}
+						}
+					});
 				}(n,is_medealib_mod));
 			}
 		}
@@ -315,30 +358,14 @@ var medealib = (function() {
 
 
 	// ---------------------------------------------------------------------------
-	/** TODO: documentation 
-	*/
-	// ---------------------------------------------------------------------------
-	medealib._Require = function(whom,callback) {
-		var whom = whom instanceof Array ? whom : [whom];
-		var cnt = 0;
-
-		for(var i = 0; i < whom.length; ++i) {
-			var init = _stubs[whom[i]];
-			if (init === undefined) {
-				medealib.DebugAssert('init stub missing for file ' + whom[i] + ', maybe not loaded yet?');
-				continue;
-			}
-			if (!init) {
-				continue;
-			}
-
-			medealib._initMod(whom[i]);
-		}
-	};
-
-
-	// ---------------------------------------------------------------------------
-	/** TODO: documentation 
+	/** Perform XHTTRequest for a given url.
+	 *
+	 *  @param {String} url Url to GET from
+	 *  @param {Function} callback to be invoked
+	 *  @param {bool} no_client_cache If set to true, an unique value is appended
+	 *    to the URL (as ?nocache=<someToken>) parameter to prevent any kind
+	 *    of client-side caching. If this parameter is not specified, it is assumed
+	 *    true iff DEBUG is defined.
 	*/
 	// ---------------------------------------------------------------------------
 	medealib._AjaxFetch = function(url, callback, no_client_cache) {
@@ -357,7 +384,7 @@ var medealib = (function() {
 		}
 
 		ajax.onreadystatechange = function() {
-			if (ajax.readyState==4) {
+			if (ajax.readyState === 4) {
 				callback(ajax.responseText, ajax.status);
 			}
 		}
@@ -365,6 +392,7 @@ var medealib = (function() {
 		ajax.open("GET",url + (no_client_cache ?  '?nocache='+(new Date()).getTime() : ''),true);
 		ajax.send(null);
 	};
+
 
 
 	// global initialization code

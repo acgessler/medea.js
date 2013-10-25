@@ -176,7 +176,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
      *
      *
 	 */
-	medea.Pass = medea.Class.extend({
+	medea.Pass = medealib.Class.extend({
 
 		wannabe_clones : null,
 		vs : null,

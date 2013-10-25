@@ -47,7 +47,7 @@ medealib.define('materialgen',['shader','material'],function(undefined) {
 
 
 	// class MaterialGen
-	medea.MaterialGen = medea.Class.extend({
+	medea.MaterialGen = medealib.Class.extend({
 		name : "",
 		mat_gen : null,
 

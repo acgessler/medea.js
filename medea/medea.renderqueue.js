@@ -27,7 +27,7 @@ medealib.define('renderqueue',['renderstate'],function(undefined) {
 
 
 	// class DistanceSorter
-	this.DistanceSorter = medea.Class.extend({
+	this.DistanceSorter = medealib.Class.extend({
 
 		Run : function(entries) {
 			entries.sort(function(a,b) {
@@ -38,7 +38,7 @@ medealib.define('renderqueue',['renderstate'],function(undefined) {
 
 
 	// class MaterialSorter
-	this.MaterialSorter = medea.Class.extend({
+	this.MaterialSorter = medealib.Class.extend({
 
 		Run : function(entries) {
 			entries.sort(function(a,b) {
@@ -48,7 +48,7 @@ medealib.define('renderqueue',['renderstate'],function(undefined) {
 	});
 
 	// class NoSorter
-	this.NoSorter = medea.Class.extend({
+	this.NoSorter = medealib.Class.extend({
 
 		Run : function(entries) {
 			// intentionally a no-op
@@ -57,7 +57,7 @@ medealib.define('renderqueue',['renderstate'],function(undefined) {
 
 
 	// class RenderQueue
-	this.RenderQueue = medea.Class.extend({
+	this.RenderQueue = medealib.Class.extend({
 
 		init: function(sorter,default_state) {
 			this.entries = [];
@@ -94,7 +94,7 @@ medealib.define('renderqueue',['renderstate'],function(undefined) {
 
 
 	// class RenderQueueManager
-	this.RenderQueueManager = medea.Class.extend({
+	this.RenderQueueManager = medealib.Class.extend({
 
 		init : function(name) {
 			// allocates queues, by default all queues have no further configuration

@@ -25,7 +25,7 @@ medealib.define('indexbuffer',[],function(undefined) {
 
 
 	// class IndexBuffer
-	medea.IndexBuffer = medea.Class.extend({
+	medea.IndexBuffer = medealib.Class.extend({
 
 		// Id of underlying OpenGl buffer object
 		buffer: -1,

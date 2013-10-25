@@ -107,7 +107,7 @@ medealib.define('vertexbuffer',[],function(undefined) {
 
 
 	// private class _VBOInitDataAccessor
-	this._VBOInitDataAccessor = medea.Class.extend({
+	this._VBOInitDataAccessor = medealib.Class.extend({
 
 		positions : null,
 		normals : null,
@@ -383,7 +383,7 @@ medealib.define('vertexbuffer',[],function(undefined) {
 	});
 
 	// class VertexBuffer
-	this.VertexBuffer = medea.Class.extend({
+	this.VertexBuffer = medealib.Class.extend({
 
 		// Id of underlying OpenGl buffer object
 		buffer: -1,

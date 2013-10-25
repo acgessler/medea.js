@@ -13,7 +13,7 @@ medealib.define('input_handler',['input'],function(undefined) {
 	var settings = medea.settings;
 
 	// class InputHandler
-	medea.InputHandler = medea.Class.extend(
+	medea.InputHandler = medealib.Class.extend(
 	{
 		custom_keymap : null,
 

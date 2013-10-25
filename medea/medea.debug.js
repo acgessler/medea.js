@@ -11,7 +11,7 @@ medealib.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniS
 	var medea = this;
 
 
-	this.DebugPanel = medea.Class.extend({
+	this.DebugPanel = medealib.Class.extend({
 
 		  where 						: null
 		, win 							: null

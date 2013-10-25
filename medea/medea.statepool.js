@@ -46,7 +46,7 @@ medealib.define('statepool',[],function(undefined) {
 	};
 
 	// class StatePool
-	medea.StatePool = medea.Class.extend({
+	medea.StatePool = medealib.Class.extend({
 
 		deps : null,
 		derived_states : null,

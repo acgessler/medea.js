@@ -19,7 +19,7 @@ medealib.define('material',['pass'],function(undefined) {
 
 
 	// class Material
-	medea.Material = medea.Class.extend({
+	medea.Material = medealib.Class.extend({
 		name : "",
 		mat_gen : null,
 

@@ -21,12 +21,23 @@
  *
  **/
  // ---------------------------------------------------------------------------
-var Context = medea.Context = function(where, settings, deps, user_on_ready, user_on_failure) {
+var Context = medealib.Context = function(where, settings, deps, user_on_ready, user_on_failure) {
 	var medeactx = this;
 
 	if(!(medeactx instanceof Context)) {
 		return new Context(where, settings, deps, user_on_ready, user_on_failure);
 	}
+
+
+	// #ifdef DEBUG
+
+	medealib.DebugAssert(!deps || Array.isArray(deps), 
+		'`deps` parameter must be array, or undef');
+	medealib.DebugAssert(where.substring, 
+		'`where` parameter must be a string');
+
+	// #endif
+
 
 	// TODO: restructure constants
 	// constants
@@ -40,34 +51,75 @@ var Context = medea.Context = function(where, settings, deps, user_on_ready, use
 	medeactx.statepool = {};
 	medeactx._workers = {};
 
-	// collect initial dependencies - for example the scenegraph module and the mathlib is always needed
-	var _initial_deps = ['node','viewport'];
-	var _initial_pre_deps = []; 
+	
+	var _modules_loaded = {};
 
-	if (window.mat4 === undefined) {
-		_initial_pre_deps.push('glMatrix.js');
-	}
-
-	var _callback = undefined, _callback_pre = undefined, readyness = 0;
 
 	// ---------------------------------------------------------------------------
-	/** TODO: documentation 
-	*/
 	// ---------------------------------------------------------------------------
-	medeactx._initMod = function(name) {
-		var s = _stubs[name];
-		if(!s) {
-			return;
-		}
+	medeactx.IsModuleLoaded = function(modname) {
+		return !!_modules_loaded[modname];
+	} 
 
-		// #ifdef LOG
-		medea.LogDebug("initmod: " + name);
-		// #endif
+	
+	// ---------------------------------------------------------------------------
+	/** Load a set of modules into this medea context.
+	 *
+	 *  Once loading is complete, the APIs of the respective modules are available
+	 *  on the context object.
+	 *
+	 *  @param {String} String or list of strings containing the names of the
+	 *    modules to be fetched. There are two kinds of modules:
+	 *     a) medea modules, which are referred to with their name suffixes and
+	 *        without the file extension and -
+	 *     b) JS files from /medea/3rdparty, which are referred to by their file 
+	 *        name, including their file extension, i.e. "someMod.js". 
+	 *
+	 *  @param {Function} Callback to be invoked once all the modules have 
+	 *    been loaded. This may be called immediately if the modules are all 
+	 *    registered with medealib.
+	 *
+	 *  @private
+	 */
+	// ---------------------------------------------------------------------------
+	medeactx.LoadModules = function(whom, callback) {
+		medealib._RegisterMods(whom, function() {
+			if (!Array.isArray(whom)) {
+				whom = [whom];
+			}
 
-		s.apply(medeactx);
-		_stubs[name] = null;
+			whom.forEach(function(mod) {
+				var init_stub;
+
+				if (medeactx.IsModuleLoaded(mod)) {
+					return;
+				}
+
+				// #ifdef DEBUG
+				medealib.DebugAssert(medealib.IsModuleRegistered(mod), "expect module to be registered");
+				// #endif
+
+				// #ifdef LOG
+				medealib.LogDebug("initmod: " + mod);
+				// #endif
+
+				// init_stub[0] init function for *this* module
+				// init_stub[1] list of (direct) module dependencies - note that
+				// the JS files have been fetched already by _RegisterMods(),
+				// so LoadModules() does not need to do async ops and we don't
+				// need to supply a callback.
+				init_stub = medealib._GetModuleInfo( mod);
+				medeactx.LoadModules(init_stub[1]);
+					
+				_modules_loaded[mod] = true;
+				init_stub[0].apply(medeactx);
+			});
+
+			if(callback) {
+				callback(medeactx);
+			}
+		});
 	};
-
 
 
 	// ------------------------------------------------------------------------
@@ -152,7 +204,7 @@ var Context = medea.Context = function(where, settings, deps, user_on_ready, use
 	medeactx.Start = function() {
 		if (!medeactx.stop_asap) {
 			window.requestAnimationFrame(function() { 
-				medea.Start(); 
+				medeactx.Start(); 
 			}, medeactx.canvas);
 
 			if (medeactx.debug_panel) {
@@ -193,7 +245,9 @@ var Context = medea.Context = function(where, settings, deps, user_on_ready, use
 
 
 	// ------------------------------------------------------------------------
-	/** TODO: documentation 
+	/** Checks if rendering is currently possible. This is the case iff
+	 *   a) the webgl context is ready, and not lost and
+	 *   b) there is at least one viewport.
 	*/
 	// ------------------------------------------------------------------------
 	medeactx.CanRender = function() {
@@ -234,7 +288,7 @@ var Context = medea.Context = function(where, settings, deps, user_on_ready, use
 	medeactx.DoSingleFrame = function(dtime) {
 		var debug_panel = medeactx.debug_panel;
 		if (!medeactx.CanRender()) {
-			medeactx.NotifyFatal("Not ready for rendering; need a GL context and a viewport");
+			medealib.NotifyFatal("Not ready for rendering; need a GL context and a viewport");
 			return;
 		}
 
@@ -293,8 +347,8 @@ var Context = medea.Context = function(where, settings, deps, user_on_ready, use
 		});
 
 		// adjust render settings if we switched to multiple viewports or vice versa
-		if (medeactx.frame_flags & medea.FRAME_VIEWPORT_UPDATED) {
-			if (medea.GetEnabledViewportCount()>1) {
+		if (medeactx.frame_flags & medeactx.FRAME_VIEWPORT_UPDATED) {
+			if (medeactx.GetEnabledViewportCount()>1) {
 				medeactx.gl.enable(medeactx.gl.SCISSOR_TEST);
 			}
 			else {
@@ -482,51 +536,24 @@ var Context = medea.Context = function(where, settings, deps, user_on_ready, use
 	}
 
 
-
-	// ------------------------------------------------------------------------
-	// for internal use by build.py only
-	medeactx._initLibrary = function() {
-
-		// Initialization has two phases, the first of which is used to load utility libraries
-		// that all medea modules may depend upon. medeactx also involves creating a webgl canvas
-		// (which is accessible through the medea.gl namespace)
-		medealib._RegisterMods(_initial_pre_deps, function() {
-			if (_callback_pre) {
-				if(!_callback_pre.apply(medea)) {
-					return;
-				}
-			}
-
-			++readyness;
-			medealib._RegisterMods(deps, function() {
-				++readyness;
-				if (_callback) {
-					_callback.apply(medea);
-				}
-			});
-		});
-
-		medeactx._initLibrary = null;
-	};
-
-
 	// ------------------------------------------------------------------------
 	// first initialization phase -- create webgl canvas and prepare environment
-	_callback_pre = function() {
+	function _init_level_0() {
 		medeactx.canvas  = document.getElementById(where);
-
 		// #if DEBUG
 		//medeactx.Assert(medeactx.canvas != null, "element with #id \"" + where + "\" not found");
 		// #endif
 
-		// create a webgl
+		// create a webgl context
 		// try out all the names under which webgl might be available
-		var candidates = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl"];
-		var context = null;
-		for (var i = 0; i < candidates.length; ++i) {
+		var candidates = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl"]
+		,	i
+		,	context = null
+		;
+
+		for (i = 0; i < candidates.length; ++i) {
 			try {
 				context = medeactx.canvas.getContext(candidates[i]);
-
 			} catch(ex) {
 
 			}
@@ -535,12 +562,11 @@ var Context = medea.Context = function(where, settings, deps, user_on_ready, use
 				break;
 			}
 		}
-		_callback_pre = _initial_pre_deps = undefined;
 
 		if(!context) {
-			// #if LOG
+		// #if LOG
 			medeactx.Log('webgl initialization failed','error');
-			// #endif
+		// #endif
 			_callback = undefined;
 			if(user_on_failure) {
 				user_on_failure();
@@ -553,15 +579,19 @@ var Context = medea.Context = function(where, settings, deps, user_on_ready, use
 			context = WebGLDebugUtils.makeDebugContext(context);
 		}
 
+	// #ifdef LOG
+		medealib.LogDebug('webgl context successfully created');
+	// #endif
+
 		medeactx.gl = context;
 		return true;
 	};
 
 
 	// ------------------------------------------------------------------------
-	// second phase of initialization -- prepare the rest and invoke the Ready() callback
-	// to pass control to the user.
-	_callback = function() {
+	// second phase of initialization -- prepare the rest and invoke the 
+	// user's callback function.
+	function _init_level_1() {
 		medeactx.cached_cw = medeactx.canvas.width, medeactx.cached_ch = medeactx.canvas.height;
 
 		medeactx.settings = settings || {};
@@ -584,7 +614,6 @@ var Context = medea.Context = function(where, settings, deps, user_on_ready, use
 		medeactx.dtmin_fps = 1e6;
 		medeactx.dtmax_fps = 0;
 
-
 		medeactx.tick_callbacks = {};
 		medeactx.stop_asap = false;
 
@@ -592,13 +621,46 @@ var Context = medea.Context = function(where, settings, deps, user_on_ready, use
 		medeactx.debug_panel = null;
 
 		// always allocate a default root node for the visual scene
-		medeactx.scene_root = medea.CreateNode("root");
+		medeactx.scene_root = medeactx.CreateNode("root");
 
-		_callback = _initial_deps = undefined;
+	// #ifdef LOG
+		medealib.LogDebug('initialization complete');
+	// #endif
+
 		user_on_ready(medeactx);
 	};
 
-	if (window.medea_is_compiled === undefined) {
-		medeactx._initLibrary();
-	}
+
+	// ------------------------------------------------------------------------
+	// initialization
+	(function() {
+		// collect initial dependencies - for example the scenegraph module and the mathlib is always needed
+		var _initial_deps = ['node','viewport'];
+		var _initial_pre_deps = []; 
+
+		if (window.mat4 === undefined) {
+			_initial_pre_deps.push('glMatrix.js');
+		}
+
+	// #ifdef LOG
+		medealib.LogDebug('fetching first set of dependencies');
+	// #endif
+
+		// Initialization has two phases, the first of which is used to load utility libraries
+		// that all medea modules may depend upon. medeactx also involves creating a webgl canvas
+		// (which is accessible through the medea.gl namespace)
+		medeactx.LoadModules(_initial_pre_deps, function() {
+			if (!_init_level_0()) {
+				return;
+			}
+
+	// #ifdef LOG
+		medealib.LogDebug('fetching second set of dependencies');
+	// #endif
+			console.log(_initial_deps.concat(deps || []));
+			medeactx.LoadModules(_initial_deps.concat(deps || []), function() {
+				_init_level_1();
+			});
+		});
+	}) ();
 };

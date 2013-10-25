@@ -12,7 +12,7 @@ medealib.define('light', ['entity'],function(undefined) {
 	medea._initMod('entity');
 
 	// class LightJob
-	medea.LightJob = medea.Class.extend({
+	medea.LightJob = medealib.Class.extend({
 
 		distance 	: null,
 		light 		: null,

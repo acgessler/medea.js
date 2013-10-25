@@ -49,7 +49,7 @@ medealib.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function
 		no_mens : 0.1,
 	};
 
-	var DefaultTerrainDataProvider = medea.Class.extend({
+	var DefaultTerrainDataProvider = medealib.Class.extend({
 
 		desc : null,
 
@@ -532,7 +532,7 @@ medealib.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function
 	};
 
 
-	var TerrainRing = medea.Class.extend({
+	var TerrainRing = medealib.Class.extend({
 
 		init : function(terrain,lod,cam) {
 			this.terrain = terrain;

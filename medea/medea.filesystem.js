@@ -73,7 +73,7 @@ medealib.define('filesystem',[],function(undefined) {
 	
 
 	// class Resource
-	medea.Resource = medea.Class.extend({
+	medea.Resource = medealib.Class.extend({
 
 		ref_count : 1,
 
@@ -140,7 +140,7 @@ medealib.define('filesystem',[],function(undefined) {
 
 
 	// class FileSystemHandler
-	medea.FileSystemHandler = medea.Class.extend({
+	medea.FileSystemHandler = medealib.Class.extend({
 
 		CanHandle : function(name) {
 			return false;

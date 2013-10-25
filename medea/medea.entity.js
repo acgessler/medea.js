@@ -16,7 +16,7 @@ medealib.define('entity',[],function() {
 	medea.ENTITY_UPDATE_WAS_REMOVED = 0x8;
 	
 
-	medea.Entity = medea.Class.extend({
+	medea.Entity = medealib.Class.extend({
 		name : "",
 		bb : null,
 		tag : null,

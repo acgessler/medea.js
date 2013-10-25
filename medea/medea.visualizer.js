@@ -10,7 +10,7 @@ medealib.define('visualizer',[],function() {
 	"use strict";
 	var medea = this;
 
-	this.Visualizer = medea.Class.extend({
+	this.Visualizer = medealib.Class.extend({
 		name : "",
 		ordinal: 0,
 

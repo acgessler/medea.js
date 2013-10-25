@@ -17,7 +17,7 @@ medealib.define('viewport',['camera','renderqueue','statepool'],function(undefin
 
 
 	// class Viewport
-	medea.Viewport = medea.Class.extend({
+	medea.Viewport = medealib.Class.extend({
 		name:"",
 		w : 1.0,
 		h : 1.0,

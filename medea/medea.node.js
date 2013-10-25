@@ -25,7 +25,7 @@ medealib.define('node',['frustum'],function(undefined) {
 
 	var id_source = 0;
 
-	medea.Node = medea.Class.extend({
+	medea.Node = medealib.Class.extend({
 
 		// this is to allow subclasses to have their own flags set when the node's transformation
 		// matrix is altered. By default we only set DIRTY.

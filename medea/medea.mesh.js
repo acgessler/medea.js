@@ -19,7 +19,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 	medea.PT_LINE_STRIPS = gl.LINE_STRIPS;
 
 	// class RenderJob
-	var MeshRenderJob = medea.Class.extend({
+	var MeshRenderJob = medealib.Class.extend({
 
 		distance 	: null,
 		mesh 		: null,
