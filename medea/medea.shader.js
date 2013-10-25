@@ -38,16 +38,25 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 
 	medea.Shader = medea.Resource.extend( {
 
-		init : function(src, defines, callback) {
-			this.type = src.split('.').pop() == 'ps'
+		type : null,
+		shader : null,
+		source_cache_name : null,
+
+		init : function(src, defines, callback, from_source, type, cache_key) {
+			this.type = type || src.split('.').pop() == 'ps'
 				? medea.SHADER_TYPE_PIXEL
 				: medea.SHADER_TYPE_VERTEX;
 
 			this.shader = 0;
 			this.defines = medea.Merge(defines || {},default_defines);
 
+			this.source_cache_name = from_source && !cache_key ? null :
+				(from_source ? cache_key : src);
+
+			// if the shader source is given without an explicit cache key, disable caching.
 			var	self = this
-			,	cached_source = sh_source_cache[src]
+			,	source_cache_name = this.source_cache_name
+			,	cached_source = !source_cache_name ? null : sh_source_cache[source_cache_name]
 			,	complete
 			;
 
@@ -67,7 +76,15 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 				return;
 			}
 
-			sh_source_cache[src] = [];
+			if(this.source_cache_name) {
+				sh_source_cache[this.source_cache_name] = [];
+			}
+
+			if(from_source) {	
+				this.OnDelayedInit(src);
+				this._super('<shader source>', callback, true);
+				return;
+			}
 
 			// trigger deferred loading
 			this._super(src, callback);
@@ -82,12 +99,15 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 // #endif
 			this.source = data;
 
-			var source_cache_entry = sh_source_cache[this.src];
-			sh_source_cache[this.src] = data;
-			if(Array.isArray(source_cache_entry)) {
-				source_cache_entry.forEach(function(e) {
-					e();
-				});
+			if(this.source_cache_name) {
+				// update cache entry, inform anyone waiting
+				var source_cache_entry = sh_source_cache[this.source_cache_name];
+				sh_source_cache[this.source_cache_name] = data;
+				if(Array.isArray(source_cache_entry)) {
+					source_cache_entry.forEach(function(e) {
+						e();
+					});
+				}
 			}
 
 			// _super() is dynamically assigned and ceases to exist as soon
@@ -246,5 +266,9 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 
 	medea.CreateShader = function(res, defines, callback) {
 		return new medea.Shader(res, defines, callback);
-	}
+	};
+
+	medea.CreateShaderFromSource = function(type, source, defines, callback, cache_key) {
+		return new medea.Shader(source, defines, callback, true, type, cache_key);
+	};
 });
