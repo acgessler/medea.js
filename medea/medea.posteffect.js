@@ -16,8 +16,10 @@ medea.define('posteffect',[ '' ],function() {
 	/** 
 	 */
 	medea.PostEffect = medea.Class.extend({
-		init : function() {
+		compositors : null,
 
+		init : function() {
+			this.compositors = [];
 		},
 
 		/**  Return extra code to be prepended to the composition shader's
@@ -45,6 +47,14 @@ medea.define('posteffect',[ '' ],function() {
 		 */
 		GetCompositionStub : function() {
 			return [0, ''];
+		},
+
+		OnAddToCompositor : function(c) {
+			this.compositors.push(s);
+		},
+
+		OnRemoveFromCompositor : function(c) {
+			this.compositors.splice(this.compositors.indexOf(c), 1);
 		},
 	});
 

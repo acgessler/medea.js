@@ -268,7 +268,7 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 		return new medea.Shader(res, defines, callback);
 	};
 
-	medea.CreateShaderFromSource = function(type, source, defines, callback, cache_key) {
-		return new medea.Shader(source, defines, callback, true, type, cache_key);
+	medea.CreateShaderFromSource = function(type, source, defines, cache_key) {
+		return new medea.Shader(source, defines, null, true, type, cache_key);
 	};
 });

@@ -79,22 +79,49 @@ medea.define('visualizer_posteffect',[ 'visualizer', 'shader' ],function() {
 
 		/** {{copydoc}} */
 		Apply : function(render_stub,original_render_stub,rq) {
+			var self = this;
 
 			if(!this.effects.length) {
 				return render_stub;
 			}
 			
 			return function() {
+				if (self.flags & medea._VISUALIZER_POSTFX_DIRTY) {
+					self._GenCompositionShader();
+				}
 				render_stub();
 			};
 		},
 
-		AddEffect : function() {
-
+		/** Add an effect to the set of posteffects associated with this 
+		 *  compositor.
+		 *
+		 *  This causes the OnAddToCompositor() method of that effect to be invoked.
+		 *  Effects can be associated with multiple compositors. 
+		 */
+		AddEffect : function(e) {
+			var idx = this.effects.indexOf(e);
+			if(idx === -1) {
+				return;
+			}
+			this.effects.push(e);
+			e.OnAddToCompositor(this);
 		},
 
-		RemoveEffect : function() {
 
+		/** Remove an effect to the set of posteffects associated with this 
+		 *  compositor.
+		 *
+		 *  This causes the OnRemoveFromCompositor() method of that effect to be 
+		 *  invoked. Effects can be associated with multiple compositors. 
+		 */
+		RemoveEffect : function(e) {
+			var idx = this.effects.indexOf(e);
+			if(idx === -1) {
+				return;
+			}
+			this.effects = this.effects.splice(idx, 1);
+			e.OnRemoveFromCompositor(this);
 		},
 
 
@@ -114,7 +141,7 @@ medea.define('visualizer_posteffect',[ 'visualizer', 'shader' ],function() {
 			var stubs = []
 			, extra = []
 			, i
-			, shader
+			, shader_source
 			;
 
 			this.effects.forEach(function(e) {
@@ -131,13 +158,26 @@ medea.define('visualizer_posteffect',[ 'visualizer', 'shader' ],function() {
 				stubs[i] = stubs[i][1];
 			}
 
-			shader = _composition_global_prefix + extra.join('\n') + 
+			shader_source = _composition_global_prefix + extra.join('\n') + 
 				_composition_main_prefix +
 				stubs.join('\n') +
 				_composition_main_suffix;
 
-			var m = medea.CreateShader
+			var m = medea.CreateShaderFromSource(medea.SHADER_TYPE_PIXEL, shader_source, [], cache_key);
+			self.flags &= ~medea._VISUALIZER_POSTFX_DIRTY;
 		},
 	});
 
+
+	medea.CreateVisualizerPostEffectCompositor = function() {
+		return new medea.VisualizerPostEffectCompositor();
+	};
+
+	medea.CreateVisualizer_posteffect = medea.CreateVisualizerPostEffectCompositor;
+
+
+	/** */
+	medea.GetPassthruVertexShader : function() {
+		// TODO
+	};
 });
