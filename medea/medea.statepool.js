@@ -111,8 +111,8 @@ medealib.define('statepool',[],function(undefined) {
 
 	medea.CloneStatePool = function(sp) {
 		var clone = new medea.StatePool();
-		medea.Merge(this.states, {}, clone.states);
-		medea.Merge(this.dirty, {}, clone.dirty);
+		medealib.Merge(this.states, {}, clone.states);
+		medealib.Merge(this.dirty, {}, clone.dirty);
 
 		return clone;
 	};

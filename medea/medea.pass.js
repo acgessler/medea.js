@@ -571,14 +571,14 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 
 			if (new_out) {
 				if (clone_flags & medea.MATERIAL_CLONE_COPY_STATE) {
-					out.state = medea.Merge(this.state, {}, {});
+					out.state = medealib.Merge(this.state, {}, {});
 				}
 				else if (clone_flags & medea.MATERIAL_CLONE_SHARE_STATE) {
 					out.state = this.state;
 				}
 
 				if (clone_flags & medea.MATERIAL_CLONE_COPY_CONSTANTS) {
-					out.constants = medea.Merge(this.constants, {}, {});
+					out.constants = medealib.Merge(this.constants, {}, {});
 				}
 				else if (clone_flags & medea.MATERIAL_CLONE_SHARE_CONSTANTS) {
 					out.constants = this.constants;

@@ -12,8 +12,8 @@ medealib.define('image',['filesystem', 'nativeimagepool'],function(undefined) {
 
 	medea.IMAGE_FLAG_USER = 0x1000;
 
-	medea._initMod('filesystem');
-	medea._initMod('nativeimagepool');
+	
+	
 
 	medea.Image = medea.Resource.extend( {
 

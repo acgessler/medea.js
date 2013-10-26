@@ -10,7 +10,7 @@ medealib.define('imagestream',['nativeimagepool','filesystem'],function(undefine
 	"use strict";
 	var medea = this;
 
-	medea._initMod('nativeimagepool');
+	
 
 	var MAX_SIMULTANEOUS_REQUESTS = 12;
 

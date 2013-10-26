@@ -20,7 +20,7 @@ medealib.define('skybox',['material','standardmesh','cubetexture'],function(unde
 
 		mesh.BB(medea.BB_INFINITE);
 
-		medea._initMod('renderqueue');
+		
 		mesh.RenderQueue(medea.RENDERQUEUE_BACKGROUND);
 		mesh.Material().Passes().forEach( function(p) {
 			p.State({

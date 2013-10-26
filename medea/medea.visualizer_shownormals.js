@@ -28,7 +28,7 @@ medealib.define('visualizer_shownormals',[ 'visualizer','material'],function() {
 		[0.3,0.1,0.7,1.0]
 	];
 
-	medea._initMod('visualizer');
+	
 	var VisualizerShowNormals = medea.Visualizer.extend({
 
 		init : function(name, draw_range, full_ts) {

@@ -13,7 +13,7 @@ medealib.define('shader',['filesystem','cpp.js'],function(undefined) {
 	medea.SHADER_TYPE_PIXEL = gl.FRAGMENT_SHADER;
 	medea.SHADER_TYPE_VERTEX = gl.VERTEX_SHADER;
 
-	medea._initMod('filesystem');
+	
 
 	// counter for getting shader ids from
 	var shader_id_counter = 0;
@@ -44,7 +44,7 @@ medealib.define('shader',['filesystem','cpp.js'],function(undefined) {
 				: medea.SHADER_TYPE_VERTEX;
 
 			this.shader = 0;
-			this.defines = medea.Merge(defines || {},default_defines);
+			this.defines = medealib.Merge(defines || {},default_defines);
 
 			var	self = this
 			,	cached_source = sh_source_cache[src]

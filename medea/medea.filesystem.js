@@ -207,7 +207,7 @@ medealib.define('filesystem',[],function(undefined) {
 		
 
 			medealib.LogDebug("begin loading: " + what + " via HTTP");
-			medea._AjaxFetch(what,function(response,status) {
+			medealib._AjaxFetch(what,function(response,status) {
 
 				medealib.LogDebug("end loading " + what + ", HTTP status " + status);
 				if (status >= 300 || status < 200) {

@@ -9,7 +9,7 @@ medealib.define('light', ['entity'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
-	medea._initMod('entity');
+	
 
 	// class LightJob
 	medea.LightJob = medealib.Class.extend({

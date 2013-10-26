@@ -21,6 +21,20 @@
  *
  **/
  // ---------------------------------------------------------------------------
+medealib.CreateContext = function(where, settings, deps, user_on_ready, user_on_failure) {
+	new medealib.Context(where, settings, deps, user_on_ready, user_on_failure);
+
+	//  Do not return a value to discourage the following pattern:
+	/*
+	var medea = medealib.CreateContext(...,function() {
+		var vp1 = medea.CreateViewport(); << medea not defined if callback is called instantly
+	});
+	*/
+}
+
+
+ // ---------------------------------------------------------------------------
+ /** @private */
 var Context = medealib.Context = function(where, settings, deps, user_on_ready, user_on_failure) {
 	var medeactx = this;
 
@@ -48,14 +62,19 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	medeactx.VISIBLE_ALL = 0x1;
 	medeactx.VISIBLE_PARTIAL = 0x2;
 
-	medeactx.statepool = {};
-	medeactx._workers = {};
-
 	
 	var _modules_loaded = {};
 
 
 	// ---------------------------------------------------------------------------
+	/** Check if a particular module has been loaded using LoadModules().
+	 *
+	 *  This becomes true for a module once the module is fully resolved,
+	 *  and its APIs are available. So after LoadModules() returns it is likely
+	 *  false, but it is true in the callback given to LoadModules(). Modules
+	 *  cannot be unloades so the value remains true for the context's lifetime
+	 *  then.
+	 * */
 	// ---------------------------------------------------------------------------
 	medeactx.IsModuleLoaded = function(modname) {
 		return !!_modules_loaded[modname];
@@ -66,14 +85,19 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	/** Load a set of modules into this medea context.
 	 *
 	 *  Once loading is complete, the APIs of the respective modules are available
-	 *  on the context object.
+	 *  on the context object or in the global environment, depending on which
+	 *  type of modules is being loaded.
 	 *
 	 *  @param {String} String or list of strings containing the names of the
-	 *    modules to be fetched. There are two kinds of modules:
+	 *    modules to be fetched. There are two kinds of "modules":
 	 *     a) medea modules, which are referred to with their name suffixes and
-	 *        without the file extension and -
+	 *        without the file extension. Such modules have their dependencies
+	 *        resolved automatically, and they are applied to augment the medea
+	 *        context such that their APIs become available on it.
 	 *     b) JS files from /medea/3rdparty, which are referred to by their file 
-	 *        name, including their file extension, i.e. "someMod.js". 
+	 *        name, including their file extension, i.e. "someMod.js". There
+	 *        is no dependency resolution for such modules, they are simply
+	 *        fetched and globally eval()ed.
 	 *
 	 *  @param {Function} Callback to be invoked once all the modules have 
 	 *    been loaded. This may be called immediately if the modules are all 
@@ -91,12 +115,17 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 			whom.forEach(function(mod) {
 				var init_stub;
 
+				// nothing to do for non-medea modules
+				if(/\.js$/i.test(mod)) {
+					return;
+				}
+
 				if (medeactx.IsModuleLoaded(mod)) {
 					return;
 				}
 
 				// #ifdef DEBUG
-				medealib.DebugAssert(medealib.IsModuleRegistered(mod), "expect module to be registered");
+				medealib.DebugAssert(medealib.IsModuleRegistered(mod), "expect module to be registered: " + mod);
 				// #endif
 
 				// #ifdef LOG
@@ -192,8 +221,13 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	*/
 	// ------------------------------------------------------------------------
 	medeactx.SetDebugPanel = function(where) {
-		medeactx._Require("debug");
-		medeactx.debug_panel = new medeactx.DebugPanel(where);
+		if(medeactx.debug_panel !== null) {
+			return;
+		}
+		medeactx.debug_panel = false;
+		medeactx.LoadModules("debug", function() {
+			medeactx.debug_panel = new medeactx.DebugPanel(where);
+		});
 	};
 
 
@@ -619,6 +653,9 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 
 		medeactx.frame_flags = 0;
 		medeactx.debug_panel = null;
+
+		medeactx.statepool = {};
+		medeactx._workers = {};
 
 		// always allocate a default root node for the visual scene
 		medeactx.scene_root = medeactx.CreateNode("root");

@@ -9,7 +9,7 @@
 medealib.define('renderer',['renderqueue'],function(undefined) {
 	"use strict";
 
-	medea._initMod('renderqueue');
+	var medea = this;
 
 	medea.Renderer = medealib.Class.extend({
 		rq : null,

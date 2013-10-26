@@ -10,7 +10,7 @@ medealib.define('terraintile',['worker_terrain','image','mesh'],function(undefin
 	"use strict";
 	var medea = this;
 
-	medea._initMod('worker_terrain');
+	
 
 
 	medea._HeightfieldFromEvenSidedHeightmap = function(tex, scale, xz_scale, t, v) {

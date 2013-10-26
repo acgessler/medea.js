@@ -460,7 +460,7 @@ medealib.define('node',['frustum'],function(undefined) {
 				bbs.push(medea.TransformBB( c[i].BB(), trafo ));
 			}
 
-			this.bb = medea.MergeBBs(bbs);
+			this.bb = medealib.MergeBBs(bbs);
 
 			// #ifdef DEBUG
 			medealib.DebugAssert(!!this.bb,"bounding box computation failed, but it shouldn't have");

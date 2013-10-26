@@ -16,9 +16,9 @@ medealib.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],f
 		'posx','negx','posy','negy','posz','negz'
 	];
 
-	medea._initMod('filesystem');
-	medea._initMod('imagestream');
-	medea._initMod('nativeimagepool');
+	
+	
+	
 
 	medea.CubeTexture = medea.Resource.extend( {
 

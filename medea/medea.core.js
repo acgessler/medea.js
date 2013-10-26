@@ -19,9 +19,17 @@
  */
 var medealib = (function() {
 	var medealib = this
+
+		// for currently pending modules, a list of observers waiting
+		// to be notified when the request succeeds.
 	, _waiters = {}
-	, _deps = {}
-	, _stubs = {}
+
+		// for every define()d module, a function to apply to a medea
+		// context and a list of dependencies.
+	, _stubs = {
+		core : [function() {}, []]
+	}
+		// original module source
 	, _sources = {}
 	;
 
@@ -249,7 +257,7 @@ var medealib = (function() {
 	 *
 	 *  @param {String} String or list of strings containing the names of the
 	 *    modules to be fetched. There are two kinds of modules:
-	 *     a) medealib modules, which are referred to with their name suffixes and
+	 *     a) medea modules, which are referred to with their name suffixes and
 	 *        without the file extension and -
 	 *     b) JS files from /medealib/3rdparty, which are referred to by their file 
 	 *        name, including their file extension, i.e. "someMod.js". 
@@ -321,6 +329,10 @@ var medealib = (function() {
 							return;
 						}
 						_sources[n] = text;
+
+					// #ifdef LOG
+						medealib.LogDebug("eval: " + n);
+					// #endif
 
 						// TODO: which way of evaluating scripts is best for debugging
 						globalEval(text);

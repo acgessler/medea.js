@@ -36,7 +36,7 @@ medealib.define('frustum',[],function(undefined) {
 		return bb[0] < bb[1];
 	};
 
-	medea.MergeBBs = function(bbs) {
+	medealib.MergeBBs = function(bbs) {
 		if(!bbs.length) {
 			return medea.BB_EMPTY;
 		}

@@ -55,7 +55,7 @@ medealib.define('visualizer',[],function() {
 
 		var modname = 'visualizer_'+type.toLowerCase();
 		medea.FetchMods([modname],function() {
-			medea._initMod(modname);
+			
 			callback(medea['CreateVisualizer_' + type](name));
 		});
 	};

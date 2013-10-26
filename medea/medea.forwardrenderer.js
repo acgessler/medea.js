@@ -29,7 +29,7 @@ medealib.define('forwardrenderer',['renderer'],function(undefined) {
 		'cull_face_mode' : 'back'
 	};
 
-	medea._initMod('renderer');
+	
 
 	var ForwardRenderer = medea.Renderer.extend({
 

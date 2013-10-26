@@ -8,25 +8,27 @@
 
 
 
- // mouse movements are always tracked
-medea.CAMCONTROLLER_MOUSE_STYLE_ALWAYS = 0x1;
-
- // mouse movements are tracked iff ctrl (or the key it maps to) is pressed
-medea.CAMCONTROLLER_MOUSE_STYLE_ON_CTRL = 0x2;
-
- // mouse movements are tracked iff ctrl (or the key it maps to) is not pressed
-medea.CAMCONTROLLER_MOUSE_STYLE_OFF_CTRL = 0x3;
-
-// mouse movements are tracked iff the left mouse button is pressed
-medea.CAMCONTROLLER_MOUSE_STYLE_ON_LEFT_MBUTTON = 0x4;
-
 
 
 medealib.define('camcontroller',['entity','input'],function(undefined) {
 	"use strict";
 	var medea = this;
 
-	medea._initMod('entity');
+	
+
+	
+	 // mouse movements are always tracked
+	medea.CAMCONTROLLER_MOUSE_STYLE_ALWAYS = 0x1;
+
+	 // mouse movements are tracked iff ctrl (or the key it maps to) is pressed
+	medea.CAMCONTROLLER_MOUSE_STYLE_ON_CTRL = 0x2;
+
+	 // mouse movements are tracked iff ctrl (or the key it maps to) is not pressed
+	medea.CAMCONTROLLER_MOUSE_STYLE_OFF_CTRL = 0x3;
+
+	// mouse movements are tracked iff the left mouse button is pressed
+	medea.CAMCONTROLLER_MOUSE_STYLE_ON_LEFT_MBUTTON = 0x4;
+
 	 
 	
 	medea.CamController = medea.Entity.extend({

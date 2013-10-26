@@ -9,8 +9,6 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 	"use strict";
 	var medea = this, gl = medea.gl;
 
-	medea._initMod('entity');
-	medea._initMod('renderqueue');
 
 	// primitive types supported by the medea.Mesh class
 	medea.PT_TRIANGLES = gl.TRIANGLES;
@@ -182,7 +180,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			// wireframe is tricky because WebGl does not support the usual
 			// gl API for setting the poly mode.
 
-			medea._initMod('indexbuffer');
+			
 			if(this.pt === medea.PT_TRIANGLES_STRIPS) {
 				// #ifdef DEBUG
 				medealib.LogDebug('not supported: wireframe and medea.PT_TRIANGLES_STRIPS');
@@ -294,15 +292,15 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 	// - supports both index- and vertexbuffer specific flags
 	medea.CreateSimpleMesh = function(vertices,indices,material_or_color,flags, cache_name) {
 
-		if (indices && (Array.isArray(indices) || typeof indices === 'object' && !(indices instanceof medea.Class))) {
+		if (indices && (Array.isArray(indices) || typeof indices === 'object' && !(indices instanceof medealib.Class))) {
 			indices = medea.CreateIndexBuffer(indices,flags);
 		}
 
-		if (typeof vertices === 'object' && !(vertices instanceof medea.Class)) {
+		if (typeof vertices === 'object' && !(vertices instanceof medealib.Class)) {
 			vertices = medea.CreateVertexBuffer(vertices,flags);
 		}
 
-		if (material_or_color instanceof Array) {
+		if (Array.isArray(material_or_color)) {
 			material_or_color = medea.CreateSimpleMaterialFromColor(material_or_color);
 		}
 

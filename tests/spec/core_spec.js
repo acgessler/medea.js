@@ -19,7 +19,8 @@ describe("medea.core", function() {
 	beforeEach(function() {
 		ok = false;
     	dom_element = 'canvas';
-    	medea = new medealib.Context(dom_element, {}, [], function() {
+    	medealib.CreateContext(dom_element, {}, [], function(_medea) {
+    		medea = _medea;
 			ok = true;
 		},
 		function() {
@@ -223,6 +224,9 @@ describe("medea.core", function() {
 		expect(medea.IsStopMarkerSet()).toBeFalsy();
 		expect(count_2).toBe(0);
 		expect(stats.count_frames).toBe(11);
+	});
+
+	it("should correctly call debug hooks", function () {
 	});
 
 	it("should correctly call debug hooks", function () {

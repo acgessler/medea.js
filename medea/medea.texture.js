@@ -10,9 +10,9 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 	"use strict";
 	var medea = this, gl = medea.gl;
 
-	medea._initMod('filesystem');
-	medea._initMod('imagestream');
-	medea._initMod('nativeimagepool');
+	
+	
+	
 
 	// check for presence of the EXT_texture_filter_anisotropic extension,
 	// which enables us to use anistropic filtering.
@@ -412,7 +412,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 	medea.GetDefaultTexture = function() {
 		if (!default_texture ) {
 			// TODO: use signal color for debug builds
-			medea._initMod('dummytexture');
+			
 			default_texture = new medea.DummyTexture([0.3,0.3,0.3,1.0]);
 		}
 		return default_texture;

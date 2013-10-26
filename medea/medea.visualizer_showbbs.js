@@ -33,7 +33,7 @@ medealib.define('visualizer_showbbs',[ 'visualizer','material','frustum'],functi
 		}
 	};
 
-	medea._initMod('visualizer');
+	
 	var VisualizerShowBBs = medea.Visualizer.extend({
 
 		init : function(name, draw_range, draw_nodes, show_cull_state) {

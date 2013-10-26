@@ -11,8 +11,8 @@ medealib.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function
 	"use strict";
 	var medea = this;
 
-	medea._initMod('terraintile');
-	medea._initMod('worker_terrain');
+	
+	
 
 
 	medea.TERRAIN_MATERIAL_ENABLE_VERTEX_FETCH = 0x1;
@@ -807,7 +807,7 @@ medealib.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function
 	medea.TerrainNode = medea.Node.extend({
 
 		init : function(name, data, settings) {
-			medea.Merge(settings,TerrainDefaultSettings,this);
+			medealib.Merge(settings,TerrainDefaultSettings,this);
 			this._super(name, medea.NODE_FLAG_NO_ROTATION | medea.NODE_FLAG_NO_SCALING);
 
 			if(this.use_worker) {
