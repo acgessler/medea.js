@@ -23,7 +23,7 @@ medealib.define('filesystem',[],function(undefined) {
 
 
 	// find root location for remote files
-	var settings_root = medea.GetSettings()['dataroot'] || 'data';
+	var settings_root = medea.GetSettings().dataroot || 'data';
 	if (settings_root.charAt(settings_root.length-1) !== '/') {
 		settings_root += '/';
 	}

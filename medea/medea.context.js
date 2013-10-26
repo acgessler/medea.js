@@ -62,6 +62,37 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	medeactx.VISIBLE_ALL = 0x1;
 	medeactx.VISIBLE_PARTIAL = 0x2;
 
+
+	// context state and statistics 
+	medeactx.settings = settings || {};
+	medeactx.settings.fps = medeactx.settings.fps || 60;
+	medeactx.wireframe = false;
+
+	medeactx.statistics = {
+		  count_frames : 0
+		, smoothed_fps : -1
+		, exact_fps    : -1
+		, min_fps      : -1
+		, max_fps      : -1
+		, primitives_frame 	: 0
+		, vertices_frame 	: 0
+		, batches_frame : 0
+	};
+
+	medeactx.dtacc = 0.0;
+	medeactx.dtcnt = 0;
+	medeactx.dtmin_fps = 1e6;
+	medeactx.dtmax_fps = 0;
+
+	medeactx.tick_callbacks = {};
+	medeactx.stop_asap = false;
+
+	medeactx.frame_flags = 0;
+	medeactx.debug_panel = null;
+
+	medeactx.statepool = {};
+	medeactx._workers = {};
+
 	
 	var _modules_loaded = {};
 
@@ -455,7 +486,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 				return false;
 			}
 
-			medea.FetchMods('worker_base', function() {
+			medea.LoadModules('worker_base', function() {
 				var source = [medea.GetModSource('worker_base'),'\n',medea.GetModSource(name )]
 				,	bb
 				,	worker 
@@ -535,9 +566,9 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	medeactx._GetSet = function(what) {
 		return function(f) {
 			if (f === undefined) {
-				return medeactx[what];
+				return this[what];
 			}
-			medeactx[what] = f;
+			this[what] = f;
 		};
 	};
 
@@ -628,35 +659,6 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	function _init_level_1() {
 		medeactx.cached_cw = medeactx.canvas.width, medeactx.cached_ch = medeactx.canvas.height;
 
-		medeactx.settings = settings || {};
-		medeactx.settings.fps = medeactx.settings.fps || 60;
-		medeactx.wireframe = false;
-
-		medeactx.statistics = {
-			  count_frames : 0
-			, smoothed_fps : -1
-			, exact_fps    : -1
-			, min_fps      : -1
-			, max_fps      : -1
-			, primitives_frame 	: 0
-			, vertices_frame 	: 0
-			, batches_frame : 0
-		};
-
-		medeactx.dtacc = 0.0;
-		medeactx.dtcnt = 0;
-		medeactx.dtmin_fps = 1e6;
-		medeactx.dtmax_fps = 0;
-
-		medeactx.tick_callbacks = {};
-		medeactx.stop_asap = false;
-
-		medeactx.frame_flags = 0;
-		medeactx.debug_panel = null;
-
-		medeactx.statepool = {};
-		medeactx._workers = {};
-
 		// always allocate a default root node for the visual scene
 		medeactx.scene_root = medeactx.CreateNode("root");
 
@@ -671,6 +673,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	// ------------------------------------------------------------------------
 	// initialization
 	(function() {
+
 		// collect initial dependencies - for example the scenegraph module and the mathlib is always needed
 		var _initial_deps = ['node','viewport'];
 		var _initial_pre_deps = []; 

@@ -55,7 +55,7 @@ medealib.define('sceneloader',['filesystem', 'material'],function(undefined) {
 		}
 			
 		// XXX we need better (read: some) error handling here
-		medea._FetchDeps('sceneloader_'+format_hint,function() {
+		medea.LoadModules('sceneloader_'+format_hint,function() {
 				medea['_LoadScene_'+format_hint](src, anchor, callback, material_resolver);
 		});
 	};

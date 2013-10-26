@@ -8,15 +8,11 @@
 
 
 
-
-
 medealib.define('camcontroller',['entity','input'],function(undefined) {
 	"use strict";
 	var medea = this;
 
-	
 
-	
 	 // mouse movements are always tracked
 	medea.CAMCONTROLLER_MOUSE_STYLE_ALWAYS = 0x1;
 

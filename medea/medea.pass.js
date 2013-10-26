@@ -532,7 +532,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 				// #ifdef DEBUG
 				medealib.LogDebug('create texture for shader uniform with string value: ' + k + ', ' + val);
 				// #endif
-				medea.FetchMods(['texture'], function() {
+				medea.LoadModules(['texture'], function() {
 					// see note above for why this.constants[k] is not changed
 					val = medea.CreateTexture(val);
 				});
@@ -542,7 +542,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 				// #ifdef DEBUG
 				medealib.LogDebug('create lod texture for shader uniform with string value: ' + k + ', ' + val);
 				// #endif
-				medea.FetchMods(['lodtexture'], function() {
+				medea.LoadModules(['lodtexture'], function() {
 					// see note above for why this.constants[k] is not changed
 					val = medea.CreateLODTexture(val);
 				});
