@@ -6,12 +6,12 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('renderer',['renderqueue'],function(undefined) {
+medealib.define('renderer',['renderqueue'],function(undefined) {
 	"use strict";
 
-	medea._initMod('renderqueue');
+	var medea = this;
 
-	medea.Renderer = medea.Class.extend({
+	medea.Renderer = medealib.Class.extend({
 		rq : null,
 		visualizers : null,
 

@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],function(undefined) {
+medealib.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -16,9 +16,9 @@ medea.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],func
 		'posx','negx','posy','negy','posz','negz'
 	];
 
-	medea._initMod('filesystem');
-	medea._initMod('imagestream');
-	medea._initMod('nativeimagepool');
+	
+	
+	
 
 	medea.CubeTexture = medea.Resource.extend( {
 
@@ -69,8 +69,8 @@ medea.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],func
 			// cube textures must be POTs and all faces must be squares. Anything else
 			// doesn't make sense unlike for 2D textures.
 			// #ifdef DEBUG
-			medea.DebugAssert(w === h && medea._IsPow2(w) && medea._IsPow2(h),'cube texture faces must be squared and POTs');
-			medea.DebugAssert(this.counter === 6 || (w === this.width && h === this.height),'cube texture faces must be all of the same size');
+			medealib.DebugAssert(w === h && medea._IsPow2(w) && medea._IsPow2(h),'cube texture faces must be squared and POTs');
+			medealib.DebugAssert(this.counter === 6 || (w === this.width && h === this.height),'cube texture faces must be all of the same size');
 			// #endif
 
 			this.width = this.glwidth = w;
@@ -84,7 +84,7 @@ medea.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],func
 					this._Upload();
 				}
 
-				medea.LogDebug("successfully loaded cube texture " + this.GetSource());
+				medealib.LogDebug("successfully loaded cube texture " + this.GetSource());
 			}
 		},
 

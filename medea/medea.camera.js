@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('camera',['statepool'],function() {
+medealib.define('camera',['statepool'],function() {
 	"use strict";
 	var medea = this;
 
@@ -164,7 +164,7 @@ medea.define('camera',['statepool'],function() {
 			var aspect = this.aspect;
 			if (aspect === undefined) {
 				// #if DEBUG
-				medea.DebugAssert(!!this.viewport,"aspect may only be omitted while the camera is assigned to a viewport");
+				medealib.DebugAssert(!!this.viewport,"aspect may only be omitted while the camera is assigned to a viewport");
 				// #endif
 
 				aspect = this.viewport.GetAspect();

@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('entity',[],function() {
+medealib.define('entity',[],function() {
 	"use strict";
 	var medea = this;
 
@@ -16,7 +16,7 @@ medea.define('entity',[],function() {
 	medea.ENTITY_UPDATE_WAS_REMOVED = 0x8;
 	
 
-	medea.Entity = medea.Class.extend({
+	medea.Entity = medealib.Class.extend({
 		name : "",
 		bb : null,
 		tag : null,
@@ -47,7 +47,7 @@ medea.define('entity',[],function() {
 					this._AutoGenBB();
 				}
 				// #ifdef DEBUG
-				medea.DebugAssert(!!this.bb,'failed to generate BB for entity');
+				medealib.DebugAssert(!!this.bb,'failed to generate BB for entity');
 				// #endif
 				return this.bb;
 			}

@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('dummytexture',['filesystem'],function(undefined) {
+medealib.define('dummytexture',['filesystem'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -36,7 +36,7 @@ medea.define('dummytexture',['filesystem'],function(undefined) {
 			// #endif
 
 			// #ifdef LOG
-			medea.LogDebug("Create dummy 1x1 texture with color: " + color);
+			medealib.LogDebug("Create dummy 1x1 texture with color: " + color);
 			// #endif
 		},
 
@@ -78,7 +78,7 @@ medea.define('dummytexture',['filesystem'],function(undefined) {
 		}
 
 		// #ifdef LOG
-		medea.LogDebug("neutral texture name not recognized: " + id);
+		medealib.LogDebug("neutral texture name not recognized: " + id);
 		// #endif
 
 		return medea.CreateDefaultTexture();

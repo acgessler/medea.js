@@ -9,7 +9,7 @@
 try {
 	medea; // this should throw ReferenceError etc. from within a web worker
 
-	medea.define('worker_base',[], function(undefined) {
+	medealib.define('worker_base',[], function(undefined) {
 	});
 }
 catch (e) {
@@ -63,7 +63,7 @@ catch (e) {
 			});
 		}
 		else {
-			medea.DebugAssert(false,'command ' + call + ' not recognized');
+			medealib.DebugAssert(false,'command ' + call + ' not recognized');
 		}
 	};
  }

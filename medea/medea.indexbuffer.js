@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('indexbuffer',[],function(undefined) {
+medealib.define('indexbuffer',[],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -25,7 +25,7 @@ medea.define('indexbuffer',[],function(undefined) {
 
 
 	// class IndexBuffer
-	medea.IndexBuffer = medea.Class.extend({
+	medea.IndexBuffer = medealib.Class.extend({
 
 		// Id of underlying OpenGl buffer object
 		buffer: -1,
@@ -53,7 +53,7 @@ medea.define('indexbuffer',[],function(undefined) {
 
 			// #ifdef DEBUG
 			if (this.flags & medea.INDEXBUFFER_LARGE_MESH) {
-				medea.DebugAssert('32 bit indices not currently supported');
+				medealib.DebugAssert('32 bit indices not currently supported');
 			}
 			// #endif
 
@@ -150,12 +150,12 @@ medea.define('indexbuffer',[],function(undefined) {
 			indices = indices.GetSourceData();
 			
 			// #ifdef DEBUG
-			medea.DebugAssert(!!indices, 'source index buffer must specify medea.INDEXBUFFER_PRESERVE_CREATION_DATA');
+			medealib.DebugAssert(!!indices, 'source index buffer must specify medea.INDEXBUFFER_PRESERVE_CREATION_DATA');
 			// #endif
 		}
 
 		// #ifdef DEBUG
-		medea.DebugAssert(indices.length % 3 === 0, 'source index count must be a multiple of 3');
+		medealib.DebugAssert(indices.length % 3 === 0, 'source index count must be a multiple of 3');
 		// #endif
 
 		var tri_count = indices.length / 3

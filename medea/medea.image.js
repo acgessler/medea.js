@@ -6,14 +6,14 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('image',['filesystem', 'nativeimagepool'],function(undefined) {
+medealib.define('image',['filesystem', 'nativeimagepool'],function(undefined) {
 	"use strict";
 	var medea = this;
 
 	medea.IMAGE_FLAG_USER = 0x1000;
 
-	medea._initMod('filesystem');
-	medea._initMod('nativeimagepool');
+	
+	
 
 	medea.Image = medea.Resource.extend( {
 
@@ -57,7 +57,7 @@ medea.define('image',['filesystem', 'nativeimagepool'],function(undefined) {
 
 			// mark this resource as complete
 			this._super();
-			medea.LogDebug("successfully loaded raw image " + this.GetSource());
+			medealib.LogDebug("successfully loaded raw image " + this.GetSource());
 		},
 		// #endif
 		
@@ -70,8 +70,8 @@ medea.define('image',['filesystem', 'nativeimagepool'],function(undefined) {
 
 		GetData : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.IsComplete(),'texture not loaded yet');
-			medea.DebugAssert(!!this.img,'image data not present, DisposeData() was called before');
+			medealib.DebugAssert(this.IsComplete(),'texture not loaded yet');
+			medealib.DebugAssert(!!this.img,'image data not present, DisposeData() was called before');
 			// #endif
 
 			if (!this.raw) {
@@ -99,14 +99,14 @@ medea.define('image',['filesystem', 'nativeimagepool'],function(undefined) {
 
 		IsPowerOfTwo : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: image not loaded yet');
+			medealib.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: image not loaded yet');
 			// #endif
 			return this.ispot;
 		},
 
 		IsSquare : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.IsComplete(),'IsSquare() ist not available: image not loaded yet');
+			medealib.DebugAssert(this.IsComplete(),'IsSquare() ist not available: image not loaded yet');
 			// #endif
 			return this.width === this.height;
 		},

@@ -138,11 +138,10 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 			path = os.path.join(input_folder, get_full_file_name(dep));
 			print('collating: ' + path)
 
-
 			with open(path, 'rt') as inp:
 				outp.write(preprocessor.run(inp.read(), input_folder))
-				if '.js' in dep:
-					outp.write('medea._markScriptAsLoaded("'+ dep +'");')
+				#if '.js' in dep:
+				#	outp.write('medea._markScriptAsLoaded("'+ dep +'");')
 				outp.write('\n')
 
 		# embed resource files
@@ -152,7 +151,6 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 				print('embedding: ' + v + ' as ' + k)
 				outp.write(include_resource(k,v))
 
-		outp.write('medea._initLibrary();');
 		outp.write('delete window.medea_is_compiled;');
 
 	topo_order = [get_full_file_name(e) for e in topo_order]

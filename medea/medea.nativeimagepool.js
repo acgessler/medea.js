@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('nativeimagepool',[],function(undefined) {
+medealib.define('nativeimagepool',[],function(undefined) {
 	"use strict";
 	var medea = this;
 
@@ -26,7 +26,7 @@ medea.define('nativeimagepool',[],function(undefined) {
 
 	medea._ReturnNativeImageToPool = function(image) {
 		// #ifdef DEBUG
-		medea.DebugAssert(image instanceof Image, 'expected native Image object');
+		medealib.DebugAssert(image instanceof Image, 'expected native Image object');
 		// #endif
 
 		// reset the src attribute in the hope that this frees memory allocated
@@ -35,7 +35,7 @@ medea.define('nativeimagepool',[],function(undefined) {
 
 		// #ifdef DEBUG
 		image.onload = function() {
-			medea.DebugAssert(false, "onload() called for pooled Image");
+			medealib.DebugAssert(false, "onload() called for pooled Image");
 		};
 		// #endif
 

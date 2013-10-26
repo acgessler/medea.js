@@ -8,25 +8,23 @@
 
 
 
- // mouse movements are always tracked
-medea.CAMCONTROLLER_MOUSE_STYLE_ALWAYS = 0x1;
-
- // mouse movements are tracked iff ctrl (or the key it maps to) is pressed
-medea.CAMCONTROLLER_MOUSE_STYLE_ON_CTRL = 0x2;
-
- // mouse movements are tracked iff ctrl (or the key it maps to) is not pressed
-medea.CAMCONTROLLER_MOUSE_STYLE_OFF_CTRL = 0x3;
-
-// mouse movements are tracked iff the left mouse button is pressed
-medea.CAMCONTROLLER_MOUSE_STYLE_ON_LEFT_MBUTTON = 0x4;
-
-
-
-medea.define('camcontroller',['entity','input'],function(undefined) {
+medealib.define('camcontroller',['entity','input'],function(undefined) {
 	"use strict";
 	var medea = this;
 
-	medea._initMod('entity');
+
+	 // mouse movements are always tracked
+	medea.CAMCONTROLLER_MOUSE_STYLE_ALWAYS = 0x1;
+
+	 // mouse movements are tracked iff ctrl (or the key it maps to) is pressed
+	medea.CAMCONTROLLER_MOUSE_STYLE_ON_CTRL = 0x2;
+
+	 // mouse movements are tracked iff ctrl (or the key it maps to) is not pressed
+	medea.CAMCONTROLLER_MOUSE_STYLE_OFF_CTRL = 0x3;
+
+	// mouse movements are tracked iff the left mouse button is pressed
+	medea.CAMCONTROLLER_MOUSE_STYLE_ON_LEFT_MBUTTON = 0x4;
+
 	 
 	
 	medea.CamController = medea.Entity.extend({
@@ -125,7 +123,7 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 					return medea.IsMouseDown();
 			}
 			// #ifdef DEBUG
-			medea.DebugAssert(false, 'mouse style not recognized: ' + this.mouse_style);
+			medealib.DebugAssert(false, 'mouse style not recognized: ' + this.mouse_style);
 			// #endif 
 		}
 	});
@@ -495,7 +493,7 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 			return new medea.RotateXCamController(enabled);
 		}
 		else {
-			medea.DebugAssert("camcontroller mode not recognized: " + kind);
+			medealib.DebugAssert("camcontroller mode not recognized: " + kind);
 			return null;
 		}
 	};

@@ -5,7 +5,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('renderqueue',['renderstate'],function(undefined) {
+medealib.define('renderqueue',['renderstate'],function(undefined) {
 	"use strict";
 	var medea = this;
 
@@ -27,7 +27,7 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 
 
 	// class DistanceSorter
-	this.DistanceSorter = medea.Class.extend({
+	this.DistanceSorter = medealib.Class.extend({
 
 		Run : function(entries) {
 			entries.sort(function(a,b) {
@@ -38,7 +38,7 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 
 
 	// class MaterialSorter
-	this.MaterialSorter = medea.Class.extend({
+	this.MaterialSorter = medealib.Class.extend({
 
 		Run : function(entries) {
 			entries.sort(function(a,b) {
@@ -48,7 +48,7 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 	});
 
 	// class NoSorter
-	this.NoSorter = medea.Class.extend({
+	this.NoSorter = medealib.Class.extend({
 
 		Run : function(entries) {
 			// intentionally a no-op
@@ -57,7 +57,7 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 
 
 	// class RenderQueue
-	this.RenderQueue = medea.Class.extend({
+	this.RenderQueue = medealib.Class.extend({
 
 		init: function(sorter,default_state) {
 			this.entries = [];
@@ -94,7 +94,7 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 
 
 	// class RenderQueueManager
-	this.RenderQueueManager = medea.Class.extend({
+	this.RenderQueueManager = medealib.Class.extend({
 
 		init : function(name) {
 			// allocates queues, by default all queues have no further configuration
@@ -108,7 +108,7 @@ medea.define('renderqueue',['renderstate'],function(undefined) {
 		Push : function(idx,renderable) {
 // #ifdef DEBUG
 			if (idx < 0 || idx >= this.queues.length) {
-				medea.NotifyFatal("render queue does not exist: " + idx);
+				medealib.NotifyFatal("render queue does not exist: " + idx);
 				return;
 			}
 // #endif

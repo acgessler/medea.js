@@ -6,14 +6,14 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('shader',['filesystem','cpp.js'],function(undefined) {
+medealib.define('shader',['filesystem','cpp.js'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
 	medea.SHADER_TYPE_PIXEL = gl.FRAGMENT_SHADER;
 	medea.SHADER_TYPE_VERTEX = gl.VERTEX_SHADER;
 
-	medea._initMod('filesystem');
+	
 
 	// counter for getting shader ids from
 	var shader_id_counter = 0;
@@ -48,7 +48,7 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 				: medea.SHADER_TYPE_VERTEX;
 
 			this.shader = 0;
-			this.defines = medea.Merge(defines || {},default_defines);
+			this.defines = medealib.Merge(defines || {},default_defines);
 
 			this.source_cache_name = from_source && !cache_key ? null :
 				(from_source ? cache_key : src);
@@ -93,7 +93,7 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 
 		OnDelayedInit : function(data) {
 // #ifdef DEBUG
-			medea.DebugAssert(typeof data === "string","got unexpected argument, perhaps "
+			medealib.DebugAssert(typeof data === "string","got unexpected argument, perhaps "
 				+ "the source for the shader was not a single resource?"
 			);
 // #endif
@@ -162,7 +162,7 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 
 				completion_func : function(data) {
 					// #ifdef DEBUG
-					medea.DebugAssert(!!data,'unexpected null');
+					medealib.DebugAssert(!!data,'unexpected null');
 					// #endif
 
 					var arr = [];
@@ -188,7 +188,7 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 					gl.compileShader(s);
 
 					if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-						medea.NotifyFatal("failure compiling shader " +  self.src
+						medealib.NotifyFatal("failure compiling shader " +  self.src
 							+ ", error log: " + gl.getShaderInfoLog(s)
 						);
 						return;
@@ -202,13 +202,13 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 						waiters[i](entry);
 					}
 
-					medea.LogDebug("successfully compiled shader "
+					medealib.LogDebug("successfully compiled shader "
 						+ self.src
 					);
 				},
 
 				error_func : function(message) {
-					medea.NotifyFatal("failure preprocessing shader "
+					medealib.NotifyFatal("failure preprocessing shader "
 						+ ": " + message
 					);
 					return;
@@ -217,7 +217,7 @@ medea.define('shader',['filesystem','cpp.js'],function(undefined) {
 				pragma_func : function(pragma_text) {
 					var r = re_toplevel.exec(pragma_text);
 					if (!r) {
-						medea.NotifyFatal("syntax error in #pragma toplevel: " + pragma_text);
+						medealib.NotifyFatal("syntax error in #pragma toplevel: " + pragma_text);
 						return null;
 					}
 

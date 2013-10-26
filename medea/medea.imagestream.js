@@ -6,11 +6,11 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('imagestream',['nativeimagepool','filesystem'],function(undefined) {
+medealib.define('imagestream',['nativeimagepool','filesystem'],function(undefined) {
 	"use strict";
 	var medea = this;
 
-	medea._initMod('nativeimagepool');
+	
 
 	var MAX_SIMULTANEOUS_REQUESTS = 12;
 

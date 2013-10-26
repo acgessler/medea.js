@@ -7,12 +7,12 @@
  */
 
  // note: json2.js may be needed for contemporary browsers with incomplete HTML5 support
-medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(undefined) {
+medealib.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(undefined) {
 	"use strict";
 	var medea = this;
 
-	medea._initMod('terraintile');
-	medea._initMod('worker_terrain');
+	
+	
 
 
 	medea.TERRAIN_MATERIAL_ENABLE_VERTEX_FETCH = 0x1;
@@ -49,7 +49,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 		no_mens : 0.1,
 	};
 
-	var DefaultTerrainDataProvider = medea.Class.extend({
+	var DefaultTerrainDataProvider = medealib.Class.extend({
 
 		desc : null,
 
@@ -59,17 +59,17 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 			}
 			catch(e) {
 				// #ifdef DEBUG
-				medea.DebugAssert("failed to read terrain description from JSON, JSON.parse failed: " + e);
+				medealib.DebugAssert("failed to read terrain description from JSON, JSON.parse failed: " + e);
 				// #endif
 				return;
 			}
 
 			// #ifdef DEBUG
-			medea.DebugAssert(medea._IsPow2(this.desc.unitbase) && this.desc.unitbase >= 4,
+			medealib.DebugAssert(medea._IsPow2(this.desc.unitbase) && this.desc.unitbase >= 4,
 				"unitbase for terrain must be power of two >= 4");
-			medea.DebugAssert(medea._IsPow2(this.desc.width),
+			medealib.DebugAssert(medea._IsPow2(this.desc.width),
 				"terrain width must be power of two");
-			medea.DebugAssert(medea._IsPow2(this.desc.height),
+			medealib.DebugAssert(medea._IsPow2(this.desc.height),
 				"terrain height must be power of two");
 			// #endif
 
@@ -127,7 +127,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 			}
 
 			// #ifdef DEBUG
-			medea.DebugAssert(h !== undefined,'out of bounds access');
+			medealib.DebugAssert(h !== undefined,'out of bounds access');
 			// #endif
 			return h * this.desc.scale[1];
 		},
@@ -178,13 +178,13 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 				var wx = this.desc.size[0] / (1 << lod), hx = this.desc.size[1] / (1 << lod);
 				match = this._FindLOD(wx,hx);
 				// #ifdef DEBUG
-				medea.DebugAssert(!!match,"LOD not present: " + lod);
+				medealib.DebugAssert(!!match,"LOD not present: " + lod);
 				// #endif
 			}
 
 			var real_scale = match.size[0]/this.desc.size[0];
 			// #ifdef DEBUG
-			medea.DebugAssert(real_scale == match.size[1]/this.desc.size[1],
+			medealib.DebugAssert(real_scale == match.size[1]/this.desc.size[1],
 				"LOD images with different aspect ratios than the main terrain are not supported");
 			// #endif
 
@@ -224,14 +224,14 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 				var wx = sx / ilod, hx = sy / ilod;
 				match = this._FindLOD(wx,hx);
 				// #ifdef DEBUG
-				medea.DebugAssert(!!match,"LOD not present: " + lod);
+				medealib.DebugAssert(!!match,"LOD not present: " + lod);
 				// #endif
 			}
 
 			var real_scale = match.size[0]/sx;
 
 			// #ifdef DEBUG
-			medea.DebugAssert(real_scale == match.size[1]/sy,
+			medealib.DebugAssert(real_scale == match.size[1]/sy,
 				"LOD images with different aspect ratios than the main terrain are not supported");
 			// #endif
 
@@ -301,7 +301,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 
 		_FindLOD : function(w,h) {
 			// #ifdef DEBUG
-			medea.DebugAssert(w <= this.GetWidth() && h <= this.GetHeight(),
+			medealib.DebugAssert(w <= this.GetWidth() && h <= this.GetHeight(),
 				'width and height may not exceed terrain dimensions');
 			// #endif
 			if (!w || !h) {
@@ -428,7 +428,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 
 		_RegisterMap : function(map) {
 			// #ifdef DEBUG
-			medea.DebugAssert(!!map._cached_img,"expect image data to be loaded: " + map.img);
+			medealib.DebugAssert(!!map._cached_img,"expect image data to be loaded: " + map.img);
 			// #endif
 
 			this.maps_bysize[map.size[0] + '_'+ map.size[1]] = map;
@@ -488,7 +488,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 			var hf = medea._HeightfieldFromOddSidedHeightmapPart(img, x,y,w,h,ys, xzs);
 			if (xofs || yofs || yofsr || xofsr) {
 				// #ifdef LOG
-				medea.LogDebug('Out of range: xofs=' + xofs + ', yofs=' + yofs +
+				medealib.LogDebug('Out of range: xofs=' + xofs + ', yofs=' + yofs +
 					', xofsr=' + xofsr+ ', yofsr=' + yofsr);
 				// #endif
 
@@ -532,7 +532,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 	};
 
 
-	var TerrainRing = medea.Class.extend({
+	var TerrainRing = medealib.Class.extend({
 
 		init : function(terrain,lod,cam) {
 			this.terrain = terrain;
@@ -675,7 +675,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 				}
 
 				// #ifdef LOG
-				medea.LogDebug('(re-)generate TerrainTile: lod=' + outer.lod + ', startx='
+				medealib.LogDebug('(re-)generate TerrainTile: lod=' + outer.lod + ', startx='
 					+ outer.startx + ', starty=' + outer.starty
 					+ ', posx=' + ppos[0] + ', posy=' + ppos[2]);
 				// #endif
@@ -717,7 +717,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 			// finish loading so we can shrink again.
 			if (extend) {
 				// #ifdef LOG
-				medea.LogDebug('extending indices for lod ' + this.lod
+				medealib.LogDebug('extending indices for lod ' + this.lod
 					+ ' down to cover lod ' + n + ' as well');
 				// #endif
 
@@ -737,7 +737,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 							}
 							if (m === nn) {
 								// #ifdef LOG
-								medea.LogDebug('shrinking indices for ' + outer.lod
+								medealib.LogDebug('shrinking indices for ' + outer.lod
 									+ ' again now that lod ' + nn + ' is present');
 								// #endif
 
@@ -768,7 +768,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 				(indices,w,h,whs,hhs,wh,hh);
 
 			// #ifdef LOG
-			medea.LogDebug('populate terrain IB cache: ' + ib_key);
+			medealib.LogDebug('populate terrain IB cache: ' + ib_key);
 			// #endif
 
 			return terrain_ib_cache[ib_key] = medea.CreateIndexBuffer(indices.subarray(0, c));
@@ -807,7 +807,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 	medea.TerrainNode = medea.Node.extend({
 
 		init : function(name, data, settings) {
-			medea.Merge(settings,TerrainDefaultSettings,this);
+			medealib.Merge(settings,TerrainDefaultSettings,this);
 			this._super(name, medea.NODE_FLAG_NO_ROTATION | medea.NODE_FLAG_NO_SCALING);
 
 			if(this.use_worker) {
@@ -945,7 +945,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 
 		_GetCamEntry : function(cam) {
 			// #ifdef DEBUG
-			medea.DebugAssert(!!this.cameras[cam.id],'camera doesn\'t exist');
+			medealib.DebugAssert(!!this.cameras[cam.id],'camera doesn\'t exist');
 			// #endif
 
 			return this.cameras[cam.id];
@@ -953,7 +953,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 
 		_AddCamera : function(cam) {
 			// #ifdef DEBUG
-			medea.DebugAssert(!this.cameras[cam.id],'camera exists already');
+			medealib.DebugAssert(!this.cameras[cam.id],'camera exists already');
 			// #endif
 
 			var c = this.cameras[cam.id] = {};
@@ -966,13 +966,13 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 			this._InitRings(c);
 
 			// #ifdef LOG
-			medea.LogDebug('terrain: creating terrain data for camera ' + cam.Name());
+			medealib.LogDebug('terrain: creating terrain data for camera ' + cam.Name());
 			// #endif LOG
 		},
 
 		_RemoveCamera : function(cam) {
 			// #ifdef DEBUG
-			medea.DebugAssert(!!this.cameras[cam.id],'camera does not exist');
+			medealib.DebugAssert(!!this.cameras[cam.id],'camera does not exist');
 			// #endif
 
 			var rings = this.cameras[cam.id].rings;
@@ -1003,7 +1003,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 				var cam = this.cameras[k];
 				if (cam.alive !== undefined && (fc-cam.alive > this.camera_timeout || cam.cam.GetViewport() === null)) {
 					// #ifdef LOG
-					medea.LogDebug('terrain: dropping data for camera ' + cam.Name());
+					medealib.LogDebug('terrain: dropping data for camera ' + cam.Name());
 					// #endif LOG
 					disp.push(k);
 				}
@@ -1047,7 +1047,7 @@ medea.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function(un
 					var res = e.data;
 
 					var job = outer.pending_jobs[res.job_id];
-					medea.DebugAssert(!!job,'job not in waitlist');
+					medealib.DebugAssert(!!job,'job not in waitlist');
 
 					delete outer.pending_jobs[res.job_id];
 					job(res.result);

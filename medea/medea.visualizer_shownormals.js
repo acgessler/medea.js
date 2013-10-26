@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('visualizer_shownormals',[ 'visualizer','material'],function() {
+medealib.define('visualizer_shownormals',[ 'visualizer','material'],function() {
 	"use strict";
 	var medea = this;
 	var ordinal = 10;
@@ -28,7 +28,7 @@ medea.define('visualizer_shownormals',[ 'visualizer','material'],function() {
 		[0.3,0.1,0.7,1.0]
 	];
 
-	medea._initMod('visualizer');
+	
 	var VisualizerShowNormals = medea.Visualizer.extend({
 
 		init : function(name, draw_range, full_ts) {

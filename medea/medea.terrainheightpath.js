@@ -6,11 +6,11 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('terrainheightpath',['entity'],function(undefined) {
+medealib.define('terrainheightpath',['entity'],function(undefined) {
 	"use strict";
 	var medea = this;
 
-	medea._initMod('entity');
+	
 
 	var TerrainHeightPath = medea.Entity.extend(
 	{
@@ -21,7 +21,7 @@ medea.define('terrainheightpath',['entity'],function(undefined) {
 			this.seen = {};
 
 // #ifdef DEBUG
-			medea.DebugAssert(this.terrain instanceof medea.TerrainNode, "need valid terrain node");
+			medealib.DebugAssert(this.terrain instanceof medea.TerrainNode, "need valid terrain node");
 // #endif
 		},
 

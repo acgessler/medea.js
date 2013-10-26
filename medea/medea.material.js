@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('material',['pass'],function(undefined) {
+medealib.define('material',['pass'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -19,7 +19,7 @@ medea.define('material',['pass'],function(undefined) {
 
 
 	// class Material
-	medea.Material = medea.Class.extend({
+	medea.Material = medealib.Class.extend({
 		name : "",
 		mat_gen : null,
 
@@ -43,7 +43,7 @@ medea.define('material',['pass'],function(undefined) {
 			}
 // #ifdef DEBUG
 			if (!this.passes) {
-				medea.DebugAssert("need at least one pass for a material to be complete");
+				medealib.DebugAssert("need at least one pass for a material to be complete");
 			}
 // #endif
 		},
@@ -58,7 +58,7 @@ medea.define('material',['pass'],function(undefined) {
 			}
 			// #ifdef DEBUG
 			else if (n > this.passes.length) {
-				medea.DebugAssert('pass index out of range, cannot add pass if there is no pass that preceedes it: ' + n);
+				medealib.DebugAssert('pass index out of range, cannot add pass if there is no pass that preceedes it: ' + n);
 				return;
 			}
 			// #endif

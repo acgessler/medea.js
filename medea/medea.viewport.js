@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('viewport',['camera','renderqueue','statepool'],function(undefined) {
+medealib.define('viewport',['camera','renderqueue','statepool'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -17,7 +17,7 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 
 
 	// class Viewport
-	medea.Viewport = medea.Class.extend({
+	medea.Viewport = medealib.Class.extend({
 		name:"",
 		w : 1.0,
 		h : 1.0,
@@ -203,7 +203,7 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 
 		GetAspect: function() {
 			var c = medea.canvas;
-			medea.DebugAssert(c.width !== 0 && c.height !== 0, 'canvas width and height may not be 0');
+			medealib.DebugAssert(c.width !== 0 && c.height !== 0, 'canvas width and height may not be 0');
 			return (this.w*c.width)/(this.h*c.height);
 		},
 

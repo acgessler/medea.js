@@ -6,12 +6,12 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStatsDisplay.js', 'dat.gui.min.js'],function() {
+medealib.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStatsDisplay.js', 'dat.gui.min.js'],function() {
 	"use strict";
 	var medea = this;
 
 
-	this.DebugPanel = medea.Class.extend({
+	this.DebugPanel = medealib.Class.extend({
 
 		  where 						: null
 		, win 							: null

@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('skybox',['material','standardmesh','cubetexture'],function(undefined) {
+medealib.define('skybox',['material','standardmesh','cubetexture'],function(undefined) {
 	"use strict";
 	var medea = this;
 
@@ -20,7 +20,7 @@ medea.define('skybox',['material','standardmesh','cubetexture'],function(undefin
 
 		mesh.BB(medea.BB_INFINITE);
 
-		medea._initMod('renderqueue');
+		
 		mesh.RenderQueue(medea.RENDERQUEUE_BACKGROUND);
 		mesh.Material().Passes().forEach( function(p) {
 			p.State({

@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('materialgen',['shader','material'],function(undefined) {
+medealib.define('materialgen',['shader','material'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -47,7 +47,7 @@ medea.define('materialgen',['shader','material'],function(undefined) {
 
 
 	// class MaterialGen
-	medea.MaterialGen = medea.Class.extend({
+	medea.MaterialGen = medealib.Class.extend({
 		name : "",
 		mat_gen : null,
 
@@ -57,7 +57,7 @@ medea.define('materialgen',['shader','material'],function(undefined) {
 		Update : function(statepool, passes) {
 
 			// #ifdef DEBUG
-			medea.DebugAssert (passes.length > 1, 'not a generated pass');
+			medealib.DebugAssert (passes.length > 1, 'not a generated pass');
 			// #endif
 
 			if(passes.length === 0) {

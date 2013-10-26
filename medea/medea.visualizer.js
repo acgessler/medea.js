@@ -6,11 +6,11 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('visualizer',[],function() {
+medealib.define('visualizer',[],function() {
 	"use strict";
 	var medea = this;
 
-	this.Visualizer = medea.Class.extend({
+	this.Visualizer = medealib.Class.extend({
 		name : "",
 		ordinal: 0,
 
@@ -54,8 +54,8 @@ medea.define('visualizer',[],function() {
 	medea.CreateVisualizer = function(type, name, callback) {
 
 		var modname = 'visualizer_'+type.toLowerCase();
-		medea.FetchMods([modname],function() {
-			medea._initMod(modname);
+		medea.LoadModules([modname],function() {
+			
 			callback(medea['CreateVisualizer_' + type](name));
 		});
 	};

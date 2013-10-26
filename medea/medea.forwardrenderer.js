@@ -6,7 +6,7 @@
  * licensed under the terms and conditions of a 3 clause BSD license.
  */
 
-medea.define('forwardrenderer',['renderer'],function(undefined) {
+medealib.define('forwardrenderer',['renderer'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -29,7 +29,7 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 		'cull_face_mode' : 'back'
 	};
 
-	medea._initMod('renderer');
+	
 
 	var ForwardRenderer = medea.Renderer.extend({
 
@@ -171,7 +171,7 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 			} */
 
 			else {
-				medea.DebugAssert('unknown kind of light');
+				medealib.DebugAssert('unknown kind of light');
 			}
 
 			var lights = statepool.GetQuick(list_name);
