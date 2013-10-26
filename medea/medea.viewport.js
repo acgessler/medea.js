@@ -262,7 +262,8 @@ medealib.define('viewport',['camera','renderqueue','statepool'],function(undefin
 			this.camera._FillRenderQueues(rq, statepool);
 			renderer.Render(this, statepool);
 
-			// TODO: is calling gl.flush() beneficial - or not?
+			// calling gl.flush() empirically improves performance at 
+			// least with firefox.
 			gl.flush();
 			this.updated = false;
 		}
