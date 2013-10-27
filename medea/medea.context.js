@@ -349,91 +349,131 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 
 
 	// ------------------------------------------------------------------------
-	/** TODO: documentation 
+	/** Performs a single frame.
+	 *
+	 *  This can be used if the application would like to have fine-grained
+	 *  control on the timing of the drawing. To perform a automatic update
+	 *  & drawing loop instead, use {@link medealib.Context.Start}.
+	 *
+	 *  Doing a frame involves (in this order):
+	 *    - calling user callbacks
+	 *    - visiting the scenegraph and calling Update() on dirty nodes
+	 *    - rendering jobs to all viewports
+	 *
+	 *  @param {number} dtime Time passed since the last frame, in seconds. 
+	 *     If omitted, the time is computed as the time elapsed since the
+	 *     last call to {@link medealib.Context.DoSingleFrame}.
 	*/
 	// ------------------------------------------------------------------------
 	medeactx.DoSingleFrame = function(dtime) {
-		var debug_panel = medeactx.debug_panel;
 		if (!medeactx.CanRender()) {
 			medealib.NotifyFatal("Not ready for rendering; need a GL context and a viewport");
 			return;
 		}
 
+
+		// get time delta and detect canvas changes
+		function update_stats() {
+			// get time delta if not specified
+			if (!dtime) {
+				var old = medeactx.time || 0;
+				medeactx.time = Date.now() * 0.001;
+
+				dtime = medeactx.time - old;
+			}
+
+			// check if the canvas sized changed
+			if(medeactx.cached_cw != medeactx.canvas.width) {
+				medeactx.cached_cw = medeactx.canvas.width;
+				medeactx.frame_flags |= medeactx.FRAME_CANVAS_SIZE_CHANGED;
+			}
+			if(medeactx.cached_ch != medeactx.canvas.height) {
+				medeactx.cached_ch = medeactx.canvas.height;
+				medeactx.frame_flags |= medeactx.FRAME_CANVAS_SIZE_CHANGED;
+			}
+
+			medeactx._UpdateFrameStatistics(dtime);
+		}
+
+		// call user tick callbacks, result of false kills the frame
+		function call_user_callbacks() {
+			// call user-defined logic, operate on a copy of the dictionary just in case
+			// somebody changed its contents while we're iterating it.
+			var temp_callbacks = [];
+			for(var k in medeactx.tick_callbacks) {
+				temp_callbacks.push(medeactx.tick_callbacks[k]);
+			}
+			for(var i = 0; i < temp_callbacks.length; ++i) {
+				if(!temp_callbacks[i](dtime)) {
+					medeactx.StopNextFrame();
+					return false;
+				}
+			}
+			return true;
+		}
+
+		// perform scenegraph update 
+		function update() {
+			medeactx.VisitGraph(medeactx.scene_root,function(node) {
+				if(!node.Enabled()) {
+					return true;
+				}
+				var e = node.GetEntities();
+				// if entities return medea.ENTITY_UPDATE_WAS_REMOVED  from Update(), medeactx means they removed
+				for(var i = 0; i < e.length; ++i) {
+					if(e[i].Update(dtime,node) === medeactx.ENTITY_UPDATE_WAS_REMOVED) {
+						--i;
+					}
+				}
+
+				node.Update(dtime);
+				return true;
+			});
+		}
+
+		// dispatch collected batch jobs to our viewport(s)
+		function draw() {
+			// adjust render settings if we switched to multiple viewports or vice versa
+			if (medeactx.frame_flags & medeactx.FRAME_VIEWPORT_UPDATED) {
+				if (medeactx.GetEnabledViewportCount()>1) {
+					medeactx.gl.enable(medeactx.gl.SCISSOR_TEST);
+				}
+				else {
+					medeactx.gl.disable(medeactx.gl.SCISSOR_TEST);
+				}
+			}
+
+			// perform rendering
+			var viewports = medeactx.GetViewports();
+			for(var vn = 0; vn < viewports.length; ++vn) {
+				viewports[vn].Render(medeactx,dtime);
+			}
+		}
+
+		// putting it all together
+		function do_frame() {
+			update_stats();
+			if(!call_user_callbacks()) {
+				return;
+			}
+			update();
+			draw();
+
+			medeactx.frame_flags = 0;
+		}
+
+		// *****************
+		var debug_panel = medeactx.debug_panel;
+
 		if (debug_panel) {
 			debug_panel.BeginFrame();
 		}
 
-		// get time delta if not specified
-		if (!dtime) {
-			var old = medeactx.time || 0;
-			medeactx.time = Date.now() * 0.001;
-
-			dtime = medeactx.time - old;
-		}
-
-		// check if the canvas sized changed
-		if(medeactx.cached_cw != medeactx.canvas.width) {
-			medeactx.cached_cw = medeactx.canvas.width;
-			medeactx.frame_flags |= medeactx.FRAME_CANVAS_SIZE_CHANGED;
-		}
-		if(medeactx.cached_ch != medeactx.canvas.height) {
-			medeactx.cached_ch = medeactx.canvas.height;
-			medeactx.frame_flags |= medeactx.FRAME_CANVAS_SIZE_CHANGED;
-		}
-
-		medeactx._UpdateFrameStatistics(dtime);
-
-		// call user-defined logic, operate on a copy of the dictionary just in case
-		// somebody changed its contents while we're iterating it.
-		var temp_callbacks = [];
-		for(var k in medeactx.tick_callbacks) {
-			temp_callbacks.push(medeactx.tick_callbacks[k]);
-		}
-		for(var i = 0; i < temp_callbacks.length; ++i) {
-			if(!temp_callbacks[i](dtime)) {
-				medeactx.StopNextFrame();
-				return;
-			}
-		}
-
-		// perform update
-		medeactx.VisitGraph(medeactx.scene_root,function(node) {
-			if(!node.Enabled()) {
-				return true;
-			}
-			var e = node.GetEntities();
-			// if entities return medea.ENTITY_UPDATE_WAS_REMOVED  from Update(), medeactx means they removed
-			for(var i = 0; i < e.length; ++i) {
-				if(e[i].Update(dtime,node) === medeactx.ENTITY_UPDATE_WAS_REMOVED) {
-					--i;
-				}
-			}
-
-			node.Update(dtime);
-			return true;
-		});
-
-		// adjust render settings if we switched to multiple viewports or vice versa
-		if (medeactx.frame_flags & medeactx.FRAME_VIEWPORT_UPDATED) {
-			if (medeactx.GetEnabledViewportCount()>1) {
-				medeactx.gl.enable(medeactx.gl.SCISSOR_TEST);
-			}
-			else {
-				medeactx.gl.disable(medeactx.gl.SCISSOR_TEST);
-			}
-		}
-
-		// perform rendering
-		var viewports = medeactx.GetViewports();
-		for(var vn = 0; vn < viewports.length; ++vn) {
-			viewports[vn].Render(medeactx,dtime);
-		}
-
+		do_frame();
+	
 		if (debug_panel) {
 			debug_panel.EndFrame();
 		}
-
-		medeactx.frame_flags = 0;
 	};
 
 
