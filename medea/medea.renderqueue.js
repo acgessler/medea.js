@@ -84,8 +84,8 @@ medealib.define('renderqueue',['renderstate'],function(undefined) {
 			this.entries = [];
 		},
 
-		Sorter : medea._GetSet('sorter'),
-		DefaultState : medea._GetSet('default_state'),
+		Sorter : medealib.Property('sorter'),
+		DefaultState : medealib.Property('default_state'),
 
 		GetEntries : function() {
 			return this.entries;

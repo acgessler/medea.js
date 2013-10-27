@@ -58,8 +58,8 @@ medealib.define('camera',['statepool'],function() {
 			return this.frustum;
 		},
 
-		Culling: medea._GetSet('culling'),
-		Name: medea._GetSet('name'),
+		Culling: medealib.Property('culling'),
+		Name: medealib.Property('name'),
 
 		GetViewport : function() {
 			return this.viewport;

@@ -54,8 +54,8 @@ medealib.define('light', ['entity'],function(undefined) {
 		},
 
 
-		CastShadows : medea._GetSet('cast_shadows'),
-		ShadowMapResolutionBias : medea._GetSet('shadowmap_res_bias'),
+		CastShadows : medealib.Property('cast_shadows'),
+		ShadowMapResolutionBias : medealib.Property('shadowmap_res_bias'),
 	});
 
 

@@ -829,9 +829,9 @@ medealib.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function
 			this.AddEntity(ent);
 		},
 
-		CameraTimeout : medea._GetSet('camera_timeout'),
-		UpdateTreshold : medea._GetSet('update_treshold'),
-		NoMensLandBorder : medea._GetSet('no_mens'),
+		CameraTimeout : medealib.Property('camera_timeout'),
+		UpdateTreshold : medealib.Property('update_treshold'),
+		NoMensLandBorder : medealib.Property('no_mens'),
 
 		UseVertexFetch : function(ts) {
 			if (ts === undefined) {

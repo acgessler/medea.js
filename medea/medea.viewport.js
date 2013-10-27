@@ -83,8 +83,8 @@ medealib.define('viewport',['camera','renderqueue','statepool'],function(undefin
 		},
 
 
-		Name: medea._GetSet('name'),
-		Renderer: medea._GetSet('renderer'),
+		Name: medealib.Property('name'),
+		Renderer: medealib.Property('renderer'),
 
 		Enabled: function(f) {
 			if(f === undefined) {

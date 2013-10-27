@@ -81,7 +81,7 @@ medealib.define('material',['pass'],function(undefined) {
 			return id;
 		},
 
-		Name : medea._GetSet(this,'name'),
+		Name : medealib.Property(this,'name'),
 
 		Use: function(drawfunc, statepool, semantic, change_flags) {
 			semantic = semantic || 0xffffffff;

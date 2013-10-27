@@ -211,7 +211,7 @@ medealib.define('pass',['shader','texture'],function(undefined) {
 		},
 
 
-		Semantic: medea._GetSet('semantic'),
+		Semantic: medealib.Property('semantic'),
 
 
 		AddSemantic : function(sem) {

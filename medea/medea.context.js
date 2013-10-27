@@ -606,20 +606,6 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	/** TODO: documentation 
 	*/
 	// ------------------------------------------------------------------------
-	medeactx._GetSet = function(what) {
-		return function(f) {
-			if (f === undefined) {
-				return this[what];
-			}
-			this[what] = f;
-		};
-	};
-
-
-	// ------------------------------------------------------------------------
-	/** TODO: documentation 
-	*/
-	// ------------------------------------------------------------------------
 	medeactx._NextPow2 = function( s ){
 		// dumb way, might use the bit fiddling hack some day?
 		return Math.pow( 2, Math.ceil( Math.log( s ) / Math.log( 2 ) ) );

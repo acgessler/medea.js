@@ -406,6 +406,25 @@ var medealib = (function() {
 	};
 
 
+	// ------------------------------------------------------------------------
+	/** Construct a hybrid getter and setter for an object property.
+	 *  
+	 *  @param {String} what Name of the object property to be made accessible.
+	 *  @return {Function} A closure that, when called with no parameter,
+	 *     returns the `name` property on the `this` object, and when called 
+	 *     with a parameter, sets this property to the given value.
+	*/
+	// ------------------------------------------------------------------------
+	medealib.Property = function(what) {
+		return function(f) {
+			if (f === undefined) {
+				return this[what];
+			}
+			this[what] = f;
+		};
+	};
+
+
 
 	// global initialization code
 	(function() {

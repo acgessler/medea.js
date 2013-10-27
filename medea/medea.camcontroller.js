@@ -44,8 +44,8 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 		},
 
 
-		Enabled : medea._GetSet('enabled'),
-		MouseStyle : medea._GetSet('mouse_style'),
+		Enabled : medealib.Property('enabled'),
+		MouseStyle : medealib.Property('mouse_style'),
 		
 
 		// TODO: deprecate in favour of Enabled()
@@ -145,10 +145,10 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 			this.scratch_mat = mat4.identity(mat4.create());
 		},
 
-		HispeedOnShift : medea._GetSet('hispeed_on_shift'),
-		TurnSpeed : medea._GetSet('turn_speed'),
-		WalkSpeed : medea._GetSet('walk_speed'),
-		TerrainEntity : medea._GetSet('terrain_entity'),
+		HispeedOnShift : medealib.Property('hispeed_on_shift'),
+		TurnSpeed : medealib.Property('turn_speed'),
+		WalkSpeed : medealib.Property('walk_speed'),
+		TerrainEntity : medealib.Property('terrain_entity'),
 
 
 		ProcessMouseDelta : function(dtime, n, d) {
@@ -246,21 +246,21 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 		},
 
 		// 1 bit set is x, 2 bit set is y
-		AxesEnabled : medea._GetSet('axes_enabled'),
+		AxesEnabled : medealib.Property('axes_enabled'),
 
-		ThetaPoleDeadAngle : medea._GetSet('theta_pole_dead_angle'),
-		TurnSpeed : medea._GetSet('turn_speed'),
-		ZoomSpeed : medea._GetSet('zoom_speed'),
-		PanSpeed : medea._GetSet('pan_speed'),
+		ThetaPoleDeadAngle : medealib.Property('theta_pole_dead_angle'),
+		TurnSpeed : medealib.Property('turn_speed'),
+		ZoomSpeed : medealib.Property('zoom_speed'),
+		PanSpeed : medealib.Property('pan_speed'),
 
-		PanEnable : medea._GetSet('pan_enable'),
-		ZoomEnable : medea._GetSet('zoom_enable'),
+		PanEnable : medealib.Property('pan_enable'),
+		ZoomEnable : medealib.Property('zoom_enable'),
 		
-		CameraDistance : medea._GetSet('camera_distance'),
-		MinimumCameraDistance : medea._GetSet('minimum_camera_distance'),
-		MaximumCameraDistance : medea._GetSet('maximum_camera_distance'),
+		CameraDistance : medealib.Property('camera_distance'),
+		MinimumCameraDistance : medealib.Property('minimum_camera_distance'),
+		MaximumCameraDistance : medealib.Property('maximum_camera_distance'),
 
-		PanningMouseButtons : medea._GetSet('panning_mouse_buttons'),
+		PanningMouseButtons : medealib.Property('panning_mouse_buttons'),
 
 
 		Reset : function(initial_rot_phi, initial_rot_theta) {
@@ -463,7 +463,7 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
  
 
 		
-		TurnSpeed : medea._GetSet('turn_speed'),
+		TurnSpeed : medealib.Property('turn_speed'),
 
 
 		ProcessMouseDelta : function(dtime, n, d) {
