@@ -279,7 +279,16 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 
 
 	// ------------------------------------------------------------------------
-	/** TODO: documentation 
+	/** Start running the "main loop", that is, an infinite loop of calls 
+	*  to {@link medealib.Context.DoSingleFrame()} to ensure continuous
+	*  rendering.
+	*
+	*  The first loop iteration happens asynchronously, i.e. Start() itself
+	*  returns immediately.
+	*
+	*  The framerate at which the frames are scheduled depends on the
+	*  `fps` setting, as well as on the current performance situation (i.e.
+	*   if CPU time is spare, the framerate is lower).
 	*/
 	// ------------------------------------------------------------------------
 	medeactx.Start = function() {
@@ -293,18 +302,6 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 				medeactx.DoSingleFrame();
 			}
 		}, medeactx.canvas);
-
-		// commented due to Chrome swallowing the stacktrace
-	//	try {
-			//medeactx.DoSingleFrame();
-	//	}
-	//	catch(a) {
-	//		// resume if an assertion occured during frame processing, greater good stems from the
-	//		// user being able to see what happens next frame.
-	//		if (!(a instanceof medea.AssertionError)) {
-	//			throw a;
-	//		}
-	//	}
 		return true;
 	};
 
