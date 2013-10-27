@@ -1,47 +1,48 @@
 
-var DEFAULT_TIMEOUT = 1000;
+var DEFAULT_TIMEOUT = 2000;
+var FRAME_DELTA = 1000/60;
 
-describe("medea.core", function() {
+describe("core", function() {
 	var dom_element;
-	var medea
-		,	ok = false
-		,	fail = false
+	var medea;
+
+	beforeEach(function(done) {
+		var init_fail = false
+		, 	init_ok = false
 		;
 
-
-	function ensureContextInit() {
-		waitsFor(function() {
-			return ok;
-		}, 'context should have been created' ,DEFAULT_TIMEOUT);
-	}
-
-
-	beforeEach(function() {
-		ok = false;
+		medea = undefined;
     	dom_element = 'canvas';
-    	medealib.CreateContext(dom_element, {}, [], function(_medea) {
+    	
+    	medealib.CreateContext(dom_element, {dataroot:'../../data'}, ['forwardrenderer'], function(_medea) {
     		medea = _medea;
-			ok = true;
+    		init_ok = true;
+
+    		expect(init_fail).toBeFalsy();
+			expect(medea).toBeDefined();
+			expect(medea.ForwardRenderer).toBeDefined();
+			done();
 		},
+
 		function() {
-			fail = true;
+			init_fail = true;
+			expect(init_ok).toBeFalsy();
+			expect(false).toBeTruthy();
+			done();
 		});
 	});	
 
 	afterEach(function() {
 		//medea.Dispose();
-		medea = null;
 	});
 
 
 	it("should be able to create a context", function () {
-		ensureContextInit();
-		expect(fail).toBeFalsy();
+		
 	});
 
 	it("should have valid defaults", function () {
 		var stats;
-		ensureContextInit();
 
 		expect(medea.Node).toBeTruthy();
 		expect(medea.RootNode()).toBeTruthy();
@@ -55,66 +56,66 @@ describe("medea.core", function() {
 	});
 
 	it("should have loaded the <node> and <viewport> modules", function () {
-		ensureContextInit();
-
 		expect(medea.Node).toBeTruthy();
 		expect(medea.Viewport).toBeTruthy();
 	});
 
 	it("should be able to define() more modules and resolve their dependencies", function () {
 		var init2 = false
-		,	init1 = false 
+		,	init1 = false
 		,	called = false
 		;		
 
-		ensureContextInit();
-
-		// core itself should be loaded too
-		medealib.define('__test2', ['__test1', 'core'], function() {
-			expect(init1).toBeTruthy();
-			init2 = true;
-		});
-
-		expect(init2).toBeFalsy();
 		medealib.define('__test1', ['node'], function() {
 			expect(init2).toBeFalsy();
 			init1 = true;
 		});
-		expect(init2).toBeTruthy();
-		expect(init1).toBeTruthy();
+		expect(init1).toBeFalsy();
+		expect(init2).toBeFalsy();
 
-		medealib._RegisterMods(['__test1', '__test2'], function() {
+		// core itself should be loaded too, so should __test1
+		medealib.define('__test2', ['__test1', 'core'], function() {
+			expect(init1).toBeTruthy();
+			init2 = true;
+		});
+		expect(init1).toBeFalsy();
+		expect(init2).toBeFalsy();
+		
+		// registering the same module again should throw an exception
+		expect(function() {
+			medealib.define('__test1', ['node'], function() {
+				expect(false).toBeTruthy();
+			});
+		}).toThrow();
+
+		// now load the modules into the medea context
+		medea.LoadModules(['__test2'], function() {
+			expect(init1).toBeTruthy();
+			expect(init2).toBeTruthy();
 			called = true;
 		});
+
 		expect(called).toBeTruthy();
 	});
 
-	it("should be able to fetch more modules", function () {
+	it("should be able to fetch more modules", function (done) {
 		var ok = false;
-
-		ensureContextInit();
 
 		expect(medea.Node).toBeDefined(); // node is there by default
 		expect(medea.Mesh).not.toBeDefined();
 		expect(medea.Shader).not.toBeDefined();
 
-		runs(function() {
-			medea.LoadModules(['node', 'mesh', 'shader'], function() {
-				ok = true;
-			});
+		medea.LoadModules(['node', 'mesh', 'shader'], function() {
+			
+			expect(medea.Node).toBeDefined(); // still here
+			expect(medea.Mesh).toBeDefined();
+			expect(medea.Shader).toBeDefined();
+
+			done();
 		});
-
-		waitsFor(function() {
-			return ok;
-		}, 'should have fetched node, mesh, shader modules',DEFAULT_TIMEOUT);
-
-		expect(medea.Node).toBeDefined(); // still here
-		expect(medea.Mesh).toBeDefined();
-		expect(medea.Shader).toBeDefined();
 	});
 
 	it("should not be able to render unless there is a viewport", function () {
-		ensureContextInit();
 
 		// this should throw an exception
 		expect(function() {medea.DoSingleFrame(0);}).toThrow(new medealib.FatalError());
@@ -131,9 +132,8 @@ describe("medea.core", function() {
 	});
 
 	it("should be able to do a single frame", function () {
-		ensureContextInit();
+
 		expect(medea.CanRender()).toBeFalsy();
-		
 		var vp = medea.CreateViewport();
 
 		//expect(medea.CanRender()).toBeFalsy();
@@ -149,81 +149,81 @@ describe("medea.core", function() {
 		// can't make assumptions on fps values after one frame
 	});
 
-	it("should be able to do a rendering loop, and be able to get callbacks and stop again", function () {
+	it("should be able to do a rendering loop, and be able to get callbacks and stop again", function (done) {
 		var count = 0
 		,	count_2 = 0
 		,	stopped = false
 		,	stats
 		;
-		waitsFor(function() {
-			return ok;
-		}, 'çontext should have been created' ,DEFAULT_TIMEOUT);
 
 		var vp = medea.CreateViewport();
 
 		expect(medea.IsStopMarkerSet()).toBeFalsy();
-		medea.Start();
 		expect(medea.IsStopMarkerSet()).toBeFalsy();
 
-		runs(function() {
-			medea.SetTickCallback(function() {
-				++count;
+		
+		medea.SetTickCallback(function() {
+			++count;
 
-				if(count === 5) {
-					// redundant calls should be ok, this also tests if adding
-					// or removing listeners works from within tick callbacks
-					medea.RemoveTickCallback('keyed_callback');
-					medea.RemoveTickCallback('keyed_callback'); 
-				}
+			if(count === 5) {
+				// redundant calls should be ok, this also tests if adding
+				// or removing listeners works from within tick callbacks
+				medea.RemoveTickCallback('keyed_callback');
+				medea.RemoveTickCallback('keyed_callback'); 
+			}
 
-				if(count === 10) {
-					medea.StopNextFrame(true);
-					expect(medea.IsStopMarkerSet()).toBeTruthy();
-					stopped = true;
-				}
+			if(count === 10) {
+				medea.StopNextFrame();
+				expect(medea.IsStopMarkerSet()).toBeTruthy();
+				stopped = true;
 
-				// should not be called an 11th time
-				expect(count).toBeLessThan(11);
-				return true;
-			});
+				setTimeout(function() {
+					stats = medea.GetStatistics();
+					expect(stats.count_frames).toBe(10);
+					expect(count).toBe(10);
+					expect(count_2).toBe(5);
 
-			// also try with a keyed callback
-			medea.SetTickCallback(function() {
-				expect(count).toBeLessThan(6);
-				count_2++;
-				return true;
-			}, 'keyed_callback');
+					// stop marker should now be unset again
+					expect(medea.IsStopMarkerSet()).toBeFalsy();
+
+					// start again, first check if removing the unnamed tick callback works 
+					// start() never runs a frame immediately, it always delays so 
+					// RemoveTickCallback() should execute first.
+					medea.Start();
+					expect(medea.IsStopMarkerSet()).toBeFalsy();
+
+					medea.RemoveTickCallback();
+
+					// now run again and check if stopping by returning something falsy works
+					medea.SetTickCallback(function() {
+						--count_2;
+						var stop = count_2 === 0;
+						if(stop) {
+							setTimeout(function() {
+								expect(medea.IsStopMarkerSet()).toBeFalsy();
+								expect(count_2).toBe(0);
+								expect(stats.count_frames).toBe(15);
+								done();
+
+							}, FRAME_DELTA * 2);
+						}
+						return !stop;
+					}, 'another_keyed_callback');
+				}, FRAME_DELTA * 2);
+			}
+			// should not be called an 11th time
+			expect(count).toBeLessThan(11);
+			return true;
 		});
 
-		waitsFor(function() {
-			return stopped;
-		}, 'should stop after 10 frames',DEFAULT_TIMEOUT);
+		// also try with a keyed callback
+		medea.SetTickCallback(function() {
+			expect(count).toBeLessThan(6);
+			count_2++;
+			return true;
+		}, 'keyed_callback');
 
-		stats = medea.GetStatistics();
-		expect(stats.count_frames).toBe(10);
-		expect(count).toBe(10);
-		expect(count_2).toBe(10);
-
-		// stop marker should now be unset again
-		expect(medea.IsStopMarkerSet()).toBeFalsy();
-
-		// start again, first check if removing the unnamed tick callback works 
 		medea.Start();
-		expect(medea.IsStopMarkerSet()).toBeFalsy();
-
-		medea.RemoveTickCallback();
-
-		// now run again and check if stopping by returning something falsy works
-		runs(function() {
-			medea.SetTickCallback(function() {
-				--count_2;
-				return count_2 === 0;
-			}, 'another_keyed_callback');
-		});
-
-		expect(medea.IsStopMarkerSet()).toBeFalsy();
-		expect(count_2).toBe(0);
-		expect(stats.count_frames).toBe(11);
 	});
 
 	it("should correctly call debug hooks", function () {

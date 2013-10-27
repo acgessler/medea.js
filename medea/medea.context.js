@@ -267,19 +267,20 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	*/
 	// ------------------------------------------------------------------------
 	medeactx.Start = function() {
-		if (!medeactx.stop_asap) {
-			window.requestAnimationFrame(function() { 
-				medeactx.Start(); 
-			}, medeactx.canvas);
-
-			if (medeactx.debug_panel) {
-				//setTimeout(function(){medea.debug_panel.Update();},1000);
-			}
+		if (medeactx.stop_asap) {
+			medeactx.stop_asap = false;
+			return false;
 		}
+
+		window.requestAnimationFrame(function() { 
+			if(medeactx.Start()) {
+				medeactx.DoSingleFrame();
+			}
+		}, medeactx.canvas);
 
 		// commented due to Chrome swallowing the stacktrace
 	//	try {
-			medeactx.DoSingleFrame();
+			//medeactx.DoSingleFrame();
 	//	}
 	//	catch(a) {
 	//		// resume if an assertion occured during frame processing, greater good stems from the
@@ -288,6 +289,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	//			throw a;
 	//		}
 	//	}
+		return true;
 	};
 
 
@@ -463,9 +465,8 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 		return function(name, callback) {
 			var Blob =  window.Blob
 			,	BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder
-			,	URL = window.URL || window.webkitURL;
+			,	URL = window.URL || window.webkitURL
 			;
-
 
 			if (!Blob && !BlobBuilder) {
 				medealib.LogDebug('BlobBuilder not available, cannot use web worker');
@@ -479,7 +480,6 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 				return false;
 			}
 
-			
 			if (!URL || !URL.createObjectURL) {
 				medealib.LogDebug('URL.createObjectURL not available, cannot use web worker');
 				callback(null);
@@ -487,7 +487,10 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 			}
 
 			medea.LoadModules('worker_base', function() {
-				var source = [medea.GetModSource('worker_base'),'\n',medea.GetModSource(name )]
+				var source = [
+					medea.GetModSource('worker_base'),
+					'\n',
+					medea.GetModSource(name )]
 				,	bb
 				,	worker 
 				,	worker_index
@@ -630,9 +633,8 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 
 		if(!context) {
 		// #if LOG
-			medeactx.Log('webgl initialization failed','error');
+			medealib.Log('webgl initialization failed','error');
 		// #endif
-			_callback = undefined;
 			if(user_on_failure) {
 				user_on_failure();
 			}

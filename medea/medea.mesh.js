@@ -53,7 +53,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 
 
 	// class Mesh
-	this.Mesh = medea.Entity.extend(
+	medea.Mesh = medea.Entity.extend(
 	{
 		vbo : null,
 		ibo : null,

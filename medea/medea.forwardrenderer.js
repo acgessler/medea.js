@@ -31,7 +31,7 @@ medealib.define('forwardrenderer',['renderer'],function(undefined) {
 
 	
 
-	var ForwardRenderer = medea.Renderer.extend({
+	medea.ForwardRenderer = medea.Renderer.extend({
 
 		init : function() {
 			this._super();
@@ -184,6 +184,6 @@ medealib.define('forwardrenderer',['renderer'],function(undefined) {
 
 
 	medea.CreateForwardRenderer = function() {
-		return new ForwardRenderer();
+		return new medea.ForwardRenderer();
 	};
 });
