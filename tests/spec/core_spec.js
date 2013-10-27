@@ -227,6 +227,21 @@ describe("core", function() {
 		medea.Start();
 	});
 
+
+	it("should keep time correctly", function () {
+		var time = medea.GetTime();
+		medea.CreateViewport();
+
+		expect(medea.GetTime()).toBe(0.0);
+
+		medea.DoSingleFrame(0);
+		medea.DoSingleFrame(1.0);
+		medea.DoSingleFrame(2.0);
+
+		expect(medea.GetTime()).toBeCloseTo(3.0,-8);
+	});
+
+
 	it("should correctly call debug hooks", function (done) {
 		var ok= false;
 

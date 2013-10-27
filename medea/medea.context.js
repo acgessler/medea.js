@@ -81,6 +81,8 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 		, batches_frame : 0
 	};
 
+	medeactx.time = 0.0;
+
 	medeactx.dtacc = 0.0;
 	medeactx.dtcnt = 0;
 	medeactx.dtmin_fps = 1e6;
@@ -374,7 +376,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	 *    - visiting the scenegraph and calling Update() on dirty nodes
 	 *    - rendering jobs to all viewports
 	 *
-	 *  @param {number} dtime Time passed since the last frame, in seconds. 
+	 *  @param {number} [dtime] Time passed since the last frame, in seconds. 
 	 *     If omitted, the time is computed as the time elapsed since the
 	 *     last call to {@link medealib.Context.DoSingleFrame}.
 	*/
@@ -389,8 +391,8 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 		// get time delta and detect canvas changes
 		function update_stats() {
 			// get time delta if not specified
-			if (!dtime) {
-				var old = medeactx.time || 0;
+			if (dtime === undefined) {
+				var old = medeactx.time;
 				medeactx.time = Date.now() * 0.001;
 
 				dtime = medeactx.time - old;
