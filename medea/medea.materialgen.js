@@ -100,22 +100,22 @@ medealib.define('materialgen',['shader','material'],function(undefined) {
 			// TODO: point and spot lights
 
 			fragment_code = fragment_code
-				.replace('$lighting_body', lighting_code);
+				.replace('$lighting_body', lighting_code)
 				.replace('$lighting_uniforms', lighting_uniforms.join(";\n"));
 
 			return fragment_code;
-		}
+		},
 
 		GeVertexShader : function(state) {
 			var vertex_code = new String(raw_vertex_shader);
 			return vertex_code;
-		}
+		},
 
 		EvaluateDirectionalLight : function() {
 			return {
-				prefix		: 'float strength = dot($normal_world, $light_dir_world)'
-				diffuse 	: 'strength * $light_diffuse_color'
-				specular 	: 'strength * $light_specular_color'
+				prefix		: 'float strength = dot($normal_world, $light_dir_world)',
+				diffuse 	: 'strength * $light_diffuse_color',
+				specular 	: 'strength * $light_specular_color',
 				ambient		: '$light_ambient_color'
 			};
 		},
@@ -126,9 +126,9 @@ medealib.define('materialgen',['shader','material'],function(undefined) {
 					'vec3 dir = $pos_world - $light_pos_world; \
 					 float distance = length(dir); \
 					 float attenuation = 1.0-clamp(distance/$light_range,0.0,1.0); \
-					 float strength = dot($normal_world, dir) * attenuation'
-				diffuse 	: 'strength * $light_diffuse_color'
-				specular 	: 'strength * $light_specular_color'
+					 float strength = dot($normal_world, dir) * attenuation',
+				diffuse 	: 'strength * $light_diffuse_color',
+				specular 	: 'strength * $light_specular_color',
 				ambient		: '$light_ambient_color'
 			};
 		},
@@ -140,10 +140,10 @@ medealib.define('materialgen',['shader','material'],function(undefined) {
 					 float distance = length(dir); \
 					 float attenuation = 1.0-clamp(distance/$light_range,0.0,1.0); \
 					 float angle = smoothstep($light_spot_angle_inner, $light_spot_angle_outer) \
-					 	* dot($light_dir_world, normalize(distance))
-					 float strength = dot($normal_world, dir) * attenuation * angle;'
-				diffuse 	: 'strength * $light_diffuse_color'
-				specular 	: 'strength * $light_specular_color'
+					 	* dot($light_dir_world, normalize(distance)) \
+					 float strength = dot($normal_world, dir) * attenuation * angle;',
+				diffuse 	: 'strength * $light_diffuse_color',
+				specular 	: 'strength * $light_specular_color',
 				ambient		: '$light_ambient_color'
 			};
 		}

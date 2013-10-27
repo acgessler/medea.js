@@ -53,14 +53,14 @@ medealib.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],f
 
 			for(var i = 0; i < 6; ++i) {
 				(function(i) {
-
-				medea._ImageStreamLoad(medea.FixURL(src[i]), function(img) {
-					outer.img[i] = img;
-					outer.OnDelayedInit(i);
-					// return true to indicate ownership of the Image
-					// (if the LAZY flag was not specified, we already disposed of it)
-					return true;
-				});
+					medea._ImageStreamLoad(medea.FixURL(src[i]), function(img) {
+						outer.img[i] = img;
+						outer.OnDelayedInit(i);
+						// return true to indicate ownership of the Image
+						// (if the LAZY flag was not specified, we already disposed of it)
+						return true;
+					});
+				})(i);
 			}
 		},
 

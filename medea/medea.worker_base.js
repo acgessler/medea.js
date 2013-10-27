@@ -17,7 +17,7 @@ try {
 catch (e) {
 	if (!(e instanceof ReferenceError)) {
 		console.log(e);
-		return;
+		//return;
 	}
 	// subset of medea's core interface that is available to workers
 	medea = {
