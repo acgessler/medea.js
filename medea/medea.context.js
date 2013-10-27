@@ -250,16 +250,28 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 
 
 	// ------------------------------------------------------------------------
-	/** TODO: documentation 
+	/** Add a debug panel to the DOM.
+	 *
+	 *  This asynchonously fetches the "debug" module and creates a 
+	 *  {@link medealib.Context.DebugPanel} instance, which is then set as the
+	 *  context's global debug handler.
+	 *
+	 *  @param {DOMElement} [where] DOM element to host the debug panel, or falsy,
+	 *    in which case the debug panel adds itself top-level.
+	 *  @param {Function} [completion] Callback to be invoked once the debug
+	 *    panel is ready.
 	*/
 	// ------------------------------------------------------------------------
-	medeactx.SetDebugPanel = function(where) {
+	medeactx.SetDebugPanel = function(where, completion) {
 		if(medeactx.debug_panel !== null) {
 			return;
 		}
 		medeactx.debug_panel = false;
 		medeactx.LoadModules("debug", function() {
 			medeactx.debug_panel = new medeactx.DebugPanel(where);
+			if (completion) {
+				completion();
+			}
 		});
 	};
 

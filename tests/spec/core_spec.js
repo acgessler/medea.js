@@ -47,6 +47,7 @@ describe("core", function() {
 		expect(medea.Node).toBeTruthy();
 		expect(medea.RootNode()).toBeTruthy();
 		expect(medea.EnsureIsResponsive()).toBeFalsy();
+		expect(medea.Wireframe()).toBeFalsy();
 		expect(medea.CanRender()).toBeFalsy();
 
 		stats = medea.GetStatistics();
@@ -226,10 +227,29 @@ describe("core", function() {
 		medea.Start();
 	});
 
-	it("should correctly call debug hooks", function () {
-	});
+	it("should correctly call debug hooks", function (done) {
+		var ok= false;
 
-	it("should correctly call debug hooks", function () {
+		medea.CreateViewport();
+		medea.SetDebugPanel(null, function() {
+			spyOn(medea.debug_panel, 'BeginFrame');
+			spyOn(medea.debug_panel, 'EndFrame');
+
+			medea.SetTickCallback(function() {
+				expect(medea.debug_panel.BeginFrame).toHaveBeenCalled();
+				expect(medea.debug_panel.EndFrame).not.toHaveBeenCalled();
+				ok = true;
+				return true;
+			});
+
+			medea.DoSingleFrame(0);
+
+			expect(medea.debug_panel.BeginFrame).toHaveBeenCalled();
+				expect(medea.debug_panel.EndFrame).toHaveBeenCalled();
+			expect(ok).toBeTruthy();
+
+			done();
+		});
 	});
 });
 
