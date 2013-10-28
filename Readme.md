@@ -35,7 +35,17 @@ Documentation will soon be available; for now, have a look at the `samples/` fol
 This is effectively the whole code for the terrain in the above video.
 
 ```javascript
-medea.Ready("canvas",{dataroot:'../../data'},['camcontroller', 'forwardrenderer'],function() {
+medealib.CreateContext("canvas",
+   {   // some (initial) settings
+       fps : 60
+       dataroot : '../../data'
+   },
+   
+   // initial module dependencies
+   ['camcontroller', 'forwardrenderer'],
+   
+   // startup function gets called once the context is ready to use
+   function(medea) {
 
 	// create a viewport to fill the entire <canvas>
 	var viewport = medea.CreateViewport();
@@ -57,13 +67,13 @@ medea.Ready("canvas",{dataroot:'../../data'},['camcontroller', 'forwardrenderer'
 	cam_controller.Enabled(true);
 		
 	// add terrain - this is highly asynchronous because a lot of data needs to be loaded
-	medea.FetchMods(['terrain'], function() {
+	medea.LoadModules(['terrain'], function() {
 		medea.CreateDefaultTerrainDataProviderFromResource('remote:terrain_sample/terrain.json', function(p) {
 		
 			var ter = medea.CreateTerrainNode(p);
 			root.AddChild(ter);
 			
-			medea.FetchMods('terrainheightpath', function() {
+			medea.LoadModules('terrainheightpath', function() {
 				var terrain_animator = medea.CreateTerrainHeightPathAnimator(ter,15.0);
 				cam.AddEntity(terrain_animator);
 				cam_controller.TerrainEntity(terrain_animator);
@@ -72,10 +82,11 @@ medea.Ready("canvas",{dataroot:'../../data'},['camcontroller', 'forwardrenderer'
 	});
 	
 	// add skydome (the texture will be fetched in the background)
-	medea.FetchMods('skydome',function() {
+	medea.LoadModules('skydome',function() {
 		root.AddChild(medea.CreateSkydomeNode('remote:skydome_sample/midmorning/midmorning.png',0.4));
 	});
-}
+    }
+);
 ```
 
 ### Deployment ###
