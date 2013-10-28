@@ -37,7 +37,7 @@ This is effectively the whole code for the terrain in the above video.
 ```javascript
 medealib.CreateContext("canvas",
    {   // some (initial) settings
-       fps : 60
+       fps : 60,
        dataroot : '../../data'
    },
    
