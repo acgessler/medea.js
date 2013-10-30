@@ -9,7 +9,10 @@ sys.path.insert(0, os.path.join('..','..'))
 import compiler 
 
 configs = [
-	'null-debug'
+	  'null-debug'
+	, 'collated-debug'
+	, 'null-release'
+	, 'collated-release'
 ] 
 
 if __name__ == '__main__':

@@ -1,0 +1,7 @@
+[general]
+output=output/null-release
+
+[modules]
+
+
+[resources]
