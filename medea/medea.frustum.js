@@ -1,12 +1,14 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('frustum',[],function(undefined) {
+medealib.define('frustum',[],function(undefined) {
 	"use strict";
 	var medea = this, min = Math.min, max = Math.max;
 
@@ -36,7 +38,7 @@ medea.define('frustum',[],function(undefined) {
 		return bb[0] < bb[1];
 	};
 
-	medea.MergeBBs = function(bbs) {
+	medealib.MergeBBs = function(bbs) {
 		if(!bbs.length) {
 			return medea.BB_EMPTY;
 		}
@@ -101,7 +103,7 @@ medea.define('frustum',[],function(undefined) {
 
 		var l = Math.sqrt( p[0]*p[0] + p[1]*p[1] + p[2]*p[2] );
 		// #ifdef DEBUG
-		medea.DebugAssert(l > 1e-8,'length of plane normal is 0');
+		medealib.DebugAssert(l > 1e-8,'length of plane normal is 0');
 		// #endif
 
 		p_out[0] = p[0] / l;

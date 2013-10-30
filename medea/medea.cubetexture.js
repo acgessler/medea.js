@@ -1,12 +1,14 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],function(undefined) {
+medealib.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -16,9 +18,9 @@ medea.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],func
 		'posx','negx','posy','negy','posz','negz'
 	];
 
-	medea._initMod('filesystem');
-	medea._initMod('imagestream');
-	medea._initMod('nativeimagepool');
+	
+	
+	
 
 	medea.CubeTexture = medea.Resource.extend( {
 
@@ -51,14 +53,14 @@ medea.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],func
 
 			for(var i = 0; i < 6; ++i) {
 				(function(i) {
-
-				medea._ImageStreamLoad(medea.FixURL(src[i]), function(img) {
-					outer.img[i] = img;
-					outer.OnDelayedInit(i);
-					// return true to indicate ownership of the Image
-					// (if the LAZY flag was not specified, we already disposed of it)
-					return true;
-				});
+					medea._ImageStreamLoad(medea.FixURL(src[i]), function(img) {
+						outer.img[i] = img;
+						outer.OnDelayedInit(i);
+						// return true to indicate ownership of the Image
+						// (if the LAZY flag was not specified, we already disposed of it)
+						return true;
+					});
+				})(i);
 			}
 		},
 
@@ -69,8 +71,8 @@ medea.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],func
 			// cube textures must be POTs and all faces must be squares. Anything else
 			// doesn't make sense unlike for 2D textures.
 			// #ifdef DEBUG
-			medea.DebugAssert(w === h && medea._IsPow2(w) && medea._IsPow2(h),'cube texture faces must be squared and POTs');
-			medea.DebugAssert(this.counter === 6 || (w === this.width && h === this.height),'cube texture faces must be all of the same size');
+			medealib.DebugAssert(w === h && medea._IsPow2(w) && medea._IsPow2(h),'cube texture faces must be squared and POTs');
+			medealib.DebugAssert(this.counter === 6 || (w === this.width && h === this.height),'cube texture faces must be all of the same size');
 			// #endif
 
 			this.width = this.glwidth = w;
@@ -84,7 +86,7 @@ medea.define('cubetexture',['filesystem', 'nativeimagepool', 'imagestream'],func
 					this._Upload();
 				}
 
-				medea.LogDebug("successfully loaded cube texture " + this.GetSource());
+				medealib.LogDebug("successfully loaded cube texture " + this.GetSource());
 			}
 		},
 

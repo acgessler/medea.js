@@ -7,7 +7,7 @@
  */
 
  // note: json2.js may be needed for contemporary browsers with incomplete HTML5 support
-medea.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],function(undefined) {
+medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],function(undefined) {
 	"use strict";
 	var medea = this;
 
@@ -154,7 +154,7 @@ medea.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functio
 
 
 	medea._LoadScene_assimp2json = function(src,anchor,callback,material_resolver) {
-		medea.DebugAssert(material_resolver, "need a valid material resolver");
+		medealib.DebugAssert(material_resolver, "need a valid material resolver");
 
 		// see if we got a JSON DOM or a unparsed string
 		if(src.rootnode === undefined) {
@@ -163,7 +163,7 @@ medea.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functio
 			}
 			catch(e) {
 				// #ifdef DEBUG
-				medea.DebugAssert("Failed to read assimp2json scene from JSON, JSON.parse failed: " + e);
+				medealib.DebugAssert("Failed to read assimp2json scene from JSON, JSON.parse failed: " + e);
 				callback(false);
 				// #endif
 				return;
@@ -175,7 +175,7 @@ medea.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],functio
 		}
 		catch(e) {
 			// #ifdef DEBUG
-			medea.DebugAssert("Failed to read assimp2json scene: " + e);
+			medealib.DebugAssert("Failed to read assimp2json scene: " + e);
 			callback(false);
 			// #endif
 			return;

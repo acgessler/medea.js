@@ -1,12 +1,14 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('camera',['statepool'],function() {
+medealib.define('camera',['statepool'],function() {
 	"use strict";
 	var medea = this;
 
@@ -58,8 +60,8 @@ medea.define('camera',['statepool'],function() {
 			return this.frustum;
 		},
 
-		Culling: medea._GetSet('culling'),
-		Name: medea._GetSet('name'),
+		Culling: medealib.Property('culling'),
+		Name: medealib.Property('name'),
 
 		GetViewport : function() {
 			return this.viewport;
@@ -164,7 +166,7 @@ medea.define('camera',['statepool'],function() {
 			var aspect = this.aspect;
 			if (aspect === undefined) {
 				// #if DEBUG
-				medea.DebugAssert(!!this.viewport,"aspect may only be omitted while the camera is assigned to a viewport");
+				medealib.DebugAssert(!!this.viewport,"aspect may only be omitted while the camera is assigned to a viewport");
 				// #endif
 
 				aspect = this.viewport.GetAspect();

@@ -1,16 +1,18 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('terraintile',['worker_terrain','image','mesh'],function(undefined) {
+medealib.define('terraintile',['worker_terrain','image','mesh'],function(undefined) {
 	"use strict";
 	var medea = this;
 
-	medea._initMod('worker_terrain');
+	
 
 
 	medea._HeightfieldFromEvenSidedHeightmap = function(tex, scale, xz_scale, t, v) {
@@ -78,7 +80,7 @@ medea.define('terraintile',['worker_terrain','image','mesh'],function(undefined)
 		// #ifdef DEBUG
 		for (var i = 0; i < pos.length; ++i) {
 			if (pos[i] === undefined) {
-				medea.DebugAssert("position array has undefined elements: " + i);
+				medealib.DebugAssert("position array has undefined elements: " + i);
 			}
 		}
 		// #endif DEBUG
@@ -90,7 +92,7 @@ medea.define('terraintile',['worker_terrain','image','mesh'],function(undefined)
 		var data = tex.GetData(), fullw = tex.GetWidth(), fullh = tex.GetHeight();
 
 		// #ifdef DEBUG
-		medea.DebugAssert(!(xs + w > fullw || w <= 0 || xs < 0 || ys + h > fullh || h <= 0 || ys < 0),"invalid input rectangle");
+		medealib.DebugAssert(!(xs + w > fullw || w <= 0 || xs < 0 || ys + h > fullh || h <= 0 || ys < 0),"invalid input rectangle");
 		// #endif DEBUG
 
 		var c = (w+1)*(h+1);
@@ -154,7 +156,7 @@ medea.define('terraintile',['worker_terrain','image','mesh'],function(undefined)
 
 		// #ifdef DEBUG
 		for (var i = 0; i < pos.length; ++i) {
-			medea.DebugAssert(pos[i] !== undefined,"position array has undefined elements: " + i);
+			medealib.DebugAssert(pos[i] !== undefined,"position array has undefined elements: " + i);
 		}
 		// #endif DEBUG
 
@@ -165,7 +167,7 @@ medea.define('terraintile',['worker_terrain','image','mesh'],function(undefined)
 		var data = tex.GetData(), fullw = tex.GetWidth(), fullh = tex.GetHeight();
 
 		// #ifdef DEBUG
-		medea.DebugAssert(!(xs + w > fullw || w <= 0 || xs < 0 || ys + h > fullh || h <= 0 || ys < 0),"invalid input rectangle");
+		medealib.DebugAssert(!(xs + w > fullw || w <= 0 || xs < 0 || ys + h > fullh || h <= 0 || ys < 0),"invalid input rectangle");
 		// #endif DEBUG
 
 		var c = w*h;
@@ -211,7 +213,7 @@ medea.define('terraintile',['worker_terrain','image','mesh'],function(undefined)
 		var min = Math.min;
 
 		// #ifdef DEBUG
-		medea.DebugAssert(holex + holew <= qtx && holey + holeh <= qty,'invalid input rectangle');
+		medealib.DebugAssert(holex + holew <= qtx && holey + holeh <= qty,'invalid input rectangle');
 		// #endif
 
 		holew += holex;
@@ -248,7 +250,7 @@ medea.define('terraintile',['worker_terrain','image','mesh'],function(undefined)
 		var min = Math.min;
 
 		// #ifdef DEBUG
-		medea.DebugAssert(holex + holew <= qtx && holey + holeh <= qty,'invalid input rectangle');
+		medealib.DebugAssert(holex + holew <= qtx && holey + holeh <= qty,'invalid input rectangle');
 		// #endif
 
 		holew += holex;
@@ -361,7 +363,7 @@ medea.define('terraintile',['worker_terrain','image','mesh'],function(undefined)
 
 			// the minimum size is chosen to get rid of nasty out-of-bounds checks during LOD generation
 			// #ifdef DEBUG
-			medea.DebugAssert(w >= 16 && h >+ 16,"minimum size for terrain tile is 16x16");
+			medealib.DebugAssert(w >= 16 && h >+ 16,"minimum size for terrain tile is 16x16");
 			// #endif
 
 			var v;
@@ -375,7 +377,7 @@ medea.define('terraintile',['worker_terrain','image','mesh'],function(undefined)
 			}
 			else {
 				// #ifdef DEBUG
-				medea.DebugAssert("source for terrain tile must be either a power-of-two or a power-of-two-minus-one grid");
+				medealib.DebugAssert("source for terrain tile must be either a power-of-two or a power-of-two-minus-one grid");
 				// #endif
 				return;
 			}

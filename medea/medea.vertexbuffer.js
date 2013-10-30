@@ -1,12 +1,14 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('vertexbuffer',[],function(undefined) {
+medealib.define('vertexbuffer',[],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -17,10 +19,10 @@ medea.define('vertexbuffer',[],function(undefined) {
 
 	// #ifdef DEBUG
 	if (va_ext) {
-		medea.LogDebug('using OES_vertex_array_object extension');
+		medealib.LogDebug('using OES_vertex_array_object extension');
 	}
 	else {
-		medea.LogDebug('OES_vertex_array_object extension not available');
+		medealib.LogDebug('OES_vertex_array_object extension not available');
 	}
 	// #endif
 
@@ -107,7 +109,7 @@ medea.define('vertexbuffer',[],function(undefined) {
 
 
 	// private class _VBOInitDataAccessor
-	this._VBOInitDataAccessor = medea.Class.extend({
+	this._VBOInitDataAccessor = medealib.Class.extend({
 
 		positions : null,
 		normals : null,
@@ -159,7 +161,7 @@ medea.define('vertexbuffer',[],function(undefined) {
 
 // #ifdef DEBUG
 			if (!this.positions) {
-				medea.NotifyFatal("vertex positions must be present");
+				medealib.NotifyFatal("vertex positions must be present");
 			}
 // #endif
 			this.itemcount = this.positions.length/3;
@@ -253,7 +255,7 @@ medea.define('vertexbuffer',[],function(undefined) {
 					view[im+2] = p[i3+2];
 
 					// #ifdef DEBUG
-					medea.DebugAssert(!isNaN(p[i3+0]) && !isNaN(p[i3+1]) && !isNaN(p[i3+2]),
+					medealib.DebugAssert(!isNaN(p[i3+0]) && !isNaN(p[i3+1]) && !isNaN(p[i3+2]),
 						'found NaN vertex position ('+i+') - this is rather a "NotAVertex"');
 					// #endif
 
@@ -274,7 +276,7 @@ medea.define('vertexbuffer',[],function(undefined) {
 
 			if (this.normals) {
 				// #ifdef DEBUG
-				medea.DebugAssert(this.normals.length === this.itemcount*3, 'size mismatch: normals');
+				medealib.DebugAssert(this.normals.length === this.itemcount*3, 'size mismatch: normals');
 				// #endif
 				var view = new Float32Array(ab,offset);
 				for(var i = 0, i3 = 0, im = 0, p = this.normals; i < end; ++i, i3 += 3, im += mul) {
@@ -290,7 +292,7 @@ medea.define('vertexbuffer',[],function(undefined) {
 
 			if (this.tangents) {
 				// #ifdef DEBUG
-				medea.DebugAssert(this.tangents.length === this.itemcount*3, 'size mismatch: tangents');
+				medealib.DebugAssert(this.tangents.length === this.itemcount*3, 'size mismatch: tangents');
 				// #endif
 				var view = new Float32Array(ab,offset);
 				for(var i = 0, i3 = 0, im = 0, p = this.tangents; i < end; ++i, i3 += 3, im += mul) {
@@ -303,7 +305,7 @@ medea.define('vertexbuffer',[],function(undefined) {
 				offset += 3*4;
 				if (this.bitangents) {
 					// #ifdef DEBUG
-					medea.DebugAssert(this.bitangents.length === this.itemcount*3, 'size mismatch: bitangents');
+					medealib.DebugAssert(this.bitangents.length === this.itemcount*3, 'size mismatch: bitangents');
 					// #endif
 
 					view = new Float32Array(ab,offset);
@@ -323,7 +325,7 @@ medea.define('vertexbuffer',[],function(undefined) {
 					var elems = Math.floor(u.length / this.itemcount), type = medea._GLUtilIDForArrayType(u);
 
 					// #ifdef DEBUG
-					medea.DebugAssert(elems >= 3 && u.length === this.itemcount * elems, 'size mismatch: colors');
+					medealib.DebugAssert(elems >= 3 && u.length === this.itemcount * elems, 'size mismatch: colors');
 					// #endif
 
 					var view = new Float32Array(ab,offset);
@@ -343,7 +345,7 @@ medea.define('vertexbuffer',[],function(undefined) {
 					var elems = Math.floor(u.length / this.itemcount), type = medea._GLUtilIDForArrayType(u);
 
 					// #ifdef DEBUG
-					medea.DebugAssert(elems >= 2 && u.length === this.itemcount * elems, 'size mismatch: uvs');
+					medealib.DebugAssert(elems >= 2 && u.length === this.itemcount * elems, 'size mismatch: uvs');
 					// #endif
 
 					var view = new Float32Array(ab,offset);
@@ -383,7 +385,7 @@ medea.define('vertexbuffer',[],function(undefined) {
 	});
 
 	// class VertexBuffer
-	this.VertexBuffer = medea.Class.extend({
+	this.VertexBuffer = medealib.Class.extend({
 
 		// Id of underlying OpenGl buffer object
 		buffer: -1,

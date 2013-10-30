@@ -1,16 +1,16 @@
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderqueue'],function(undefined) {
+medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderqueue'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
-	medea._initMod('entity');
-	medea._initMod('renderqueue');
 
 	// primitive types supported by the medea.Mesh class
 	medea.PT_TRIANGLES = gl.TRIANGLES;
@@ -19,7 +19,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 	medea.PT_LINE_STRIPS = gl.LINE_STRIPS;
 
 	// class RenderJob
-	var MeshRenderJob = medea.Class.extend({
+	var MeshRenderJob = medealib.Class.extend({
 
 		distance 	: null,
 		mesh 		: null,
@@ -55,7 +55,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 
 
 	// class Mesh
-	this.Mesh = medea.Entity.extend(
+	medea.Mesh = medea.Entity.extend(
 	{
 		vbo : null,
 		ibo : null,
@@ -73,12 +73,12 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 			this.line_ibo = line_ibo;
 
 // #ifdef DEBUG
-			medea.DebugAssert(!!this.vbo,"need valid vbo for mesh to be complete");
-			medea.DebugAssert(!!this.material,"need valid material for mesh to be complete");
+			medealib.DebugAssert(!!this.vbo,"need valid vbo for mesh to be complete");
+			medealib.DebugAssert(!!this.material,"need valid material for mesh to be complete");
 // #endif
 
 // #ifdef LOG
-			medea.LogDebug("create mesh, " + this.vbo.GetItemCount() + " items in VBO, " + 
+			medealib.LogDebug("create mesh, " + this.vbo.GetItemCount() + " items in VBO, " + 
 				(this.ibo ? this.ibo.GetItemCount() : -1) + " items in IBO");
 // #endif
 		},
@@ -127,7 +127,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 		},
 		
 		_Clone : function(material_or_color, deep_copy) {
-			medea.DebugAssert(!deep_copy, 'not implemented yet');
+			medealib.DebugAssert(!deep_copy, 'not implemented yet');
 			return medea.CreateSimpleMesh(this.vbo, this.ibo, material_or_color);
 		},
 
@@ -182,10 +182,10 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 			// wireframe is tricky because WebGl does not support the usual
 			// gl API for setting the poly mode.
 
-			medea._initMod('indexbuffer');
+			
 			if(this.pt === medea.PT_TRIANGLES_STRIPS) {
 				// #ifdef DEBUG
-				medea.LogDebug('not supported: wireframe and medea.PT_TRIANGLES_STRIPS');
+				medealib.LogDebug('not supported: wireframe and medea.PT_TRIANGLES_STRIPS');
 				// #endif
 				return;
 			}
@@ -215,7 +215,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 			}
 
 			// #ifdef DEBUG
-			medea.DebugAssert(this.ibo && !(this.ibo.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA), 'inv');
+			medealib.DebugAssert(this.ibo && !(this.ibo.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA), 'inv');
 			// #endif
 
 			// we have an ibo, but its creation data was not preserved
@@ -241,7 +241,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 
 		_CreateLineIBO : function() {
 			// #ifdef LOG
-			medea.LogDebug('creating auxiliary index buffer to hold wireframe line mesh');
+			medealib.LogDebug('creating auxiliary index buffer to hold wireframe line mesh');
 			// #endif
 
 			if(this.ibo) {
@@ -254,7 +254,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 			}
 
 			// #ifdef DEBUG
-			medea.DebugAssert(!!this.line_ibo, 'invariant');
+			medealib.DebugAssert(!!this.line_ibo, 'invariant');
 			// #endif
 		},
 
@@ -271,7 +271,7 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 			};
 
 			// #ifdef DEBUG
-			medea.DebugAssert('unrecognized primitive type: ' + this.pt);
+			medealib.DebugAssert('unrecognized primitive type: ' + this.pt);
 			// #endif
 		},
 
@@ -294,15 +294,15 @@ medea.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderque
 	// - supports both index- and vertexbuffer specific flags
 	medea.CreateSimpleMesh = function(vertices,indices,material_or_color,flags, cache_name) {
 
-		if (indices && (Array.isArray(indices) || typeof indices === 'object' && !(indices instanceof medea.Class))) {
+		if (indices && (Array.isArray(indices) || typeof indices === 'object' && !(indices instanceof medealib.Class))) {
 			indices = medea.CreateIndexBuffer(indices,flags);
 		}
 
-		if (typeof vertices === 'object' && !(vertices instanceof medea.Class)) {
+		if (typeof vertices === 'object' && !(vertices instanceof medealib.Class)) {
 			vertices = medea.CreateVertexBuffer(vertices,flags);
 		}
 
-		if (material_or_color instanceof Array) {
+		if (Array.isArray(material_or_color)) {
 			material_or_color = medea.CreateSimpleMaterialFromColor(material_or_color);
 		}
 

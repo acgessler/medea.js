@@ -1,12 +1,14 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('forwardrenderer',['renderer'],function(undefined) {
+medealib.define('forwardrenderer',['renderer'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -29,9 +31,9 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 		'cull_face_mode' : 'back'
 	};
 
-	medea._initMod('renderer');
+	
 
-	var ForwardRenderer = medea.Renderer.extend({
+	medea.ForwardRenderer = medea.Renderer.extend({
 
 		init : function() {
 			this._super();
@@ -171,7 +173,7 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 			} */
 
 			else {
-				medea.DebugAssert('unknown kind of light');
+				medealib.DebugAssert('unknown kind of light');
 			}
 
 			var lights = statepool.GetQuick(list_name);
@@ -184,6 +186,6 @@ medea.define('forwardrenderer',['renderer'],function(undefined) {
 
 
 	medea.CreateForwardRenderer = function() {
-		return new ForwardRenderer();
+		return new medea.ForwardRenderer();
 	};
 });

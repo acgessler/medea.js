@@ -3,12 +3,12 @@
 <head>
 <title></title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<script type="text/javascript" src="../../medea/medea.core.js"></script>
+<script type="text/javascript" src="../../compiled/medea.core-compiled.js"></script>
 <script type="text/javascript">
 
 function run() {
 
-	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes','camcontroller','forwardrenderer'],function() {
+	medealib.CreateContext("canvas",{dataroot:'../../data'},['debug','keycodes','camcontroller','forwardrenderer'],function(medea) {
 		var vp1 = medea.CreateViewport();
 		vp1.ClearColor([1.0,1.0,1.0]);
 		vp1.Renderer(medea.CreateForwardRenderer());
@@ -26,13 +26,13 @@ function run() {
         
         cc.Enabled(true);
 			
-		medea.FetchMods(['terrain'], function() {
+		medea.LoadModules(['terrain'], function() {
 			medea.CreateDefaultTerrainDataProviderFromResource('remote:terrain_sample/terrain.json', function(p) {
 			
 				var ter = medea.CreateTerrainNode(p);
 				root.AddChild(ter);
 				
-				medea.FetchMods('terrainheightpath', function() {
+				medea.LoadModules('terrainheightpath', function() {
 					var tp = medea.CreateTerrainHeightPathAnimator(ter,15.0);
 					cam.AddEntity(tp);
 					cc.TerrainEntity(tp);
@@ -41,11 +41,11 @@ function run() {
 		});
         
 		// add the skydome, as in the previous sample
-		medea.FetchMods('skydome',function() {
+		medea.LoadModules('skydome',function() {
 			root.AddChild(medea.CreateSkydomeNode('remote:skydome_sample/midmorning/midmorning.png',0.4));
         });
 		
-		medea.SetDebugPanel(null,true);
+		medea.SetDebugPanel(null);
 		medea.Start();
 	});
 }

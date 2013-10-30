@@ -1,12 +1,14 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('statepool',[],function(undefined) {
+medealib.define('statepool',[],function(undefined) {
 	"use strict";
 	var medea = this
 
@@ -52,7 +54,7 @@ medea.define('statepool',[],function(undefined) {
 	};
 
 	// class StatePool
-	medea.StatePool = medea.Class.extend({
+	medea.StatePool = medealib.Class.extend({
 
 		deps : null,
 		derived_states : null,
@@ -83,7 +85,7 @@ medea.define('statepool',[],function(undefined) {
 
 		SetQuick : function(key,value) {
 // #ifdef DEBUG
-			medea.DebugAssert(!(key in this.deps),"only states with no dependent states can be set using SetQuick(): " + key);
+			medealib.DebugAssert(!(key in this.deps),"only states with no dependent states can be set using SetQuick(): " + key);
 // #endif
 			if(key in this.derived_states) {
 				this.dirty[key] = false;
@@ -94,7 +96,7 @@ medea.define('statepool',[],function(undefined) {
 		Get : function(key) {
 			if (this.dirty[key] === true) {
 // #ifdef DEBUG
-				medea.DebugAssert(key in this.derived_states,"only derived states can be 'dirty': " + key);
+				medealib.DebugAssert(key in this.derived_states,"only derived states can be 'dirty': " + key);
 // #endif
 				this.dirty[key] = false;
 				return this.states[key] = this.derived_states[key](this, this.states[key]);
@@ -105,7 +107,7 @@ medea.define('statepool',[],function(undefined) {
 
 		GetQuick : function(key) {
 // #ifdef DEBUG
-			medea.DebugAssert(!(key in this.derived_states),"only non-derived states can be queried using GetQuick(): " + key);
+			medealib.DebugAssert(!(key in this.derived_states),"only non-derived states can be queried using GetQuick(): " + key);
 // #endif
 			return this.states[key];
 		}
@@ -117,8 +119,8 @@ medea.define('statepool',[],function(undefined) {
 
 	medea.CloneStatePool = function(sp) {
 		var clone = new medea.StatePool();
-		medea.Merge(this.states, {}, clone.states);
-		medea.Merge(this.dirty, {}, clone.dirty);
+		medealib.Merge(this.states, {}, clone.states);
+		medealib.Merge(this.dirty, {}, clone.dirty);
 
 		return clone;
 	};

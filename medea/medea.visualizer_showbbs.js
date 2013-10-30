@@ -1,12 +1,14 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('visualizer_showbbs',[ 'visualizer','material','frustum'],function() {
+medealib.define('visualizer_showbbs',[ 'visualizer','material','frustum'],function() {
 	"use strict";
 	var medea = this;
 	var ordinal = 10;
@@ -33,7 +35,7 @@ medea.define('visualizer_showbbs',[ 'visualizer','material','frustum'],function(
 		}
 	};
 
-	medea._initMod('visualizer');
+	
 	var VisualizerShowBBs = medea.Visualizer.extend({
 
 		init : function(name, draw_range, draw_nodes, show_cull_state) {

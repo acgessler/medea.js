@@ -46,7 +46,7 @@ def include_resource(resource, source_file):
 		with open(source_file, 'rt') as inp:
 			return """ 
 
-			medea._bakedResources["{resource}"] = {data};
+			medealib._bakedResources["{resource}"] = {data};
 
 			""".format(resource=resource, data=javascript_string_escape(inp.read()))
 	except IOError:
@@ -110,7 +110,7 @@ def run(input_folder, config):
 			contents = inp.read()
 
 			l = None
-			for match in re.finditer(r"medea\.define\(.*?,\[(.*?)\]", contents):
+			for match in re.finditer(r"medealib\.define\(.*?,\[(.*?)\]", contents):
 				if not l is None:
 					print('unexpected input: two define calls in one file')
 					break
@@ -142,21 +142,19 @@ def run(input_folder, config):
 			path = os.path.join(input_folder, get_full_file_name(dep));
 			print('collating: ' + path)
 
-
 			with open(path, 'rt') as inp:
 				outp.write(preprocessor.run(inp.read(), input_folder))
-				if '.js' in dep:
-					outp.write('medea._markScriptAsLoaded("'+ dep +'");')
+				#if '.js' in dep:
+				#	outp.write('medea._markScriptAsLoaded("'+ dep +'");')
 				outp.write('\n')
 
 		# embed resource files
 		if resources_to_include:
-			outp.write('medea._bakedResources = {}; \n')
+			outp.write('medealib._bakedResources = {}; \n')
 			for k,v in resources_to_include.items():
 				print('embedding: ' + v + ' as ' + k)
 				outp.write(include_resource(k,v))
 
-		outp.write('medea._initLibrary();');
 		outp.write('delete window.medea_is_compiled;');
 
 	topo_order = [get_full_file_name(e) for e in topo_order]

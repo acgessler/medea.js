@@ -1,12 +1,14 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('viewport',['camera','renderqueue','statepool'],function(undefined) {
+medealib.define('viewport',['camera','renderqueue','statepool'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -17,7 +19,7 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 
 
 	// class Viewport
-	medea.Viewport = medea.Class.extend({
+	medea.Viewport = medealib.Class.extend({
 		name:"",
 		w : 1.0,
 		h : 1.0,
@@ -83,8 +85,8 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 		},
 
 
-		Name: medea._GetSet('name'),
-		Renderer: medea._GetSet('renderer'),
+		Name: medealib.Property('name'),
+		Renderer: medealib.Property('renderer'),
 
 		Enabled: function(f) {
 			if(f === undefined) {
@@ -203,7 +205,7 @@ medea.define('viewport',['camera','renderqueue','statepool'],function(undefined)
 
 		GetAspect: function() {
 			var c = medea.canvas;
-			medea.DebugAssert(c.width !== 0 && c.height !== 0, 'canvas width and height may not be 0');
+			medealib.DebugAssert(c.width !== 0 && c.height !== 0, 'canvas width and height may not be 0');
 			return (this.w*c.width)/(this.h*c.height);
 		},
 

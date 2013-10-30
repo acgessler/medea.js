@@ -1,12 +1,14 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('dummytexture',['filesystem'],function(undefined) {
+medealib.define('dummytexture',['filesystem'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -36,7 +38,7 @@ medea.define('dummytexture',['filesystem'],function(undefined) {
 			// #endif
 
 			// #ifdef LOG
-			medea.LogDebug("Create dummy 1x1 texture with color: " + color);
+			medealib.LogDebug("Create dummy 1x1 texture with color: " + color);
 			// #endif
 		},
 
@@ -78,7 +80,7 @@ medea.define('dummytexture',['filesystem'],function(undefined) {
 		}
 
 		// #ifdef LOG
-		medea.LogDebug("neutral texture name not recognized: " + id);
+		medealib.LogDebug("neutral texture name not recognized: " + id);
 		// #endif
 
 		return medea.CreateDefaultTexture();

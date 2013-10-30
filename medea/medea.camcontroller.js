@@ -1,32 +1,32 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
 
 
- // mouse movements are always tracked
-medea.CAMCONTROLLER_MOUSE_STYLE_ALWAYS = 0x1;
-
- // mouse movements are tracked iff ctrl (or the key it maps to) is pressed
-medea.CAMCONTROLLER_MOUSE_STYLE_ON_CTRL = 0x2;
-
- // mouse movements are tracked iff ctrl (or the key it maps to) is not pressed
-medea.CAMCONTROLLER_MOUSE_STYLE_OFF_CTRL = 0x3;
-
-// mouse movements are tracked iff the left mouse button is pressed
-medea.CAMCONTROLLER_MOUSE_STYLE_ON_LEFT_MBUTTON = 0x4;
-
-
-
-medea.define('camcontroller',['entity','input'],function(undefined) {
+medealib.define('camcontroller',['entity','input'],function(undefined) {
 	"use strict";
 	var medea = this;
 
-	medea._initMod('entity');
+
+	 // mouse movements are always tracked
+	medea.CAMCONTROLLER_MOUSE_STYLE_ALWAYS = 0x1;
+
+	 // mouse movements are tracked iff ctrl (or the key it maps to) is pressed
+	medea.CAMCONTROLLER_MOUSE_STYLE_ON_CTRL = 0x2;
+
+	 // mouse movements are tracked iff ctrl (or the key it maps to) is not pressed
+	medea.CAMCONTROLLER_MOUSE_STYLE_OFF_CTRL = 0x3;
+
+	// mouse movements are tracked iff the left mouse button is pressed
+	medea.CAMCONTROLLER_MOUSE_STYLE_ON_LEFT_MBUTTON = 0x4;
+
 	 
 	
 	medea.CamController = medea.Entity.extend({
@@ -46,8 +46,8 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 		},
 
 
-		Enabled : medea._GetSet('enabled'),
-		MouseStyle : medea._GetSet('mouse_style'),
+		Enabled : medealib.Property('enabled'),
+		MouseStyle : medealib.Property('mouse_style'),
 		
 
 		// TODO: deprecate in favour of Enabled()
@@ -125,7 +125,7 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 					return medea.IsMouseDown();
 			}
 			// #ifdef DEBUG
-			medea.DebugAssert(false, 'mouse style not recognized: ' + this.mouse_style);
+			medealib.DebugAssert(false, 'mouse style not recognized: ' + this.mouse_style);
 			// #endif 
 		}
 	});
@@ -147,10 +147,10 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 			this.scratch_mat = mat4.identity(mat4.create());
 		},
 
-		HispeedOnShift : medea._GetSet('hispeed_on_shift'),
-		TurnSpeed : medea._GetSet('turn_speed'),
-		WalkSpeed : medea._GetSet('walk_speed'),
-		TerrainEntity : medea._GetSet('terrain_entity'),
+		HispeedOnShift : medealib.Property('hispeed_on_shift'),
+		TurnSpeed : medealib.Property('turn_speed'),
+		WalkSpeed : medealib.Property('walk_speed'),
+		TerrainEntity : medealib.Property('terrain_entity'),
 
 
 		ProcessMouseDelta : function(dtime, n, d) {
@@ -248,21 +248,21 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 		},
 
 		// 1 bit set is x, 2 bit set is y
-		AxesEnabled : medea._GetSet('axes_enabled'),
+		AxesEnabled : medealib.Property('axes_enabled'),
 
-		ThetaPoleDeadAngle : medea._GetSet('theta_pole_dead_angle'),
-		TurnSpeed : medea._GetSet('turn_speed'),
-		ZoomSpeed : medea._GetSet('zoom_speed'),
-		PanSpeed : medea._GetSet('pan_speed'),
+		ThetaPoleDeadAngle : medealib.Property('theta_pole_dead_angle'),
+		TurnSpeed : medealib.Property('turn_speed'),
+		ZoomSpeed : medealib.Property('zoom_speed'),
+		PanSpeed : medealib.Property('pan_speed'),
 
-		PanEnable : medea._GetSet('pan_enable'),
-		ZoomEnable : medea._GetSet('zoom_enable'),
+		PanEnable : medealib.Property('pan_enable'),
+		ZoomEnable : medealib.Property('zoom_enable'),
 		
-		CameraDistance : medea._GetSet('camera_distance'),
-		MinimumCameraDistance : medea._GetSet('minimum_camera_distance'),
-		MaximumCameraDistance : medea._GetSet('maximum_camera_distance'),
+		CameraDistance : medealib.Property('camera_distance'),
+		MinimumCameraDistance : medealib.Property('minimum_camera_distance'),
+		MaximumCameraDistance : medealib.Property('maximum_camera_distance'),
 
-		PanningMouseButtons : medea._GetSet('panning_mouse_buttons'),
+		PanningMouseButtons : medealib.Property('panning_mouse_buttons'),
 
 
 		Reset : function(initial_rot_phi, initial_rot_theta) {
@@ -465,7 +465,7 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
  
 
 		
-		TurnSpeed : medea._GetSet('turn_speed'),
+		TurnSpeed : medealib.Property('turn_speed'),
 
 
 		ProcessMouseDelta : function(dtime, n, d) {
@@ -495,7 +495,7 @@ medea.define('camcontroller',['entity','input'],function(undefined) {
 			return new medea.RotateXCamController(enabled);
 		}
 		else {
-			medea.DebugAssert("camcontroller mode not recognized: " + kind);
+			medealib.DebugAssert("camcontroller mode not recognized: " + kind);
 			return null;
 		}
 	};

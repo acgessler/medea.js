@@ -1,18 +1,20 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytexture'],function(undefined) {
+medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytexture'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
-	medea._initMod('filesystem');
-	medea._initMod('imagestream');
-	medea._initMod('nativeimagepool');
+	
+	
+	
 
 	// check for presence of the EXT_texture_filter_anisotropic extension,
 	// which enables us to use anistropic filtering.
@@ -23,12 +25,12 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytex
 	// #ifdef DEBUG
 	var max_anisotropy;
 	if (aniso_ext) {
-		medea.LogDebug('using EXT_texture_filter_anisotropic extension');
+		medealib.LogDebug('using EXT_texture_filter_anisotropic extension');
 		max_anisotropy = gl.getParameter(aniso_ext.
 			MAX_TEXTURE_MAX_ANISOTROPY_EXT);
 	}
 	else {
-		medea.LogDebug('EXT_texture_filter_anisotropic extension not available');
+		medealib.LogDebug('EXT_texture_filter_anisotropic extension not available');
 	}
 	// #endif
 
@@ -60,7 +62,7 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytex
 				return gl.LUMINANCE_ALPHA;
 		}
 		// #ifdef DEBUG
-		medea.DebugAssert('unrecognized texture format: ' + f);
+		medealib.DebugAssert('unrecognized texture format: ' + f);
 		// #endif
 	}
 
@@ -174,7 +176,7 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytex
 				texture_cache[name] = this;
 			}
 
-			medea.LogDebug("successfully loaded texture " + this.GetSource());
+			medealib.LogDebug("successfully loaded texture " + this.GetSource());
 		},
 
 		GetGlTextureWidth : function() {
@@ -207,7 +209,7 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytex
 
 		GetImage : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE,'GetImage() ist not available: '+
+			medealib.DebugAssert(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE,'GetImage() ist not available: '+
 				'TEXTURE_FLAG_KEEP_IMAGE not specified');
 			// #endif
 			return this.img;
@@ -215,14 +217,14 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytex
 
 		IsPowerOfTwo : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: texture not loaded yet');
+			medealib.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: texture not loaded yet');
 			// #endif
 			return this.ispot;
 		},
 
 		IsSquare : function() {
 			// #ifdef DEBUG
-			medea.DebugAssert(this.IsComplete(),'IsSquare() ist not available: texture not loaded yet');
+			medealib.DebugAssert(this.IsComplete(),'IsSquare() ist not available: texture not loaded yet');
 			// #endif
 			return this.width === this.height;
 		},
@@ -359,7 +361,7 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytex
 	
 
 	medea.CreateTexture = function(src_or_image, callback, flags, format, force_width, force_height) {
-		medea.DebugAssert((force_width === undefined) === (force_height === undefined), 
+		medealib.DebugAssert((force_width === undefined) === (force_height === undefined), 
 			'explicit size must always be given for both axes');
 			
 		var create = function() {
@@ -380,7 +382,7 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytex
 				cache_name_w = cache_name + GetTextureSizeSuffix(force_width, force_height);
 				var cache_entry_w = texture_cache[cache_name_w];
 				if(cache_entry_w !== undefined) {
-					medea.LogDebug('texture found in cache (1): ' + src_or_image);
+					medealib.LogDebug('texture found in cache (1): ' + src_or_image);
 					return cache_entry_w;
 				}
 			}
@@ -401,7 +403,7 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytex
 			if (cache_name_w === null || (force_width === cache_entry.GetWidth() 
 				&& force_height === cache_entry.GetHeight())) {
 				
-				medea.LogDebug('texture found in cache (2): ' + src_or_image);
+				medealib.LogDebug('texture found in cache (2): ' + src_or_image);
 				return cache_entry;
 			}
 		}
@@ -412,7 +414,7 @@ medea.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytex
 	medea.GetDefaultTexture = function() {
 		if (!default_texture ) {
 			// TODO: use signal color for debug builds
-			medea._initMod('dummytexture');
+			
 			default_texture = new medea.DummyTexture([0.3,0.3,0.3,1.0]);
 		}
 		return default_texture;

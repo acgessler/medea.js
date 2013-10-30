@@ -1,12 +1,14 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('materialgen',['shader','material'],function(undefined) {
+medealib.define('materialgen',['shader','material'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -47,7 +49,7 @@ medea.define('materialgen',['shader','material'],function(undefined) {
 
 
 	// class MaterialGen
-	medea.MaterialGen = medea.Class.extend({
+	medea.MaterialGen = medealib.Class.extend({
 		name : "",
 		mat_gen : null,
 
@@ -57,7 +59,7 @@ medea.define('materialgen',['shader','material'],function(undefined) {
 		Update : function(statepool, passes) {
 
 			// #ifdef DEBUG
-			medea.DebugAssert (passes.length > 1, 'not a generated pass');
+			medealib.DebugAssert (passes.length > 1, 'not a generated pass');
 			// #endif
 
 			if(passes.length === 0) {
@@ -98,22 +100,22 @@ medea.define('materialgen',['shader','material'],function(undefined) {
 			// TODO: point and spot lights
 
 			fragment_code = fragment_code
-				.replace('$lighting_body', lighting_code);
+				.replace('$lighting_body', lighting_code)
 				.replace('$lighting_uniforms', lighting_uniforms.join(";\n"));
 
 			return fragment_code;
-		}
+		},
 
 		GeVertexShader : function(state) {
 			var vertex_code = new String(raw_vertex_shader);
 			return vertex_code;
-		}
+		},
 
 		EvaluateDirectionalLight : function() {
 			return {
-				prefix		: 'float strength = dot($normal_world, $light_dir_world)'
-				diffuse 	: 'strength * $light_diffuse_color'
-				specular 	: 'strength * $light_specular_color'
+				prefix		: 'float strength = dot($normal_world, $light_dir_world)',
+				diffuse 	: 'strength * $light_diffuse_color',
+				specular 	: 'strength * $light_specular_color',
 				ambient		: '$light_ambient_color'
 			};
 		},
@@ -124,9 +126,9 @@ medea.define('materialgen',['shader','material'],function(undefined) {
 					'vec3 dir = $pos_world - $light_pos_world; \
 					 float distance = length(dir); \
 					 float attenuation = 1.0-clamp(distance/$light_range,0.0,1.0); \
-					 float strength = dot($normal_world, dir) * attenuation'
-				diffuse 	: 'strength * $light_diffuse_color'
-				specular 	: 'strength * $light_specular_color'
+					 float strength = dot($normal_world, dir) * attenuation',
+				diffuse 	: 'strength * $light_diffuse_color',
+				specular 	: 'strength * $light_specular_color',
 				ambient		: '$light_ambient_color'
 			};
 		},
@@ -138,10 +140,10 @@ medea.define('materialgen',['shader','material'],function(undefined) {
 					 float distance = length(dir); \
 					 float attenuation = 1.0-clamp(distance/$light_range,0.0,1.0); \
 					 float angle = smoothstep($light_spot_angle_inner, $light_spot_angle_outer) \
-					 	* dot($light_dir_world, normalize(distance))
-					 float strength = dot($normal_world, dir) * attenuation * angle;'
-				diffuse 	: 'strength * $light_diffuse_color'
-				specular 	: 'strength * $light_specular_color'
+					 	* dot($light_dir_world, normalize(distance)) \
+					 float strength = dot($normal_world, dir) * attenuation * angle;',
+				diffuse 	: 'strength * $light_diffuse_color',
+				specular 	: 'strength * $light_specular_color',
 				ambient		: '$light_ambient_color'
 			};
 		}

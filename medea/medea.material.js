@@ -1,12 +1,14 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('material',['pass'],function(undefined) {
+medealib.define('material',['pass'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -19,7 +21,7 @@ medea.define('material',['pass'],function(undefined) {
 
 
 	// class Material
-	medea.Material = medea.Class.extend({
+	medea.Material = medealib.Class.extend({
 		name : "",
 		mat_gen : null,
 
@@ -43,7 +45,7 @@ medea.define('material',['pass'],function(undefined) {
 			}
 // #ifdef DEBUG
 			if (!this.passes) {
-				medea.DebugAssert("need at least one pass for a material to be complete");
+				medealib.DebugAssert("need at least one pass for a material to be complete");
 			}
 // #endif
 		},
@@ -58,7 +60,7 @@ medea.define('material',['pass'],function(undefined) {
 			}
 			// #ifdef DEBUG
 			else if (n > this.passes.length) {
-				medea.DebugAssert('pass index out of range, cannot add pass if there is no pass that preceedes it: ' + n);
+				medealib.DebugAssert('pass index out of range, cannot add pass if there is no pass that preceedes it: ' + n);
 				return;
 			}
 			// #endif
@@ -81,7 +83,7 @@ medea.define('material',['pass'],function(undefined) {
 			return id;
 		},
 
-		Name : medea._GetSet(this,'name'),
+		Name : medealib.Property(this,'name'),
 
 		Use: function(drawfunc, statepool, semantic, change_flags) {
 			semantic = semantic || 0xffffffff;

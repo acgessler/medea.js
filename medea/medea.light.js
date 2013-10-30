@@ -1,18 +1,20 @@
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of a 3 clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
 
-medea.define('light', ['entity'],function(undefined) {
+medealib.define('light', ['entity'],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
-	medea._initMod('entity');
+	
 
 	// class LightJob
-	medea.LightJob = medea.Class.extend({
+	medea.LightJob = medealib.Class.extend({
 
 		distance 	: null,
 		light 		: null,
@@ -54,8 +56,8 @@ medea.define('light', ['entity'],function(undefined) {
 		},
 
 
-		CastShadows : medea._GetSet('cast_shadows'),
-		ShadowMapResolutionBias : medea._GetSet('shadowmap_res_bias'),
+		CastShadows : medealib.Property('cast_shadows'),
+		ShadowMapResolutionBias : medealib.Property('shadowmap_res_bias'),
 	});
 
 
