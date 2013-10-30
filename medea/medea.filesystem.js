@@ -12,7 +12,7 @@ medealib.define('filesystem',[],function(undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
-	var baked_resources = medea._bakedResources;
+	var baked_resources = medealib._bakedResources;
 
 	// #ifdef DEBUG
 	if (baked_resources !== undefined) {
