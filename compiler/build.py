@@ -26,8 +26,8 @@ def get_google_closure_params():
 			'// ==/ClosureCompiler==\n\n'
 
 
-def get_license():
-	with open( 'LICENSE', 'rt') as inp:
+def get_license(input_folder):
+	with open( os.path.join(input_folder, '..', 'LICENSE'), 'rt') as inp:
 		# the @license tag instructs minifiers not to strip the comment
 		return "/** @license\n" + inp.read() + '\n*/'
 
@@ -73,7 +73,11 @@ def derive_topological_order(initial, mods_by_deps):
 	return topo_order
 
 
-def run(input_folder, output_folder, files_to_compact, resources_to_include = {}):
+def run(input_folder, config):
+	output_folder = config['output']
+	files_to_compact = config['modules']
+	resources_to_include = config['resources']
+
 	input_folder_3rdparty = os.path.join(input_folder, '3rdparty')
 	output_folder_3rdparty = os.path.join(output_folder, '3rdparty')
 
@@ -132,7 +136,7 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 	# generate medea.core-compiled.js output file
 	with open(os.path.join(output_folder, primary_compiled_file), 'wt') as outp:
 		outp.write(get_google_closure_params())
-		outp.write(get_license())
+		outp.write(get_license(input_folder))
 		outp.write('medea_is_compiled = true;');
 		for n, dep in enumerate(topo_order):
 			path = os.path.join(input_folder, get_full_file_name(dep));

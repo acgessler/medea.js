@@ -81,37 +81,20 @@ if __name__ == "__main__":
 		print(help)
 		sys.exit(-1)
 	
-	resources = {}
-
+	config = {}
 	if sys.argv[1] == '-c':
 		# cannot use ConfigParser due to colons in keys
-		with open(sys.argv[2], "rt") as inp:
-			lines = [l.strip() for l in inp.readlines() if l.strip() and not l.strip()[0] == '#']
-			sections = {}
-			sections[''] = cur_section = {}
-			for n, line in enumerate(lines):
-				lineno = n+1
-				head = re.match(r'^\[(.+)\]$', line)
-				if head is None:
-					elem = re.match(r'^(.+?)(?:\=(.+?))?$', line)
-					if elem is None:
-						print('invalid entry in configuration file, line ' + str(lineno))
-						sys.exit(-3)
-					cur_section[elem.group(1)] = elem.group(2)
-				else:
-					sections[head.group(1)] = cur_section = {}
-
-		output = sections['general']['output']
-		modules = list(sections['modules'].keys()) if 'modules' in sections else []
-		resources = sections['resources'] if 'resources' in sections else {}
+		from compiler import config 
+		config = compiler.read_config(sys.argv[2])
 
 	else:
-		output = sys.argv[1]
-		modules = sys.argv[2:]
+		config.output = sys.argv[1]
+		config.modules = sys.argv[2:]
+		config.resources = {}
 
 		for n,arg in enumerate(sys.argv):
 			if arg[:2] == '-r':
-				modules = sys.argv[2:n]
+				config.modules = sys.argv[2:n]
 
 				def parse_res(k):
 					match = re.match(r'^(.+?)\=(.+?)$',k)
@@ -120,9 +103,9 @@ if __name__ == "__main__":
 						sys.exit(-2)
 					return match.groups()
 
-				resources = dict(parse_res(k) for k in sys.argv[n+1:]);
+				config.resources = dict(parse_res(k) for k in sys.argv[n+1:]);
 				break
 
-	modules = modules or []
-	assert output
-	compiler.run('medea', output, modules, resources)
+	config['modules'] = config['modules'] or []
+	assert config['output']
+	compiler.run('medea', config)
