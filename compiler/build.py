@@ -41,9 +41,9 @@ def javascript_string_escape(s):
 	return '+ \n'.join("'" + line + "\\n'" for line in escaped.split('\n')) + '\n'
 
 
-def include_resource(resource, source_file):
+def include_resource(resource, source_file, input_folder):
 	try:
-		with open(source_file, 'rt') as inp:
+		with open(os.path.join(input_folder, '..', source_file), 'rt') as inp:
 			return """ 
 
 			medealib._bakedResources["{resource}"] = {data};
@@ -130,7 +130,7 @@ def run(input_folder, config):
 	# pre-define sprintf, matrix and the core module as they do not follow the 
 	# usual module dependency system.
 	topo_order = derive_topological_order(['core', 'glMatrix.js'],mods_by_deps)
-	print topo_order
+	print(topo_order)
 	print('writing medea.core-compiled.js')
 	
 	# generate medea.core-compiled.js output file
@@ -153,7 +153,7 @@ def run(input_folder, config):
 			outp.write('medealib._bakedResources = {}; \n')
 			for k,v in resources_to_include.items():
 				print('embedding: ' + v + ' as ' + k)
-				outp.write(include_resource(k,v))
+				outp.write(include_resource(k,v,input_folder))
 
 		outp.write('delete window.medea_is_compiled;');
 
@@ -169,4 +169,6 @@ def run(input_folder, config):
 		if not os.path.join('3rdparty',file) in topo_order and ".js" in file:
 			print('copying ' + file + ' to output folder')
 			shutil.copy2(os.path.join(input_folder_3rdparty, file), os.path.join(output_folder_3rdparty, file))
+
+	print('** done - ' + output_folder)
 
