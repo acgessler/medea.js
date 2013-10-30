@@ -46,7 +46,7 @@ def include_resource(resource, source_file):
 		with open(source_file, 'rt') as inp:
 			return """ 
 
-			medea._bakedResources["{resource}"] = {data};
+			medealib._bakedResources["{resource}"] = {data};
 
 			""".format(resource=resource, data=javascript_string_escape(inp.read()))
 	except IOError:
@@ -106,7 +106,7 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 			contents = inp.read()
 
 			l = None
-			for match in re.finditer(r"medea\.define\(.*?,\[(.*?)\]", contents):
+			for match in re.finditer(r"medealib\.define\(.*?,\[(.*?)\]", contents):
 				if not l is None:
 					print('unexpected input: two define calls in one file')
 					break
@@ -146,7 +146,7 @@ def run(input_folder, output_folder, files_to_compact, resources_to_include = {}
 
 		# embed resource files
 		if resources_to_include:
-			outp.write('medea._bakedResources = {}; \n')
+			outp.write('medealib._bakedResources = {}; \n')
 			for k,v in resources_to_include.items():
 				print('embedding: ' + v + ' as ' + k)
 				outp.write(include_resource(k,v))
