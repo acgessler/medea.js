@@ -19,8 +19,10 @@
  *
  * TODO
  */
-var medealib = (function() {
-	var medealib = this
+medealib = (function() {
+
+	var old_medealib = window.medealib
+	,	medealib = this
 
 		// for currently pending modules, a list of observers waiting
 		// to be notified when the request succeeds.
@@ -49,6 +51,18 @@ var medealib = (function() {
 
 	medealib.AssertionError = function(what) {medealib.what = what;};
 	medealib.FatalError = function(what) {medealib.what = what;};
+
+
+	// ---------------------------------------------------------------------------
+	/** Similar to jQuery's NoConflict() API, restores the previous value of
+	 *  window.medealib and returns this medealib instance.
+	 *  @return {medealib} previous value of window.medealib
+	*/
+	// ---------------------------------------------------------------------------
+	medealib.NoConflict = function() {
+		window.medealib = old_medealib;
+		return medealib;
+	};
 
 
 	// ---------------------------------------------------------------------------
