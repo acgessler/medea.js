@@ -35,6 +35,10 @@ medealib = (function() {
 	}
 		// original module source
 	, _sources = {}
+
+		// raw .js files (3rdparty, i.e. not in medea module format)
+		// that have been loaded already
+	, _scripts_preloaded =  {}
 	;
 
 
@@ -311,7 +315,7 @@ medealib = (function() {
 		for(var i = 0; i < whom.length; ++i) {
 			var n = whom[i], init = _stubs[n];
 
-			if(!n) {
+			if(!n || _scripts_preloaded[n] || _waiters[n]) {
 				continue;
 			}
 
@@ -441,6 +445,14 @@ medealib = (function() {
 	};
 
 
+	// ------------------------------------------------------------------------
+	/** @private to build system */
+	// ------------------------------------------------------------------------
+	medealib._MarkScriptAsLoaded = function(name) {
+		_scripts_preloaded[name] = true;
+	};
+
+
 
 	// global initialization code
 	(function() {
@@ -450,7 +462,7 @@ medealib = (function() {
 
 		// check if we need the JSON polyfill
 		if(typeof JSON !== undefined) {
-			_stubs['json2.js'] = function() {};
+			medealib._MarkScriptAsLoaded('json2.js');
 		}
 	}) ();
 

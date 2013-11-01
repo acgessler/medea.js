@@ -144,8 +144,8 @@ def run(input_folder, config):
 
 			with open(path, 'rt') as inp:
 				outp.write(preprocessor.run(inp.read(), input_folder))
-				#if '.js' in dep:
-				#	outp.write('medea._markScriptAsLoaded("'+ dep +'");')
+				if '.js' in dep:
+					outp.write('medealib._MarkScriptAsLoaded("'+ dep +'");')
 				outp.write('\n')
 
 		# embed resource files
