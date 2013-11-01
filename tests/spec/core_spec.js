@@ -2,6 +2,8 @@
 var DEFAULT_TIMEOUT = 2000;
 var FRAME_DELTA = 1000/60;
 
+window.medealib_jasmine_no_alert = true;
+
 	// note: js files must execute in exactly this order
 var configs = [
 	  'null-debug'

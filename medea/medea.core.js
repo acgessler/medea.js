@@ -100,7 +100,10 @@ medealib = (function() {
 		if (!cond) {
 			what = "medealib DEBUG ASSERTION: " + what;
 			console.error(what);
-			alert(what);
+			// hack to disable message boxes when running tests
+			if(!window.medealib_jasmine_no_alert) {
+				alert(what);
+			}
 			throw new medealib.AssertionError(what);
 		}
 	};
