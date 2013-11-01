@@ -98,7 +98,29 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	medeactx._workers = {};
 
 	
-	var _modules_loaded = {};
+	var _modules_loaded = {}
+	,	_disposed = false;
+
+
+	// ---------------------------------------------------------------------------
+	/** Dispose of all resources held by the context. 
+	 * */
+	// ---------------------------------------------------------------------------
+	medeactx.Dispose = function() {
+	// #ifdef DEBUG
+		medealib.DebugAssert(!_disposed, 'context has been disposed before');
+	// #endif
+
+		_disposed = true;
+
+		if(this.debug_panel) {
+			this.debug_panel.Dispose();
+		}
+
+		// TODO: how to cleverly destroy all gl resources, including the
+		// context? http://stackoverflow.com/questions/14970206
+	} 
+
 
 
 	// ---------------------------------------------------------------------------
@@ -379,6 +401,10 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	*/
 	// ------------------------------------------------------------------------
 	medeactx.DoSingleFrame = function(dtime) {
+	// #ifdef DEBUG
+		medealib.DebugAssert(!_disposed, 'context has been disposed');
+	// #endif
+
 		if (!medeactx.CanRender()) {
 			medealib.NotifyFatal("Not ready for rendering; need a GL context and a viewport");
 			return;
@@ -738,7 +764,6 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	// #ifdef LOG
 		medealib.LogDebug('fetching second set of dependencies');
 	// #endif
-			console.log(_initial_deps.concat(deps || []));
 			medeactx.LoadModules(_initial_deps.concat(deps || []), function() {
 				_init_level_1();
 			});

@@ -57,7 +57,7 @@ function testConfig(iconfig) {
 			});	
 
 			afterEach(function() {
-				//medea.Dispose();
+				medea.Dispose();
 			});
 
 

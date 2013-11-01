@@ -72,6 +72,10 @@ var MiniStatsDisplay = function (config) {
 
 		container : container,
 
+		destroy : function() {
+			document.body.removeChild( container );
+		},
+
 		range : function(lower, upper) {
 			range = [lower|0, upper|0];
 			range_changed = true;

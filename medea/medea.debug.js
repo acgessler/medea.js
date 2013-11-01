@@ -92,6 +92,15 @@ medealib.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniS
 		},
 
 
+		Dispose : function() {
+			this.gui.destroy();
+
+			this.stats_shortlist.forEach(function(e) {
+				e.destroy();
+			});
+		},
+
+
 		BeginFrame : function() {
 			this._SetVisualizer('showbbs', this.show_bbs);
 			this._SetVisualizer('shownormals', this.show_normals);
