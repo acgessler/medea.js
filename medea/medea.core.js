@@ -78,7 +78,10 @@ medealib = (function() {
 	medealib.NotifyFatal = function(what) {
 		what = "medealib: " + what;
 		medealib.LogDebug(what);
-		alert(what);
+		// hack to disable message boxes when running tests
+		if(!window.medealib_jasmine_no_alert) {
+			alert(what);
+		}
 		throw new medealib.FatalError(what);
 	};
 
