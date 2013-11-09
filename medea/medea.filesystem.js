@@ -96,7 +96,7 @@ medealib.define('filesystem',[],function(medealib, undefined) {
 						outer.OnDelayedInit.apply(outer,arguments);
 					},
 					function(error) {
-						medea.Log('failed to delay initialize resource from ' + src + 
+						medealib.LogDebug('failed to delay initialize resource from ' + src + 
 							', resource remains non-complete: '+error, 'error');
 					}
 				);
