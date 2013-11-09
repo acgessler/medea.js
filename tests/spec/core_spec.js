@@ -157,6 +157,30 @@ function testConfig(iconfig) {
 				// can't make assumptions on fps values after one frame
 			});
 
+			it("should be able to have a tick callback remove itself", function () {
+
+				expect(medea.CanRender()).toBeFalsy();
+				var vp = medea.CreateViewport();
+
+				var called = false;
+				medea.SetTickCallback(function() {
+					expect(called).toBeFalsy();
+					called = true;
+					medea.RemoveTickCallback();
+				});
+
+				medea.DoSingleFrame(0);
+				expect(called).toBeTruthy();
+				medea.DoSingleFrame(0);
+
+				called = false;
+				medea.SetTickCallback(function() {
+					expect(called).toBeFalsy();
+					called = true;
+					medea.RemoveTickCallback('key');
+				}, 'key');
+			});
+
 			it("should be able to do a rendering loop, and be able to get callbacks and stop again", function (done) {
 				var count = 0
 				,	count_2 = 0
