@@ -58,8 +58,7 @@ function Continuation(tick_getter_or_interval) {
 		};
 
 		do {
-			var job = _jobs[0];
-			_jobs = _jobs.slice(1);
+			var job = _jobs.shift();
 
 			var result = job(time_remaining_updater);
 			if(typeof result === 'function') {
@@ -76,7 +75,9 @@ function Continuation(tick_getter_or_interval) {
 		while(!_done && time_remaining > 0);
 
 		if(!_done) {
-			_tick_getter(_call_next);
+			_tick_getter(function() {
+				_call_next(slice_duration);
+			});
 		}
 	};
 

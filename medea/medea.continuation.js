@@ -23,14 +23,20 @@ medealib.define('continuation',['continue.js'],function(medealib, undefined) {
 			this.max_time = max_time || 20;
 
 			var key = prefix + (counter++);
-			this.c = new Continuation(function(f) {
+			// problem: when the main loop is not running, or is terminated,
+			// continuations may never fully execute. For this, a rework
+			// of the main loop is needed. So for now, back to setTimeout()
+			this.c = new Continuation( /*function(f) {
+
 				// go through medea's regular tick system to make sure the
 				// debug tools are able to include this in the frame-time.
 				medea.SetTickCallback( function() {
 					medea.RemoveTickCallback(key);
 					f();
 				}, key);
-			});
+
+
+			} */);
 		},
 
 		MaxTime : medealib.Property('max_time'),
