@@ -128,9 +128,9 @@ medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js', 'con
 		if(node.meshes) {
 			for(var i = 0; i < node.meshes.length; ++i) {
 			// #if DEBUG
-				medea.DebugAssert(!!w.meshes[node.meshes[i]], 'meshes should have been created before');
+				medealib.DebugAssert(!!w.meshes[node.meshes[i]], 'meshes should have been created before');
 			// #endif
-				outnd.AddEntity(LoadMesh(w.meshes[node.meshes[i]]));
+				outnd.AddEntity(w.meshes[node.meshes[i]]);
 			}
 		}
 
@@ -143,7 +143,6 @@ medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js', 'con
 
 
 	var LoadScene = function(scene,anchor,callback,material_resolver) {
-
 		// batch the working set together in a dumpbin and pass it around 
 		var working = {
 			callback : callback,
@@ -162,25 +161,24 @@ medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js', 'con
 
 		// one job per mesh
 		if(scene.meshes) {
-			for(i = 0, e = scene.meshes.length; i < e; ++i) {
+			scene.meshes.forEach(function(m,i) {
 				cont.AddJob(function() {
 					LoadMesh(working, i);
 				});
-			};
+			});
 		}
 
 		// final assembly job
 		cont.AddJob(function() {
-
 			LoadNode(working,anchor,scene.rootnode);
-			callback(true);
+			working.callback(medea.SCENE_LOAD_STATUS_GEOMETRY_FINISHED);
 		});
 
 		cont.Schedule();
 	};
 
 
-	medea._LoadScene_assimp2json = function(src,anchor,callback,material_resolver) {
+	medea._LoadScene_assimp2json = function(src, anchor, callback, material_resolver) {
 		medealib.DebugAssert(material_resolver, "need a valid material resolver");
 
 		// see if we got a JSON DOM or a unparsed string
@@ -199,14 +197,16 @@ medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js', 'con
 
 		try {
 			LoadScene(src, anchor, callback, material_resolver);
-		}
+		} 
 		catch(e) {
 			// #ifdef DEBUG
-			medealib.DebugAssert("Failed to read assimp2json scene: " + e);
-			callback(false);
+			console.log(e.stack);	
+			medealib.DebugAssert("Failed to read assimp2json scene: " + e);		
 			// #endif
+
+			callback(false);
 			return;
-		}
+		} 
 	};
 }, ['_LoadScene_assimp2json']);
 

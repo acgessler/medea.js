@@ -13,6 +13,22 @@ medealib.define('sceneloader',['filesystem', 'material'],function(medealib, unde
 	var medea = this;
 
 
+	// failure loading a scene
+	medea.SCENE_LOAD_STATUS_FAILED = 0;
+
+	// scene has been downloaded, now starting to decode it
+	medea.SCENE_LOAD_STATUS_DOWNLOADED = 1;
+
+	// scene geometry and topology has been fully loaded, but materials
+	// and textures may still be pending.
+	medea.SCENE_LOAD_STATUS_GEOMETRY_FINISHED = 2;
+
+	// (not supported yet)
+	// all pending resources are loaded
+	medea.SCENE_LOAD_STATUS_FINISHED = 3;
+
+
+
 	var FixTexturePath = function(path, root) {
 		return root+'/'+ path.replace(/^\.(\\|\/)(.*)/,'$2');
 	};
@@ -69,19 +85,11 @@ medealib.define('sceneloader',['filesystem', 'material'],function(medealib, unde
 		material_resolver = material_resolver || CreateDefaultMaterialResolver(src.replace(/^(.*[\\\/])?(.*)/,'$1'));
 		medea.Fetch(src,function(data) {
 			if(!data) {
-				callback(false);
+				callback(medea.SCENE_LOAD_STATUS_FAILED);
 				return;
 			}
-			medea.LoadScene(data,anchor,format_hint,function(status) {
-				if(!status) {
-					callback(false);
-					return;
-				}
-				// #ifdef LOG
-				medealib.LogDebug("sceneloader: scene hierarchy is present, but dependent resources may still be pending: " + src);
-				// #endif
-				callback(true);
-			}, material_resolver);
+			callback(medea.SCENE_LOAD_STATUS_DOWNLOADED);
+			medea.LoadScene(data,anchor,format_hint,callback, material_resolver);
 		});
 	};
 });
