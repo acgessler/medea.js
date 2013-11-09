@@ -2,26 +2,9 @@
 var DEFAULT_TIMEOUT = 2000;
 var FRAME_DELTA = 1000/60;
 
-window.medealib_jasmine_no_alert = true;
 
-	// note: js files must execute in exactly this order
-var configs = [
-	  'null-debug'
-	, 'null-release'
-	, 'collated-debug'
-	, 'collated-release'
-];
 
-var medealibs = new Array(configs.length);
-for (var i = configs.length - 1; i >= 1; --i) {
-	medealibs[i] = medealib.NoConflict();
-}
-medealibs[0] = window.medealib;
-
-for(var i = 0; i < configs.length; ++i) {
-	testConfig(i);
-}
-
+test_runners.push(testConfig);
 
 function testConfig(iconfig) {
 	var medealib = medealibs[iconfig];

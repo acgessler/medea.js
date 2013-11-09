@@ -17,8 +17,41 @@
   <script type="text/javascript" src="build/output/collated-debug/medea.core-compiled.js"></script>
   <script type="text/javascript" src="build/output/collated-release/medea.core-compiled.js"></script>
 
+
+  <script type="text/javascript">
+  test_runners = [];
+  </script>
+
   <!-- include spec files here... -->
    <script type="text/javascript" src="spec/core_spec.js"></script>
+
+
+   <script type="text/javascript">
+  // prevent alerts
+    window.medealib_jasmine_no_alert = true;
+
+  // note: js files must execute in exactly this order
+    var configs = [
+        'null-debug'
+      , 'null-release'
+      , 'collated-debug'
+      , 'collated-release'
+    ];
+
+    var medealibs = new Array(configs.length);
+    for (var i = configs.length - 1; i >= 1; --i) {
+      medealibs[i] = medealib.NoConflict();
+    }
+    medealibs[0] = window.medealib;
+
+    // run all registered test runners for all configurations
+    for(var i = 0; i < configs.length; ++i) {
+      test_runners.forEach(function(f) {
+        f(i);
+      });
+    }
+
+   </script>
 
 </head>
 
