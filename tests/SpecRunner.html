@@ -19,12 +19,12 @@
 
 
   <script type="text/javascript">
-  test_runners = [];
+    test_runners = [];
   </script>
 
   <!-- include spec files here... -->
    <script type="text/javascript" src="spec/core_spec.js"></script>
-   
+   <script type="text/javascript" src="spec/continuation_spec.js"></script>
 
    <script type="text/javascript">
   // prevent alerts
@@ -45,33 +45,32 @@
     medealibs[0] = window.medealib;
     delete window.medealib;
 
-    // run all registered test runners for all configurations
-    for(var i = 0; i < configs.length; ++i) {
-      (function(i) {
+    var old_onload = window.onload;
+    window.onload = function() {
+     
 
-        var medealib = medealibs[i]
-        , config = "BUILD CONFIG = " + configs[i]
-        , dom_element = 'canvas' + (i+1)
-        ;
+      // run all registered test runners for all configurations
+      for(var i = 0; i < configs.length; ++i) {
+        (function(i) {
 
-        describe(config, function(done) {
+          var medealib = medealibs[i]
+          , config = "BUILD CONFIG = " + configs[i]
+          , dom_element = 'canvas' + (i+1)
+          ;
 
-          test_runners.forEach(function(f) {
-            f(medealib, dom_element);
+          describe(config, function() {
+
+            test_runners.forEach(function(f) {
+              f(medealib, dom_element);
+            });
+
           });
+        })(i);
+      }
 
-          /* TODO: setup environment for tests that depend on a valid medea context
-          medealib.CreateContext('canvas', {dataroot:'../data'}, ['forwardrenderer'], function(medea) {
-           // medea = _medea;
-           console.log(1);
-            done();
-          });
-          console.log(2); */
-
-        });
-      })(i);
+      old_onload();
     }
-
+      
    </script>
 
 </head>
@@ -83,6 +82,7 @@
   <canvas id="canvas2" style="border: none;" width="100" height="100"></canvas>
   <canvas id="canvas3" style="border: none;" width="100" height="100"></canvas>
   <canvas id="canvas4" style="border: none;" width="100" height="100"></canvas>
+  <canvas id="canvas5" style="border: none;" width="100" height="100"></canvas>
 </div>
 </div>
 
