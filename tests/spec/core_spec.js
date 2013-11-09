@@ -1,4 +1,8 @@
 
+
+// verify context creation, destruction and the main rendering loop
+// infrastructure, as well as debug hooks and statistics housekeeping.
+
 var DEFAULT_TIMEOUT = 2000;
 var FRAME_DELTA = 1000/60;
 
@@ -129,6 +133,8 @@ function testConfig(medealib, dom_element) {
 			expect(medea.CanRender()).toBeFalsy();
 
 			var vp = medea.CreateViewport();
+			vp.Renderer(medea.CreateForwardRenderer());
+			vp.ClearColor([1,0,1]);
 
 			//expect(medea.CanRender()).toBeFalsy();
 			//vp1.Renderer(medea.CreateForwardRenderer());
@@ -142,6 +148,8 @@ function testConfig(medealib, dom_element) {
 
 			expect(medea.CanRender()).toBeFalsy();
 			var vp = medea.CreateViewport();
+			vp.Renderer(medea.CreateForwardRenderer());
+			vp.ClearColor([1,0,1]);
 
 			//expect(medea.CanRender()).toBeFalsy();
 			//vp1.Renderer(medea.CreateForwardRenderer());
@@ -160,6 +168,8 @@ function testConfig(medealib, dom_element) {
 
 			expect(medea.CanRender()).toBeFalsy();
 			var vp = medea.CreateViewport();
+			vp.Renderer(medea.CreateForwardRenderer());
+			vp.ClearColor([1,0,1]);
 
 			var called = false;
 			medea.SetTickCallback(function() {
@@ -188,6 +198,8 @@ function testConfig(medealib, dom_element) {
 			;
 
 			var vp = medea.CreateViewport();
+			vp.Renderer(medea.CreateForwardRenderer());
+			vp.ClearColor([1,0,1]);
 
 			expect(medea.IsStopMarkerSet()).toBeFalsy();
 			expect(medea.IsStopMarkerSet()).toBeFalsy();
@@ -260,7 +272,9 @@ function testConfig(medealib, dom_element) {
 
 		it("should keep time correctly", function () {
 			var time = medea.GetTime();
-			medea.CreateViewport();
+			var vp = medea.CreateViewport();
+			vp.Renderer(medea.CreateForwardRenderer());
+			vp.ClearColor([1,0,1]);
 
 			expect(medea.GetTime()).toBe(0.0);
 
@@ -275,7 +289,10 @@ function testConfig(medealib, dom_element) {
 		it("should correctly call debug hooks", function (done) {
 			var ok= false;
 
-			medea.CreateViewport();
+			var vp = medea.CreateViewport();
+			vp.Renderer(medea.CreateForwardRenderer());
+			vp.ClearColor([1,0,1]);
+
 			medea.SetDebugPanel(null, function() {
 				spyOn(medea.debug_panel, 'BeginFrame');
 				spyOn(medea.debug_panel, 'EndFrame');
