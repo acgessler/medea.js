@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('nativeimagepool',[],function(undefined) {
+medealib.define('nativeimagepool',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

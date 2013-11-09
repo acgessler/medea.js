@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('material',['pass'],function(undefined) {
+medealib.define('material',['pass'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

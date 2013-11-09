@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('skydome',['mesh'],function(undefined) {
+medealib.define('skydome',['mesh'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

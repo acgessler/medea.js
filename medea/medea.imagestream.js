@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('imagestream',['nativeimagepool','filesystem'],function(undefined) {
+medealib.define('imagestream',['nativeimagepool','filesystem'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

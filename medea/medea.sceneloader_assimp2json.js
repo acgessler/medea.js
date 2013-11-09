@@ -1,13 +1,14 @@
 
-/* medea - an Open Source, WebGL-based 3d engine for next-generation browser games.
- * (or alternatively, for clumsy and mostly useless tech demos written solely for fun)
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
  *
- * medea is (c) 2011, Alexander C. Gessler
- * licensed under the terms and conditions of the 3-clause BSD license.
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
  */
-
  // note: json2.js may be needed for contemporary browsers with incomplete HTML5 support
-medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],function(undefined) {
+medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js', 'continuation'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 
@@ -123,9 +124,13 @@ medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],func
 		var outnd = anchor.AddChild(node.name);
 		outnd.LocalTransform(mat4.transpose(mat4.create(node.transformation)), true);
 
+
 		if(node.meshes) {
 			for(var i = 0; i < node.meshes.length; ++i) {
-				outnd.AddEntity(LoadMesh(w,node.meshes[i]));
+			// #if DEBUG
+				medea.DebugAssert(!!w.meshes[node.meshes[i]], 'meshes should have been created before');
+			// #endif
+				outnd.AddEntity(LoadMesh(w.meshes[node.meshes[i]]));
 			}
 		}
 
@@ -138,7 +143,8 @@ medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],func
 
 
 	var LoadScene = function(scene,anchor,callback,material_resolver) {
-		// batch the working set together in a dumpbin and pass it around to get rid of parameter hell
+
+		// batch the working set together in a dumpbin and pass it around 
 		var working = {
 			callback : callback,
 			scene : scene,
@@ -146,10 +152,31 @@ medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js'],func
 
 			meshes : new Array(scene.meshes.length),
 			materials : new Array(scene.materials.length)
-		};
+		}
+		,	cont, i, e;
 
-		LoadNode(working,anchor,scene.rootnode);
-		callback(true);
+
+		// loading meshes can take a bit on slower systems, so we have to spread
+		// the work across multiple frames to avoid unresponsive script errors.
+		cont = medea.CreateContinuation();
+
+		// one job per mesh
+		if(scene.meshes) {
+			for(i = 0, e = scene.meshes.length; i < e; ++i) {
+				cont.AddJob(function() {
+					LoadMesh(working, i);
+				});
+			};
+		}
+
+		// final assembly job
+		cont.AddJob(function() {
+
+			LoadNode(working,anchor,scene.rootnode);
+			callback(true);
+		});
+
+		cont.Schedule();
 	};
 
 

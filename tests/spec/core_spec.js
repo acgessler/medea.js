@@ -6,10 +6,9 @@ var FRAME_DELTA = 1000/60;
 
 test_runners.push(testConfig);
 
-function testConfig(medealib) {
+function testConfig(medealib, dom_element) {
 
-	describe("core", function() {
-		var dom_element;
+	describe("core", function(done) {
 		var medea;
 
 		beforeEach(function(done) {
@@ -18,7 +17,6 @@ function testConfig(medealib) {
 			;
 
 			medea = undefined;
-	    	dom_element = 'canvas';
 	    	
 	    	medealib.CreateContext(dom_element, {dataroot:'../../data'}, ['forwardrenderer'], function(_medea) {
 	    		medea = _medea;
@@ -72,6 +70,8 @@ function testConfig(medealib) {
 			,	init1 = false
 			,	called = false
 			;		
+
+			console.log(medealib.id);
 
 			medealib.define('__test1', ['node'], function() {
 				expect(init2).toBeFalsy();

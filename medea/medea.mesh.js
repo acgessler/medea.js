@@ -7,7 +7,7 @@
  *
  */
 
-medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderqueue'],function(undefined) {
+medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderqueue'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('sceneloader',['filesystem', 'material'],function(undefined) {
+medealib.define('sceneloader',['filesystem', 'material'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

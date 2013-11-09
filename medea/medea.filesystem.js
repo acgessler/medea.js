@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('filesystem',[],function(undefined) {
+medealib.define('filesystem',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

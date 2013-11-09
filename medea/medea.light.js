@@ -7,7 +7,7 @@
  *
  */
 
-medealib.define('light', ['entity'],function(undefined) {
+medealib.define('light', ['entity'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

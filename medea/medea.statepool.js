@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('statepool',[],function(undefined) {
+medealib.define('statepool',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this
 

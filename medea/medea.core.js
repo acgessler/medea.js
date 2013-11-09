@@ -19,7 +19,7 @@
  *
  * TODO
  */
-medealib = (function() {
+medealib = new function() {
 
 	var old_medealib = window.medealib
 	,	medealib = this
@@ -361,7 +361,10 @@ medealib = (function() {
 					// #endif
 
 						// TODO: which way of evaluating scripts is best for debugging
+						var old = window.medealib;
+						window.medealib = medealib;
 						globalEval(text);
+						window.medealib = old;
 
 						/*
 						var sc = document.createElement( 'script' );
@@ -476,4 +479,4 @@ medealib = (function() {
 	// #include "medea.context.js"
 
 	return medealib;
-})();
+};

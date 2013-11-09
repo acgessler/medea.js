@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('dummytexture',['filesystem'],function(undefined) {
+medealib.define('dummytexture',['filesystem'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

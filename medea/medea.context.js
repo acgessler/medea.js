@@ -198,7 +198,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 				medeactx.LoadModules(init_stub[1]);
 					
 				_modules_loaded[mod] = true;
-				init_stub[0].apply(medeactx);
+				init_stub[0].call(medeactx, medealib);
 			});
 
 			if(callback) {

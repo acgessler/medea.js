@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('shader',['filesystem','cpp.js'],function(undefined) {
+medealib.define('shader',['filesystem','cpp.js'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

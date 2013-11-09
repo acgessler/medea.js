@@ -24,6 +24,7 @@
 
   <!-- include spec files here... -->
    <script type="text/javascript" src="spec/core_spec.js"></script>
+   
 
    <script type="text/javascript">
   // prevent alerts
@@ -42,16 +43,33 @@
       medealibs[i] = medealib.NoConflict();
     }
     medealibs[0] = window.medealib;
+    delete window.medealib;
 
     // run all registered test runners for all configurations
     for(var i = 0; i < configs.length; ++i) {
+      (function(i) {
 
-      var medealib = medealibs[i];
-      describe("BUILD CONFIG = " + configs[i], function() {
-        test_runners.forEach(function(f) {
-          f(medealib);
+        var medealib = medealibs[i]
+        , config = "BUILD CONFIG = " + configs[i]
+        , dom_element = 'canvas' + (i+1)
+        ;
+
+        describe(config, function(done) {
+
+          test_runners.forEach(function(f) {
+            f(medealib, dom_element);
+          });
+
+          /* TODO: setup environment for tests that depend on a valid medea context
+          medealib.CreateContext('canvas', {dataroot:'../data'}, ['forwardrenderer'], function(medea) {
+           // medea = _medea;
+           console.log(1);
+            done();
+          });
+          console.log(2); */
+
         });
-      });
+      })(i);
     }
 
    </script>
@@ -61,7 +79,11 @@
 <body>
 
 <div>
-  <canvas id="canvas" style="border: none;" width="100" height="100"></canvas>
+  <canvas id="canvas1" style="border: none;" width="100" height="100"></canvas>
+  <canvas id="canvas2" style="border: none;" width="100" height="100"></canvas>
+  <canvas id="canvas3" style="border: none;" width="100" height="100"></canvas>
+  <canvas id="canvas4" style="border: none;" width="100" height="100"></canvas>
+</div>
 </div>
 
 

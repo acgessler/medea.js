@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('viewport',['camera','renderqueue','statepool'],function(undefined) {
+medealib.define('viewport',['camera','renderqueue','statepool'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('standardmesh',['mesh'],function(undefined) {
+medealib.define('standardmesh',['mesh'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

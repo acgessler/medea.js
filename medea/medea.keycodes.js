@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('keycodes',[],function(undefined) {
+medealib.define('keycodes',[],function(medealib, undefined) {
   "use strict";
   var medea = this;
 

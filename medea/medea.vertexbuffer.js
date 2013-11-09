@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('vertexbuffer',[],function(undefined) {
+medealib.define('vertexbuffer',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('terraintile',['worker_terrain','image','mesh'],function(undefined) {
+medealib.define('terraintile',['worker_terrain','image','mesh'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

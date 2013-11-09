@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('node',['frustum'],function(undefined) {
+medealib.define('node',['frustum'],function(medealib, undefined) {
 	"use strict";
 
 	var medea = this;

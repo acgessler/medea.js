@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('input_handler',['input'],function(undefined) {
+medealib.define('input_handler',['input'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 
