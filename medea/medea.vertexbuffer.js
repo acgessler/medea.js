@@ -13,7 +13,7 @@ medealib.define('vertexbuffer',[],function(medealib, undefined) {
 	var medea = this, gl = medea.gl;
 
 	// http://blog.tojicode.com/2012/10/oesvertexarrayobject-extension.html
-	var va_ext = gl.getExtension("OES_vertex_array_object") ||
+	var va_ext =  gl.getExtension("OES_vertex_array_object") ||
 		gl.getExtension("MOZ_OES_vertex_array_object") ||
 		gl.getExtension("WEBKIT_OES_vertex_array_object");
 
@@ -498,12 +498,17 @@ medealib.define('vertexbuffer',[],function(medealib, undefined) {
 		},
 
 		_Bind : function(attrMap, statepool) {
-			var id = this.GetBufferId(), gls = statepool.GetQuick('_gl');
-			if (gls.ab === id) {
+			var id = this.buffer, gls = statepool.GetQuick('_gl');
+
+			// TODO: what if the attribute mapping object changes its contents?
+			// is this allowed to happen? Either case it needs to be documented.
+			if (gls.ab === id && gls.amap === attrMap) {
 				return;
 			}
 
 			gls.ab = id;
+			gls.amap = attrMap;
+
 			// use VAO if available. The VAO changes, however, with the input attribute
 			// map so we have to quickly detect if the current VAO is still up to date.
 			if(va_ext) {
