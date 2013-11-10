@@ -132,5 +132,21 @@ medealib.define('statepool',[],function(medealib, undefined) {
 		// TODO for debugging, use a new StatePool to prevent unwanted state leaking
 		return def_pool;
 	};
+
+
+	/** Drop any cached Gl state values. This is required after any modifications
+	 *  to the webgl state that are external to medea. 
+ 	 *
+ 	 *  Calling this API is also expensive, as it kills lots of internal optimizations
+ 	 *  and caches in the next frame.
+	 */
+	medea.DropGlCache = function() {
+		
+		// does not work as the old object would still be used in statepools.gls
+		//_global_gl_state = {};
+		for(var v in _global_gl_state) {
+			delete _global_gl_state[v];
+		}
+	};
 });
 
