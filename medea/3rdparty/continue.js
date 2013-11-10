@@ -11,17 +11,34 @@
  *
  *  This is useful for splitting CPU heavy tasks into multiple slices, which
  *  are processed sequentially, leaving some time in between to avoid rendering
- *  the browser unresponsible.
+ *  the browser unresponsive. The user provides a a list of 'jobs', each of
+ *  which should only do a part of the work. Assignment of jobs to time slices,
+ *  and execution thereof is handled by the library then. Additionally, 
+ *  jobs get access to timing information (i.e. how much time is remaining in
+ *  the current slice), allowing them to voluntarily yield and return another 
+ *  continuation job to be run in the next slice.
  *
- *  The basic API usage looks like this:
+ *  Basic API usage looks like this:
  *
  *      // a continuation with 100 ms time in between slices
  *      var c = new Continuation(100);
- *      c.AddJob(function(timer) {
+ *      c.add(function(timer) {
  *
- *          // do h
+ *          // do some work - use timer() to check how many ms we have
+ *			// left in this time slice.
  *
  *      });
+ *
+ *      c.add( ... do more work ...);
+ *
+ *      // schedule the continuation: by default this runs one
+ *      // slice of work and offloads the rest to a later
+ *      // point in time. 
+ *      c.schedule();
+ *
+ *   For more information on adding jobs, see the add() member function.
+ *   To get a callback once the continuation has finished, see
+ *   on_finished()
  *
  */
 function Continuation(tick_getter_or_interval) {
@@ -36,6 +53,8 @@ function Continuation(tick_getter_or_interval) {
 	,	_call_next
 	,	_done = false
 	,	_running = false
+	,	_aborted = false
+	,	_on_finished_callback = null
 	;
 
 	_tick_getter = typeof _tick_getter == 'number' ? function(f) {
@@ -74,7 +93,12 @@ function Continuation(tick_getter_or_interval) {
 		}
 		while(!_done && time_remaining > 0);
 
-		if(!_done) {
+		if(_done) {
+			if (_on_finished_callback) {
+				_on_finished_callback(!_aborted);
+			}
+		}
+		else {
 			_tick_getter(function() {
 				_call_next(slice_duration);
 			});
@@ -142,6 +166,29 @@ function Continuation(tick_getter_or_interval) {
 			_jobs.push(job);
 		},
 
+		/** Add a callback to be called once the continuation has finished.
+		 *  
+		 *  The completion function is technically similar to a job, but it 
+		 *  is kept separately from the normal work queue and is always 
+		 *  processed last. Therefore, even if the computation keep adding jobs
+		 *  dynamically using add() from within running jobs, the completion
+		 *  callback is the last function executed.
+		 *
+		 *  The callback receives as parameter a boolean value which is 
+		 *  false iff the continuation was aborted with abort(), and true otherwise.
+		 *
+		 *  @param {function} [_on_finished_callback] If undefined, returns the
+		 *     currently set completion func (initially a null). Otherwise,
+		 *     the parameter specifies a new completion callback.
+		 **/
+		on_finished : function(on_finished_callback) {
+			if (on_finished_callback === undefined) {
+				return _on_finished_callback;
+			}
+
+			_on_finished_callback = on_finished_callback;
+		},
+
 
 		/** Starts running the continuation.
 		 *
@@ -162,9 +209,15 @@ function Continuation(tick_getter_or_interval) {
 		 */
 		schedule : function(slice_duration, force_async) {
 			slice_duration = slice_duration || 100;
-
-			_done = _done || !_jobs.length;
 			if(_done || _running) {
+				return;
+			}
+
+			if (!_jobs.length) {
+				_done = true;
+				if (_on_finished_callback) {
+					_on_finished_callback(true);
+				}
 				return;
 			}
 
@@ -192,6 +245,7 @@ function Continuation(tick_getter_or_interval) {
 		abort : function() {
 			if(this.running()) {
 				_done = true;
+				_aborted = true;
 			}
 		}
 	};
