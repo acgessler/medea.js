@@ -135,7 +135,11 @@ medealib.define('statepool',[],function(medealib, undefined) {
 
 
 	/** Drop any cached Gl state values. This is required after any modifications
-	 *  to the webgl state that are external to medea. 
+	 *  to the webgl state that are external to medea. A typical use case is an
+	 *  application wishing to use custom WebGl drawing commands to achieve
+	 *  things not directly possible or too slow with medea. Any WebGl APIs may 
+	 *  be used and medea is able to resume afterwards if DropGlCache() is invoked
+	 *  before control returns to medea.
  	 *
  	 *  Calling this API is also expensive, as it kills lots of internal optimizations
  	 *  and caches in the next frame.
