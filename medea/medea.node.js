@@ -307,13 +307,16 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 
 				// bbs are in world-space, so we have to make it a world-space scaling
 				// it is not our job to correct non-uniform scale occuring anywhere
-				// in the tree stem, so take the min scale that is in the parent I
-				var pinv = this.GetGlobalTransform()
-				,	v1 = [pinv[0],pinv[4],pinv[8]]
-				,	v2 = [pinv[1],pinv[5],pinv[9]]
-				,	v3 = [pinv[2],pinv[6],pinv[10]]
-				;
-				e = e / Math.sqrt(Math.min(vec3.dot(v1,v1), vec3.dot(v2,v2), vec3.dot(v3,v3)));
+				// in the tree stem, so take the min scale that is in the parent transform
+				if(this.parent) {
+					var pinv = this.parent.GetGlobalTransform()
+					,	v1 = [pinv[0],pinv[4],pinv[8]]
+					,	v2 = [pinv[1],pinv[5],pinv[9]]
+					,	v3 = [pinv[2],pinv[6],pinv[10]]
+					;
+					e = e / Math.sqrt(Math.min(vec3.dot(v1,v1), vec3.dot(v2,v2), vec3.dot(v3,v3)));
+				}
+				
 				this.Scale(e);
 
 				// also apply scaling to the translation component
@@ -338,8 +341,11 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			var vec = [-x/2 + world_point[0], -y/2 + world_point[1], -z/2 + world_point[2]];
 
 			// bbs are in world-space, so we have to make it a world-space translation
-			var pinv = this.GetInverseGlobalTransform();
-			mat4.multiplyVec3(pinv, vec);
+			// by using the parent global transform as offset
+			if(this.parent) {
+				var pinv = this.parent.GetInverseGlobalTransform();
+				mat4.multiplyVec3(pinv, vec);
+			}
 			this.Translate(vec);
 		},
 
