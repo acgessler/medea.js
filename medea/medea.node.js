@@ -290,23 +290,56 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 		},
 
 		ScaleToFit : function(s) {
-			var bb = this.GetBB(), m = Math.max, e;
+			var bb = this.GetBB()
+			,	m
+			,	e
+			;
+			// #ifdef DEBUG
+			medealib.DebugAssert(!(this.flags & medea.NODE_FLAG_NO_SCALING),'node cannot be scaled');
 			medealib.DebugAssert(bb.length === 2, 'must be AABB');
-			e = m(-bb[0][0],bb[1][0]);
-			e = m(e,m(-bb[0][1],bb[1][1]));
-			e = m(e,m(-bb[0][2],bb[1][2]));
+			// #endif
+
+			e = Math.max(-bb[0][0],bb[1][0],-bb[0][1],bb[1][1],-bb[0][2],bb[1][2]);
 			if(e > 1e-6) {
-				this.Scale((s===undefined?1.0:s)/e);
-			}
+				e = ( s === undefined ? 1.0 : s) / e;
+
+				var vec = [e, e, e, 0];
+
+				// bbs are in world-space, so we have to make it a world-space scaling
+				// it is not our job to correct non-uniform scale occuring anywhere
+				// in the tree stem, so take the min scale that is in the parent I
+				var pinv = this.GetGlobalTransform()
+				,	v1 = [pinv[0],pinv[4],pinv[8]]
+				,	v2 = [pinv[1],pinv[5],pinv[9]]
+				,	v3 = [pinv[2],pinv[6],pinv[10]]
+				;
+				e = e / Math.sqrt(Math.min(vec3.dot(v1,v1), vec3.dot(v2,v2), vec3.dot(v3,v3)));
+				this.Scale(e);
+
+				// also apply scaling to the translation component
+				this.lmatrix[12] *= e;
+				this.lmatrix[13] *= e;
+				this.lmatrix[14] *= e;
+			}		
 		},
 
-		Center : function(s) {
+		Center : function(world_point) {
+			world_point = world_point || [0,0,0];
+
 			var bb = this.GetBB();
+
+			// #ifdef DEBUG
 			medealib.DebugAssert(bb.length === 2, 'must be AABB');
-			var x = bb[1][0] - bb[0][0];
-			var y = bb[1][1] - bb[0][1];
-			var z = bb[1][2] - bb[0][2];
-			var vec = [-(x/2 + bb[0][0]),-(y/2 + bb[0][1]),-(z/2 + bb[0][2])];
+			// #endif
+
+			var x = bb[1][0] + bb[0][0];
+			var y = bb[1][1] + bb[0][1];
+			var z = bb[1][2] + bb[0][2];
+			var vec = [-x/2 + world_point[0], -y/2 + world_point[1], -z/2 + world_point[2]];
+
+			// bbs are in world-space, so we have to make it a world-space translation
+			var pinv = this.GetInverseGlobalTransform();
+			mat4.multiplyVec3(pinv, vec);
 			this.Translate(vec);
 		},
 
