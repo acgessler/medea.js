@@ -588,7 +588,7 @@ medealib.define('terrain',[,'worker_terrain','terraintile', 'json2.js'],function
 					this.material = medea.CreateSimpleMaterialFromColor([0.7,0.7,0.5,1.0], true);
 
 					// #ifdef LOG
-					medea.Log('terrain data provider failed to deliver a material for LOD '
+					medealib.Log('terrain data provider failed to deliver a material for LOD '
 						+ this.lod + ' with behaviour flags: ' + flags,'error');
 					// #endif
 				}

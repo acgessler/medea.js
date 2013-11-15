@@ -592,7 +592,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 				worker.onmessage = function(e) {
 
 					if (e.data[0] === 'log') {
-						medea.Log('(worker ' + worker_index + ') ' + e.data[1], e.data[2] || 'debug');
+						medealib.Log('(worker ' + worker_index + ') ' + e.data[1], e.data[2] || 'debug');
 						return;
 					}
 					else if (e.data[0] === 'assert') {
