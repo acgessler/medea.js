@@ -211,12 +211,6 @@
     }
 
 
-    /** Extract the width and height of a DDS iimage from a given arrayBuffer */
-    function getDDSDimension(arrayBuffer) {
-        var header = new Int32Array(arrayBuffer, 0, headerLengthInt);
-        return [header[off_width], header[off_height]];
-    }
-
 
     /**
      * Parses a DDS file from the given arrayBuffer and uploads it into the currently bound texture

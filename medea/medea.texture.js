@@ -128,7 +128,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			// and directly fill a WebGl texture.
 			// for other images, we decode them into an Image first.
 			if(src_or_img.match(/.dds/i)) {
-				medea.LoadModules('texture_dds', function() {
+				medea.LoadModules(['texture_dds'], function() {
 					medealib._AjaxFetch(medea.FixURL(src_or_img), function(ab) {
 						outer.data_src = ab;
 						outer.OnDelayedInit();
@@ -160,7 +160,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				this.height = this.img.height;
 			}
 			else {
-				 dim = getDDSDimension(this.data_src);
+				 dim = medea._DDSgetDDSDimension(this.data_src);
 				 this.width = dim[0];
 				 this.height = dim[1];
 			}
@@ -372,7 +372,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 					gl.texImage2D(TEX, 0, intfmt, intfmt, gl.UNSIGNED_BYTE, img);
 				}
 				else {
-					c = uploadDDSLevels(gl, compr_ext, data_src, gen_mips);
+					c = medea._DDSuploadDDSLevels(gl, compr_ext, data_src, gen_mips);
 					if(gen_mips && c > 1) {
 						gen_mips = false;
 					}
