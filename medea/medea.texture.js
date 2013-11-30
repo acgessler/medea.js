@@ -129,7 +129,12 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			// for other images, we decode them into an Image first.
 			if(src_or_img.match(/.dds/i)) {
 				medea.LoadModules(['texture_dds'], function() {
-					medealib._AjaxFetch(medea.FixURL(src_or_img), function(ab) {
+					medealib._AjaxFetch(medea.FixURL(src_or_img), function(ab, status) {
+						if(!ab || !ab.byteLength) {
+							// TODO: set to permanently failed state
+							return;
+						}
+						
 						outer.data_src = ab;
 						outer.OnDelayedInit();
 					}, undefined, true);
