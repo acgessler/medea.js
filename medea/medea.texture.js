@@ -97,6 +97,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 
 		img : null,
 		data_src : null,
+		uploaded : false,
 
 		init : function(src_or_img, callback, flags, format, force_width, force_height) {
 			var outer = this;
@@ -214,7 +215,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			}
 
 			// mark this texture resource as complete
-			this._super();
+			this.complete = true;
 
 			// trigger immediate upload if the LAZY flag is not specified, and
 			// responsiveness is not required at this time.
@@ -222,6 +223,9 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				this._Upload();
 			}
 			
+			// and let the parent implementation call user callbacks
+			this._super();
+
 			// also create a cache entry for this texture
 			if(IsEligibleForCaching(this.flags)) {
 				var name = GetTextureCacheName(this.GetSource(), this.format, this.flags) + 
@@ -262,20 +266,10 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 		},
 
 		GetImage : function() {
-			// #ifdef DEBUG
-			medealib.DebugAssert(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE,
-				'GetImage() ist not available: '+
-				'TEXTURE_FLAG_KEEP_IMAGE not specified');
-			// #endif
 			return this.img;
 		},
 
 		GetDDSDataSource : function() {
-			// #ifdef DEBUG
-			medealib.DebugAssert(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE,
-				'GetDDSDataSource() ist not available: '+
-				'TEXTURE_FLAG_KEEP_IMAGE not specified');
-			// #endif
 			return this.data_src;
 		},
 
