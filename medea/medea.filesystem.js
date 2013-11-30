@@ -78,6 +78,9 @@ medealib.define('filesystem',[],function(medealib, undefined) {
 	medea.Resource = medealib.Class.extend({
 
 		ref_count : 1,
+		complete : false,
+		callback : null,
+		src : null,
 
 		init : function(src, callback, do_not_load) {
 			if(!src) {
