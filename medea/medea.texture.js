@@ -316,7 +316,8 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			}
 
 			var old = gl.getParameter(gl.TEXTURE_BINDING_2D)
-			,	gen_mips = !(this.flags & medea.TEXTURE_FLAG_NO_MIPS)
+			,	mips = !(this.flags & medea.TEXTURE_FLAG_NO_MIPS)
+			,	gen_mips = mips
 			,	img = this.img
 			,	data_src = this.data_src
 			,	intfmt = texfmt_to_gl(this.format)
@@ -377,8 +378,8 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 					gl.texImage2D(TEX, 0, intfmt, intfmt, gl.UNSIGNED_BYTE, img);
 				}
 				else {
-					c = medea._DDSuploadDDSLevels(gl, compr_ext, data_src, gen_mips);
-					if(gen_mips && c > 1) {
+					c = medea._DDSuploadDDSLevels(gl, compr_ext, data_src, mips);
+					if(mips && c > 1) {
 						gen_mips = false;
 					}
 				}
@@ -389,9 +390,12 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			gl.texParameteri(TEX, gl.TEXTURE_WRAP_T, gl.REPEAT);
 			gl.texParameteri(TEX, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-			if (gen_mips) {
+			if (mips) {
 				gl.texParameteri(TEX, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-				gl.generateMipmap(TEX);
+
+				if(gen_mips) {
+					gl.generateMipmap(TEX);
+				}
 
 				// setup anistropic filter
 				// TODO: quality adjust
