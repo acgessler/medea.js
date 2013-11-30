@@ -152,11 +152,11 @@ function test_texture(medealib, dom_element) {
 			});
 		});
 
-		it("should be able to react to loading failures", function () {
+		it("should be able to react to loading failures", function (done) {
 			medea.CreateTexture('url:data/texture_does_not_exist.png', function(tex) {
+				expect(tex).toBe(null);
+				done();
 			});
-			// TODO
-			expect(false).toBeTruthy();
 		});
 
 		it("should be able to load DXT textures from DDS", function () {
