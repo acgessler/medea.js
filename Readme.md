@@ -1,14 +1,16 @@
 medea.js
 ========
 
-#### High-performance WebGL-based 3D engine ####
+#### Highly optimized, robust, lightweight __3D engine for JavaScript__.  ####
 
-medea is a scenegraph-based, lightweight and highly optimized 3D engine for JavaScript. While all planned features are not yet implemented, the framework is ready for productive use. In a long-term view, the library aims to be a solid, industry-strength platform for use of 3D content on the web.
+Medea is a __stable, clean and consistent API__ with extensive test coverage. It enables productive WebGl development and strives to meet high requirements in terms of performance and robustness. In a long-term view, the library aims to be a solid, industry-strength platform for use of 3D content on the web.  
 
-**Major design goals**:
+**Design Goals**
 
- - Provide a _full content pipeline_ for distributing 3D content on the web. 3D data from authoring tools can be converted offline to a representation that is maximally optimized for loading at runtime.  <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
-  (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) is used to import geometry from about thirty 3D model formats.
+ - A _full content pipeline_ for distributing 3D content on the web. 3D data from authoring tools is converted offline to a representation that is highly optimized for loading at runtime.  <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
+  (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) is used to import geometry from about thirty 3D formats.
+ - Exact and transparent _resource management_ to avoid hitting GC, or to exhaust browser memory.
+ - Recovery from failure (i.e. HTTP failure) is largely ignored by other JS 3D engines, but not by medea.
  - _Automatic detail management_ so medea-based applications can scale to all platforms, including mobile devices.
  - Optimized _scene management and visibility detection_.
  - _Data-driven material system_ supporting automatic dynamic lighting and shadowing. The framework abstracts both forward and deferred lighting methods while still offering full flexibility to shader authors.
