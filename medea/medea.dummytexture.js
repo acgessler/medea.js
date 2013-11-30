@@ -42,15 +42,63 @@ medealib.define('dummytexture',['filesystem'],function(medealib, undefined) {
 			// #endif
 		},
 
+		GetGlTextureWidth : function() {
+			return 1;
+		},
+
+		GetGlTextureHeight : function() {
+			return 1;
+		},
+
+		GetPaddingCompensationFactor : function() {
+			return [1, 1];
+		},
+
+		GetWidth : function() {
+			return 1;
+		},
+
+		GetHeight : function() {
+			return 1;
+		},
+
+		GetGlTexture : function() {
+			return this.texture;
+		},
+
+		GetSource : function() {
+			return '<dummy>';
+		},
+
+		GetImage : function() {
+			return null;
+		},
+
+		GetDDSDataSource : function() {
+			return null;
+		},
+
+		IsPowerOfTwo : function() {
+			return true;
+		},
+
+		IsSquare : function() {
+			return true;
+		},
+
+		IsUploaded : function() {
+			return true;
+		},
+
+		IsRenderable : function() {
+			return true;
+		},
+
 		Dispose : function() {
 			if(this.texture) {
 				gl.deleteTexture(this.texture);
 				this.texture = null;
 			}
-		},
-
-		GetGlTexture : function() {
-			return this.texture;
 		},
 
 		_Bind : function(slot) {
