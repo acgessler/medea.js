@@ -27,9 +27,9 @@
  *    distribution.
  */
 
-define([], function () {
-
-    "use strict";
+// commented for use in medea
+//define([], function () {
+ //   "use strict";
     
     // All values and structures referenced from:
     // http://msdn.microsoft.com/en-us/library/bb943991.aspx/
@@ -210,6 +210,14 @@ define([], function () {
         return dst;
     }
 
+
+    /** Extract the width and height of a DDS iimage from a given arrayBuffer */
+    function getDDSDimension(arrayBuffer) {
+        var header = new Int32Array(arrayBuffer, 0, headerLengthInt);
+        return [header[off_width], header[off_height]];
+    }
+
+
     /**
      * Parses a DDS file from the given arrayBuffer and uploads it into the currently bound texture
      *
@@ -294,6 +302,7 @@ define([], function () {
         return mipmapCount;
     }
 
+    // #ifdef 0
 
     /**
      * Creates a texture from the DDS file at the given URL. Simple shortcut for the most common use case
@@ -343,6 +352,11 @@ define([], function () {
         return texture;
     }
 
+    // #endif 
+
+
+// commented for use in medea
+/*
     return {
         dxtToRgb565: dxtToRgb565,
         uploadDDSLevels: uploadDDSLevels,
@@ -350,4 +364,4 @@ define([], function () {
         loadDDSTexture: loadDDSTexture
     };
 
-});
+}); */
