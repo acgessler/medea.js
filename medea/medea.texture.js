@@ -13,12 +13,20 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 	var medea = this, gl = medea.gl;
 
 	
-
 	// check for presence of the EXT_texture_filter_anisotropic extension,
 	// which enables us to use anistropic filtering.
-	var aniso_ext = gl.getExtension("EXT_texture_filter_anisotropic") ||
-		gl.getExtension("MOZ_EXT_texture_filter_anisotropic") ||
-		gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic");
+	var aniso_ext = (
+			gl.getExtension("EXT_texture_filter_anisotropic") ||
+			gl.getExtension("MOZ_EXT_texture_filter_anisotropic") ||
+			gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic")
+		)
+
+	,	compr_ext = (
+			gl.getExtension("WEBGL_compressed_texture_s3tc") ||
+			gl.getExtension("MOZ_WEBGL_compressed_texture_s3tc") ||
+			gl.getExtension("WEBKIT_WEBGL_compressed_texture_s3tc")
+		)
+	;
 
 	// #ifdef DEBUG
 	var max_anisotropy;
@@ -30,6 +38,10 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 	else {
 		medealib.LogDebug('EXT_texture_filter_anisotropic extension not available');
 	}
+
+	medealib.LogDebug('WEBGL_compressed_texture_s3tc extension is ' + 
+		(compr_ext ? '' : 'not ') + 'available'
+	);
 	// #endif
 
 
@@ -86,6 +98,9 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 	// standalone textures utilize ImageStreamLoader for their loading business.
 	medea.Texture = medea.Resource.extend( {
 
+		img : null,
+		data_src : null,
+
 		init : function(src_or_img, callback, flags, format, force_width, force_height) {
 			var outer = this;
 
@@ -116,29 +131,53 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			// and directly fill a WebGl texture.
 			// for other images, we decode them into an Image first.
 			if(src_or_img.match(/.dds/i)) {
-				medealib._AjaxFetch(medea.FixURL(src_or_img), function(ab) {
-					outer.image = ab;
-					outer.OnDelayedInit();
-				}, undefined, true);
-			}
-			else {
-				medea._ImageStreamLoad(medea.FixURL(src_or_img), function(img) {
-					outer.img = img;
-					outer.OnDelayedInit();
-					// return true to indicate ownership of the Image
-					// (if the LAZY flag was not specified, we already disposed of it)
-					return true;
+				medea.LoadModules('texture_dds', function() {
+					medealib._AjaxFetch(medea.FixURL(src_or_img), function(ab) {
+						outer.data_src = ab;
+						outer.OnDelayedInit();
+					}, undefined, true);
 				});
+				return;
 			}
+
+			medea._ImageStreamLoad(medea.FixURL(src_or_img), function(img) {
+				outer.img = img;
+				outer.OnDelayedInit();
+				// return true to indicate ownership of the Image
+				// (if the LAZY flag was not specified, we already disposed of it)
+				return true;
+			});
 		},
 
 		OnDelayedInit : function() {
-			
-			this.width = this.img.width;
-			this.height = this.img.height;
+			var dim;
+
+			// obtain image width and height. For DDS textures, this requires
+			// us to dig into the DDS header while the information is readily
+			// available for textures decoded into Image objects.
+			if(!this.data_src) {
+				// #ifdef DEBUG
+				medealib.DebugAssert(this.img != null, 'need either image, or data_src');
+				// #endif
+				this.width = this.img.width;
+				this.height = this.img.height;
+			}
+			else {
+				 dim = getDDSDimension(this.data_src);
+				 this.width = dim[0];
+				 this.height = dim[1];
+			}
 
 			this.ispot = medea._IsPow2(this.width) && medea._IsPow2(this.height);
 
+			// #ifdef DEBUG
+			if(this.data_src) {
+				medealib.DebugAssert(this.ispot, 'dds source image must be POT');
+			}
+			// #endif
+
+			// if the size of the input image is nPOT, round to the next higher
+			// POT size unless there is a user override.
 			if (this.ispot) {
 				if (this.glwidth === -1) {
 					this.glwidth = this.width;
@@ -156,6 +195,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				}
 			}
 
+			// check if the hardware size limit for textures is exceeded
 			if (this.glwidth > medea.MAX_TEXTURE_SIZE || this.glheight > medea.MAX_TEXTURE_SIZE) {
 				this.glwidth = Math.min(this.glwidth, medea.MAX_TEXTURE_SIZE);
 				this.glheight = Math.min(this.glheight, medea.MAX_TEXTURE_SIZE);
@@ -171,9 +211,11 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				// #endif
 			}
 
-			// mark this texture as complete
+			// mark this texture resource as complete
 			this._super();
 
+			// trigger immediate upload if the LAZY flag is not specified, and
+			// responsiveness is not required at this time.
 			if (!(this.flags & medea.TEXTURE_FLAG_LAZY_UPLOAD) && !medea.EnsureIsResponsive()) {
 				this._Upload();
 			}
@@ -219,22 +261,34 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 
 		GetImage : function() {
 			// #ifdef DEBUG
-			medealib.DebugAssert(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE,'GetImage() ist not available: '+
+			medealib.DebugAssert(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE,
+				'GetImage() ist not available: '+
 				'TEXTURE_FLAG_KEEP_IMAGE not specified');
 			// #endif
 			return this.img;
 		},
 
+		GetDDSDataSource : function() {
+			// #ifdef DEBUG
+			medealib.DebugAssert(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE,
+				'GetDDSDataSource() ist not available: '+
+				'TEXTURE_FLAG_KEEP_IMAGE not specified');
+			// #endif
+			return this.data_src;
+		},
+
 		IsPowerOfTwo : function() {
 			// #ifdef DEBUG
-			medealib.DebugAssert(this.IsComplete(),'IsPowerOfTwo() ist not available: texture not loaded yet');
+			medealib.DebugAssert(this.IsComplete(),
+				'IsPowerOfTwo() ist not available: texture not loaded yet');
 			// #endif
 			return this.ispot;
 		},
 
 		IsSquare : function() {
 			// #ifdef DEBUG
-			medealib.DebugAssert(this.IsComplete(),'IsSquare() ist not available: texture not loaded yet');
+			medealib.DebugAssert(this.IsComplete(),
+				'IsSquare() ist not available: texture not loaded yet');
 			// #endif
 			return this.width === this.height;
 		},
@@ -259,16 +313,26 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				return;
 			}
 
-			var old = gl.getParameter(gl.TEXTURE_BINDING_2D);
+			var old = gl.getParameter(gl.TEXTURE_BINDING_2D)
+			,	gen_mips = !(this.flags & medea.TEXTURE_FLAG_NO_MIPS)
+			,	img = this.img
+			,	data_src = this.data_src
+			,	intfmt = texfmt_to_gl(this.format)
+			,	canvas
+			,	ctx
+			,	c
+			;
+
 			if(old !== this.texture) {
 				gl.bindTexture(TEX, this.texture);
 			}
 
-			var img = this.img;
-			var intfmt = texfmt_to_gl(this.format);
-
-			// scale or pad NPOT or oversized textures
+			// scale or pad nPOT or oversized textures
 			if (this.glwidth !== this.width || this.glheight !== this.height) {
+				// #ifdef DEBUG
+				medealib.DebugAssert(!!img, 'invariant, verified in OnDelayedInit()');
+				// #endif
+
 				// #ifdef LOG
 				var newsize = '(' + this.glwidth + ' x ' + this.glheight + ')';
 				if (!this.IsPowerOfTwo()) {
@@ -283,10 +347,10 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				// #endif
 
 				// http://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
-				var canvas = document.createElement("canvas");
+				canvas = document.createElement("canvas");
 				canvas.width = this.glwidth;
 				canvas.height = this.glheight;
-				var ctx = canvas.getContext("2d");
+				ctx = canvas.getContext("2d");
 
 				if (this.flags & medea.TEXTURE_FLAG_NPOT_PAD) {
 					ctx.drawImage(img, 0, 0, Math.min(img.width,canvas.width),
@@ -300,14 +364,22 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				// but it also consumes loads of memory and quickly screws up Webkit and
 				// Gecko. `texImage2D(TEX,0,canvas)` keeps throwing type errors in both
 				// engines, though.
-				var c = ctx.getImageData(0,0,canvas.width,canvas.height);
+				c = ctx.getImageData(0,0,canvas.width,canvas.height);
 				ctx = canvas = null;
 				gl.texImage2D(TEX, 0, intfmt, intfmt, gl.UNSIGNED_BYTE, c);
 			}
 			else {
 
-				// copy to the gl texture
-				gl.texImage2D(TEX, 0, intfmt, intfmt, gl.UNSIGNED_BYTE, img);
+				if(img) {
+					// copy to the gl texture
+					gl.texImage2D(TEX, 0, intfmt, intfmt, gl.UNSIGNED_BYTE, img);
+				}
+				else {
+					c = uploadDDSLevels(gl, compr_ext, data_src, gen_mips);
+					if(gen_mips && c > 1) {
+						gen_mips = false;
+					}
+				}
 			}
 
 			// setup sampler states and generate MIPs
@@ -315,7 +387,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			gl.texParameteri(TEX, gl.TEXTURE_WRAP_T, gl.REPEAT);
 			gl.texParameteri(TEX, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-			if (!(this.flags & medea.TEXTURE_FLAG_NO_MIPS)) {
+			if (gen_mips) {
 				gl.texParameteri(TEX, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
 				gl.generateMipmap(TEX);
 
@@ -336,11 +408,14 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				gl.bindTexture(TEX, old);
 			}
 
-			// this hopefully frees some memory
+			// free up memory unless an user override is active
 			if (!(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE)) {
-				if(this.img) {
+				if(img) {
 					medea._ReturnNativeImageToPool(this.img);
 					this.img = null;
+				}
+				if(data_src) {
+					this.data_src = null;
 				}
 			}
 
