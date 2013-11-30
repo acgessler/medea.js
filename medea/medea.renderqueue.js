@@ -7,7 +7,7 @@
  *
  */
 
-medealib.define('renderqueue',['renderstate'],function(undefined) {
+medealib.define('renderqueue',['renderstate'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

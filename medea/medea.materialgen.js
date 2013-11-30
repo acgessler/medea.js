@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('materialgen',['shader','material'],function(undefined) {
+medealib.define('materialgen',['shader','material'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

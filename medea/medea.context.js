@@ -198,7 +198,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 				medeactx.LoadModules(init_stub[1]);
 					
 				_modules_loaded[mod] = true;
-				init_stub[0].apply(medeactx);
+				init_stub[0].call(medeactx, medealib);
 			});
 
 			if(callback) {
@@ -592,7 +592,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 				worker.onmessage = function(e) {
 
 					if (e.data[0] === 'log') {
-						medea.Log('(worker ' + worker_index + ') ' + e.data[1], e.data[2] || 'debug');
+						medealib.Log('(worker ' + worker_index + ') ' + e.data[1], e.data[2] || 'debug');
 						return;
 					}
 					else if (e.data[0] === 'assert') {

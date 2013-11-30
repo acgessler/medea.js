@@ -105,3 +105,6 @@ See the `LICENSE` file for the full wording.
 
 Are very welcome! Fork it on Github, and do a pull request against the main repository.
 
+
+_Estimated date for first major release: January 2014_
+

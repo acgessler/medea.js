@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('pass',['shader','texture'],function(undefined) {
+medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

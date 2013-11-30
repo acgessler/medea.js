@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('statepool',[],function(undefined) {
+medealib.define('statepool',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this
 
@@ -131,6 +131,26 @@ medealib.define('statepool',[],function(undefined) {
 	medea.GetDefaultStatePool = function(deps, derived_states) {
 		// TODO for debugging, use a new StatePool to prevent unwanted state leaking
 		return def_pool;
+	};
+
+
+	/** Drop any cached Gl state values. This is required after any modifications
+	 *  to the webgl state that are external to medea. A typical use case is an
+	 *  application wishing to use custom WebGl drawing commands to achieve
+	 *  things not directly possible or too slow with medea. Any WebGl APIs may 
+	 *  be used and medea is able to resume afterwards if DropGlCache() is invoked
+	 *  before control returns to medea.
+ 	 *
+ 	 *  Calling this API is also expensive, as it kills lots of internal optimizations
+ 	 *  and caches in the next frame.
+	 */
+	medea.DropGlCache = function() {
+		
+		// does not work as the old object would still be used in statepools.gls
+		//_global_gl_state = {};
+		for(var v in _global_gl_state) {
+			delete _global_gl_state[v];
+		}
 	};
 });
 

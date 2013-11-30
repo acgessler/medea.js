@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytexture'],function(undefined) {
+medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummytexture'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -272,12 +272,12 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				// #ifdef LOG
 				var newsize = '(' + this.glwidth + ' x ' + this.glheight + ')';
 				if (!this.IsPowerOfTwo()) {
-					medea.Log('texture ' + this.GetSource() + ' is not of a power-of-two size, this means it will be ' + (
+					medealib.Log('texture ' + this.GetSource() + ' is not of a power-of-two size, this means it will be ' + (
 						this.flags & medea.TEXTURE_FLAG_NPOT_PAD ? 'padded' : 'scaled') + ' to ' + newsize,'warn');
 				}
 
 				if (this.hits_size_limit) {
-					medea.Log('texture ' + this.GetSource() + ' is exceeds the maximum size so it will be ' + (
+					medealib.Log('texture ' + this.GetSource() + ' is exceeds the maximum size so it will be ' + (
 						this.flags & medea.TEXTURE_FLAG_NPOT_PAD ? 'padded' : 'scaled') + ' to '  + newsize,'warn');
 				}
 				// #endif

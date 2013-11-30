@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('skybox',['material','standardmesh','cubetexture'],function(undefined) {
+medealib.define('skybox',['material','standardmesh','cubetexture'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

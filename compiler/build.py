@@ -23,6 +23,7 @@ def get_google_closure_params():
 	return  '// ==ClosureCompiler==\n' +\
 			'// @output_file_name {0}\n'.format(primary_compiled_file[:-2] + 'min.js') +\
 			'// @compilation_level SIMPLE_OPTIMIZATIONS\n' +\
+			'// @language ECMASCRIPT5\n'+\
 			'// ==/ClosureCompiler==\n\n'
 
 

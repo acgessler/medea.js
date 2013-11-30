@@ -7,7 +7,7 @@
  *
  */
 
-medealib.define('renderstate',[],function(undefined) {
+medealib.define('renderstate',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

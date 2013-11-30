@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('forwardrenderer',['renderer'],function(undefined) {
+medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

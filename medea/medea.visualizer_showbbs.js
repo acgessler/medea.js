@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('visualizer_showbbs',[ 'visualizer','material','frustum'],function() {
+medealib.define('visualizer_showbbs',[ 'visualizer','material','frustum'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 	var ordinal = 10;

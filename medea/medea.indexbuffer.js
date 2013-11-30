@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('indexbuffer',[],function(undefined) {
+medealib.define('indexbuffer',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

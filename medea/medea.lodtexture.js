@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('lodtexture',['texture', 'dummytexture'],function(undefined) {
+medealib.define('lodtexture',['texture', 'dummytexture'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('filesystem',[],function(undefined) {
+medealib.define('filesystem',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -96,7 +96,7 @@ medealib.define('filesystem',[],function(undefined) {
 						outer.OnDelayedInit.apply(outer,arguments);
 					},
 					function(error) {
-						medea.Log('failed to delay initialize resource from ' + src + 
+						medealib.LogDebug('failed to delay initialize resource from ' + src + 
 							', resource remains non-complete: '+error, 'error');
 					}
 				);

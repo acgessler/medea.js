@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('entity',[],function() {
+medealib.define('entity',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

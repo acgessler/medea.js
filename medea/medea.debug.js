@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStatsDisplay.js', 'dat.gui.min.js'],function() {
+medealib.define('debug',['visualizer', 'input_handler', 'sprintf-0.7.js', 'MiniStatsDisplay.js', 'dat.gui.min.js'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

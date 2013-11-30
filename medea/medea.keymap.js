@@ -7,7 +7,7 @@
  *
  */
 
-medealib.define('keymap',[],function(undefined) {
+medealib.define('keymap',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

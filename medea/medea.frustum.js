@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('frustum',[],function(undefined) {
+medealib.define('frustum',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this, min = Math.min, max = Math.max;
 

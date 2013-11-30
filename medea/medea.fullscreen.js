@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('fullscreen',[],function(undefined) {
+medealib.define('fullscreen',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 

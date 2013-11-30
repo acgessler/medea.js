@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('visualizer',[],function() {
+medealib.define('visualizer',[],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

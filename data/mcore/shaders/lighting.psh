@@ -24,7 +24,7 @@ float ComputeBlinnSpecularCoeff(vec3 eye, vec3 normal, vec3 light_dir, float shi
 
 
 // ------------------------------------------------------
-float ComputeLambertDiffuseCoeff(vec3 light_dir, vec3 normal) 
+float ComputeLambertDiffuseCoeff(vec3 normal, vec3 light_dir) 
 {
 	return max(0.0,dot(light_dir, normal));
 }
@@ -34,8 +34,8 @@ float ComputeLambertDiffuseCoeff(vec3 light_dir, vec3 normal)
 float ComputeHalfLambertDiffuseCoeff(vec3 normal, vec3 light_dir) 
 {
 	float f = dot(light_dir, normal);
-	f * 0.5 + 0.5;
-	return f*f;
+	f = f * 0.5 + 0.5;
+	return f * f;
 }
 
 

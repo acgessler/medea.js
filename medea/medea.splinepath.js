@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('splinepath',['entity'],function(undefined) {
+medealib.define('splinepath',['entity'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

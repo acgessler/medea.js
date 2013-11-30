@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('terrainheightpath',['entity'],function(undefined) {
+medealib.define('terrainheightpath',['entity'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 

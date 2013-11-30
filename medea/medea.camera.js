@@ -8,7 +8,7 @@
  *
  */
 
-medealib.define('camera',['statepool'],function() {
+medealib.define('camera',['statepool'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 
