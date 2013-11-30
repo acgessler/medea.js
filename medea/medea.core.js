@@ -396,14 +396,19 @@ medealib = (function() {
 	/** Perform XHTTRequest for a given url.
 	 *
 	 *  @param {String} url Url to GET from
-	 *  @param {Function} callback to be invoked
-	 *  @param {bool} no_client_cache If set to true, an unique value is appended
+	 *  @param {Function} callback to be invoked once the response is available.
+	 *    The callback receives the responseText as first parameter and the
+	 *    status field of the XTTPRequest as second parameter.
+	 *  @param {bool} [no_client_cache] If set to true, an unique value is appended
 	 *    to the URL (as ?nocache=<someToken>) parameter to prevent any kind
 	 *    of client-side caching. If this parameter is not specified, it is assumed
 	 *    true iff DEBUG is defined.
+	 *  @param {bool] [array_buffer] Specifies whether the response is parsed
+	 *    into an ArrayBuffer. In this case, the first parameter received by the
+	 *    callback is an ArrayBuffer object containing the response.
 	*/
 	// ---------------------------------------------------------------------------
-	medealib._AjaxFetch = function(url, callback, no_client_cache) {
+	medealib._AjaxFetch = function(url, callback, no_client_cache, array_buffer) {
 		// #ifdef DEBUG
 		if (no_client_cache === undefined) {
 			no_client_cache = true;
@@ -411,6 +416,10 @@ medealib = (function() {
 		// #endif
 
 		var ajax;
+
+		// TODO: re-use the XHTTPRequests or now? (i.e. also have a pool
+		// for them as we have for Image's). As they are not part of the
+		// DOM, constructing XHTTPs seems cheaper. 
   		if (window.XMLHttpRequest) {
 	  		ajax = new XMLHttpRequest();
 		}
@@ -420,8 +429,12 @@ medealib = (function() {
 
 		ajax.onreadystatechange = function() {
 			if (ajax.readyState === 4) {
-				callback(ajax.responseText, ajax.status);
+				callback(array_buffer ? ajax.response : ajax.responseText, ajax.status);
 			}
+		}
+
+		if(array_buffer) {
+			ajax.responseType = "arraybuffer";
 		}
 
 		ajax.open("GET",url + (no_client_cache ?  '?nocache='+(new Date()).getTime() : ''),true);
