@@ -435,7 +435,8 @@ medealib = new function() {
 
 		ajax.onreadystatechange = function() {
 			if (ajax.readyState === 4) {
-				callback(array_buffer ? ajax.response : ajax.responseText, ajax.status);
+				callback(ajax.status === 200 ? (array_buffer ? ajax.response 
+					: ajax.responseText) : null, ajax.status);
 			}
 		}
 
