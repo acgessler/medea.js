@@ -316,15 +316,19 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	medeactx.Start = function() {
 		if (medeactx.stop_asap) {
 			medeactx.stop_asap = false;
-			return false;
+			return;
 		}
 
 		window.requestAnimationFrame(function() { 
-			if(medeactx.Start()) {
-				medeactx.DoSingleFrame();
+			if (medeactx.stop_asap) {
+				medeactx.stop_asap = false;
+				return;
 			}
+
+			medeactx.DoSingleFrame();
+
+			medeactx.Start();
 		}, medeactx.canvas);
-		return true;
 	};
 
 
