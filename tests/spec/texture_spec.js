@@ -32,6 +32,16 @@ function test_texture(medealib, dom_element) {
 			expect(def.IsRenderable()).toBeTruthy();
 		});
 
+		it("should be able to create dummy textures of size 1x1 from a color", function () {
+			var def = medea.CreateDummyTexture([0.5,0.5,0.5]);
+			expect(def.GetWidth()).toBe(1);
+			expect(def.GetHeight()).toBe(1);
+			expect(def.IsSquare()).toBeTruthy();
+			expect(def.IsPowerOfTwo()).toBeTruthy();
+			expect(def.IsUploaded()).toBeTruthy();
+			expect(def.IsRenderable()).toBeTruthy();
+		});
+
 		it("should be able to upload a texture lazily", function (done) {
 			medea.CreateTexture('url:data/texture_test_4.jpg', function(tex) {
 				expect(tex.IsUploaded()).toBeFalsy();
