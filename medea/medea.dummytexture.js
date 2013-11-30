@@ -19,8 +19,9 @@ medealib.define('dummytexture',['filesystem'],function(medealib, undefined) {
 	medea.DummyTexture = medea.Resource.extend( {
 
 		init : function(color) {
-			// this marks the resource as complete and disables delay init
-			this._super(); 
+			var old = gl.getParameter(gl.TEXTURE_BINDING_2D);
+
+			this.complete = true;
 			this.texture = gl.createTexture();
 
 			gl.bindTexture(TEX, this.texture);
@@ -33,9 +34,12 @@ medealib.define('dummytexture',['filesystem'],function(medealib, undefined) {
 				]
 			));
 
-			// #ifdef DEBUG
-			gl.bindTexture(TEX, null);
-			// #endif
+			// restore old Gl state
+			gl.bindTexture(TEX, old);
+
+			// call user callbacks - putting it here is consistent with
+			// texture's behaviour.
+			this._super(); 
 
 			// #ifdef LOG
 			medealib.LogDebug("Create dummy 1x1 texture with color: " + color);
