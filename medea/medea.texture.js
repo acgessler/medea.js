@@ -13,8 +13,6 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 	var medea = this, gl = medea.gl;
 
 	
-	
-	
 
 	// check for presence of the EXT_texture_filter_anisotropic extension,
 	// which enables us to use anistropic filtering.
@@ -89,6 +87,8 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 	medea.Texture = medea.Resource.extend( {
 
 		init : function(src_or_img, callback, flags, format, force_width, force_height) {
+			var outer = this;
+
 			this.texture = gl.createTexture();
 			this.glwidth = force_width || -1;
 			this.glheight = force_height || -1;
@@ -112,14 +112,24 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				return;
 			}
 
-			var outer = this;
-			medea._ImageStreamLoad(medea.FixURL(src_or_img), function(img) {
-				outer.img = img;
-				outer.OnDelayedInit();
-				// return true to indicate ownership of the Image
-				// (if the LAZY flag was not specified, we already disposed of it)
-				return true;
-			});
+			// for .dds images, we fetch the data as an ArrayBuffer using AJAX
+			// and directly fill a WebGl texture.
+			// for other images, we decode them into an Image first.
+			if(src_or_img.match(/.dds/i)) {
+				medealib._AjaxFetch(medea.FixURL(src_or_img), function(ab) {
+					outer.image = ab;
+					outer.OnDelayedInit();
+				}, undefined, true);
+			}
+			else {
+				medea._ImageStreamLoad(medea.FixURL(src_or_img), function(img) {
+					outer.img = img;
+					outer.OnDelayedInit();
+					// return true to indicate ownership of the Image
+					// (if the LAZY flag was not specified, we already disposed of it)
+					return true;
+				});
+			}
 		},
 
 		OnDelayedInit : function() {
