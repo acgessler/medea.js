@@ -20,7 +20,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			gl.getExtension("MOZ_EXT_texture_filter_anisotropic") ||
 			gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic")
 		)
-
+	,	max_anisotropy = aniso_ext ? gl.getParameter(aniso_ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT) : 0
 	,	compr_ext = (
 			gl.getExtension("WEBGL_compressed_texture_s3tc") ||
 			gl.getExtension("MOZ_WEBGL_compressed_texture_s3tc") ||
@@ -29,11 +29,8 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 	;
 
 	// #ifdef DEBUG
-	var max_anisotropy;
 	if (aniso_ext) {
 		medealib.LogDebug('using EXT_texture_filter_anisotropic extension');
-		max_anisotropy = gl.getParameter(aniso_ext.
-			MAX_TEXTURE_MAX_ANISOTROPY_EXT);
 	}
 	else {
 		medealib.LogDebug('EXT_texture_filter_anisotropic extension not available');
