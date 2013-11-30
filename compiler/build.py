@@ -160,11 +160,14 @@ def run(input_folder, config):
 
 	topo_order = [get_full_file_name(e) for e in topo_order]
 
-	# copy all other files
+	# all other files are preprocessed, but kept in separate JS files
 	for file in os.listdir(input_folder):
 		if not file in topo_order and ".js" in file:
-			print('copying ' + file + ' to output folder')
-			shutil.copy2(os.path.join(input_folder, file), os.path.join(output_folder, file))
+			print('writing ' + file + ' to output folder')
+
+			with open(os.path.join(output_folder, file), 'wt') as outp:
+				with open(os.path.join(input_folder, file), 'rt') as inp:
+					outp.write(preprocessor.run(inp.read(), input_folder))
 
 	for file in os.listdir(input_folder_3rdparty):
 		if not os.path.join('3rdparty',file) in topo_order and ".js" in file:
