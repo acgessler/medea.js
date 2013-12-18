@@ -3,35 +3,65 @@
 <head>
 <title></title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<script type="text/javascript" src="../../medea/medea.core.js"></script>
-
+<script type="text/javascript" src="../../compiled/medea.core-compiled.js"></script>
 
 <script type="text/javascript">
 
+function oninit(medea) {
+	// Create a viewport (i.e. a part of the canvas that we can 3D to)
+	var vp1 = medea.CreateViewport();
+
+	// Every viewport needs a Renderer attach, ForwardRenderer is the
+	// most straightforward choice.
+	vp1.Renderer(medea.CreateForwardRenderer());
+
+	// Register a callback to be invoked once per frame. We use this
+	// callback to add a color fade animation to the background.
+	var time = 0.0;
+	medea.SetTickCallback(function(dtime) {
+		time += dtime;
+		vp1.ClearColor([(Math.sin(time)+1.0)*0.5,(Math.cos(time)+1.0)*0.5,0.0,1.0]);
+		// note: must return true here as returning false terminates the main loop
+		return true;
+	});	
+	
+	// Using the SetDebugPanel() API from the [debug] model a simple
+	// debugging overlay is added to the window.
+	medea.SetDebugPanel(null);
+
+	// Run main loop asynchronously 
+	medea.Start();
+}
+
+
 function run() {
 
-	medea.Ready("canvas",{dataroot:'../../data'},['debug','standardmesh'],function() {
-		var vp1 = medea.CreateViewport();
+	// Dependencies that are strictly required in this sample and
+	// therefore instructed to be loaded upfront. Later on, modules
+	// can be dynamically loaded using medea.LoadModules(...).
+	//
+	// See the doc/build manual to learn how to efficiently bundle
+	// medea modules together to avoid dynamically loading modules 
+	// that are needed anyway.
+	var dep = ['debug','standardmesh', 'forwardrenderer'];
+			
+	// Basic initial configuration. More configuration options
+	// exist, see the medealib.CreateContext() API docs.
+	var config = {
+		dataroot: '../..\data'
+	};
 
-		var time = 0.0;
-		medea.SetTickCallback(function(dtime) {
-			time += dtime;
-			vp1.ClearColor([(Math.sin(time)+1.0)*0.5,(Math.cos(time)+1.0)*0.5,0.0,1.0]);
-
-			// note: we must return true here because otherwise the
-			// main loop would be quit.
-			return true;
-		});	
-
-		var m = medea.CreateStandardMesh_Cube();
-		medea.RootNode().AddEntity(m);
-		
-		var root = medea.RootNode();
-		root.Translate(vec3.create([0,0,-5]));
-
-		medea.SetDebugPanel(null,true);
-		medea.Start();
-	});
+	// Create a medea context given the canvas, pre-requisite deps
+	// and initial configuration. Once loading has completed, oninit()
+	// is invoked with the medea context as a parameter. Note that
+	// this is an asynchronous operation.
+	medealib.CreateContext("canvas", 
+		config, 
+		dep,
+		oninit,
+		function() {
+			alert('failed to initialize medea');
+		});
 }
 
 </script>
