@@ -2,32 +2,123 @@
 import re
 import os
 
-line_re = re.compile(r'\s*//\s*#(include|define|ifdef|endif|else)\s*(.*)\s*$')
+line_re = re.compile(r'\s*//\s*#(include|define|if|ifdef|elif|ifndef|endif|else)(?:\s+(.*)\s*$|($))')
 
-def run(text, base_dir):
+
+def eval_conditional(cond, symbols):
+	assert cond.strip() == cond
+
+	if not cond:
+		return True
+
+	negate = False
+	if cond[0] == '!':
+		negate = True
+		cond = cond[1:]
+
+	val = cond in symbols
+	return not val if negate else val
+
+
+def run(text, base_dir, debug_filename, symbols = set()):
 	"""Rudimentary resolver for the following preprocessor commands:
 
 		// #include <some-file>
 		    (no check for cyclic includes!)
 
-		TODO: handle more
+		// #ifdef | #if <symbol>
+		//   <contents>
+		// [ #elif
+		//   <alt-contents> ]*
+		// [ #else
+		//   <alt-contents> ]
+		// #endif 
 
 	"""
 	out = []
+	stack = []
 
 	lines = text.split('\n')
-	for line in lines:
+	l_iter = iter(zip(range(1, len(lines)+1),lines))
+	push_line = None
+
+	nline = -1
+
+	def error(msg):
+		raise Exception(msg + '   @   ' + debug_filename + ':' + str(nline))
+	
+	while True:
+		try:
+			nline, line = push_line or next(l_iter)
+			push_line = None
+		except StopIteration:
+			break
+
 		match = line_re.match(line)
 		if match:
+
+			skip_branch = False
 			
-			if match.group(1) == 'include':
-				fpath = os.path.join(base_dir, match.group(2).strip('<>"\''))
+			cmd = match.group(1)
+			if cmd == 'include':
+				name = match.group(2).strip('<>"\'')
+				fpath = os.path.join(base_dir, name)
 
 				print 'handling js #include: ' + fpath
 				with open( fpath, 'rt' ) as inp:
-					out.append(run(inp.read(), os.path.split(fpath)[1]))
+					out.append(run(inp.read(), os.path.split(fpath)[1], name, symbols))
+
+			elif cmd in ['if', 'ifdef', 'ifndef']:
+				val = eval_conditional(match.group(2), symbols)
+				print('eval: ' + match.group(2) + ' as ' + str(val))
+				if cmd == 'ifndef':
+					val = not val
+
+				skip_branch = not val
+				stack.append(val)
+
+			elif cmd in ['else', 'elif']:
+				if not stack:
+					error('syntax error, unexpected ' + cmd)
+				# has been handled before?
+				if stack[-1]:
+					skip_branch = True
+				elif cmd != 'elif' or eval_conditional(match.group(2), symbols):
+					stack[-1] = True
+				else:
+					skip_branch = True
+			elif cmd == 'endif':
+				if not stack:
+					error('syntax error, unexpected endif')
+					continue
+
+				stack.pop()
+
 			else:
-				print 'define/ifdef/endif/else currently ignored' 
+				error('define/ifdef/endif/else currently ignored')
+
+			if skip_branch:
+				# skip everything up to the next elif/else/endif at the same nesting level
+				nesting = 1
+				while True:
+					try:
+						nline, line = next(l_iter)
+						match = line_re.match(line)
+						if match:
+							cmd = match.group(1)
+							if cmd in ['if', 'ifdef']:
+								nesting += 1
+							elif cmd == 'endif':
+								nesting -= 1
+
+							if cmd in ['else', 'elif', 'endif'] and nesting == 0:
+								push_line = nline, line
+								break
+
+					except StopIteration:
+						error('syntax error, unexpected EOF')
+						return
 		else:
 			out.append(line)
+
 	return '\n'.join(out)

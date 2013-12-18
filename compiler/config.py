@@ -21,9 +21,11 @@ def read_config(file):
 	output = sections['general']['output']
 	modules = list(sections['modules'].keys()) if 'modules' in sections else []
 	resources = sections['resources'] if 'resources' in sections else {}
+	symbols = set(sections['symbols'].keys() if 'symbols' in sections else [])
 
 	return {
 		'output' : output,
 		'modules' : modules,
-		'resources' : resources
+		'resources' : resources,
+		'symbols' : symbols
 	}

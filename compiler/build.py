@@ -8,7 +8,7 @@ import preprocessor
 
 primary_compiled_file = 'medea.core-compiled.js'
 
-
+# --------------------------------------------------------------------------------
 def get_full_file_name(file):
 	# the rules for module names are simple - if the full .js file name
 	# is given, we load it directly. Otherwise, we assume it is a medea
@@ -17,6 +17,7 @@ def get_full_file_name(file):
 		 else os.path.join('3rdparty',file)
 
 
+# --------------------------------------------------------------------------------
 def get_google_closure_params():
 	# ADVANCED_OPTIMIZATIONS breaks the medea module dependency system.
 	# TODO: might be possible to fix this, though.
@@ -27,12 +28,14 @@ def get_google_closure_params():
 			'// ==/ClosureCompiler==\n\n'
 
 
+# --------------------------------------------------------------------------------
 def get_license(input_folder):
 	with open( os.path.join(input_folder, '..', 'LICENSE'), 'rt') as inp:
 		# the @license tag instructs minifiers not to strip the comment
 		return "/** @license\n" + inp.read() + '\n*/'
 
 
+# --------------------------------------------------------------------------------
 def javascript_string_escape(s):
 	# TODO: this does not catch everything.
 	escaped = s.replace('\\','\\\\') 
@@ -42,6 +45,7 @@ def javascript_string_escape(s):
 	return '+ \n'.join("'" + line + "\\n'" for line in escaped.split('\n')) + '\n'
 
 
+# --------------------------------------------------------------------------------
 def include_resource(resource, source_file, input_folder):
 	try:
 		with open(os.path.join(input_folder, '..', source_file), 'rt') as inp:
@@ -54,6 +58,7 @@ def include_resource(resource, source_file, input_folder):
 		print('failed to open input file: ' + source_file)
 
 
+# --------------------------------------------------------------------------------
 def derive_topological_order(initial, mods_by_deps):
 	mods_by_deps_copy = dict(mods_by_deps)
 	topo_order = list(initial)
@@ -74,20 +79,44 @@ def derive_topological_order(initial, mods_by_deps):
 	return topo_order
 
 
-def run(input_folder, config):
-	output_folder = config['output']
-	files_to_compact = config['modules']
-	resources_to_include = config['resources']
-
-	input_folder_3rdparty = os.path.join(input_folder, '3rdparty')
-	output_folder_3rdparty = os.path.join(output_folder, '3rdparty')
-
+# --------------------------------------------------------------------------------
+def make_clean_folders(output_folder, output_folder_3rdparty):
 	# cleanup previous compiler output
 	shutil.rmtree(output_folder, True)
 	try:
 		os.makedirs(output_folder_3rdparty)
 	except:
 		pass
+
+
+# --------------------------------------------------------------------------------
+def parse_module_dependencies(contents, all_deps = None):
+	l = None
+	for match in re.finditer(r"medealib\.define\(.*?,\[(.*?)\]", contents):
+		if not l is None:
+			print('unexpected input: two define calls in one file')
+			break
+		l = match.group(1)
+		l = frozenset(l.strip()[1:-1] for l in l.split(',') if len(l.strip()) > 0)
+
+		if not all_deps is None:
+			for dep in l:
+				all_deps.add(dep)
+		
+	return l or frozenset()
+
+
+# --------------------------------------------------------------------------------
+def run(input_folder, config):
+	output_folder = config['output']
+	files_to_compact = config['modules']
+	resources_to_include = config['resources']
+	symbols = config['symbols']
+
+	input_folder_3rdparty = os.path.join(input_folder, '3rdparty')
+	output_folder_3rdparty = os.path.join(output_folder, '3rdparty')
+
+	make_clean_folders(output_folder, output_folder_3rdparty)
 
 	mods_by_deps = {}
 	all_deps = set()
@@ -103,28 +132,18 @@ def run(input_folder, config):
 		cursor = cursor + 1
 
 		full_file_name = get_full_file_name(file)
-
 		path = os.path.join(input_folder, full_file_name) 
 		print('processing: ' + path)
 
 		with open(path, 'rt') as inp:
 			contents = inp.read()
 
-			l = None
-			for match in re.finditer(r"medealib\.define\(.*?,\[(.*?)\]", contents):
-				if not l is None:
-					print('unexpected input: two define calls in one file')
-					break
-				l = match.group(1)
-				l = frozenset(l.strip()[1:-1] for l in l.split(',') if len(l.strip()) > 0)
-
-				for dep in l:
-					all_deps.add(dep)
-					if not dep in mods_by_deps and not dep in files_to_compact:
-						files_to_compact.append(dep)
-						print full_file_name + ' depends on ' + dep
-
-			mods_by_deps[file] = l or frozenset()
+			l = parse_module_dependencies(contents, all_deps)
+			for dep in (dep for dep in l if not dep in mods_by_deps and not dep in files_to_compact):
+				files_to_compact.append(dep)
+				print full_file_name + ' depends on ' + dep
+			
+			mods_by_deps[file] = l 
 
 	print('deriving topological order of collated modules')
 
@@ -140,11 +159,12 @@ def run(input_folder, config):
 		outp.write(get_license(input_folder))
 		outp.write('medea_is_compiled = true;');
 		for n, dep in enumerate(topo_order):
-			path = os.path.join(input_folder, get_full_file_name(dep));
+			name = get_full_file_name(dep)
+			path = os.path.join(input_folder, name);
 			print('collating: ' + path)
 
 			with open(path, 'rt') as inp:
-				outp.write(preprocessor.run(inp.read(), input_folder))
+				outp.write(preprocessor.run(inp.read(), input_folder, name, symbols))
 				if '.js' in dep:
 					outp.write('medealib._MarkScriptAsLoaded("'+ dep +'");')
 				outp.write('\n')
@@ -167,7 +187,7 @@ def run(input_folder, config):
 
 			with open(os.path.join(output_folder, file), 'wt') as outp:
 				with open(os.path.join(input_folder, file), 'rt') as inp:
-					outp.write(preprocessor.run(inp.read(), input_folder))
+					outp.write(preprocessor.run(inp.read(), input_folder, file, symbols))
 
 	for file in os.listdir(input_folder_3rdparty):
 		if not os.path.join('3rdparty',file) in topo_order and ".js" in file:
