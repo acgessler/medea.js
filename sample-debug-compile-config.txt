@@ -1,6 +1,10 @@
 [general]
 output=compiled
 
+[symbols]
+DEBUG
+LOG
+
 [modules]
 frustum
 viewport
