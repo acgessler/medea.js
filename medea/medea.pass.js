@@ -670,8 +670,9 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 					medealib.NotifyFatal("failure validating program, error log: " + gl.getProgramInfoLog(p));
 					return;
 				}
+				// #endif DEBUG
 
-				// #ifdef DEBUG
+				// #ifdef LOG
 				medealib.LogDebug('successfully linked program #' +p);
 				// #endif
 			}
@@ -778,10 +779,10 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			// further escaping should not be needed, name is required to be
 			// a valid GLSL identifier.
 			var typename = rex.exec(vs) || rex.exec(ps);
-			if(typename === null) {
-				// should not happen
-				medealib.DebugAssert('could not find type declaration for uniform: ' + name);
-			}
+
+			// #ifdef DEBUG
+			medealib.DebugAssert(typename !== null, 'could not find type declaration for uniform: ' + name);
+			// #endif
 
 			typename = typename[1];
 
