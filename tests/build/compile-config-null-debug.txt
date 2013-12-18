@@ -1,6 +1,10 @@
 [general]
 output=output/null-debug
 
+[symbols]
+DEBUG
+LOG
+
 [modules]
 
 

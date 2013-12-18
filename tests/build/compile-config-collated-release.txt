@@ -23,7 +23,6 @@ simpleanim
 standardmesh
 statepool
 terrain
-text
 texture
 vertexbuffer
 viewport

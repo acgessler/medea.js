@@ -1,6 +1,10 @@
 [general]
 output=output/collated-debug
 
+[symbols]
+DEBUG
+LOG
+
 [modules]
 frustum
 viewport
@@ -23,7 +27,6 @@ simpleanim
 standardmesh
 statepool
 terrain
-text
 texture
 vertexbuffer
 viewport
