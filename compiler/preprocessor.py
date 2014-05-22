@@ -70,9 +70,10 @@ def run(text, base_dir, debug_filename, symbols = set()):
 
 			elif cmd in ['if', 'ifdef', 'ifndef']:
 				val = eval_conditional(match.group(2), symbols)
-				print('eval: ' + match.group(2) + ' as ' + str(val))
 				if cmd == 'ifndef':
 					val = not val
+
+				print('eval: ' + cmd + ' ' + match.group(2) + ' as ' + str(val))
 
 				skip_branch = not val
 				stack.append(val)
@@ -105,13 +106,19 @@ def run(text, base_dir, debug_filename, symbols = set()):
 						nline, line = next(l_iter)
 						match = line_re.match(line)
 						if match:
+							done = False
 							cmd = match.group(1)
 							if cmd in ['if', 'ifdef']:
 								nesting += 1
 							elif cmd == 'endif':
 								nesting -= 1
+								if nesting == 0:
+									done = True
 
-							if cmd in ['else', 'elif', 'endif'] and nesting == 0:
+							if cmd in ['else', 'elif'] and nesting == 1:
+								done = True
+								
+							if done:
 								push_line = nline, line
 								break
 
