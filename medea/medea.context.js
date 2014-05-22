@@ -414,7 +414,6 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 			return;
 		}
 
-
 		// get time delta and detect canvas changes
 		function update_stats() {
 			// get time delta if not specified
@@ -511,7 +510,6 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 		if (debug_panel) {
 			debug_panel.BeginFrame();
 		}
-
 		do_frame();
 	
 		if (debug_panel) {

@@ -32,6 +32,7 @@ medealib.define('viewport',['camera','renderqueue','statepool'],function(medeali
 		updated : true,
 		renderer : null,
 		visualizers : null,
+		waiting_for_renderer_to_load : false,
 
 		// no rendering happens until Renderer() is set to valid value
 		init : function(name,x,y,w,h,zorder,camera,enable,renderer) {
@@ -223,7 +224,20 @@ medealib.define('viewport',['camera','renderqueue','statepool'],function(medeali
 		},
 
 		Render: function(dtime) {
-			if (!this.enabled || !this.renderer) {
+			if (!this.enabled) {
+				return;
+			}
+			if (!this.renderer) {
+				if (this.waiting_for_renderer_to_load) {
+					return;
+				}
+				this.waiting_for_renderer_to_load = true;
+				medealib.LogDebug('viewport.Render() called, but no Renderer set. Loading ForwardRenderer');
+
+				var outer = this;
+				medea.LoadModules('forwardrenderer', function() {
+					outer.Renderer(medea.CreateForwardRenderer());
+				});
 				return;
 			}
 
