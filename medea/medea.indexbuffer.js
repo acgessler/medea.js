@@ -200,9 +200,9 @@ medealib.define('indexbuffer',[],function(medealib, undefined) {
 		;
 
 		for(; tri < tri_count; ++tri) {
-			a = incur++;
-			b = incur++;
-			c = incur++;
+			a = in_cur++;
+			b = in_cur++;
+			c = in_cur++;
 
 			line_indices[cur++] = a;
 			line_indices[cur++] = b;
