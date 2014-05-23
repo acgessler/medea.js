@@ -34,13 +34,13 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 	medea.MAX_DIRECTIONAL_LIGHTS = 8;
 
 
-	// cache for gl program objects and their ids, keyed by "vs_id" + "ps_id" (
+	// Cache for gl program objects and their ids, keyed by "vs_id" + "ps_id" (
 	// corresponding to pass.cache_id)
 	var program_cache = {};
 	var program_ids = {};
 	var program_id_counter = 0;
 
-	// map from GLSL type identifiers to the corresponding GL enumerated types
+	// Map from GLSL type identifiers to the corresponding GL enumerated types
 	var glsl_typemap = {
 		'float'	: gl.FLOAT,
 		'int'	: gl.INT,
@@ -135,7 +135,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 
 	var zero_light = [0,0,0];
 
-	// generate shader setters for directional lights
+	// Generate shader setters for directional lights
 	for (var i = 0, e = medea.MAX_DIRECTIONAL_LIGHTS; i < e; ++i) {
 		(function(i) { 
 			// LIGHT_Dn_DIR -- global light direction vector
@@ -166,7 +166,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		})(i);
 	}
 
-	// for every program (keyed on the cache name) the pass
+	// For every program (keyed on the cache name) the pass
 	// instance that this material was last used with.
 	var pass_last_used_with = {};
 
@@ -460,7 +460,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		},
 
 		_SetTexture : function(k, val, pos) {
-			// explicitly bound texture - this is a special case because string values
+			// Explicitly bound texture - this is a special case because string values
 			// for texture parameters are not eval()ed but requested as textures from
 			// the server.
 			var prog = this.program;
@@ -469,7 +469,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			// #endif
 
 			this.auto_setters[k] = [pos,function(pos, state) {
-				// note: constants[k] is not set to be the texture as it is loaded.
+				// Note: constants[k] is not set to be the texture as it is loaded.
 				// this is because the user expects consistent values with the Get/Set
 				// APIs, so we cannot change the object type in the background. The
 				// texture object only exists in the Set() closure.
@@ -487,7 +487,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				state = state.GetQuick('_gl');
 				state.texage = state.texage || 0;
 
-				// check if this texture is already active, if not get rid of the
+				// Check if this texture is already active, if not get rid of the
 				// oldest texture in the sampler cache.
 				var slots = state.tex_slots || new Array(6);
 				var oldest = state.texage+1;
@@ -535,7 +535,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				medealib.LogDebug('create texture for shader uniform with string value: ' + k + ', ' + val);
 				// #endif
 				medea.LoadModules(['texture'], function() {
-					// see note above for why this.constants[k] is not changed
+					// See note above for why this.constants[k] is not changed
 					val = medea.CreateTexture(val);
 				});
 
@@ -588,7 +588,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			}
 
 			if (!this.IsComplete()) {
-				// since this instance isn't complete yet, we can't
+				// Since this instance isn't complete yet, we can't
 				// clone the other yet. Add it to a list and do the actual cloning
 				// as soon as all data is present. This is a bit dirty and imposes an
 				// unwanted reference holder on the cloned pass, but it cannot be
@@ -604,14 +604,14 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			out.program_id = this.program_id;
 			out.cache_name = this.cache_name;
 
-			// program reference can be shared (XXX but this does not play well
+			// Program reference can be shared (XXX but this does not play well
 			// with explicit disposal semantics).
 			out.program = this.program;
 
-			// attribute mapping is always safe to share
+			// Attribute mapping is always safe to share
 			out.attr_map = this.attr_map;
 
-			// however, we need to rebuild setters from scratch
+			// However, we need to rebuild setters from scratch
 			out.auto_setters = {};
 			out._ExtractUniforms();
 			out._RefreshState();
@@ -648,12 +648,12 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			var cache_name = this.cache_name =  this.vs.GetShaderId() + '#' + this.ps.GetShaderId();
 			var p = program_cache[cache_name];
 			if(p === undefined) {
-				// there is none, so we have to link the program
+				// There is none, so we have to link the program
 				p = program_cache[cache_name] = this.program = gl.createProgram();
 				gl.attachShader(p,this.vs.GetGlShader());
 				gl.attachShader(p,this.ps.GetGlShader());
 
-				// increment program id to get a unique value
+				// Increment program id to get a unique value
 				// (unfortunately, there does not seem to be an easy way to directly
 				//  derive an id from the program)
 				this.program_id = program_ids[cache_name] = program_id_counter++;
@@ -685,7 +685,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			this._ExtractUniforms();
 			this._RefreshState();
 
-			// if the user didn't supply an attribute mapping (i.e. which pre-defined
+			// If the user didn't supply an attribute mapping (i.e. which pre-defined
 			// attribute type maps to which attribute in the shader), derive it
 			// from the attribute names, assuming their names are recognized.
 			if(!this.attr_map) {
@@ -730,28 +730,28 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				// #endif
 			}
 
-			// now transfer the dictionaries and the program reference to all pending
+			// Now transfer the dictionaries and the program reference to all pending
 			// clones for this material.
 			if (this.wannabe_clones) {
 				for (var i = 0; i < this.wannabe_clones.length; ++i) {
 					this._Clone( this.wannabe_clones[i].clone_flags, this.wannabe_clones[i] );
 				}
 
-				// do not delete to avoid changing the hidden class
+				// Do not delete to avoid changing the hidden class
 				this.wannabe_clones = null;
 			}
 		},
 
 		_SetAutoState : function(statepool, change_flags) {
 
-			// update shader variables automatically
+			// Update shader variables automatically
 			var setters = this.auto_setters;
 			for(var k in setters) {
 				var v = setters[k];
 				v[1](v[0], statepool, change_flags);
 			}
 
-			// and apply global state blocks
+			// And apply global state blocks
 			if (this.state) {
 				medea.SetState(this.state,statepool);
 			}
@@ -776,7 +776,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			var vs = this.vs.GetPreProcessedSourceCode(), ps = this.ps.GetPreProcessedSourceCode();
 			var rex = new RegExp(glsl_type_picker + '\\s+' + name);
 
-			// further escaping should not be needed, name is required to be
+			// Further escaping should not be needed, name is required to be
 			// a valid GLSL identifier.
 			var typename = rex.exec(vs) || rex.exec(ps);
 
@@ -795,7 +795,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			/*
 			var info = gl.getActiveUniform(this.program,pos), type = info.type;
 
-			// this is a workaround for my secondary linux system on which the driver
+			// This is a workaround for my secondary linux system on which the driver
 			// for the builtin Intel GMA unit is not only not on the whitelist of ff/chrome,
 			// but also keeps confusing sampler and matrix uniforms. The workaround
 			// doesn't make it much betteŗ, though, because the driver manages to get
