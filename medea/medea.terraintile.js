@@ -8,11 +8,54 @@
  *
  */
 
-medealib.define('terraintile',['worker_terrain','image','mesh'],function(medealib, undefined) {
+medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer'],function(medealib, undefined) {
 	"use strict";
 	var medea = this;
 
-	
+	// Populate |ind| with indices to draw a terrain tile of size |qtx| * |qty| quads
+	// while only using every |divisor| row and column in the source space.
+	medea._GenHeightfieldIndicesSkip = function(ind, qtx, qty, divisor) {
+		var min = Math.min;
+
+		// Index the terrain patch in groups of 3x3 vertex quads to improve vertex cache locality
+		// Each group then uses 16 unique vertices, which should be a reasonable PTVC cache size
+		var out = 0;
+		var groups_x = (qtx+3)/4;
+		var groups_y = (qty+3)/4;
+
+		var row_pitch = (qtx * divisor + 1) * divisor;
+
+		for (var ty = 0; ty < groups_y; ++ty) {
+			for (var tx = 0; tx < groups_x; ++tx) {
+				var xbase = tx * 4;
+				var ybase = ty * 4;
+				var base_index = divisor * ybase * (qtx * divisor + 1) + xbase * divisor;
+
+				var group_h = min(ybase + 4, qty);
+				var group_w = min(xbase + 4, qtx);
+
+				var row_offset = row_pitch - (group_w - xbase) * divisor;
+				for (var y = ybase; y < group_h; ++y, base_index += row_offset) {
+					for (var x = xbase; x < group_w; ++x, base_index += divisor) {
+
+						ind[out++] = base_index;
+						ind[out++] = base_index + row_pitch;
+						ind[out++] = base_index + divisor;
+
+						ind[out++] = base_index + row_pitch;
+						ind[out++] = base_index + row_pitch + divisor;
+						ind[out++] = base_index + divisor;
+					}
+				}
+			}
+		}
+
+		return out;
+	};
+
+
+	// TODO: clean up everything below this line. It doesn't need to be that messy,
+	// making a terrain is not rocket science.
 
 
 	medea._HeightfieldFromEvenSidedHeightmap = function(tex, scale, xz_scale, t, v) {
@@ -200,7 +243,6 @@ medealib.define('terraintile',['worker_terrain','image','mesh'],function(medeali
 		return medea._HeightfieldFromOddSidedHeightmapPart(tex,0,0,tex.GetWidth(),tex.GetHeight(),scale,xz_scale, t,v);
 	};
 
-
 	medea._GenHeightfieldIndices = function(ind, qtx, qty) {
 		return medea._GenHeightfieldIndicesWithHole(ind, qtx, qty, 0, 0, 0, 0);
 	};
@@ -359,20 +401,65 @@ medealib.define('terraintile',['worker_terrain','image','mesh'],function(medeali
 	};
 
 
-	medea.CreateTerrainTileMesh = function(height_map, material, callback, xs, ys, ws, hs) {
-		medea.CreateImage(height_map, function(tex) {
+	var cached_terrain_ibos = {
 
+	};
+
+	// Obtain a cached terrain index buffer for the given 0 <= |lod| of
+	// a |w| x |h| quad terrain.
+	//
+	// Require |w| and |h| to be multiple of |1 << lod|
+	var GetTerrainIndexBuffer = function(w, h, lod) {
+		var key = w + '_' + h + '_' + lod;
+		var ibo = cached_terrain_ibos[key];
+		if (ibo) {
+			return ibo;
+		}
+		// #ifdef DEBUG
+		medealib.LogDebug("Creating terrain index buffer: " + key);
+		// #endif
+
+		var indices = new Array((w+1)*(h+1)*2*3);
+		var divisor = 1 << lod;
+		medea._GenHeightfieldIndicesSkip(indices,w / divisor,h / divisor, divisor);
+		ibo = cached_terrain_ibos[key] = medea.CreateIndexBuffer(indices);
+		return ibo;
+	};
+
+	medea.DEFAULT_TERRAIN_LOD_LEVELS = 5;
+
+	// Create a LODMesh of a terrain tile using |height_map| as source bitmap
+	//
+	// |xs|, |ys|, |w|, |h| describe a subset of the source |height_map| to use.
+	// |w| and |h| must be a power of two.
+	//
+	// If omitted, the entire height map is made a mesh. In this case, the
+	// source height map must either be of power-of-two resolution, or
+	// power-of-two plus one (i.e. 129x129).
+	//
+	// The created terrain tile is in all cases a grid of quads with a
+	// power-of-two number of quads on each axis.
+	medea.CreateTerrainTileMesh = function(height_map, material, callback, xs, ys, ws, hs, lod_levels) {
+		medea.CreateImage(height_map, function(tex) {
+			lod_levels = lod_levels || medea.DEFAULT_TERRAIN_LOD_LEVELS;
 			var data = tex.GetData(), w = tex.GetWidth(), h = tex.GetHeight();
 
-			// the minimum size is chosen to get rid of nasty out-of-bounds checks during LOD generation
+			// The minimum size is chosen to get rid of nasty out-of-bounds checks during LOD generation
 			// #ifdef DEBUG
-			medealib.DebugAssert(w >= 16 && h >= 16,"minimum size for terrain tile is 16x16");
+			medealib.DebugAssert(w >= 16 && h >= 16,"Minimum size for a terrain tile is 16x16");
 			// #endif
 
 			var v;
 
+			// Multiple legacy or non-legacy ways of deriving a terrain tile from an image
+			// The preferred way is to use an explicit rectangle.
 			if (ws > 0 && hs > 0) {
-				v = medea._HeightfieldFromOddSidedHeightmapPart(tex, xs || 0, ys || 0, ws, hs, 1, 1);
+				xs = xs || 0;
+				ys = ys || 0;
+				// #ifdef DEBUG
+				medealib.DebugAssert(xs + ws < w && ys + ws < h,"Invalid sub rectangle");
+				// #endif
+				v = medea._HeightfieldFromOddSidedHeightmapPart(tex, xs, ys, ws, hs, 1, 1);
 			}
 			else if (medea._IsPow2(w) && medea._IsPow2(h)) {
 				v = medea._HeightfieldFromEvenSidedHeightmap(tex);
@@ -383,7 +470,7 @@ medealib.define('terraintile',['worker_terrain','image','mesh'],function(medeali
 			}
 			else {
 				// #ifdef DEBUG
-				medealib.DebugAssert("source for terrain tile must be either a power-of-two or a power-of-two-minus-one grid");
+				medealib.DebugAssert("Unsupported height map size");
 				// #endif
 				return;
 			}
@@ -393,13 +480,22 @@ medealib.define('terraintile',['worker_terrain','image','mesh'],function(medeali
 			var nor = new Array(pos.length), tan = new Array(pos.length), bit = new Array(pos.length);
 			medea._GenHeightfieldTangentSpace(pos, wv, hv, nor, tan, bit);
 
-			var uv = new Array(wv*hv*2);
+			var uv = new Array(wv * hv * 2);
 			medea._GenHeightfieldUVs(uv,wv,hv);
 
-			var indices = new Array(wv*hv*2*3);
-			medea._GenHeightfieldIndices(indices,wv-1,hv-1);
+			var lod_ibos = new Array(lod_levels);
+			for (var i = 0; i < lod_levels; ++i) {
+				lod_ibos[i] = GetTerrainIndexBuffer(wv - 1, hv - 1, i);
+			}
 
-			callback(medea.CreateSimpleMesh({ positions: pos, normals: nor, uvs: [uv]}, indices, material, callback));
+			var vertex_channels = {
+				positions: pos,
+				normals: nor,
+				uvs: [uv]
+			};
+
+			var mesh = medea.CreateLODMesh(vertex_channels, lod_ibos, material);
+			callback(mesh);
 		});
 	};
 });
