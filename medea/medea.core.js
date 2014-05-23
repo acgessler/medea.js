@@ -147,9 +147,9 @@ medealib = new function() {
 	medealib.Merge = function(inp,template,out_opt) {
 		var out = out_opt || {};
 		for(var k in inp) {
-			var v = inp[v];
-			if (typeof v === 'object') {
-				out[k] = medealib.Merge(v,template[k] || {});
+			var v = inp[k];
+			if (typeof v === 'object' && v.prototype === Object.prototype) {
+				out[k] = medealib.Merge(v, template[k] || {});
 			}
 			else {
 				out[k] = v;
