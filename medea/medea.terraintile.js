@@ -219,14 +219,16 @@ medealib.define('terraintile',['worker_terrain','image','mesh'],function(medeali
 		holew += holex;
 		holeh += holey;
 
-		// index the terrain patch in groups of 4x4 quads to improve vertex cache locality
+		// index the terrain patch in groups of 3x3 vertex quads to improve vertex cache locality
 		for (var ty = 0, out = 0; ty < (qty+3)/4; ++ty) {
 			for (var tx = 0; tx < (qtx+3)/4; ++tx) {
 				var fullx = tx*4, fully = ty*4;
 
-				for (var y = fully,bc=fully*(qtx+1)+fullx; y < min(fully+4,qty); ++y,bc+=(qtx+1)-4) {
+				var last_x = 0;
+				for (var y = fully,bc=fully*(qtx+1)+fullx; y < min(fully+4,qty); ++y,bc+=(qtx+1)-last_x) {
 					for (var x = fullx; x < min(fullx+4,qtx); ++x,++bc) {
 
+						last_x = x + 1 - fullx;
 						if (x >= holex && x < holew && y >= holey && y < holeh) {
 							continue;
 						}
@@ -238,6 +240,7 @@ medealib.define('terraintile',['worker_terrain','image','mesh'],function(medeali
 						ind[out++] = bc+qtx+1;
 						ind[out++] = bc+qtx+2;
 						ind[out++] = bc+1;
+
 					}
 				}
 			}
@@ -356,19 +359,22 @@ medealib.define('terraintile',['worker_terrain','image','mesh'],function(medeali
 	};
 
 
-	medea.CreateTerrainTileMesh = function(height_map, material, callback) {
+	medea.CreateTerrainTileMesh = function(height_map, material, callback, xs, ys, ws, hs) {
 		medea.CreateImage(height_map, function(tex) {
 
 			var data = tex.GetData(), w = tex.GetWidth(), h = tex.GetHeight();
 
 			// the minimum size is chosen to get rid of nasty out-of-bounds checks during LOD generation
 			// #ifdef DEBUG
-			medealib.DebugAssert(w >= 16 && h >+ 16,"minimum size for terrain tile is 16x16");
+			medealib.DebugAssert(w >= 16 && h >= 16,"minimum size for terrain tile is 16x16");
 			// #endif
 
 			var v;
 
-			if (medea._IsPow2(w) && medea._IsPow2(h)) {
+			if (ws > 0 && hs > 0) {
+				v = medea._HeightfieldFromOddSidedHeightmapPart(tex, xs || 0, ys || 0, ws, hs, 1, 1);
+			}
+			else if (medea._IsPow2(w) && medea._IsPow2(h)) {
 				v = medea._HeightfieldFromEvenSidedHeightmap(tex);
 			}
 			else if (medea._IsPow2(w-1) && medea._IsPow2(h-1)) {
@@ -390,7 +396,7 @@ medealib.define('terraintile',['worker_terrain','image','mesh'],function(medeali
 			var uv = new Array(wv*hv*2);
 			medea._GenHeightfieldUVs(uv,wv,hv);
 
-			var indices = new Array(w*h*2*3);
+			var indices = new Array(wv*hv*2*3);
 			medea._GenHeightfieldIndices(indices,wv-1,hv-1);
 
 			callback(medea.CreateSimpleMesh({ positions: pos, normals: nor, uvs: [uv]}, indices, material, callback));
