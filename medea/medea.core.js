@@ -363,6 +363,22 @@ medealib = new function() {
 						// TODO: which way of evaluating scripts is best for debugging
 						var old = window.medealib;
 						window.medealib = medealib;
+
+						// Based off http://stackoverflow.com/questions/3488994
+					// #ifdef DEBUG
+						text =  "var __medea_offset; " +
+								"try { " +
+								" __medea_undefined_function(); " +
+								"} catch(e) { " + 
+								" __medea_offset = e.lineNumber; " +
+								"}" + 
+								"try { " +
+									text + 
+								"} catch(e) {medealib.LogDebug('Exception line number (~): ' " +
+									"+ (e.lineNumber - __medea_offset - 6)); " +
+									"throw e; " +
+								"}";
+					// #endif
 						globalEval(text);
 						window.medealib = old;
 
