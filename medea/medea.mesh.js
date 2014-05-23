@@ -19,20 +19,18 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 	medea.PT_LINE_STRIPS = gl.LINE_STRIPS;
 
 	// class RenderJob
-	var MeshRenderJob = medealib.Class.extend({
+	medea.MeshRenderJob = medealib.Class.extend({
 
 		distance 	: null,
 		mesh 		: null,
-		entity 		: null,
 		node 		: null,
-		viewport 	: null,
+		camera  	: null,
 		sort_matid  : -1,
 
-		init : function(mesh,entity,node,viewport) {
+		init : function(mesh, node, camera) {
 			this.mesh = mesh;
-			this.entity = entity;
 			this.node = node;
-			this.viewport = viewport;
+			this.camera = camera;
 			this.sort_matid = mesh.material.GetId();
 		},
 
@@ -40,10 +38,13 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			renderer.DrawMesh(this, statepool);
 		},
 
-		// required methods for automatic sorting of renderqueues
+		// Required methods for automatic sorting of renderqueues
 		DistanceEstimate : function() {
 			if (this.distance === null) {
-				this.distance = vec3.lengthSquared(vec3.sub(this.viewport.GetCameraWorldPos(),this.node.GetWorldPos()));
+				var cam_pos = this.camera.GetWorldPos();
+				var node_pos = this.node.GetWorldPos();
+				var delta = vec3.subtract(cam_pos, node_pos);
+				this.distance = vec3.dot(delta, delta);
 			}
 			return this.distance;
 		},
@@ -83,9 +84,9 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 // #endif
 		},
 
-		Render : function(viewport,entity,node,rqmanager) {
+		Render : function(camera, node, rqmanager) {
 			// construct a renderable capable of drawing this mesh upon request by the render queue manager
-			rqmanager.Push(this.rq_idx,new MeshRenderJob(this,entity,node,viewport));
+			rqmanager.Push(this.rq_idx,new medea.MeshRenderJob(this, node, camera));
 		},
 
 		Update : function() {
@@ -144,10 +145,10 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			}
 
 			this.material.Use(function(pass) {
-				// set vbo and ibo if needed
+				// Set vbo and ibo if needed
 				outer.vbo._Bind(pass.GetAttributeMap(), statepool);
 
-				// non-wireframe, regular drawing:
+				// Non-wireframe, regular drawing:
 				// NOTE: this must happen AFTER the VBO is bound, as Chrome validates the
 				// indices when binding the index buffer, leading to undefined 
 				// ELEMENT_ARRAY_BUFFER status if the old ARRAY_BUFFER is too small.
@@ -179,7 +180,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			,	iboc = this.ibo ? this.ibo.GetItemCount() : null
 			;
 
-			// wireframe is tricky because WebGl does not support the usual
+			// Wireframe is tricky because WebGl does not support the usual
 			// gl API for setting the poly mode.
 
 			
@@ -202,7 +203,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 				this.material.Use(function(pass) {
 					outer.vbo._Bind(pass.GetAttributeMap(), statepool);
 
-					// see note in DrawNode()
+					// See note in DrawNode()
 					outer.line_ibo._Bind(statepool);
 
 					gl.drawElements(gl.LINES,iboc * 2,outer.line_ibo.GetGlType(),0);
@@ -218,7 +219,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			medealib.DebugAssert(this.ibo && !(this.ibo.flags & medea.INDEXBUFFER_PRESERVE_CREATION_DATA), 'inv');
 			// #endif
 
-			// we have an ibo, but its creation data was not preserved
+			// We have an ibo, but its creation data was not preserved
 			this.ibo._Bind(statepool);
 			this.material.Use(function(pass) {
 				outer.vbo._Bind(pass.GetAttributeMap(), statepool);
@@ -233,7 +234,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			}, statepool);
 		},
 
-		// updating BBs is well-defined for meshes, so make this functionality public
+		// Updating BBs is well-defined for meshes, so make this functionality public
 		UpdateBB : function() {
 			this._AutoGenBB();
 		},
@@ -284,6 +285,8 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 	var _mesh_cache = {
 	
 	};
+
+	medea._mesh_cache = _mesh_cache;
 	
 	
 	medea.QueryMeshCache = function(cache_name) {

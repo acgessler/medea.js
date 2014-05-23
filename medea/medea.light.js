@@ -18,7 +18,6 @@ medealib.define('light', ['entity'],function(medealib, undefined) {
 
 		distance 	: null,
 		light 		: null,
-		entity 		: null,
 		node 		: null,
 		viewport 	: null,
 
@@ -27,11 +26,10 @@ medealib.define('light', ['entity'],function(medealib, undefined) {
 		},
 
 
-		init : function(light,entity,node,viewport) {
+		init : function(light, node, camera) {
 			this.light = light;
-			this.entity = entity;
 			this.node = node;
-			this.viewport = viewport;
+			this.camera = camera;
 		},
 	});
 
@@ -50,9 +48,9 @@ medealib.define('light', ['entity'],function(medealib, undefined) {
 		},
 
 
-		Render : function(viewport,entity,node,rqmanager) {
-			// construct a renderable capable of drawing this light upon request by the render queue manager
-			rqmanager.Push(this.rq_idx,new medea.LightJob(this,entity,node,viewport));
+		Render : function(camera, node, rqmanager) {
+			// Construct a renderable capable of drawing this light later
+			rqmanager.Push(this.rq_idx, new medea.LightJob(this, node, camera));
 		},
 
 

@@ -106,6 +106,8 @@ medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 		},
 
 
+		// Draws a given |meshjob| now, using |statepool| to minimize
+		// GL state changes.
 		DrawMesh : function(meshjob, statepool) {
 			var old_w = statepool.GetQuick("W")
 			,	new_w = meshjob.node.GetGlobalTransform()
@@ -150,6 +152,8 @@ medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 		},
 
 
+		// Draws a given |lightjob| now, using |statepool| to minimize
+		// GL state changes.
 		DrawLight : function(lightjob, statepool) {
 			var light = lightjob.light;
 			var list_name = null;

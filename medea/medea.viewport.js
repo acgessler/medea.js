@@ -223,6 +223,17 @@ medealib.define('viewport',['camera','renderqueue','statepool'],function(medeali
 			}
 		},
 
+		// Utility to obtain the current camera world position
+		// for this viewport. This handles the corner case
+		// that a viewport need not have a camera and returns
+		// [0, 0, 0] in this case.
+		GetCameraWorldPos : function() {
+			if (this.camera) {
+				return this.camera.GetWorldPos();
+			}
+			return [0, 0, 0];
+		},
+
 		Render: function(dtime) {
 			if (!this.enabled) {
 				return;

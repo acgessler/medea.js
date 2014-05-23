@@ -197,15 +197,15 @@ medealib.define('camera',['statepool'],function(medealib, undefined) {
 				this.last_canvas_h = canvas.height;
 			}
 
-			// update state pool
+			// Update state pool
 			statepool.Set("V",this.GetViewMatrix());
 			statepool.Set("P",this.GetProjectionMatrix());
 			statepool.Set("W",identity);
 
 			statepool.Set("CAM_POS", this.GetWorldPos());
 
-			// traverse all nodes in the graph and collect their render jobs
-			medea.VisitGraph(medea.RootNode(),function(node,parent_visible) {
+			// Traverse all nodes in the graph and collect their render jobs
+			medea.VisitGraph(medea.RootNode(),function(node, parent_visible) {
 				if(!node.Enabled()) {
 					return medea.VISIBLE_NONE;
 				}
@@ -218,17 +218,17 @@ medealib.define('camera',['statepool'],function(medealib, undefined) {
 				}
 
 				if(vis === medea.VISIBLE_ALL || e.length === 1) {
-					e.forEach(function(val,idx,outer) {
-						val.Render(this,val,node,rq);
+					e.forEach(function(val, idx) {
+						val.Render(outer, node, rq);
 					});
 
 					return medea.VISIBLE_ALL;
 				}
 
-				// partial visibility and more than one entity, cull per entity
-				e.forEach(function(val,idx,outer) {
+				// Partial visibility and more than one entity, cull per entity
+				e.forEach(function(val, idx) {
 					if(val.Cull(node, frustum) !== medea.VISIBLE_NONE) {
-						val.Render(this,val,node,rq);
+						val.Render(outer, node, rq);
 					}
 				});
 
