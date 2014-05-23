@@ -409,7 +409,7 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 	// a |w| x |h| quad terrain.
 	//
 	// Require |w| and |h| to be multiple of |1 << lod|
-	var GetTerrainIndexBuffer = function(w, h, lod) {
+	medea.GetTerrainIndexBuffer = function(w, h, lod) {
 		var key = w + '_' + h + '_' + lod;
 		var ibo = cached_terrain_ibos[key];
 		if (ibo) {
@@ -431,7 +431,7 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 	// Create a LODMesh of a terrain tile using |height_map| as source bitmap
 	//
 	// |xs|, |ys|, |w|, |h| describe a subset of the source |height_map| to use.
-	// |w| and |h| must be a power of two.
+	// |w| and |h| must be a power-of-two size.
 	//
 	// If omitted, the entire height map is made a mesh. In this case, the
 	// source height map must either be of power-of-two resolution, or
@@ -454,12 +454,17 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 			// Multiple legacy or non-legacy ways of deriving a terrain tile from an image
 			// The preferred way is to use an explicit rectangle.
 			if (ws > 0 && hs > 0) {
+				// #ifdef DEBUG
+				medealib.DebugAssert(medea._IsPow2(ws) && medea._IsPow2(hs),
+					"Not power-of two sub rectangle dimension");
+				// #endif
+
 				xs = xs || 0;
 				ys = ys || 0;
 				// #ifdef DEBUG
 				medealib.DebugAssert(xs + ws < w && ys + ws < h,"Invalid sub rectangle");
 				// #endif
-				v = medea._HeightfieldFromOddSidedHeightmapPart(tex, xs, ys, ws, hs, 1, 1);
+				v = medea._HeightfieldFromOddSidedHeightmapPart(tex, xs, ys, ws + 1, hs + 1, 1, 1);
 			}
 			else if (medea._IsPow2(w) && medea._IsPow2(h)) {
 				v = medea._HeightfieldFromEvenSidedHeightmap(tex);
@@ -485,7 +490,7 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 
 			var lod_ibos = new Array(lod_levels);
 			for (var i = 0; i < lod_levels; ++i) {
-				lod_ibos[i] = GetTerrainIndexBuffer(wv - 1, hv - 1, i);
+				lod_ibos[i] = medea.GetTerrainIndexBuffer(wv - 1, hv - 1, i);
 			}
 
 			var vertex_channels = {
