@@ -294,7 +294,18 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 	};
 	
 
-	// - supports both index- and vertexbuffer specific flags
+	// Assemble a medea.Mesh from a source of vertices, indices and a material.
+	//
+	// |vertices| can be a medea.VertexBuffer, or vertex data sources from which
+	// to construct a medea.VertexBuffer (go there for the details).
+	//
+	// Same for |indices|.
+	// |material_or_color| can be a color, in which case a plain default
+	// material with that color is assigned.
+	//
+	// |flags| supports both index- and vertexbuffer specific creation flags. If
+	// existing vertex and index buffers are passed in, |flags| are ignored.
+	// Mesh will not be cached unless |cache_name| is given.
 	medea.CreateSimpleMesh = function(vertices,indices,material_or_color,flags, cache_name) {
 
 		if (indices && (Array.isArray(indices) || typeof indices === 'object' && !(indices instanceof medealib.Class))) {

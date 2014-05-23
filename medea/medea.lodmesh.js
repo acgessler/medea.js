@@ -38,6 +38,7 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 		lod_attenuation_scale : 1,
 		ibo_levels : null,
 		ibo_creation_flags : 0,
+		lod_offset : 0,
 
 		init : function(vbo, ibo_levels, material, rq, pt, line_ibo, ibo_creation_flags) {
 			// Submit a null IBO to the base class, we will update
@@ -54,37 +55,44 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 		},
 
 		LODDistanceScale :  medealib.Property('lod_distance_scale'),
-		LODLOffset :  medealib.Property('lod_offset'),
+		LODOffset :  medealib.Property('lod_offset'),
 
 		_SelectLOD : function(sq_distance) {
 			// Multiply by two to undo the square in log space
-			var log_distance = Math.log(sq_distance) * 2 * this.lod_attenuation_scale;
-			var lod = this.lod = 0;
+			var log_distance = Math.log(sq_distance * 0.0001) * 2 * this.lod_attenuation_scale;
+			var lod = Math.max(0, Math.min(this.ibo_levels.length - 1,
+				~~log_distance + this.LODOffset()));
 
 			// Eval the LOD level as needed
 			var indices = this.ibo_levels[lod];
+
 			if (typeof indices == "function") {
-				indices = this.ibo_levels[lod] = this.ibo_levels[lod]();
+				indices = this.ibo_levels[lod] = indices();
 			}
 			if (Array.isArray(indices) && typeof indices === 'object' && !(indices instanceof medealib.Class)) {
 				indices = this.ibo_levels[lod] = medea.CreateIndexBuffer(indices, this.ibo_creation_flags);
 			}
+			
 			this.ibo = indices;
 			return 0;
 		}
 	});
 
+	// Variant of |medea.CreateSimpleMesh| for creating LOD meshes.
+	//
 	// |ibo_levels| is an array of the index buffer sources for all
 	// supported LOD levels. Each entry can be one of:
 	//
 	//  1) Array of indices
 	//  2) medea.IndexBuffer
-	//  3) function() -> medea.IndexBuffer
+	//  3) function() -> |medea.IndexBuffer|
 	//
 	//  Unlike CreateSimpleMesh(), 1) and 3) are not evaluated immediately but
 	//  the first time the respective LOD level is requested.
 	//
 	// Supports both index- and vertexbuffer specific |flags|.
+	//
+	// Mesh will not be cached unless |cache_name| is given.
 	medea.CreateLODMesh = function(vertices, ibo_levels, material_or_color, flags, cache_name) {
 		if (typeof vertices === 'object' && !(vertices instanceof medealib.Class)) {
 			vertices = medea.CreateVertexBuffer(vertices,flags);
