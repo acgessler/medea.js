@@ -194,7 +194,28 @@ medealib.define('material',['pass'],function(medealib, undefined) {
 	};
 
 
-	medea.CloneMaterial = function(mat, name, clone_flags) {
+	// Create a clone of a given |mat|, with |name| being the name of
+	// the clone material. 
+	//
+	// |clone_flags| is a bitwise ORed combination of the medea.MATERIAL_CLONE_XXX
+	// constants and describes whether constants and render state are shared
+	// between original and copy or whether the clone receives a deep copy.
+	//
+	// When sharing state between clones, care must be taken - medea does
+	// not retain the information that clonest exist, so there will be
+	// no debugging aid and state changes may easily have unintended
+	// side-effects. As a trade-off, sharing state greatly reduces necessary
+	// GL state changes and thereby improves performance.
+	//
+	// |clone_flags| default to MATERIAL_CLONE_COPY_CONSTANTS | medea.MATERIAL_CLONE_COPY_STATE
+	medea.CloneMaterial = function(mat, clone_flags, name) {
+		// #ifdef DEBUG
+		medealib.DebugAssert(Object.prototype.toString.call(clone_flags) != '[object String]',
+			"Breaking API change (2015-05-23): CloneMaterial(); name is now the last parameter");
+		// #endif
+		if (clone_flags === undefined) {
+			clone_flags = medea.MATERIAL_CLONE_COPY_CONSTANTS | medea.MATERIAL_CLONE_COPY_STATE
+		}
 		var passes = mat.Passes(), newp = new Array(passes.length);
 		for (var i = 0; i < passes.length; ++i) {
 			newp[i] = medea.ClonePass(passes[i], clone_flags);
