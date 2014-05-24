@@ -41,10 +41,19 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 		// Required methods for automatic sorting of renderqueues
 		DistanceEstimate : function() {
 			if (this.distance === null) {
-				var cam_pos = this.camera.GetWorldPos();
-				var node_pos = this.node.GetWorldPos();
-				var delta = vec3.subtract(cam_pos, node_pos);
-				this.distance = vec3.dot(delta, delta);
+				if (this.mesh.IsUnbounded()) {
+					this.distance = 0;
+				}
+				else {
+					// TODO: this does *not* handle scaled meshes correctly
+					var cam_pos = this.camera.GetWorldPos();
+					var node_pos = vec3.add(this.node.GetWorldPos(), this.mesh.GetCenter());
+					var delta = vec3.subtract(cam_pos, node_pos);
+
+					// Subtract the mesh' bounding radius from the estimate
+					var radius = this.mesh.GetRadius();
+					this.distance = Math.max(0, vec3.dot(delta, delta) - radius * radius);
+				}
 			}
 			return this.distance;
 		},

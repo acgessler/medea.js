@@ -23,6 +23,10 @@ medealib.define('entity',[],function(medealib, undefined) {
 		bb : null,
 		tag : null,
 
+		// Derived from |bb|
+		center : null,
+		radius : null,
+
 		init : function(name) {
 			this.id = id_source++;
 			this.name = name || ("UnnamedEntity_" + this.id);
@@ -54,6 +58,20 @@ medealib.define('entity',[],function(medealib, undefined) {
 				return this.bb;
 			}
 			this.bb = b;
+			this._UpdateRadius();
+			this._UpdateCenter();
+		},
+
+		IsUnbounded : function() {
+			return this.bb === medea.BB_INFINITE;
+		},
+
+		GetRadius : function() {
+			return this.radius;
+		},
+
+		GetCenter : function() {
+			return this.center;
 		},
 
 		GetWorldBB : function(parent) {
@@ -82,7 +100,34 @@ medealib.define('entity',[],function(medealib, undefined) {
 		_AutoGenBB : function() {
 			// deriving classes should supply a more meaningful implementation
 			this.bb = medea.BB_INFINITE;
-		}
+		},
+
+		_UpdateCenter : function() {
+			if (this.bb.length === 2) {
+				var a = this.bb[0];
+				var b = this.bb[1];
+				this.center = vec3.create([
+					(a[0] + b[0]) * 0.5,
+					(a[1] + b[1]) * 0.5,
+					(a[2] + b[2]) * 0.5
+				]);
+				return;
+			}
+			this.center = vec3.create([0, 0, 0]);
+		},
+
+		_UpdateRadius : function() {
+			// Derive bounding radius from the BB. This may not be
+			// the tightest-fit sphere.
+			if (this.bb.length === 2) {
+				var a = this.bb[0];
+				var b = this.bb[1];
+				this.radius = Math.max(b[0] - a[0], b[1] - a[1], b[2] - a[2]) * 0.5;
+				return;
+			}
+
+			this.radius = null;
+		},
 	});
 
 	medea.CreateEntity = function(name) {
