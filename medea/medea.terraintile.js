@@ -426,6 +426,7 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 		return ibo;
 	};
 
+
 	medea.DEFAULT_TERRAIN_LOD_LEVELS = 5;
 
 	// Create a LODMesh of a terrain tile using |height_map| as source bitmap,
@@ -443,14 +444,18 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 	//
 	// The created terrain tile is in all cases a grid of quads with a
 	// power-of-two number of quads on each axis.
+	//
+	// |lod_levels| is the number of LOD levels for which index buffers
+	// are added to the LODMesh. It defaults to |medea.DEFAULT_TERRAIN_LOD_LEVELS|
 	medea.CreateTerrainTileMesh = function(height_map, material, callback, xs, ys, ws, hs, lod_levels) {
 		var init = function(tex) {
 			lod_levels = lod_levels || medea.DEFAULT_TERRAIN_LOD_LEVELS;
 			var data = tex.GetData(), w = tex.GetWidth(), h = tex.GetHeight();
 
-			// The minimum size is chosen to get rid of nasty out-of-bounds checks during LOD generation
 			// #ifdef DEBUG
-			medealib.DebugAssert(w >= 16 && h >= 16,"Minimum size for a terrain tile is 16x16");
+			var min_size = 1 << (lod_levels - 1);
+			medealib.DebugAssert(w >= min_size && h >= min_size,
+			"Terrain tile is not large enough for number of LODs");
 			// #endif
 
 			var v;
@@ -486,10 +491,12 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 
 			var pos = v[0], wv = v[1], hv = v[2];
 
-			var nor = new Array(pos.length), tan = new Array(pos.length), bit = new Array(pos.length);
+			var nor = new Float32Array(pos.length);
+			var tan = new Float32Array(pos.length);
+			var bit = new Float32Array(pos.length);
 			medea._GenHeightfieldTangentSpace(pos, wv, hv, nor, tan, bit);
 
-			var uv = new Array(wv * hv * 2);
+			var uv = new Float32Array(wv * hv * 2);
 			medea._GenHeightfieldUVs(uv,wv,hv);
 
 			var lod_ibos = new Array(lod_levels);
@@ -512,5 +519,59 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 			return;
 		}
 		medea.CreateImage(height_map, init);
+	};
+
+
+	// Create a LODMesh of a completely planar terrain tile.
+	//
+	// The resulting mesh has only positions and UV coordinates, except
+	// if |no_uvs| is truthy in which case it has only positions.
+	//
+	// |w| and |h| must be a power-of-two size.
+	//
+	// |lod_levels| is the number of LOD levels for which index buffers
+	// are added to the LODMesh. It defaults to |medea.DEFAULT_TERRAIN_LOD_LEVELS|
+	medea.CreateFlatTerrainTileMesh = function(material, w, h, lod_levels, no_uvs) {
+		lod_levels = lod_levels || medea.DEFAULT_TERRAIN_LOD_LEVELS;
+		// #ifdef DEBUG
+		var min_size = 1 << (lod_levels - 1);
+		medealib.DebugAssert(w >= min_size && h >= min_size,
+			"Terrain tile is not large enough for number of LODs");
+		// #endif
+
+		// #ifdef DEBUG
+		medealib.DebugAssert(medea._IsPow2(w) && medea._IsPow2(h),
+			"Must be power-of-two size");
+		// #endif
+
+		var pos = new Float32Array((w + 1) * (h + 1) * 3);
+		for (var y = 0, cursor = 0; y <= h; ++y) {
+			for (var x = 0; x <= w; ++x) {
+				pos[cursor++] = x; 
+				pos[cursor++] = 0.0; 
+				pos[cursor++] = y; 
+			}
+		}
+
+		var uv = null;
+		if (!no_uvs) {
+			uv = new Float32Array((w + 1) * (h + 1) * 2);
+			medea._GenHeightfieldUVs(uv, w + 1, h + 1);
+		}
+
+		var lod_ibos = new Array(lod_levels);
+		for (var i = 0; i < lod_levels; ++i) {
+			lod_ibos[i] = medea.GetTerrainIndexBuffer(w, h, i);
+		}
+
+		var vertex_channels = {
+			positions: pos,
+		};
+
+		if (uv) {
+			vertex_channels.uvs = [uv];
+		}
+
+		return medea.CreateLODMesh(vertex_channels, lod_ibos, material);
 	};
 });
