@@ -428,7 +428,11 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 
 	medea.DEFAULT_TERRAIN_LOD_LEVELS = 5;
 
-	// Create a LODMesh of a terrain tile using |height_map| as source bitmap
+	// Create a LODMesh of a terrain tile using |height_map| as source bitmap,
+	// where |height_map| can be either a URL to fetch from, an |Image| or
+	// an |medea.Image|. Prefer |medea.Image| if multiple terrain tiles are
+	// created from the same source image, this avoids drawing to canvas
+	// multiple times.
 	//
 	// |xs|, |ys|, |w|, |h| describe a subset of the source |height_map| to use.
 	// |w| and |h| must be a power-of-two size.
@@ -440,7 +444,7 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 	// The created terrain tile is in all cases a grid of quads with a
 	// power-of-two number of quads on each axis.
 	medea.CreateTerrainTileMesh = function(height_map, material, callback, xs, ys, ws, hs, lod_levels) {
-		medea.CreateImage(height_map, function(tex) {
+		var init = function(tex) {
 			lod_levels = lod_levels || medea.DEFAULT_TERRAIN_LOD_LEVELS;
 			var data = tex.GetData(), w = tex.GetWidth(), h = tex.GetHeight();
 
@@ -501,6 +505,12 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 
 			var mesh = medea.CreateLODMesh(vertex_channels, lod_ibos, material);
 			callback(mesh);
-		});
+		};
+
+		if (height_map instanceof medea.Image) {
+			init(height_map);
+			return;
+		}
+		medea.CreateImage(height_map, init);
 	};
 });
