@@ -127,9 +127,8 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			this.ibo = ibo;
 		},
 		
-		_Clone : function(material_or_color, deep_copy) {
-			medealib.DebugAssert(!deep_copy, 'not implemented yet');
-			return medea.CreateSimpleMesh(this.vbo, this.ibo, material_or_color);
+		_Clone : function(material_or_color) {
+			return medea.CreateSimpleMesh(this.vbo, this.ibo, material_or_color || this.Material());
 		},
 
 		DrawNow : function(statepool, change_flags) {
@@ -328,9 +327,16 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 	};
 	
 	
-	// create clone of a mesh (shares vbo, ibo). Material can be different, though.
-	medea.CloneMesh = function(mesh, material_or_color, deep_copy) {
-		return mesh._Clone(material_or_color, deep_copy);
+	// Create clone of a mesh (sharing vbo and ibo).
+	//
+	// |material_or_color| is the material (or plain RGBA color) to use for
+	// the cloned mesh. If this argument is omitted, the cloned mesh shares
+	// the material of the original.
+	//
+	// To further specify how materials are shared between meshes, use
+	// |medea.CloneMesh(mesh, medea.CloneMaterial(mesh.Material(), flags))|
+	medea.CloneMesh = function(mesh, material_or_color) {
+		return mesh._Clone(material_or_color);
 	};
 });
 
