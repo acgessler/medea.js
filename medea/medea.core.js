@@ -485,6 +485,21 @@ medealib = new function() {
 
 
 	// ------------------------------------------------------------------------
+	/** Cache result of |closure|
+	 */
+	medealib.Cached = function(closure) {
+		var val = null;
+		return function() {
+			if (val != null) {
+				return val;
+			}
+			val = closure.apply(this);
+			return val;
+		};
+	};
+
+
+	// ------------------------------------------------------------------------
 	/** @private to build system */
 	// ------------------------------------------------------------------------
 	medealib._MarkScriptAsLoaded = function(name) {
