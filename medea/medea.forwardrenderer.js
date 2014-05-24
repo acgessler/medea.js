@@ -13,9 +13,10 @@ medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 	var medea = this, gl = medea.gl;
 
 	// default config for normal, solid rendering
-	var _initial_state_depth_test_enabled = {
+	var _initial_state_depth_write_enabled = {
 		'depth_test' : true,
 		'depth_func' : 'less_equal',
+		'depth_write' : true,
 
 		// culling is turned on by default
 		'cull_face' : true,
@@ -23,15 +24,18 @@ medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 	};
 
 	// default config for rendering of transparent objects
-	var _initial_state_depth_test_disabled = {
-		'depth_test' : false,
+	var _initial_state_depth_write_disabled = {
+		'depth_test' : true,
+		'depth_func' : 'less_equal',
+
+		// no depth write
+		'depth_write' : false,
 
 		// culling is turned on by default
 		'cull_face' : true,
 		'cull_face_mode' : 'back'
 	};
 
-	
 
 	medea.ForwardRenderer = medea.Renderer.extend({
 
@@ -57,7 +61,7 @@ medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 			].forEach(function(s) {
 				s = outer.rq.queues[s];
 				s.Sorter(material_sorter);
-				s.DefaultState(_initial_state_depth_test_enabled);
+				s.DefaultState(_initial_state_depth_write_enabled);
 			});
 
 
@@ -68,7 +72,7 @@ medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 			].forEach(function(s) {
 				s = outer.rq.queues[s];
 				s.Sorter(distance_sorter);
-				s.DefaultState(_initial_state_depth_test_disabled);
+				s.DefaultState(_initial_state_depth_write_disabled);
 			});
 		},
 
