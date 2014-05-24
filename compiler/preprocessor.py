@@ -6,7 +6,7 @@ line_re = re.compile(r'\s*//\s*#(include|define|if|ifdef|elif|ifndef|endif|else)
 
 
 def eval_conditional(cond, symbols):
-	assert cond.strip() == cond
+	cond = cond.strip()
 
 	if not cond:
 		return True
