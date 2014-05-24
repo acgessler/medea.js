@@ -54,7 +54,7 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 			rqmanager.Push(this.rq_idx, new medea.LODMeshRenderJob(this, node, viewport));
 		},
 
-		LODDistanceScale :  medealib.Property('lod_distance_scale'),
+		LODAttenuationScale :  medealib.Property('lod_attenuation_scale'),
 		LODOffset :  medealib.Property('lod_offset'),
 
 		_Clone : function(material_or_color) {
@@ -69,6 +69,8 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 			// manually specified as opposed to the BB being
 			// derived from the VBO's extents.
 			mesh.BB(this.BB());
+			mesh.LODAttenuationScale(this.LODAttenuationScale());
+			mesh.LODOffset(this.LODOffset());
 			return mesh;
 		},
 
@@ -76,7 +78,7 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 			// Multiply by two to undo the square in log space
 			var log_distance = Math.log(sq_distance * 0.0001) * 2 * this.lod_attenuation_scale;
 			var lod = Math.max(0, Math.min(this.ibo_levels.length - 1,
-				~~log_distance + this.LODOffset()));
+				~~log_distance + this.lod_offset));
 
 			// Eval the LOD level as needed
 			var indices = this.ibo_levels[lod];
