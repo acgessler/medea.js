@@ -57,6 +57,12 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 		LODDistanceScale :  medealib.Property('lod_distance_scale'),
 		LODOffset :  medealib.Property('lod_offset'),
 
+		_Clone : function(material_or_color) {
+			return medea.CreateLODMesh(this.vbo, this.ibo_levels,
+				material_or_color || this.Material(),
+				this.ibo_creation_flags);
+		},
+
 		_SelectLOD : function(sq_distance) {
 			// Multiply by two to undo the square in log space
 			var log_distance = Math.log(sq_distance * 0.0001) * 2 * this.lod_attenuation_scale;
