@@ -50,6 +50,16 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 	medea.TEXTURE_FLAG_NPOT_PAD      = 0x4;
 	medea.TEXTURE_FLAG_NO_MIPS       = 0x8;
 
+	// Hint that vertex shader access will be required for this texture
+	//
+	// Currently, this implies |TEXTURE_FLAG_NO_MIPS| as MIP mapping is
+	// not supported for vertex texture fetch. This requirement could
+	// go away in future (we might copy to a second, non MIPed texture
+	// internally). Therefore you should still specify the
+	// |TEXTURE_FLAG_NO_MIPS| flag if you intend to never use MIPs
+	// with a texture that is also used from vertex shaders.
+	medea.TEXTURE_VERTEX_SHADER_ACCESS = 0x10 | medea.TEXTURE_FLAG_NO_MIPS;
+
 	// possible values for the `format` parameter
 	medea.TEXTURE_FORMAT_RGBA        = 'rgba';
 	medea.TEXTURE_FORMAT_RGB         = 'rgb';
@@ -111,7 +121,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			this.width = this.height = -1;
 			this.flags = flags || 0;
 			
-			// image data requires special handling, so instruct the Resource
+			// Image data requires special handling, so instruct the Resource
 			// base class not to ajax-fetch the URI.
 			this._super(src_or_img.src || src_or_img, callback, true);
 
@@ -125,7 +135,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				return;
 			}
 
-			// for .dds images, we fetch the data as an ArrayBuffer using AJAX
+			// For .dds images, we fetch the data as an ArrayBuffer using AJAX
 			// and directly fill a WebGl texture.
 			// for other images, we decode them into an Image first.
 			if(src_or_img.match(/.dds/i)) {
@@ -146,7 +156,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			medea._ImageStreamLoad(medea.FixURL(src_or_img), function(img) {
 				outer.img = img;
 				outer.OnDelayedInit();
-				// return true to indicate ownership of the Image
+				// Return true to indicate ownership of the Image
 				// (if the LAZY flag was not specified, we already disposed of it)
 				return true;
 			});
@@ -155,12 +165,12 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 		OnDelayedInit : function() {
 			var dim;
 
-			// obtain image width and height. For DDS textures, this requires
+			// Obtain image width and height. For DDS textures, this requires
 			// us to dig into the DDS header while the information is readily
 			// available for textures decoded into Image objects.
 			if(!this.data_src) {
 				// #ifdef DEBUG
-				medealib.DebugAssert(this.img != null, 'need either image, or data_src');
+				medealib.DebugAssert(this.img != null, 'Need either image, or data_src');
 				// #endif
 				this.width = this.img.width;
 				this.height = this.img.height;
@@ -175,11 +185,11 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 
 			// #ifdef DEBUG
 			if(this.data_src) {
-				medealib.DebugAssert(this.ispot, 'dds source image must be POT');
+				medealib.DebugAssert(this.ispot, 'DDS source image must be POT');
 			}
 			// #endif
 
-			// if the size of the input image is nPOT, round to the next higher
+			// If the size of the input image is nPOT, round to the next higher
 			// POT size unless there is a user override.
 			if (this.ispot) {
 				if (this.glwidth === -1) {
@@ -198,14 +208,14 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				}
 			}
 
-			// check if the hardware size limit for textures is exceeded
+			// Check if the hardware size limit for textures is exceeded
 			if (this.glwidth > medea.MAX_TEXTURE_SIZE || this.glheight > medea.MAX_TEXTURE_SIZE) {
 				this.glwidth = Math.min(this.glwidth, medea.MAX_TEXTURE_SIZE);
 				this.glheight = Math.min(this.glheight, medea.MAX_TEXTURE_SIZE);
 
 				// #ifdef LOG
 
-				// normally we should warn about this immediately, but in some cases
+				// Normally we should warn about this immediately, but in some cases
 				// textures are created but never uploaded to the GPU (i.e. the
 				// terrain code does this intentionally to be able to switch from
 				// GPU to CPU terrain generation without recreating all heightmaps.
@@ -214,19 +224,19 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				// #endif
 			}
 
-			// mark this texture resource as complete
+			// Mark this texture resource as complete
 			this.complete = true;
 
-			// trigger immediate upload if the LAZY flag is not specified, and
+			// Trigger immediate upload if the LAZY flag is not specified, and
 			// responsiveness is not required at this time.
 			if (!(this.flags & medea.TEXTURE_FLAG_LAZY_UPLOAD) && !medea.EnsureIsResponsive()) {
 				this._Upload();
 			}
 			
-			// and let the parent implementation call user callbacks
+			// And let the parent implementation call user callbacks
 			this._super();
 
-			// also create a cache entry for this texture
+			// Also create a cache entry for this texture
 			if(IsEligibleForCaching(this.flags)) {
 				var name = GetTextureCacheName(this.GetSource(), this.format, this.flags) + 
 					GetTextureSizeSuffix(this.width, this.height);
@@ -324,7 +334,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				gl.bindTexture(TEX, this.texture);
 			}
 
-			// scale or pad nPOT or oversized textures
+			// Scale or pad nPOT or oversized textures
 			if (this.glwidth !== this.width || this.glheight !== this.height) {
 				// #ifdef DEBUG
 				medealib.DebugAssert(!!img, 'invariant, verified in OnDelayedInit()');
@@ -357,7 +367,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 					ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 				}
 
-				// according to http://jsperf.com/texture-sources this should be fastest,
+				// According to http://jsperf.com/texture-sources this should be fastest,
 				// but it also consumes loads of memory and quickly screws up Webkit and
 				// Gecko. `texImage2D(TEX,0,canvas)` keeps throwing type errors in both
 				// engines, though.
@@ -368,7 +378,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			else {
 
 				if(img) {
-					// copy to the gl texture
+					// Copy to the gl texture
 					gl.texImage2D(TEX, 0, intfmt, intfmt, gl.UNSIGNED_BYTE, img);
 				}
 				else {
@@ -447,7 +457,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 
 	medea.CreateTexture = function(src_or_image, callback, flags, format, force_width, force_height) {
 		medealib.DebugAssert((force_width === undefined) === (force_height === undefined), 
-			'explicit size must always be given for both axes');
+			'Explicit size must always be given for both axes');
 			
 		var create = function() {
 			return new medea.Texture(src_or_image, callback, flags, format, force_width, force_height);
@@ -460,19 +470,19 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			var cache_name = GetTextureCacheName(src_or_image, format, flags);
 			var cache_name_w = null;
 		
-			// was a specific texture size requested? If so, check if we have a cache entry 
+			// Was a specific texture size requested? If so, check if we have a cache entry 
 			// for exactly this texture size. Such entries are created by Texture.DelayedInit()
 			// once the size of the texture is known.
 			if (force_width !== undefined) {
 				cache_name_w = cache_name + GetTextureSizeSuffix(force_width, force_height);
 				var cache_entry_w = texture_cache[cache_name_w];
 				if(cache_entry_w !== undefined) {
-					medealib.LogDebug('texture found in cache (1): ' + src_or_image);
+					medealib.LogDebug('Texture found in cache (1): ' + src_or_image);
 					return cache_entry_w;
 				}
 			}
 		
-			// check regular cache. This is supposed to be the texture at its default
+			// Check regular cache. This is supposed to be the texture at its default
 			// size, which however is not known before the texture is loaded. Therefore,
 			// there is a small possibility that a texture is loaded twice. Browser
 			// caching should make the effect on the loading time negligible though (
@@ -488,7 +498,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			if (cache_name_w === null || (force_width === cache_entry.GetWidth() 
 				&& force_height === cache_entry.GetHeight())) {
 				
-				medealib.LogDebug('texture found in cache (2): ' + src_or_image);
+				medealib.LogDebug('Texture found in cache (2): ' + src_or_image);
 				return cache_entry;
 			}
 		}
