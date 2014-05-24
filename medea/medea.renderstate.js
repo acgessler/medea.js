@@ -38,6 +38,17 @@ medealib.define('renderstate',[],function(medealib, undefined) {
 		'both' 			: gl.FRONT_AND_BACK
 	};
 
+	var bf_table = {
+		'one_minus_src_alpha' : gl.ONE_MINUS_SRC_ALPHA,
+		'src_alpha' : gl.SRC_ALPHA,
+		'one_minus_dst_alpha' : gl.ONE_MINUS_DST_ALPHA,
+		'dst_alpha' : gl.DST_ALPHA,
+		'one_minus_src_color' : gl.ONE_MINUS_SRC_COLOR,
+		'src_color' : gl.SRC_COLOR,
+		'one_minus_dst_color' : gl.ONE_MINUS_DST_COLOR,
+		'dst_color' : gl.DST_COLOR,
+	};
+
 	var action_map = {
 		'depth_test'  :  function(v) { setsimple(gl.DEPTH_TEST,v); },
 		'depth_write' :  function(v) {
@@ -50,7 +61,12 @@ medealib.define('renderstate',[],function(medealib, undefined) {
 		'cull_face'  :  function(v) { setsimple(gl.CULL_FACE,v); },
 		'cull_face_mode'  :  function(v) {
 			gl.cullFace(cfm_table[v]);
-		}
+		},
+
+		'blend' : function(v) { setsimple(gl.BLEND,v); },
+		'blend_func' : function(v) {
+			gl.blendFunc(bf_table[v[0]], bf_table[v[1]]);
+		},
 	};
 
 

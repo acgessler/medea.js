@@ -324,12 +324,74 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			this.state.depth_test = c;
 		},
 
+
+		// Possible values for |c|:
+		//   never, less, equal, less_equal, greater, greater_equal,
+		//   not_equal, always.
 		DepthFunc : function(c) {
 			if (c === undefined) {
 				return this.state.depth_func;
 			}
 
 			this.state.depth_func = c;
+		},
+
+
+		// Possible values for |c|:
+		//   add, subtract, reverse_subtract
+		BlendOp : function(c) {
+			if (c === undefined) {
+				return this.state.blend_op;
+			}
+
+			this.state.blend_op = c;
+		},
+
+
+		// Possible values for |src| and |dst|:
+		//   src_alpha, dst_alpha, src_color, dst_color
+		//   one_minus_src_alpha, one_minus_dst_alpha, one_minus_src_color,
+		//	 one_minus_dst_color
+		//
+		// If parameters are omitted, returns a 2-tuple of
+		// the current values.
+		BlendFunc : function(src, dst) {
+			if (src === undefined) {
+				return this.state.blend_func;
+			}
+
+			this.state.blend_func = [src, dst];
+		},
+
+
+		BlendEnable : function(c) {
+			if (c === undefined) {
+				return this.state.blend;
+			}
+
+			this.state.blend = c;
+		},
+
+
+		// Convenience function to enable "normal" alpha blending for the
+		// pass (if |doit| is true, else it is disabled).
+		//
+		// "Normal" alpha blending is equivalent to:
+		//		BlendOp('add')
+		//		BlendFunc(['src_alpha', 'one_minus_src_alpha'])
+		//		BlendEnable(true)
+		//
+		// Note: when using alpha-blending, make sure you move all meshes
+		// that are semi-transparent to one of the RENDERQUEUE_ALPHA_XXX
+		// render queues to make sure they are rendered with depth
+		// write access turned off and proper depth sorting.
+		SetDefaultAlphaBlending : function(doit) {
+			if (!doit) {
+				this.BlendEnable(false);
+			}
+			this.BlendOp('add');
+			this.BlendFunc('src_alpha', 'one_minus_src_alpha');
+			this.BlendEnable(true);
 		},
 
 
