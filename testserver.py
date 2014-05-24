@@ -5,5 +5,5 @@ if sys.version_info <  (3,0):
 else:
 	from http.server import HTTPServer, SimpleHTTPRequestHandler
  
-httpd = HTTPServer(('127.0.0.1', 80), SimpleHTTPRequestHandler)
+httpd = HTTPServer(('0.0.0.0', 80), SimpleHTTPRequestHandler)
 httpd.serve_forever()
