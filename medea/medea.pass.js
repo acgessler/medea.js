@@ -255,7 +255,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				pass_last_used_with[cache_name] = this;
 			}
 
-			// if this program was last used with _this_ pass, we can 
+			// If this program was last used with _this_ pass, we can 
 			// sometimes completely re-use shader state.
 			else if(pass_last_used_with[cache_name] === this) {
 				change_flags |= 0x8;
@@ -333,8 +333,27 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		},
 
 
-
-		Set : function(k,val) {
+		// Set the |k| shader constant (uniform) to |val|.
+		//
+		// |val| must be one of:
+		//   1) A value matching the data type of the uniform being set (otherwise
+		//      a debug error is produced). Duck-typing applies: for example, a GLSL vec4
+		//      can be set from anything that has allows indexing in range [0, 3].
+		//   2) A closure that produces a value that fullfils 1). The closure will
+		//      be invoked every time the pass is used to produce an up to date
+		//      value for the uniform. Note that this causes a performance penalty.
+		//   3) A string, the meaning of which depends on the data type:
+		//       i) for textures (cube, normal, volume): a string that can be passed
+		//          to |medea.CreateTexture|, |medea.CreateCubeTexture|, .. (respectively)
+		//          in order to create a texture. While the texture is not available,
+		//          a default texture is bound to the slot (the default texture is
+		//          black in release builds and yellow-black in debug builds).
+		//       ii) for other types: the string is eval()ed every time the pass is
+		//          used, with performance characteristics similar to 2).
+		//	  4) A dictionary, containing a |medea.LODTexture| input specification, i.e.
+		//       it has at least |low| and |high| set to valid textures (or
+		//       texture paths).
+		Set : function(k, val) {
 			if (val === undefined) {
 				return;
 			}
@@ -357,7 +376,6 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			var prog = this.program;
 
 			switch(this._GetUniformType(k)) {
-
 				case gl.FLOAT:
 					handler = function(pos, state, curval) {
 						gl.uniform1f(pos, curval );
@@ -407,19 +425,19 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 					break;
 
 				case gl.FLOAT_MAT4:
-					handler = function(pos, state,curval) {
+					handler = function(pos, state, curval) {
 						gl.uniformMatrix4fv(pos, false, curval);
 					};
 					break;
 
 				case gl.FLOAT_MAT3:
-					handler = function(pos, state,curval) {
+					handler = function(pos, state, curval) {
 						gl.uniformMatrix3fv(pos, false, curval);
 					};
 					break;
 
 				case gl.FLOAT_MAT2:
-					handler = function(pos, state,curval) {
+					handler = function(pos, state, curval) {
 						gl.uniformMatrix2fv(pos, false, curval);
 					};
 					break;
@@ -439,8 +457,17 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				return;
 			}
 
-			if (typeof value === 'string') {
-				this.auto_setters[k] = [pos,function(pos, state) {
+			// If the value is a closure, evaluate it every time
+			if (typeof val == 'function') {
+				this.auto_setters[k] = [pos, function(pos, state) {
+					handler(pos, state, val());
+				}];
+			}
+			// If the value is a string, eval() it every time
+			// Note: texture paths are handled earlier and control
+			// never reaches here for textures.
+			else if (typeof val == 'string') {
+				this.auto_setters[k] = [pos, function(pos, state) {
 					var val_eval = null;
 
 					try {
@@ -451,7 +478,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 						// #endif
 					}
 
-					handler(pos,state,val_eval);
+					handler(pos, state, val_eval);
 				}];
 			}
 			else {
