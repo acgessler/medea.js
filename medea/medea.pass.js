@@ -188,9 +188,11 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		attr_map : null,
 		state : null,
 		program : null,
-		clone_flags : null,
 		semantic : medea.PASS_SEMANTIC_COLOR_FORWARD_LIGHTING,
 		cache_name : null,
+
+		clone_flags : null,
+		original : null,
 
 
 		/** @name medea.Pass.init(*) 
@@ -468,7 +470,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			medealib.DebugAssert(prog, 'program must exist already');
 			// #endif
 
-			this.auto_setters[k] = [pos,function(pos, state) {
+			this.auto_setters[k] = [pos, function(pos, state) {
 				// Note: constants[k] is not set to be the texture as it is loaded.
 				// this is because the user expects consistent values with the Get/Set
 				// APIs, so we cannot change the object type in the background. The
@@ -538,7 +540,6 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 					// See note above for why this.constants[k] is not changed
 					val = medea.CreateTexture(val);
 				});
-
 			}
 			else if (typeof val === 'object' && val.low) {
 				// #ifdef DEBUG
@@ -555,6 +556,14 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			return this.constants[k];
 		},
 
+		// A pass is complete iff the GL program underlying it is
+		// linked successfully.
+		//
+		// IsComplete() updates only after attempts to call |Begin|
+		// (which does nothing if the material is not complete yet)
+		//
+		// For cloned passes this is mirrored from the original
+		// pass being complete.
 		IsComplete : function() {
 			return this.program !== null;
 		},
@@ -580,7 +589,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				}
 
 				if (clone_flags & medea.MATERIAL_CLONE_COPY_CONSTANTS) {
-					out.constants = medealib.Merge(this.constants, {}, {});
+					out.constants = medealib.Merge(this.constants, {}, {});			
 				}
 				else if (clone_flags & medea.MATERIAL_CLONE_SHARE_CONSTANTS) {
 					out.constants = this.constants;
@@ -598,6 +607,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				}
 				this.wannabe_clones.push(out);
 				out.clone_flags = clone_flags;
+				out.original = this;
 				return out;
 			}
 
@@ -634,17 +644,24 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			var old = this.constants;
 			this.constants = {};
 			for(var k in old) {
-				this.Set(k,old[k]);
+				this.Set(k, old[k]);
 			}
 		},
 
 		_TryAssembleProgram : function() {
-			if (this.IsComplete() || !this.vs.IsComplete() || !this.ps.IsComplete() || this.IsClone()) {
-				// can't assemble this program yet, for we first need to wait for some dependent resources to load
+			if (this.IsClone()) {
+				// Try assembling the original material. It will update us as well
+				this.original._TryAssembleProgram();
 				return;
 			}
 
-			// first check if we do already have a linked copy of this shader program
+			if (this.IsComplete() || !this.vs.IsComplete() || !this.ps.IsComplete()) {
+				// Can't assemble this program yet, for we first need to wait
+				// for some dependent resources to load
+				return;
+			}
+
+			// First check if we do already have a linked copy of this shader program
 			var cache_name = this.cache_name =  this.vs.GetShaderId() + '#' + this.ps.GetShaderId();
 			var p = program_cache[cache_name];
 			if(p === undefined) {
@@ -724,7 +741,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 
 				// #ifdef DEBUG
 				if(a['POSITION'] === undefined) {
-					medealib.LogDebug('failed to derive automatic attribute mapping table, '
+					medealib.LogDebug('Failed to derive automatic attribute mapping table, '
 						+'at least there is no POSITION input defined.');
 				}
 				// #endif
@@ -733,6 +750,10 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			// Now transfer the dictionaries and the program reference to all pending
 			// clones for this material.
 			if (this.wannabe_clones) {
+				// #ifdef DEBUG				
+				medealib.LogDebug('Material ready: will now update clones');
+				// #endif
+
 				for (var i = 0; i < this.wannabe_clones.length; ++i) {
 					this._Clone( this.wannabe_clones[i].clone_flags, this.wannabe_clones[i] );
 				}
