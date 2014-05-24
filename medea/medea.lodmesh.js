@@ -58,9 +58,18 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 		LODOffset :  medealib.Property('lod_offset'),
 
 		_Clone : function(material_or_color) {
-			return medea.CreateLODMesh(this.vbo, this.ibo_levels,
+			var mesh = medea.CreateLODMesh(this.vbo, this.ibo_levels,
 				material_or_color || this.Material(),
+				this.rq,
+				this.pt,
+				this.line_ibo, 
 				this.ibo_creation_flags);
+
+			// Copy BB: this is necessary if this.BB has been
+			// manually specified as opposed to the BB being
+			// derived from the VBO's extents.
+			mesh.BB(this.BB());
+			return mesh;
 		},
 
 		_SelectLOD : function(sq_distance) {
@@ -99,7 +108,7 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 	// Supports both index- and vertexbuffer specific |flags|.
 	//
 	// Mesh will not be cached unless |cache_name| is given.
-	medea.CreateLODMesh = function(vertices, ibo_levels, material_or_color, flags, cache_name) {
+	medea.CreateLODMesh = function(vertices, ibo_levels, material_or_color, flags, cache_name, rq, pt, line_ibo) {
 		if (typeof vertices === 'object' && !(vertices instanceof medealib.Class)) {
 			vertices = medea.CreateVertexBuffer(vertices,flags);
 		}
@@ -108,7 +117,7 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 			material_or_color = medea.CreateSimpleMaterialFromColor(material_or_color);
 		}
 
-		var mesh = new medea.LODMesh(vertices, ibo_levels, material_or_color);
+		var mesh = new medea.LODMesh(vertices, ibo_levels, material_or_color, rq, pt, line_ibo);
 		if (cache_name !== undefined) {
 			medea._mesh_cache[cache_name] = mesh;
 		}

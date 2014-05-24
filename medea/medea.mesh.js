@@ -128,7 +128,16 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 		},
 		
 		_Clone : function(material_or_color) {
-			return medea.CreateSimpleMesh(this.vbo, this.ibo, material_or_color || this.Material());
+			var mesh = medea.CreateSimpleMesh(this.vbo, this.ibo,
+				material_or_color || this.Material(),
+				this.rq,
+				this.pt,
+				this.line_ibo);
+			// Copy BB: this is necessary if this.BB has been
+			// manually specified as opposed to the BB being
+			// derived from the VBO's extents.
+			mesh.BB(this.BB());
+			return mesh;
 		},
 
 		DrawNow : function(statepool, change_flags) {
@@ -305,7 +314,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 	// |flags| supports both index- and vertexbuffer specific creation flags. If
 	// existing vertex and index buffers are passed in, |flags| are ignored.
 	// Mesh will not be cached unless |cache_name| is given.
-	medea.CreateSimpleMesh = function(vertices,indices,material_or_color,flags, cache_name) {
+	medea.CreateSimpleMesh = function(vertices,indices, material_or_color, flags, cache_name, rq, pt, line_ibo) {
 
 		if (indices && (Array.isArray(indices) || typeof indices === 'object' && !(indices instanceof medealib.Class))) {
 			indices = medea.CreateIndexBuffer(indices,flags);
@@ -319,7 +328,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 			material_or_color = medea.CreateSimpleMaterialFromColor(material_or_color);
 		}
 
-		var mesh = new medea.Mesh(vertices,indices,material_or_color);
+		var mesh = new medea.Mesh(vertices, indices, material_or_color, rq, pt, line_ibo);
 		if (cache_name !== undefined) {
 			_mesh_cache[cache_name] = mesh;
 		}

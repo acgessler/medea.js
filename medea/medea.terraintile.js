@@ -530,7 +530,10 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 	// |w| and |h| must be a power-of-two size.
 	//
 	// |lod_levels| is the number of LOD levels for which index buffers
-	// are added to the LODMesh. It defaults to |medea.DEFAULT_TERRAIN_LOD_LEVELS|
+	// are added to the LODMesh. It defaults to |medea.DEFAULT_TERRAIN_LOD_LEVELS|.
+	//
+	// Note: the resulting mesh has a zero-volume bounding box that should
+	// be changed to a more sensible value.
 	medea.CreateFlatTerrainTileMesh = function(material, w, h, lod_levels, no_uvs) {
 		lod_levels = lod_levels || medea.DEFAULT_TERRAIN_LOD_LEVELS;
 		// #ifdef DEBUG
