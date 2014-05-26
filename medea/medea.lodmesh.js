@@ -18,7 +18,7 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 	// This ensures that, if a mesh is drawn multiple times in a scene,
 	// the correct LOD is selected for each instance.
 	//
-	// See |medea.LODMesh._SelectLOD|
+	// See |medea.LODMesh._SelectLOD|, |medea.LODMesh._ComputeLODLevel|
 	medea.LODMeshRenderJob = medea.MeshRenderJob.extend({
 		
 		Draw : function(renderer, statepool) {
@@ -33,7 +33,11 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 	// buffer (but not the vertex buffer) depending on a function
 	// of the distance to the camera.
 	//
-	// To tweak the LOD selection logic, override |_SelectLOD|
+	// To tweak the LOD selection logic, yu have two options:
+	//   1) Override |_SelectLOD| for full control. As control returns,
+	//      |this.ibo| should be the actual IBO to use for rendering.
+	//   2) Override |_ComputeLODLevel| to tweak the selection of the
+	//      LOD index, but not change the way how this maps to IBOs.
 	medea.LODMesh = medea.Mesh.extend({
 
 		lod_attenuation_scale : 1,
@@ -75,11 +79,15 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 			return mesh;
 		},
 
-		_SelectLOD : function(sq_distance) {
+		_ComputeLODLevel : function(sq_distance) {
 			// Multiply by two to undo the square in log space
 			var log_distance = Math.log(sq_distance * 0.0001) * 2 * this.lod_attenuation_scale;
-			var lod = Math.max(0, Math.min(this.ibo_levels.length - 1,
+			return Math.max(0, Math.min(this.ibo_levels.length - 1,
 				~~log_distance + this.lod_offset));
+		},
+
+		_SelectLOD : function(sq_distance) {
+			var lod = this._ComputeLODLevel(sq_distance);
 
 			// Eval the LOD level as needed
 			var indices = this.ibo_levels[lod];
