@@ -523,14 +523,14 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	*/
 	// ------------------------------------------------------------------------
 	medeactx.VisitGraph = function(node,visitor,status_in) {
-		var status = visitor(node,status_in);
+		var status = visitor(node, status_in);
 		if (!status) {
 			return false;
 		}
 
 		var c = node.GetChildren();
 		for(var i = 0; i < c.length; ++i) {
-			medeactx.VisitGraph(c[i],visitor,status);
+			medeactx.VisitGraph(c[i], visitor, status);
 		}
 
 		return true;

@@ -11,6 +11,7 @@ medealib.define('lodmesh',['mesh'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
+
 	// Special render job that selects the most suitable LOD before
 	// dispatching the draw command to the renderer.
 	//

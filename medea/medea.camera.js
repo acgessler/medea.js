@@ -217,7 +217,9 @@ medealib.define('camera',['statepool'],function(medealib, undefined) {
 					return medea.VISIBLE_NONE;
 				}
 
-				if(vis === medea.VISIBLE_ALL || e.length === 1) {
+				node.Render(outer, rq);
+
+				if(vis === medea.VISIBLE_ALL || e.length === 1) {					
 					e.forEach(function(val, idx) {
 						val.Render(outer, node, rq);
 					});

@@ -35,8 +35,19 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			medea._NODE_FLAG_DIRTY_GI |
 			medea._NODE_FLAG_DIRTY_BB,
 
-		parent:null,
-
+		parent : null,
+		children : null,
+		entities : null,
+		id : null,
+		name : null,
+		plane_hint : null,
+		listeners : null,
+		lmatrix : null,
+		gmatrix : null,
+		gimatrix : null,
+		bb : null,
+		flags : null,
+		enabled : null,
 
 		init : function(name, flags) {
 			this.children = [];
@@ -44,7 +55,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			this.id = id_source++;
 			this.name = name || ("UnnamedNode_" + this.id);
 
-			// for culling purposes, saves the index of the frustun plane
+			// For culling purposes, saves the index of the frustun plane
 			// that caused this node to be culled recently. This exploits
 			// temporal coherence in the scene.
 			this.plane_hint = [0];
@@ -64,6 +75,15 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			this.enabled = true;
 		},
 		
+		// Enable or disable a node for rendering and updating.
+		//
+		// Disabled nodes still contribute their BB to the parent's
+		// bounding box, but are neither updated or rendered.
+		//
+		// This is a cheap way of selectively enabling parts of a
+		// scene without incurring expensive scenegraph changes.
+		//
+		// A node is initially enabled.
 		Enabled : function(e) {
 			if (e === undefined) {
 				return this.enabled;
@@ -213,8 +233,22 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			this._SetTrafoDirty();
 		},
 
+		// Update gets called once per frame with the |dtime| passed
+		// since the last frame, in seconds.
 		Update: function(dtime) {
-			// all regular updates are carried out lazily, so this is a no-op
+			// All regular updates are carried out lazily, so this is a no-op
+		},
+
+		// Render gets called once per frame per camera for nodes that are
+		// at least partially visible with respect to the camera.
+		//
+		// The default implementation does nothing.
+		//
+		// It gets called *before* Render() is called on all entities that are
+		// attached to the node. It is also called *before* recursing into node
+		// children (or even checking if they are visible), so any changes made
+		// to the node's children take effect immediately.
+		Render : function(camera, rqmanager) {
 		},
 
 		GetWorldBB: function() {

@@ -32,7 +32,7 @@ medealib.define('entity',[],function(medealib, undefined) {
 			this.name = name || ("UnnamedEntity_" + this.id);
 		},
 
-		Render : function(viewport,rqmanager) {
+		Render : function(camera, rqmanager) {
 			// At this level of abstraction Render() is empty, deriving classes will substitute their own logic
 		},
 
