@@ -33,7 +33,7 @@ medealib.define('entity',[],function(medealib, undefined) {
 		},
 
 		Render : function(viewport,rqmanager) {
-			// at this level of abstraction Render() is empty, deriving classes will substitute their own logic
+			// At this level of abstraction Render() is empty, deriving classes will substitute their own logic
 		},
 
 		Update : function(dtime) {
@@ -47,19 +47,21 @@ medealib.define('entity',[],function(medealib, undefined) {
 			this.tag = n;
 		},
 
+		// Note: manually setting the BB of an entity does *not*
+		// inform any nodes the entity is attached to.
+		//
+		// To update nodes, detach the entity from the scenegraph and attach again.
 		BB : function(b) {
 			if(b === undefined) {
 				if(this.bb === null) {
 					this._AutoGenBB();
 				}
 				// #ifdef DEBUG
-				medealib.DebugAssert(!!this.bb,'failed to generate BB for entity');
+				medealib.DebugAssert(!!this.bb,'Failed to generate BB for entity');
 				// #endif
 				return this.bb;
 			}
 			this.bb = b;
-			this._UpdateRadius();
-			this._UpdateCenter();
 		},
 
 		IsUnbounded : function() {
@@ -67,27 +69,34 @@ medealib.define('entity',[],function(medealib, undefined) {
 		},
 
 		GetRadius : function() {
+			if (this.radius == null) {
+				this._UpdateRadius();
+			}
 			return this.radius;
 		},
 
 		GetCenter : function() {
+			if (this.center == null) {
+				this._UpdateCenter();
+			}
 			return this.center;
 		},
 
 		GetWorldBB : function(parent) {
-			if(!this.bb) {
+			var bb = this.BB();
+			if(!bb) {
 				return medea.BB_INFINITE;
 			}
-			return medea.TransformBB(this.bb, parent.GetGlobalTransform());
+			return medea.TransformBB(bb, parent.GetGlobalTransform());
 		},
+
 
 		Cull : function(parent,frustum) {
 			return medea.BBInFrustum(frustum, this.GetWorldBB(parent));
 		},
 
 
-
-		// note that entities can be attached to multiple nodes by default.
+		// Note that entities can be attached to multiple nodes by default.
 		// deriving classes which do NOT want this, should assert this
 		// case in OnAttach().
 		OnAttach : function(node) {
@@ -98,7 +107,7 @@ medealib.define('entity',[],function(medealib, undefined) {
 
 
 		_AutoGenBB : function() {
-			// deriving classes should supply a more meaningful implementation
+			// Deriving classes should supply a more meaningful implementation
 			this.bb = medea.BB_INFINITE;
 		},
 
@@ -126,7 +135,7 @@ medealib.define('entity',[],function(medealib, undefined) {
 				return;
 			}
 
-			this.radius = null;
+			this.radius = 0.0;
 		},
 	});
 
