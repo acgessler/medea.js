@@ -19,6 +19,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 	medea._NODE_FLAG_DIRTY = 0x1;
 	medea._NODE_FLAG_DIRTY_BB = 0x2;
 	medea._NODE_FLAG_DIRTY_GI = 0x4;
+	medea._NODE_FLAG_STATIC_BB = 0x8;
 
 	medea.NODE_FLAG_NO_ROTATION = 0x40;
 	medea.NODE_FLAG_NO_SCALING = 0x80;
@@ -249,6 +250,37 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 		// children (or even checking if they are visible), so any changes made
 		// to the node's children take effect immediately.
 		Render : function(camera, rqmanager) {
+		},
+
+		// Assign a static (local) AABB to the node.
+		//
+		// |static_bb| will be the static Axis-Aligned Bounding Boxes that is
+		// used for culling the node from now on. Any automatic propagation
+		// of changes to children's bounding boxes is disabled.
+		//
+		// Use this to
+		//   1) force a specific bounding box size (i.e. for nodes whose child
+		//      nodes are dynamically populated, i.e. a terrain quad tree).
+		//   2) avoid any further BB updates if further changes are negligible.
+		//      To do so, use |SetStaticBB(GetBB())|
+		//
+		// To go back to automatic BB calculation, pass |static_bb| falsy.
+		SetStaticBB : function(static_bb) {
+			if (!static_bb) {
+				this.flags &= ~medea._NODE_FLAG_STATIC_BB;
+				this.flags |= medea._NODE_FLAG_DIRTY_BB;
+				this._UpdateBB();
+				return;
+			}
+			this.flags |= medea._NODE_FLAG_STATIC_BB;
+			this.flags &= ~medea._NODE_FLAG_DIRTY_BB;
+			this.bb = static_bb;
+			this._FireListener("OnUpdateBB");
+
+			// Propagate the static bounding box up in the tree
+			if (this.parent) {
+				this.parent._SetBBDirty();
+			}
 		},
 
 		GetWorldBB: function() {
@@ -519,6 +551,11 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 		},
 
 		_SetBBDirty : function() {
+			// No upwards propagation for static bounding boxes.
+			// See SetStaticBB()
+			if (this.flags & medea._NODE_FLAG_STATIC_BB) {
+				return;
+			}
 			var node = this, flag = medea._NODE_FLAG_DIRTY_BB;
 			do {
 				node.flags |= flag;
@@ -529,6 +566,11 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 
 		_UpdateBB: function() {
 			if (!(this.flags & medea._NODE_FLAG_DIRTY_BB)) {
+				return;
+			}
+			// No updates for static bounding boxes.
+			// See SetStaticBB()
+			if (this.flags & medea._NODE_FLAG_STATIC_BB) {
 				return;
 			}
 			this.flags &= ~medea._NODE_FLAG_DIRTY_BB;
