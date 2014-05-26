@@ -134,16 +134,16 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 	
 	medea.FpsCamController = medea.CamController.extend({
 
-		enabled: false,
-		turn_speed : 0.005,
-		walk_speed : 5.5,
 		scratch_mat : null,
-
 		hispeed_on_shift : true,
 		terrain_entity : null,
 
 		init : function(enabled) {
 			this._super(enabled);
+
+			this.turn_speed = 0.005;
+			this.walk_speed = 5.5;
+
 			this.scratch_mat = mat4.identity(mat4.create());
 		},
 
@@ -224,7 +224,7 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 	
 	
 	medea.OrbitCamController = medea.CamController.extend({
-		turn_speed : 0.02,
+		
 		camera_distance : 2.5,
 		pan_speed : 0.006,
 		zoom_speed : 1.00105,
@@ -243,6 +243,7 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 		init : function(enabled, initial_rot_phi, initial_rot_theta) {
 			this.panning_mouse_buttons = [1,2];
 			this._super(enabled);
+			this.turn_speed = 0.02;
 
 			this.Reset(initial_rot_phi, initial_rot_theta);
 		},
@@ -456,10 +457,8 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 	
 	
 	medea.RotateXCamController = medea.CamController.extend({
-		turn_speed : 0.005,
-		
-
 		init : function(enabled) {
+			this.turn_speed = 0.005;
 			this._super(enabled);
 		},
  

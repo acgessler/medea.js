@@ -43,6 +43,13 @@
 		  };
 		})(name, prop[name]) :
 		prop[name];
+
+		// Don't allow overwriting fields - right now there
+		// is no way of keeping fields private (except for
+		// wrapping them in a pimpl object) so deriving
+		// classes would easily overwrite parent fields.
+		console.assert (typeof prop[name] == "function" || _super[name] === undefined,
+			"Field does already exist in parent: " + name);
 	}
 
 	// The dummy class constructor
