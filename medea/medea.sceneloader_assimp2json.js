@@ -171,7 +171,10 @@ medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js', 'con
 		// final assembly job
 		cont.AddJob(function() {
 			LoadNode(working,anchor,scene.rootnode);
-			working.callback(medea.SCENE_LOAD_STATUS_GEOMETRY_FINISHED);
+
+			if (working.callback) {
+				working.callback(medea.SCENE_LOAD_STATUS_GEOMETRY_FINISHED);
+			}
 		});
 
 		cont.Schedule();

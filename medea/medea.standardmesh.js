@@ -23,7 +23,6 @@ medealib.define('standardmesh',['mesh'],function(medealib, undefined) {
 	medea.CreateStandardMesh_Plane = function(color_or_material) {
 		return medea.CreateSimpleMesh(
 		{ positions : [
-			  // Bottom face
 			  -1.0, 0.0, -1.0,
 			   1.0, 0.0, -1.0,
 			   1.0, 0.0,  1.0,
