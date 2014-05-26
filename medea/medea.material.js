@@ -50,6 +50,24 @@ medealib.define('material',['pass'],function(medealib, undefined) {
 // #endif
 		},
 
+		// Disable debug checks on uniform variable locations being available.
+		// Usually it is an error to try setting uniforms that don't exist.
+		// However, given that GLSL kills all uniforms that do not contribute
+		// to the result, it can become very tedious to quickly iterate on
+		// shaders. In such a case, calling this method avoids any assertions.
+		//
+		// The operation cannot be undone, it is permanent for this material.
+		//
+		// While the API is still provided, it is a no-op in release builds
+		SetIgnoreUniformVarLocationNotFound : function() {
+// #ifdef DEBUG
+			var passes = this.passes;
+			for(var i = passes.length - 1; i >= 0; --i) {
+				passes[i].ignore_uniform_errors = true;
+			}
+// #endif
+		},
+
 		Pass : function(n,p) {
 			if(p === undefined) {
 				return this.passes[n];

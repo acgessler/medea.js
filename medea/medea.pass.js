@@ -194,6 +194,9 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		clone_flags : null,
 		original : null,
 
+// #ifdef DEBUG
+		ignore_uniform_errors : false,
+// #endif
 
 		/** @name medea.Pass.init(*) 
 		 */
@@ -429,7 +432,12 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			var pos = gl.getUniformLocation(this.program, k);
 			if (!pos) {
 				// #ifdef DEBUG
-				medealib.DebugAssert("uniform variable location not found: " + k);
+				if (!this.ignore_uniform_errors) {
+					medealib.DebugAssert("Uniform variable location not found: " + k +
+						". This is a debug check to help catch errors. Use " +
+						" material.SetIgnoreUniformVarLocationNotFound() " +
+						"to silence this message if this was intentional.");
+				}
 				// #endif
 				return;
 			}
@@ -699,6 +707,10 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				out.original = this;
 				return out;
 			}
+
+			// #ifdef DEBUG
+			out.ignore_uniform_errors = this.ignore_uniform_errors;
+			// #endif
 
 			out.program_id = this.program_id;
 			out.cache_name = this.cache_name;
