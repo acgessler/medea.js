@@ -18,6 +18,7 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 	medea.PT_TRIANGLE_STRIPS = gl.TRIANGLE_STRIPS;
 	medea.PT_LINE_STRIPS = gl.LINE_STRIPS;
 
+
 	// class RenderJob
 	medea.MeshRenderJob = medealib.Class.extend({
 
@@ -39,24 +40,27 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 		},
 
 		// Required methods for automatic sorting of renderqueues
-		DistanceEstimate : function() {
-			if (this.distance === null) {
-				if (this.mesh.IsUnbounded()) {
-					this.distance = 0;
-				}
-				else {
-					// TODO: this does *not* handle scaled meshes correctly
-					var cam_pos = this.camera.GetWorldPos();
-					var node_pos = vec3.add(this.node.GetWorldPos(), this.mesh.GetCenter());
-					var delta = vec3.subtract(cam_pos, node_pos);
+		DistanceEstimate : (function() {
+			var scratch_vec = vec3.create();
+			return function() {
+				if (this.distance === null) {
+					if (this.mesh.IsUnbounded()) {
+						this.distance = 0;
+					}
+					else {
+						// TODO: this does *not* handle scaled meshes correctly
+						var cam_pos = this.camera.GetWorldPos();
+						var node_pos = vec3.add(this.node.GetWorldPos(), this.mesh.GetCenter(), scratch_vec);
+						var delta = vec3.subtract(cam_pos, node_pos, scratch_vec);
 
-					// Subtract the mesh' bounding radius from the estimate
-					var radius = this.mesh.GetRadius();
-					this.distance = Math.max(0, vec3.dot(delta, delta) - radius * radius);
+						// Subtract the mesh' bounding radius from the estimate
+						var radius = this.mesh.GetRadius();
+						this.distance = Math.max(0, vec3.dot(delta, delta) - radius * radius);
+					}
 				}
-			}
-			return this.distance;
-		},
+				return this.distance;
+			};
+		})(),
 
 		MaterialId : function() {
 			return this.sort_matid;
