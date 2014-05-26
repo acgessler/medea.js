@@ -83,7 +83,7 @@ medealib.define('sceneloader',['filesystem', 'material'],function(medealib, unde
 	 */
 	medea.LoadSceneFromResource = function(src, anchor, format_hint, callback, material_resolver) {
 		material_resolver = material_resolver || CreateDefaultMaterialResolver(src.replace(/^(.*[\\\/])?(.*)/,'$1'));
-		medea.Fetch(src,function(data) {
+		medea.Fetch(src, function(data) {
 			if(!data) {
 				if (callback) {
 					callback(medea.SCENE_LOAD_STATUS_FAILED);
@@ -93,7 +93,7 @@ medealib.define('sceneloader',['filesystem', 'material'],function(medealib, unde
 			if (callback) {
 				callback(medea.SCENE_LOAD_STATUS_DOWNLOADED);
 			}
-			medea.LoadScene(data,anchor,format_hint,callback, material_resolver);
+			medea.LoadScene(data, anchor, format_hint, callback, material_resolver);
 		});
 	};
 });

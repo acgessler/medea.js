@@ -124,7 +124,6 @@ medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js', 'con
 		var outnd = anchor.AddChild(node.name);
 		outnd.LocalTransform(mat4.transpose(mat4.create(node.transformation)), true);
 
-
 		if(node.meshes) {
 			for(var i = 0; i < node.meshes.length; ++i) {
 			// #if DEBUG
@@ -142,7 +141,7 @@ medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js', 'con
 	};
 
 
-	var LoadScene = function(scene,anchor,callback,material_resolver) {
+	var LoadScene = function(scene, anchor, callback, material_resolver) {
 		// batch the working set together in a dumpbin and pass it around 
 		var working = {
 			callback : callback,
@@ -170,7 +169,7 @@ medealib.define('sceneloader_assimp2json',['mesh','filesystem', 'json2.js', 'con
 
 		// final assembly job
 		cont.AddJob(function() {
-			LoadNode(working,anchor,scene.rootnode);
+			LoadNode(working, anchor, scene.rootnode);
 
 			if (working.callback) {
 				working.callback(medea.SCENE_LOAD_STATUS_GEOMETRY_FINISHED);
