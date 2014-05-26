@@ -153,6 +153,14 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			}
 		},
 
+		FilterEntitiesRecursively : function(classes, callback) {
+			this.FilterEntities(classes, callback);
+			var e = this.children.length;
+			for (var i = 0; i < e; ++i) {
+				this.children[i].FilterEntitiesRecursively(classes, callback);
+			}
+		},
+
 		GetChildren: function() {
 			return this.children;
 		},
@@ -258,7 +266,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 		},
 
 		Translate: function(vec) {
-			mat4.translate(this.lmatrix,vec);
+			mat4.translate(this.lmatrix, vec);
 			this._SetTrafoDirty();
 			return this;
 		},
@@ -279,6 +287,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			return this;
 		},
 
+		// Order of translate and scale matters
 		Scale: function(s) {
 			// #ifdef DEBUG
 			medealib.DebugAssert(!(this.flags & medea.NODE_FLAG_NO_SCALING),'node cannot be scaled');
