@@ -20,7 +20,9 @@ medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 
 		// culling is turned on by default
 		'cull_face' : true,
-		'cull_face_mode' : 'back'
+		'cull_face_mode' : 'back',
+
+		'blend' : false
 	};
 
 	// default config for rendering of transparent objects
@@ -33,7 +35,9 @@ medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 
 		// culling is turned on by default
 		'cull_face' : true,
-		'cull_face_mode' : 'back'
+		'cull_face_mode' : 'back',
+
+		'blend' : false
 	};
 
 
