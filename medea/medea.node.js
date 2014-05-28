@@ -280,7 +280,17 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			this.flags &= ~medea._NODE_FLAG_DIRTY_BB;
 
 			this.static_bb = static_bb;
-			this.bb = medea.TransformBB( this.static_bb, this.gmatrix );
+
+			// Ensure the |bb| is updated with |static_bb| transformed
+			// by the node's world transform. If a static bb is active,
+			// _UpdateGlobalTransform() automatically takes care of
+			// that but we have to ensure it happens a first time.
+			if (this.flags & medea._NODE_FLAG_DIRTY) {
+				this._UpdateGlobalTransform();
+			}
+			else {
+				this.bb = medea.TransformBB( this.static_bb, this.gmatrix );
+			}
 			this._FireListener("OnUpdateBB");
 
 			// Propagate the static bounding box up in the tree
