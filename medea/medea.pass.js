@@ -12,6 +12,8 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
+	// Maximum number of samplers in use at the same time
+	medea.MAX_TEXTURE_UNITS = 12;
 
 	medea.MATERIAL_CLONE_COPY_STATE 		= 0x1;
 	medea.MATERIAL_CLONE_SHARE_STATE 		= 0x2;
@@ -588,7 +590,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 
 				// Check if this texture is already active, if not get rid of the
 				// oldest texture in the sampler cache.
-				var slots = state.tex_slots || new Array(6);
+				var slots = state.tex_slots || new Array(medea.MAX_TEXTURE_UNITS);
 				var oldest = state.texage+1;
 				var oldesti = 0;
 				var curgl = curval.GetGlTexture();
