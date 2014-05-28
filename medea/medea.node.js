@@ -49,6 +49,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 		bb : null,
 		flags : null,
 		enabled : null,
+		static_bb : null,
 
 		init : function(name, flags) {
 			this.children = [];
@@ -258,6 +259,9 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 		// used for culling the node from now on. Any automatic propagation
 		// of changes to children's bounding boxes is disabled.
 		//
+		// The static AABB is given in local space and is still transformed
+		// by and affected by changes to the node's world matrix.
+		//
 		// Use this to
 		//   1) force a specific bounding box size (i.e. for nodes whose child
 		//      nodes are dynamically populated, i.e. a terrain quad tree).
@@ -274,13 +278,23 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			}
 			this.flags |= medea._NODE_FLAG_STATIC_BB;
 			this.flags &= ~medea._NODE_FLAG_DIRTY_BB;
-			this.bb = static_bb;
+
+			this.static_bb = static_bb;
+			this.bb = medea.TransformBB( this.static_bb, this.gmatrix );
 			this._FireListener("OnUpdateBB");
 
 			// Propagate the static bounding box up in the tree
 			if (this.parent) {
 				this.parent._SetBBDirty();
 			}
+		},
+
+		// Returns a static BB previously set using |SetStaticBB| or |null|
+		GetStaticBB : function() {
+			if (this.flags & medea._NODE_FLAG_STATIC_BB) {
+				return null;
+			}
+			return this.static_bb;
 		},
 
 		GetWorldBB: function() {
@@ -527,6 +541,9 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 				this.gmatrix = mat4.create( this.lmatrix );
 			}
 
+			if (this.flags & medea._NODE_FLAG_STATIC_BB) {
+				this.bb = medea.TransformBB( this.static_bb, this.gmatrix );
+			}
 			this._FireListener("OnUpdateGlobalTransform");
 		},
 
