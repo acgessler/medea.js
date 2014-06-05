@@ -112,9 +112,10 @@ medealib.define('entity',[],function(medealib, undefined) {
 		},
 
 		_UpdateCenter : function() {
-			if (this.bb.length === 2) {
-				var a = this.bb[0];
-				var b = this.bb[1];
+			var bb = this.BB();
+			if (bb.length === 2) {
+				var a = bb[0];
+				var b = bb[1];
 				this.center = vec3.create([
 					(a[0] + b[0]) * 0.5,
 					(a[1] + b[1]) * 0.5,
@@ -126,11 +127,12 @@ medealib.define('entity',[],function(medealib, undefined) {
 		},
 
 		_UpdateRadius : function() {
+			var bb = this.BB();
 			// Derive bounding radius from the BB. This may not be
 			// the tightest-fit sphere.
-			if (this.bb.length === 2) {
-				var a = this.bb[0];
-				var b = this.bb[1];
+			if (bb.length === 2) {
+				var a = bb[0];
+				var b = bb[1];
 				this.radius = Math.max(b[0] - a[0], b[1] - a[1], b[2] - a[2]) * 0.5;
 				return;
 			}
