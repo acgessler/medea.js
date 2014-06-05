@@ -12,6 +12,17 @@ medealib.define('shader',['filesystem','cpp.js'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
+	var stddev_ext = gl.getExtension("OES_standard_derivatives");
+	
+	// #ifdef DEBUG
+	if (stddev_ext) {
+		medealib.LogDebug('using OES_standard_derivatives extension');
+	}
+	else {
+		medealib.LogDebug('OES_standard_derivatives extension not available');
+	}
+	// #endif
+
 	medea.SHADER_TYPE_PIXEL = gl.FRAGMENT_SHADER;
 	medea.SHADER_TYPE_VERTEX = gl.VERTEX_SHADER;
 
@@ -147,6 +158,8 @@ medealib.define('shader',['filesystem','cpp.js'],function(medealib, undefined) {
 
 			// preprocessing shaders is asynchronous
 			var settings = {
+				// Required so #extension is preserved for the GLSL parser to handle
+				keep_unknown_preprocessor_statements : true,
 				include_func : function(file, is_global, resumer) {
 					if (!is_global) {
 						file = medea._GetPath(self.src) + file;

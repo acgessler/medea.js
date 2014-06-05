@@ -16,8 +16,11 @@ uniform vec3 LIGHT_D0_DIR;
 
 void main()
 {
-    gl_FragColor.a = 1.0;
-	gl_FragColor.rgb = texture2D(texture, FetchTexCoord() ).rgb * 
-		ComputeHalfLambertDiffuseCoeff(normalize(FetchNormal()),LIGHT_D0_DIR);
+	vec4 tex = texture2D(texture, FetchTexCoord() );
+	if (tex.a < 0.8) {
+		discard;
+	}
+	float d = ComputeHalfLambertDiffuseCoeff(normalize(FetchNormal()),LIGHT_D0_DIR);
+	gl_FragColor = tex * vec4(d, d, d, 1.0);
 }
 
