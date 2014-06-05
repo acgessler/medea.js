@@ -381,7 +381,35 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		// Convenience function to enable "normal" alpha blending for the
 		// pass (if |doit| is true, else it is disabled).
 		//
+		// Use with premultiplied alpha (which, with WebGL, is default for
+		// blending targets with the underlying layers and therefore is
+		// best used consistently across an app).
+		//
 		// "Normal" alpha blending is equivalent to:
+		//		BlendOp('add')
+		//		BlendFunc(['one', 'one_minus_src_alpha'])
+		//		BlendEnable(true)
+		//
+		// Note: when using alpha-blending, make sure you move all meshes
+		// that are semi-transparent to one of the RENDERQUEUE_ALPHA_XXX
+		// render queues to make sure they are rendered with depth
+		// write access turned off and proper depth sorting.
+		SetDefaultAlphaBlending : function(doit) {
+			if (!doit) {
+				this.BlendEnable(false);
+			}
+			this.BlendOp('add');
+			this.BlendFunc('one', 'one_minus_src_alpha');
+			this.BlendEnable(true);
+		},
+
+
+		// Convenience function to enable "normal" alpha blending for the
+		// pass (if |doit| is true, else it is disabled).
+		//
+		// Use with non-premultiplied alpha.
+		//
+		// "Normal" alpha blending without premultiplied alpha is equivalent to:
 		//		BlendOp('add')
 		//		BlendFunc(['src_alpha', 'one_minus_src_alpha'])
 		//		BlendEnable(true)
@@ -390,7 +418,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		// that are semi-transparent to one of the RENDERQUEUE_ALPHA_XXX
 		// render queues to make sure they are rendered with depth
 		// write access turned off and proper depth sorting.
-		SetDefaultAlphaBlending : function(doit) {
+		SetDefaultAlphaBlendingNotPremultiplied : function(doit) {
 			if (!doit) {
 				this.BlendEnable(false);
 			}

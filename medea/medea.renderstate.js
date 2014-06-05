@@ -47,6 +47,7 @@ medealib.define('renderstate',[],function(medealib, undefined) {
 		'src_color' : gl.SRC_COLOR,
 		'one_minus_dst_color' : gl.ONE_MINUS_DST_COLOR,
 		'dst_color' : gl.DST_COLOR,
+		'one' : gl.ONE
 	};
 
 	var action_map = {
