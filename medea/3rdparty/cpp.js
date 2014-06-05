@@ -146,7 +146,9 @@ function cpp_js(settings) {
 		
 		pragma_func : function(pragma) {
 			return null;
-		}
+		},
+
+		keep_unknown_preprocessor_statements : false,
 	};
 	
 	// apply default settings
@@ -500,8 +502,11 @@ function cpp_js(settings) {
 					
 				default:
 					warn("unrecognized preprocessor command: "
-						+ command
+						+ command + ' ' + elem
 					);
+					if (settings.keep_unknown_preprocessor_statements) {
+						out[outi++] = '#' + command + ' ' + elem + '\n';
+					}
 					break;
 				};
 				return true;
