@@ -53,7 +53,7 @@ medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 			,	light_queue 
 			;
 
-			// setup default render states for all render queues and also pick
+			// Setup default render states for all render queues and also pick
 			// appropriate sorting algorithm implementations.
 			light_queue = this.rq.queues[medea.RENDERQUEUE_LIGHT];
 			light_queue.Sorter(no_sorter);
@@ -97,20 +97,28 @@ medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 				}]);
 			}
 
-			// the default behaviour is to simply dispatch all render queues to the GPU
+			// The default behaviour is to simply dispatch all render queues to the GPU,
+			// which is going to invoke a DrawXXX() method on us for each entity.
 			RenderProxy = function() {
 				rq.Flush(outer, statepool);
 			};
 
 			RenderWithVisualizers = RenderProxy;
 
-			// but we invoke all visualizers in the right order to have them change this
+			// But we invoke all visualizers in the right order to have them change this
 			// by injecting their own logic. They also get access to the original rq.
 			viewport.GetVisualizers().forEach(function(vis) {
 				RenderWithVisualizers = vis.Apply(RenderWithVisualizers,RenderProxy,rq,outer,viewport);
 			});
 
 			RenderWithVisualizers(); 
+
+			// Clear out light records in the state pool. The state pool
+			// may be re-used for next frame, but lights are added
+			// from light entities anew each frame.
+			statepool.Set("DIR_LIGHTS",[]);
+			statepool.Set("POINT_LIGHTS",[]);
+			statepool.Set("SPOT_LIGHTS",[]);
 		},
 
 
@@ -124,7 +132,7 @@ medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 			,	change_flags = 0x4 | 0x2 /* no view, projection changes */
 			;
 
-			// update the current world matrix to the node's global transformation matrix
+			// Update the current world matrix to the node's global transformation matrix
 			// if it is different than the previously set matrix
 			if (old_w) {
 				for(i = 15; i >= 0; --i) {
@@ -170,7 +178,7 @@ medealib.define('forwardrenderer',['renderer'],function(medealib, undefined) {
 				color : light.color
 			};
 
-			// add this light to the statepool so that materials will find it
+			// Add this light to the statepool so that materials will find it
 			if(light instanceof medea.DirectionalLight) {
 				list_name = 'DIR_LIGHTS';
 
