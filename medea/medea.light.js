@@ -69,6 +69,14 @@ medealib.define('light', ['entity'],function(medealib, undefined) {
 			this.dir = vec3.create(dir || [0,-1,0]); 
 			vec3.normalize(this.dir);
 		},
+
+		Direction : function(dir) {
+			if (dir === undefined) {
+				return this.dir;
+			}
+			this.dir = dir;
+			vec3.normalize(this.dir);
+		},
 	});
 
 
