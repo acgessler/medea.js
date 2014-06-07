@@ -255,11 +255,13 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 
 		// Assign a static (local) AABB to the node.
 		//
-		// |static_bb| will be the static Axis-Aligned Bounding Boxes that is
-		// used for culling the node from now on. Any automatic propagation
-		// of changes to children's bounding boxes is disabled.
+		// |static_bb| will be the static Bounding Box (can be an oriented BB)
+		// that is used for culling the node from now on. Automatic upwards
+		// propagation of changes to bounding boxes is disabled in sub trees
+		// rooted at a static bounding box, saving updates. Changes to the
+		// static BB are still propagated to its own parents, though.
 		//
-		// The static AABB is given in local space and is still transformed
+		// The static BB is specified in local space. It is transformed
 		// by and affected by changes to the node's world matrix.
 		//
 		// Use this to
@@ -289,7 +291,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 				this._UpdateGlobalTransform();
 			}
 			else {
-				this.bb = medea.TransformBB( this.static_bb, this.gmatrix );
+				this.bb = medea.MakeAABB(medea.TransformBB( this.static_bb, this.gmatrix ));
 			}
 			this._FireListener("OnUpdateBB");
 
@@ -300,6 +302,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 		},
 
 		// Returns a static BB previously set using |SetStaticBB| or |null|
+		// if no static bounding box is set.
 		GetStaticBB : function() {
 			if (this.flags & medea._NODE_FLAG_STATIC_BB) {
 				return null;
@@ -307,11 +310,31 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			return this.static_bb;
 		},
 
+		// Returns a world-space AABB for this node.
+		//
+		// Possible results are also the two special BBs |medea.BB_EMPTY|
+		// and |medea.BB_INFINITE|. Unless one of the two occurs, the
+		// resulting AABB is always an array of length 2, the first
+		// element being a vec3 with the minimum vertices and the second
+		// element being a vec3 with the maximum vertices for the
+		// AABB that contains the node in world-space.
+		//
+		// TODO: rename to GetAABB(), the current name is misleading
+		// as the BB returned by |GetBB| is strictly speaking also
+		// given in world space.
 		GetWorldBB: function() {
 			this._UpdateBB();
 			return this.bb;
 		},
 
+		// Returns any BB for this node.
+		//
+		// Unlike |GetWorldBB| the result value can also be an oriented
+		// bounding box for which a third array element contains the
+		// transformation matrix by which to transform all corner points
+		// of the box.
+		//
+		// |medea.MakeAABB(GetBB()) equals GetWorldBB()| always holds.
 		GetBB: function() {
 			this._UpdateBB();
 			return this.bb;
@@ -552,7 +575,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			}
 
 			if (this.flags & medea._NODE_FLAG_STATIC_BB) {
-				this.bb = medea.TransformBB( this.static_bb, this.gmatrix );
+				this.bb = medea.MakeAABB(medea.TransformBB( this.static_bb, this.gmatrix ));
 			}
 			this._FireListener("OnUpdateGlobalTransform");
 		},
@@ -604,7 +627,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			var bbs = [];
 
 			for( var i = 0, c = this.children, l = c.length; i < l; ++i) {
-				bbs.push(c[i].GetWorldBB());
+				bbs.push(c[i].GetBB());
 			}
 
 			// TODO: avoid temporary matrices
@@ -613,7 +636,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 				bbs.push(medea.TransformBB( c[i].BB(), trafo ));
 			}
 
-			this.bb = medealib.MergeBBs(bbs);
+			this.bb = medea.MergeBBs(bbs);
 
 			// #ifdef DEBUG
 			medealib.DebugAssert(!!this.bb,"bounding box computation failed, but it shouldn't have");
