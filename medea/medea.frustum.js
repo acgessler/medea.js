@@ -29,16 +29,23 @@ medealib.define('frustum',[],function(medealib, undefined) {
 		}
 
 		if (b.length === 2) {
-			return [b[0],b[1],mat4.create(mat)];
+			return [b[0], b[1], mat4.create(mat)];
 		}
-		return [b[0],b[1],mat4.multiply(mat,b[2],mat4.create())];
+		return [b[0], b[1], mat4.multiply(mat,b[2],mat4.create())];
+	};
+
+	medea.MakeAABB = function(bb) {
+		if(bb === medea.BB_INFINITE || bb === medea.BB_EMPTY || bb.length === 2) {
+			return bb;
+		}
+		return medea.MergeBBs([bb]);
 	};
 
 	medea.IsValidBB = function(bb) {
 		return bb[0] < bb[1];
 	};
 
-	medealib.MergeBBs = function(bbs) {
+	medea.MergeBBs = function(bbs) {
 		if(!bbs.length) {
 			return medea.BB_EMPTY;
 		}
@@ -185,7 +192,7 @@ medealib.define('frustum',[],function(medealib, undefined) {
 
 	medea.BBInFrustum = function(f, bb, plane_hint) {
 		if (bb === medea.BB_INFINITE) {
-			// important: if we return medea.VISIBLE_ALL for BB_INFINITE,
+			// Important: if we return medea.VISIBLE_ALL for BB_INFINITE,
 			// then a single element with no well-defined bounding box
 			// would bubble up so the entire scene would be rendered with
 			// no culling at all.
