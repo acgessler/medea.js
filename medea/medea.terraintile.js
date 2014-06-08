@@ -419,9 +419,12 @@ medealib.define('terraintile',['worker_terrain','image','lodmesh','indexbuffer']
 		medealib.LogDebug("Creating terrain index buffer: " + key);
 		// #endif
 
-		var indices = new Array((w+1)*(h+1)*2*3);
 		var divisor = 1 << lod;
-		medea._GenHeightfieldIndicesSkip(indices,w / divisor,h / divisor, divisor);
+		w /= divisor;
+		h /= divisor;
+
+		var indices = new Array((w + 1) * (h + 1) * 2 * 3);
+		medea._GenHeightfieldIndicesSkip(indices, w, h, divisor);
 		ibo = cached_terrain_ibos[key] = medea.CreateIndexBuffer(indices);
 		return ibo;
 	};

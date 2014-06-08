@@ -178,17 +178,17 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 					outer.ibo._Bind(statepool);
 				}
 
-				// update statistics
+				// Update statistics
 				st.vertices_frame += vboc;
 				++st.batches_frame;
 
-				// regular drawing
+				// Regular drawing
 				if (outer.ibo) {
-					gl.drawElements(outer.pt,iboc,outer.ibo.GetGlType(),0);
+					gl.drawElements(outer.pt, iboc, outer.ibo.GetGlType(), 0);
 					st.primitives_frame += outer._Calc_pt(iboc);
 				}
 				else {
-					gl.drawArrays(outer.pt,0,vboc);
+					gl.drawArrays(outer.pt, 0, vboc);
 					st.primitives_frame += outer._Calc_pt(vboc);
 				}
 			}, statepool, 0xffffffff, change_flags);
