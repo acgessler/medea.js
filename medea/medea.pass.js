@@ -196,19 +196,22 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		clone_flags : null,
 		original : null,
 
+		uniform_type_cache : null,
+
 // #ifdef DEBUG
 		ignore_uniform_errors : false,
 // #endif
 
 		/** @name medea.Pass.init(*) 
 		 */
-		init : function(vs,ps,constants,attr_map,state) {
+		init : function(vs, ps, constants, attr_map, state) {
 			this.vs = vs;
 			this.ps = ps;
 			this.constants = constants || {};
 			this.auto_setters = {};
 			this.attr_map = attr_map;
 			this.state = state || {};
+			this.uniform_type_cache = {};
 
 // #ifdef DEBUG
 			if (!vs || !ps) {
@@ -752,6 +755,9 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			// Attribute mapping is always safe to share
 			out.attr_map = this.attr_map;
 
+			// Uniform type cache can be shared between clones
+			out.uniform_type_cache = this.uniform_type_cache;
+
 			// However, we need to rebuild setters from scratch
 			out.auto_setters = {};
 			out._ExtractUniforms();
@@ -925,6 +931,12 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			   currently handled anyway.
 			*/
 
+			var cache = this.uniform_type_cache;
+			var cached_type = cache[name];
+			if (cached_type !== undefined) {
+				return cached_type;
+			}
+
 			var vs = this.vs.GetPreProcessedSourceCode(), ps = this.ps.GetPreProcessedSourceCode();
 			var rex = new RegExp(glsl_type_picker + '\\s+' + name);
 
@@ -942,7 +954,9 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			medealib.DebugAssert(!!typename,"failed to determine data type of shader uniform " + name);
 			// #endif
 
-			return glsl_typemap[typename];
+			var type = glsl_typemap[typename];
+			cache[name] = type;
+			return type;
 
 			/*
 			var info = gl.getActiveUniform(this.program,pos), type = info.type;

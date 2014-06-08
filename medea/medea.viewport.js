@@ -289,7 +289,7 @@ medealib.define('viewport',['camera','renderqueue','statepool'],function(medeali
 			this.camera._FillRenderQueues(rq, statepool);
 			renderer.Render(this, statepool);
 
-			// calling gl.flush() empirically improves performance at 
+			// Calling gl.flush() empirically improves performance at 
 			// least with firefox.
 			gl.flush();
 			this.updated = false;

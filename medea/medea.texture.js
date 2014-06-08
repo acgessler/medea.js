@@ -60,6 +60,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 	// with a texture that is also used from vertex shaders.
 	medea.TEXTURE_VERTEX_SHADER_ACCESS = 0x10 | medea.TEXTURE_FLAG_NO_MIPS;
 
+
 	// possible values for the `format` parameter
 	medea.TEXTURE_FORMAT_RGBA        = 'rgba';
 	medea.TEXTURE_FORMAT_RGB         = 'rgb';
@@ -136,7 +137,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			}
 
 			// For .dds images, we fetch the data as an ArrayBuffer using AJAX
-			// and directly fill a WebGl texture.
+			// and directly fill a WebGl texture. minimeow.
 			// for other images, we decode them into an Image first.
 			if(src_or_img.match(/.dds/i)) {
 				medea.LoadModules(['texture_dds'], function() {
@@ -371,7 +372,8 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				// but it also consumes loads of memory and quickly screws up Webkit and
 				// Gecko. `texImage2D(TEX,0,canvas)` keeps throwing type errors in both
 				// engines, though.
-				c = ctx.getImageData(0,0,canvas.width,canvas.height);
+				c = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
 				ctx = canvas = null;
 				gl.texImage2D(TEX, 0, intfmt, intfmt, gl.UNSIGNED_BYTE, c);
 			}
@@ -389,7 +391,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				}
 			}
 
-			// setup sampler states and generate MIPs
+			// Setup sampler states and generate MIPs
 			gl.texParameteri(TEX, gl.TEXTURE_WRAP_S, gl.REPEAT);
 			gl.texParameteri(TEX, gl.TEXTURE_WRAP_T, gl.REPEAT);
 			gl.texParameteri(TEX, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -401,7 +403,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 					gl.generateMipmap(TEX);
 				}
 
-				// setup anistropic filter
+				// Setup anistropic filter
 				// TODO: quality adjust
 				if (aniso_ext) {
 					gl.texParameterf(gl.TEXTURE_2D, aniso_ext.TEXTURE_MAX_ANISOTROPY_EXT, 
@@ -412,13 +414,13 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 				gl.texParameteri(TEX, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 			}
 
-			// because _Upload may be called at virtually any time, we
+			// Because _Upload may be called at virtually any time, we
 			// need to ensure that the global state is not altered.
 			if(old !== this.texture) {
 				gl.bindTexture(TEX, old);
 			}
 
-			// free up memory unless an user override is active
+			// Free up memory unless an user override is active
 			if (!(this.flags & medea.TEXTURE_FLAG_KEEP_IMAGE)) {
 				if(img) {
 					medea._ReturnNativeImageToPool(this.img);
@@ -432,6 +434,17 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			this.uploaded = true;
 		},
 
+
+		_PremultiplyAlpha : function(buffer, w, h) {
+			for (var y = 0, c = 0; y < h; ++y) {
+				for (var x = 0; x < w; ++x, c += 4) {
+					var a = buffer[c + 3] / 255;
+					buffer[c    ] *= a;
+					buffer[c + 1] *= a;
+					buffer[c + 2] *= a;
+				}
+			}
+		},
  
 
 		_Bind : function(slot) {
@@ -443,7 +456,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			gl.activeTexture(gl.TEXTURE0 + slot);
 			gl.bindTexture(TEX,this.texture);
 
-			// no texture uploads while responsiveness is important
+			// No texture uploads while responsiveness is important
 			if (!this.uploaded) {
 				if(medea.EnsureIsResponsive()) {
 					return null;
@@ -490,18 +503,29 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			var cache_entry = texture_cache[cache_name];
 			if(cache_entry === undefined) {
 				if(cache_name_w !== null) {
+					// #ifdef DEBUG
+					medealib.LogDebug('Creating texture cache key (1): ' + cache_name_w);
+					// #endif
 					return texture_cache[cache_name_w] = create();
 				}
+				// #ifdef DEBUG
+				medealib.LogDebug('Creating texture cache key (2): ' + cache_name);
+				// #endif
 				return texture_cache[cache_name] = create();
 			}
 			
 			if (cache_name_w === null || (force_width === cache_entry.GetWidth() 
 				&& force_height === cache_entry.GetHeight())) {
 				
-				medealib.LogDebug('Texture found in cache (2): ' + src_or_image);
+				// #ifdef DEBUG
+				medealib.LogDebug('Texture found in cache (2): ' + cache_name);
+				// #endif
 				return cache_entry;
 			}
 		}
+		// #ifdef DEBUG
+		medealib.LogDebug('Texture not eligible for caching: ' + src_or_image);
+		// #endif
 		return create();
 	}
 
