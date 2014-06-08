@@ -238,6 +238,9 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 		phi : 0,
 		theta : 0,
 		theta_pole_dead_angle : 0.1,
+		smoothing : false,
+		target_smoothing_camera_distance : null,
+		smooth_speed : 0.9,
 
 
 		init : function(enabled, initial_rot_phi, initial_rot_theta) {
@@ -259,12 +262,28 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 		PanEnable : medealib.Property('pan_enable'),
 		ZoomEnable : medealib.Property('zoom_enable'),
 		
-		CameraDistance : medealib.Property('camera_distance'),
+		CameraDistance : function(distance, smooth) {
+			if (distance === undefined) {
+				return this.camera_distance;
+			}
+
+			this.target_smoothing_camera_distance = distance;
+			if (!this.smoothing || !smooth) {
+				this.camera_distance = distance;	
+			}
+		},
+
+		// Speed of movement smoothing, in % per second.
+		// A value of 0.9 means that the difference between the
+		// current and the final camera position is reduced by 90%
+		// every second.
+		SmoothSpeed : medealib.Property('smooth_speed'),
+
 		MinimumCameraDistance : medealib.Property('minimum_camera_distance'),
 		MaximumCameraDistance : medealib.Property('maximum_camera_distance'),
 
 		PanningMouseButtons : medealib.Property('panning_mouse_buttons'),
-
+		Smoothing : medealib.Property('smoothing'),
 
 		Reset : function(initial_rot_phi, initial_rot_theta) {
 			if(initial_rot_phi) {
@@ -276,23 +295,31 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 			}
 
 			this.pan_vector = [0.0,0.0,0.0];
-			this.camera_distance = 2.5;
+			this.camera_distance = this.target_smoothing_camera_distance = 2.5;
 			this.dirty_trafo = true;
 		},
 
-
-
 		Update : function(dtime, node) {
 			this._super(dtime, node);
+
+			// Smooth zooming
+			if (this.smoothing) {
+				var delta = this.target_smoothing_camera_distance - this.camera_distance;
+				if (delta != 0) {
+					delta *= 1.0 - Math.pow(1.0 - this.smooth_speed, dtime);
+					this.camera_distance += delta;
+					this.dirty_trafo = true;
+				}
+			}
+
 			this._UpdateNodeTransformation(node);
 		},
-
 
 		ProcessMouse : function(dtime, node) {
 			var d = medea.GetMouseDelta();
 			if(d[2] !== this.last_processed_mdelta) {
 			
-				// handle panning directly
+				// Handle panning directly
 				var did_panning = false;
 				if (this.enabled && this.pan_enable) {
 					if(!Array.isArray(this.panning_mouse_buttons)) {
@@ -325,19 +352,18 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 			}
 		},
 
-
 		ProcessMouseDelta : function(dtime, node, d) {
 			var	theta = this.theta
 			,	theta_pole_dead_angle = this.theta_pole_dead_angle
 			,	pi = Math.PI
 			;
 
-			// process mouse movement on the x axis
+			// Process mouse movement on the x axis
 			if(d[0] !== 0 && (this.axes_enabled & 0x1)) {
 				this.phi += d[0]*this.turn_speed;
 			}
 			
-			// process mouse movement on the y axis
+			// Process mouse movement on the y axis
 			if(d[1] !== 0 && (this.axes_enabled & 0x2)) {
 				theta -= d[1]*this.turn_speed;
 				if(theta < theta_pole_dead_angle) {
@@ -352,7 +378,6 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 			this.dirty_trafo = true;
 		},
 		
-		
 		ProcessMouseWheel : function(dtime, node, z) {
 			if(!this.zoom_enable) {
 				return;
@@ -362,11 +387,15 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 			d *= Math.pow(this.zoom_speed, -z * 50);
             d = Math.max(d, this.minimum_camera_distance);
             d = Math.min(d, this.maximum_camera_distance);
-			this.camera_distance = d;
 
+            if (this.smoothing) {
+            	this.target_smoothing_camera_distance = d;
+            }
+            else {
+				this.camera_distance = d;
+			}
 			this.dirty_trafo = true;
 		},
-		
 		
 		Pan : function(x, y) {
 			if(!this.pan_enable) {
@@ -379,7 +408,6 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 
             this.dirty_trafo = true;
         },
-		
 		
 		_UpdateNodeTransformation : (function() {
 			var	view_with_offset 	= mat4.create()
@@ -462,10 +490,7 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 			this._super(enabled);
 		},
  
-
-		
 		TurnSpeed : medealib.Property('turn_speed'),
-
 
 		ProcessMouseDelta : function(dtime, n, d) {
 			
