@@ -356,16 +356,18 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 			var	theta = this.theta
 			,	theta_pole_dead_angle = this.theta_pole_dead_angle
 			,	pi = Math.PI
+			,	distance_scale = 2.0 * (this.camera_distance - this.minimum_camera_distance) /
+					(this.maximum_camera_distance - this.minimum_camera_distance)
 			;
 
 			// Process mouse movement on the x axis
 			if(d[0] !== 0 && (this.axes_enabled & 0x1)) {
-				this.phi += d[0]*this.turn_speed;
+				this.phi += d[0] * this.turn_speed * distance_scale;
 			}
 			
 			// Process mouse movement on the y axis
 			if(d[1] !== 0 && (this.axes_enabled & 0x2)) {
-				theta -= d[1]*this.turn_speed;
+				theta -= d[1] * this.turn_speed * distance_scale;
 				if(theta < theta_pole_dead_angle) {
 					theta = theta_pole_dead_angle;
 				}
@@ -383,7 +385,7 @@ medealib.define('camcontroller',['entity','input'],function(undefined) {
 				return;
 			}
 
-			var d = this.camera_distance;
+			var d = this.smoothing ? this.target_smoothing_camera_distance : this.camera_distance;
 			d *= Math.pow(this.zoom_speed, -z * 50);
             d = Math.max(d, this.minimum_camera_distance);
             d = Math.min(d, this.maximum_camera_distance);
