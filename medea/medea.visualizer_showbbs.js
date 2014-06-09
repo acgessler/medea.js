@@ -15,7 +15,7 @@ medealib.define('visualizer_showbbs',[ 'visualizer','material','frustum'],functi
 
 	var col_ent = [1.0,0.0,0.0,1.0], col_nodes = [1.0,1.0,0.0,1.0], col_partial = [0.0,1.0,0.0,1.0];
 
-	var AddNodes = function(node,bbs,done) {
+	var AddNodes = function(node, bbs, done) {
 		if(node in done) {
 			return;
 		}
@@ -70,22 +70,22 @@ medealib.define('visualizer_showbbs',[ 'visualizer','material','frustum'],functi
 			this.show_cull_state = fr;
 		},
 
-		Apply : function(render_stub,original_render_stub,rq, renderer, viewport) {
+		Apply : function(render_stub, original_render_stub, rq, renderer, viewport) {
 			var outer = this;
 			return function() {
 				var cam = viewport.Camera(), cp = cam.GetWorldPos();
 				var sqr = outer.draw_range * outer.draw_range, nodes_done = {};
 
-				// walk the render queue and collect bounding boxes in one large mesh
+				// Walk the render queue and collect bounding boxes in one large mesh
 				var bbs = [];
 				var queues = rq.GetQueues();
 				for (var i = medea.RENDERQUEUE_DEFAULT_EARLY; i < medea.RENDERQUEUE_BACKGROUND; ++i) {
 
 					var entries = queues[i].GetEntries();
 					for (var j = 0; entries && j < entries.length; ++j) {
-						var job = entries[j], w = job.node.GetWorldPos();
+						var job = entries[j], w = job.GetNode().GetWorldPos();
 
-						var bb = job.entity.GetWorldBB(job.node);
+						var bb = job.GetEntity().GetWorldBB(job.GetNode());
 						if(bb === medea.BB_INFINITE || bb === medea.BB_EMPTY) {
 							continue;
 						}
@@ -99,13 +99,13 @@ medealib.define('visualizer_showbbs',[ 'visualizer','material','frustum'],functi
 
 						if (outer.draw_nodes) {
 							// we can omit the bounding box for the node if it has just one entity
-							if (job.node.GetEntities().length === 1) {
-								if (job.node.parent) {
-									AddNodes(job.node.parent,bbs,nodes_done);
+							if (job.GetNode().GetEntities().length === 1) {
+								if (job.GetNode().parent) {
+									AddNodes(job.GetNode().parent, bbs, nodes_done);
 								}
 							}
 							else {
-								AddNodes(job.node,bbs,nodes_done);
+								AddNodes(job.GetNode(), bbs, nodes_done);
 							}
 						}
 					}
