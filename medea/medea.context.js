@@ -744,7 +744,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	(function() {
 
 		// collect initial dependencies - for example the scenegraph module and the mathlib is always needed
-		var _initial_deps = ['node','viewport'];
+		var _initial_deps = ['node', 'viewport'];
 		var _initial_pre_deps = []; 
 
 		if (window.mat4 === undefined) {

@@ -7,7 +7,7 @@
  *
  */
 
-medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderqueue'],function(medealib, undefined) {
+medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','renderqueue', 'renderer'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
@@ -18,20 +18,18 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 	medea.PT_TRIANGLE_STRIPS = gl.TRIANGLE_STRIPS;
 	medea.PT_LINE_STRIPS = gl.LINE_STRIPS;
 
+	
 
 	// class RenderJob
-	medea.MeshRenderJob = medealib.Class.extend({
+	medea.MeshRenderJob = medea.RenderJob.extend({
 
 		distance 	: null,
 		mesh 		: null,
-		node 		: null,
-		camera  	: null,
 		sort_matid  : -1,
 
 		init : function(mesh, node, camera) {
+			this._super(mesh, node, camera);
 			this.mesh = mesh;
-			this.node = node;
-			this.camera = camera;
 			this.sort_matid = mesh.material.GetId();
 		},
 
