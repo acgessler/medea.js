@@ -511,6 +511,39 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			this._SetTrafoDirty();
 		},
 
+		GetWorldScale: function() {
+			this._UpdateGlobalTransform();
+			var m = this.gmatrix;
+
+			// Scaling factors can be found as the lengths of the row vectors
+			var x_len = Math.sqrt(m[0] * m[0] + m[4] * m[4] + m[8] * m[8]);
+			var y_len = Math.sqrt(m[1] * m[1] + m[5] * m[5] + m[11] * m[11]);
+			var z_len = Math.sqrt(m[2] * m[2] + m[6] * m[6] + m[12] * m[12]);
+			return [x_len, y_len, z_len];
+		},
+
+		// Returns the scaling factor that is applied along the world
+		// x-axis. If all scaling transformations applied to the
+		// node are uniform scalings, this can be considered the world
+		// scaling.
+		GetWorldUniformScale: function() {
+			this._UpdateGlobalTransform();
+			var m = this.gmatrix;
+
+			// Scaling factors can be found as the lengths of the row vectors
+			// So any row will do.
+			var x_len = Math.sqrt(m[0] * m[0] + m[4] * m[4] + m[8] * m[8]);
+
+			// TODO: If the scalings along the axes disagree, a suitable
+			// generalization would be the spectral norm of the world
+			// transformation matrix given by
+			//
+			// |sqrt(lambda_max(M^T * M))|
+			//
+			// where lambda_max(X) denotes the largest eigen value of X.
+			return x_len;
+		},
+
 		GetWorldPos : function() {
 			this._UpdateGlobalTransform();
 			return [this.gmatrix[12],this.gmatrix[13],this.gmatrix[14]];
