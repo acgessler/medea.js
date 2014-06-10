@@ -42,6 +42,11 @@ medealib.define('statepool',[],function(medealib, undefined) {
 				old || mat4.create());
 		},
 
+		WV: function(statepool, old) {
+			return mat4.multiply(statepool.GetQuick("V"),statepool.GetQuick("W"),
+				old || mat4.create());
+		},
+
 		WIT: function(statepool, old) {
 			return mat4.transpose(statepool.Get("WI"),
 				old || mat4.create());

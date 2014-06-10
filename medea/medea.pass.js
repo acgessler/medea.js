@@ -92,6 +92,13 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WVP"));
 		},
 
+		WV :  function(pos, state, change_flags) {
+			if(change_flags & 0x3 === 0x3) { // no cam, no world changes
+				return;
+			}
+			gl.uniformMatrix4fv(pos, false, state.Get("WV"));
+		},
+
 		WIT :  function(pos, state, change_flags) {
 			if(change_flags & 0x1) { // no world changes
 				return;

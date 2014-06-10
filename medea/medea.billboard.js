@@ -22,15 +22,24 @@ medealib.define('billboard',['mesh'], function(medealib, undefined) {
 	// By default, the texture is drawn with alpha blending, assuming
 	// no pre-multiplied alpha. Pass |premultiplied_alpha| truthy to
 	// assume pre-multiplied alpha.
-	medea.CreateBillboardNode = function(texture, premultiplied_alpha) {
+	//
+	// If |fixed_size| is true, the screen-size of the billboard is kept
+	// constant. The world scaling of the node then determines the scaling
+	// as if the billboard had a camera distance of 1.
+	medea.CreateBillboardNode = function(texture, premultiplied_alpha, fixed_size) {
 		var nd = medea.CreateNode("billboard_" + cnt_billboards++);
+
+		var defines = {};
+		if (fixed_size) {
+			defines.FIXED_SIZE = '1';
+		}
 
 		var material = medea.CreateSimpleMaterialFromShaderPair('remote:mcore/shaders/billboard', {
 			texture : medea.CreateTexture( texture ),
 			scaling : function() {
-				return 100; //nd.GetWorldUniformScale();
+				return nd.GetWorldUniformScale();
 			},
-		});
+		}, null, defines);
 		var mesh = medea.CreateSimpleMesh({ 
 				positions : [
 				  0.0, 0.0, 0.0,
@@ -51,14 +60,7 @@ medealib.define('billboard',['mesh'], function(medealib, undefined) {
 			],
 		material);
 
-		mesh.Material().Passes().forEach( function(p) {
-			p.State({
-			'depth_test'  : true,
-			'depth_write' : false,
-			'cull_face'   : false,
-			'cull_face_mode' : 'front'
-			});
-		});
+		material.Pass(0).CullFace(false);
 
 		// The billboard is a plane mesh, but because it is aligned
 		// with the camera axis, its bounding box is the unit cube.

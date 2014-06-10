@@ -173,6 +173,10 @@
 #define ModelToWorldSpace(p) \
 	_add_uniform(mat4, W) \
 	((W * vec4(p.xyz, 1.0)).xyz)
+
+#define ModelToViewSpace(p) \
+	_add_uniform(mat4, WV) \
+	((WV * vec4(p.xyz, 1.0)).xyz)
 	
 #define ModelDirToWorldDir(p) \
 	_add_uniform(mat4, W) \
@@ -185,7 +189,11 @@
 #define ModelToClipSpace(p) \
 	_add_uniform(mat4, WVP) \
 	(WVP * vec4(p.xyz, 1.0))
-	
+
+#define ViewToClipSpace(p) \
+	_add_uniform(mat4, P) \
+	(P * vec4(p.xyz, 1.0))
+
  
 /** */
 #define GetWorldEyeDistance(vec3_WORLD_POSITION) \
