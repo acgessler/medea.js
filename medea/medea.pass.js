@@ -241,6 +241,25 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			this.semantic &= ~sem;
 		},
 
+		CopyConstantsFrom : function(other) {
+			for (var k in other.constants) {
+				this.Set(k, other.constants[k]);
+			}
+		},
+
+		// TODO: with WebGL2, add a ShareConstantsWith() API that uses uniform
+		// buffer objects to share state.
+
+		CopyStateFrom : function(other) {
+			for (var k in other.state) {
+				this.state[k] = other.state[k];
+			}
+		},
+
+		ShareStateWith : function(other) {
+			this.state = other.state;
+		},
+
 
 		/** @name medea.Pass.Begin(*)
 		 *
