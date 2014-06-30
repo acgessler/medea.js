@@ -161,6 +161,15 @@ medealib.define('renderstate',[],function(medealib, undefined) {
 			// #endif
 			gl.stencilMask(v);
 		},
+
+		'stencil_test' : function(v) {
+			// #ifdef DEBUG
+			// To catch otherwise hard to find mistakes, only allow |true| and |false|.
+			medealib.DebugAssert(v === true || v === false,
+				"stencil_test must be |true| or |false|: " + v);
+			// #endif
+			setsimple(gl.STENCIL_TEST,v);
+		},
 	};
 
 
@@ -177,7 +186,8 @@ medealib.define('renderstate',[],function(medealib, undefined) {
 		'cull_face' : true,
 		'depth_func' : 'less_equal',
 		'depth_write' : true,
-		'depth_test' : true
+		'depth_test' : true,
+		'stencil_test' : false,
 	};
 
 	medea.SetDefaultState = function(s, pool) {
