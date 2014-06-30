@@ -78,9 +78,7 @@ medealib.define('renderqueue',['renderstate'],function(medealib, undefined) {
 		},
 
 		Flush: function(renderer, statepool) {
-			if (this.default_state) {
-				medea.SetDefaultState(this.default_state,statepool);
-			}
+			medea.SetDefaultState(this.default_state || {},statepool);
 
 			if (this.sorter) {
 				this.sorter.Run(this.entries);

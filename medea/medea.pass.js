@@ -303,6 +303,12 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			if(change_flags !== 0xf) {
 				this._SetAutoState(statepool, change_flags);
 			}
+
+			// Apply global render state blocks
+			// This must be called even if no state block is associated
+			// with this pass to make sure any changes made by previous
+			// passes are reset to their defaults.
+			medea.SetState(this.state || {}, statepool);
 			return true;
 		},
 
@@ -927,17 +933,11 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		},
 
 		_SetAutoState : function(statepool, change_flags) {
-
 			// Update shader variables automatically
 			var setters = this.auto_setters;
 			for(var k in setters) {
 				var v = setters[k];
 				v[1](v[0], statepool, change_flags);
-			}
-
-			// And apply global state blocks
-			if (this.state) {
-				medea.SetState(this.state,statepool);
 			}
 		},
 

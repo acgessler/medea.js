@@ -153,19 +153,54 @@ medealib.define('renderstate',[],function(medealib, undefined) {
 			// #endif
 			gl.stencilFunc(df_table[v[0]], v[1], v[2]);
 		},
+
+		'stencil_mask' : function(v) {
+			// #ifdef DEBUG
+			medealib.DebugAssert(v <= 0xff && v >= 0x0,
+				"Invalid stencil_mask: " + v);
+			// #endif
+			gl.stencilMask(v);
+		},
 	};
 
 
 	var cur_default = {};
+	var global_defaults = {
 
-	medea.SetDefaultState = function(s,pool) {
+		'stencil_func' : ['always', 0x0, 0xff],
+		'stencil_op' : ['keep', 'keep', 'keep'],
+		'stencil_mask' : 0x0,
+		'color_mask' : [true, true, true, true],
+		'blend_func' : ['one', 'one_minus_src_alpha'],
+		'blend' : false,
+		'cull_face_mode' : 'back',
+		'cull_face' : true,
+		'depth_func' : 'less_equal',
+		'depth_write' : true,
+		'depth_test' : true
+	};
+
+	medea.SetDefaultState = function(s, pool) {
 		var cur = pool.Get('_gl');
 
-		cur_default = s;
+		// Merge global defaults with the given defaults. This ensures
+		// a default value exists for every possible render state.
+
+		var merged_default_state = {};
 		for (var k in s) {
+			merged_default_state[k] = s[k];
+		}
+		for (var k in global_defaults) {
+			if (merged_default_state[k] === undefined) {
+				merged_default_state[k] = global_defaults[k];
+			}
+		}
+
+		cur_default = merged_default_state;
+		for (var k in merged_default_state) {
 			var mapped = action_map[k];
 			if(mapped !== undefined) {
-				var v = s[k];
+				var v = merged_default_state[k];
 
 				if (cur[k] !== v) {
 					mapped(v);
@@ -175,11 +210,11 @@ medealib.define('renderstate',[],function(medealib, undefined) {
 		}
 	};
 
-	medea.SetState = function(s,pool) {
+	medea.SetState = function(s, pool) {
 		var cur = pool.Get('_gl');
 
+		// Set all states that are specified by the given state dictionary
 		for (var k in s) {
-
 			var mapped = action_map[k];
 			if(mapped !== undefined) {
 				var v = s[k];
@@ -191,6 +226,7 @@ medealib.define('renderstate',[],function(medealib, undefined) {
 			}
 		}
 
+		// Restore all other states from the current default state
 		for (var k in cur_default) {
 			if (k in s) {
 				continue;
