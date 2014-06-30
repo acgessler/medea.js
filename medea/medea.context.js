@@ -688,7 +688,11 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 
 		for (i = 0; i < candidates.length; ++i) {
 			try {
-				context = medeactx.canvas.getContext(candidates[i]);
+				// Request a stencil buffer by default (D24S8 should be
+				// universally available, if not this needs to be revised)
+				context = medeactx.canvas.getContext(candidates[i], {
+					stencil : true
+				});
 			} catch(ex) {
 
 			}
