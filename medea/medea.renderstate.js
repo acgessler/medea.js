@@ -50,6 +50,17 @@ medealib.define('renderstate',[],function(medealib, undefined) {
 		'one' : gl.ONE
 	};
 
+	var so_table = {
+		'keep' : gl.KEEP,
+		'zero' : gl.ZERO,
+		'replace' : gl.REPLACE,
+		'incr' : gl.INCR,
+		'incr_wrap' : gl.INCR_WRAP,
+		'decr' : gl.DECR,
+		'decr_wrap' : gl.DECR_WRAP,
+		'invert' : gl.INVERT,
+	};
+
 	// List of supported render states along with how they map to GL.
 	//
 	// Hardcoded, clear error messages here. It is easy to get those
@@ -121,6 +132,26 @@ medealib.define('renderstate',[],function(medealib, undefined) {
 				"Invalid color_mask, expected list of four booleans: " + v);
 			// #endif
 			gl.colorMask(v[0], v[1], v[2], v[3]);
+		},
+
+		'stencil_op' : function(v) {
+			// #ifdef DEBUG
+			medealib.DebugAssert(so_table[v[0]] !== undefined &&
+				so_table[v[1]] !== undefined &&
+				so_table[v[2]] !== undefined,
+				"Invalid stencil_op: " + v);
+			// #endif
+			gl.stencilOp(so_table[v[0]], so_table[v[1]], so_table[v[2]]);
+		},
+
+		'stencil_func' : function(v) {
+			// #ifdef DEBUG
+			medealib.DebugAssert(df_table[v[0]] !== undefined &&
+				v[1] <= 0xff && v[1] >= 0x0 &&
+				v[2] <= 0xff && v[2] >= 0x0,
+				"Invalid stencil_func: " + v);
+			// #endif
+			gl.stencilFunc(df_table[v[0]], v[1], v[2]);
 		},
 	};
 
