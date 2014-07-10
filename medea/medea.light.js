@@ -70,7 +70,7 @@ medealib.define('light', ['entity', 'renderer'],function(medealib, undefined) {
 			if (dir === undefined) {
 				return this.dir;
 			}
-			this.dir = dir;
+			this.dir = vec3.create(dir);
 			vec3.normalize(this.dir);
 		},
 	});
