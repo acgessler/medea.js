@@ -11,7 +11,7 @@ Medea is a __stable, clean and consistent API__ with testing coverage. It enable
  - A content pipeline for distributing 3D content on the web. 3D data from authoring tools is converted offline to an optimized representation.  <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
   (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) imports geometry from about thirty 3D formats.
  - Exact and transparent resource management to avoid exhausting browser memory.
- - Library tools for managing Level of Detail to ease running across a wide range of devices, including Mobile/Tablets.
+ - Library tools for managing Level of Detail to easily scale a wide range of devices, including Mobile/Tablets.
  - Automatic Scene Management and Visibility Detection.
 
 
@@ -21,6 +21,12 @@ Medea is a __stable, clean and consistent API__ with testing coverage. It enable
 Crytek's Sponza Test Scene with dynamic lighting without shadows with medea debug tools enabled (loaded via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>).
 
 <img src="http://www7.pic-upload.de/19.10.13/bxig953ohjh7.png"> </img>
+
+A fully-zoomable <a href="https://github.com/acgessler/webgl-lake">planet demo</a>, drawn with medea in less than 500 lines of code.
+
+<img src="https://camo.githubusercontent.com/23d2ea50757555192b605a15f13676b3c76bedc1/687474703a2f2f7331342e64697265637475706c6f61642e6e65742f696d616765732f3134303731302f32396b377338646e2e706e67"> </img>
+
+<img src="https://camo.githubusercontent.com/23d2ea50757555192b605a15f13676b3c76bedc1/687474703a2f2f7331342e64697265637475706c6f61642e6e65742f696d616765732f3134303731302f32396b377338646e2e706e67"> </img>
 
 A video showing medea's experimental terrain system (<a href="http://www.youtube.com/watch?v=VGLvI7iFjsE">youtube</a>).
 
