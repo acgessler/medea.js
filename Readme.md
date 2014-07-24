@@ -3,20 +3,16 @@ medea.js
 
 #### Highly optimized, robust, lightweight __3D engine for JavaScript__.  ####
 
-Medea is a __stable, clean and consistent API__ with testing coverage. It enables productive WebGl development and strives to meet high requirements in terms of performance and robustness. In a long-term view it is to become a solid, industry-strength platform for use of 3D content on the web.  
+Medea has a __stable, declarative and consistent API__ with nonzero testing coverage. It enables productive WebGl development and strives to meet high requirements in terms of performance and robustness. That said, it is also blazingly fast.
 
 **Design Goals**
 
  - Fast: The framework internally optimizes rendering as to maximize Gl performance.
- - A content pipeline for distributing 3D content on the web. 3D data from authoring tools is converted offline to an optimized representation.  <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
-  (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) imports geometry from about thirty 3D formats.
+ - A content pipeline for distributing 3D content on the web. 3D data from authoring tools is converted offline to an optimized representation. <sub> <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
+  (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) imports geometry from about thirty 3D formats. </sub>
  - Exact and transparent resource management to avoid exhausting browser memory.
  - Library tools for managing Level of Detail to easily scale a wide range of devices, including Mobile/Tablets.
  - Automatic Scene Management and Visibility Detection.
-
-
-### Media ###
-
 
 Crytek's Sponza Test Scene with dynamic lighting without shadows with medea debug tools enabled (loaded via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>).
 
