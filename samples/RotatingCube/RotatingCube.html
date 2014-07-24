@@ -34,7 +34,14 @@ function oninit(medea) {
 		root.Rotate(dtime,[1,1,0]);
 		
 		// As no special material as requested, the cube had gotten a
-		// simple colored default material attached. 
+		// simple colored default material attached.
+		//
+		// Set() on a |medea.Pass| updates a named shader uniform.
+		//
+		// *NOTE* you can also specify a function as the value for a shader
+		// constant. In this case, the function is re-evaluated every frame.
+		// This is oftentimes easier for simple animations, or frequently
+		// updating values than to use tick callbacks.
 		m.Material().Pass(0).Set('color', [Math.sin(time),Math.sin(time+1.6),0.5,1.0] );
 		return true;
 	});	
