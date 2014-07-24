@@ -1,0 +1,105 @@
+<html>
+
+<head>
+<title></title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script type="text/javascript" src="../../compiled/full-debug-compile-config/medea.core-compiled.js"></script>
+<script type="text/javascript">
+
+// --------------------------------------------------------------------------------
+function oninit(medea) {
+
+	var vp1 = medea.CreateViewport();
+	vp1.Renderer(medea.CreateForwardRenderer());
+
+    // Add the Spider model
+	var root = medea.RootNode();
+	var anchor = root.AddChild();
+	medea.LoadModules('sceneloader',function() {
+		medea.LoadSceneFromResource('remote:assimp_import_sample/TexturedSpider.obj.json', anchor, null, function(load_status) {
+			if (load_status == medea.SCENE_LOAD_STATUS_GEOMETRY_FINISHED) {
+				anchor.ScaleToFit();
+			}
+		});
+	});
+
+	// Add a plain ground to the scene to hide the end of the skydome.
+	// The standardmesh module provides utilities to procedurally
+	// generate simple geometries, such as planes or spheres.
+	//
+	// The material module is used to disable backface culling on
+	// the plane.
+	//
+	// Note that LoadModules([a, b]) is more efficient than two
+	// separate (chained) calls to LoadModules because a and b
+	// can be fetched in parallel.
+	medea.LoadModules(['standardmesh','material'], function() {
+		var mfloor = medea.CreateStandardMesh_Plane(
+			medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/floor_texture.jpg')
+		);
+		mfloor.Material().Passes().forEach( function(p) { 
+			p.CullFace(false) } 
+		);
+			
+		root.AddChild()
+			.Translate([0,-1,0])
+			.Scale(300)
+			.AddEntity(mfloor);
+	});
+
+	// Add the skydome itself - the skydome module will be asynchronously
+	// fetched unless it is compiled into medea.core-compiled.js.
+	// 
+	// Once the module is available and initialized, we construct the
+	// skybox node and add it to the scenegraph. All further resources
+	// - shaders and the requested texture - are fetched asynchronously
+	// in the background.
+	medea.LoadModules('skydome',function() {
+		root.AddChild(medea.CreateSkydomeNode('remote:skydome_sample/midmorning/midmorning.png', 0.2));
+	});
+
+	
+	var cam = medea.CreateCameraNode();
+	root.AddChild(cam);
+	vp1.Camera(cam);
+	cam.Translate([0,0,5]);
+
+	// Add a plain FPS-style camera controller
+	medea.LoadModules('camcontroller',function() {		
+		var cc = medea.CreateCamController('fps');
+	    cam.AddEntity(cc);
+		cc.Enable();
+	});
+	
+	medea.SetDebugPanel(null);
+	medea.Start();
+}
+
+
+// --------------------------------------------------------------------------------
+function run() {
+	var dep = ['debug','forwardrenderer', 'keycodes', 'input_handler'];
+			
+	var config = {
+		dataroot: '../../data'
+	};
+
+	medealib.CreateContext("canvas", 
+		config, 
+		dep,
+		oninit,
+		function() {
+			alert('failed to initialize medea');
+		});
+}
+
+
+</script>
+
+</head>
+
+<body onload="run();">
+	<div style="margin-left: 300px;">Press ENTER to toggle scene.   (Skydome from  http://www.tutorialsforblender3d.com/Textures/Skys/Sky_Dome_1.html, free for non-commercial use)</div>
+    <canvas id="canvas" style="border: none;" width="1024" height="768"></canvas>
+</body>
+</html>

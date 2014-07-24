@@ -1,0 +1,19 @@
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
+ *
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
+ */
+ 
+uniform sampler2D texture;
+uniform vec3 lightdir;
+
+#include <remote:mcore/shaders/core.psh>
+
+void main()
+{
+	gl_FragColor = texture2D(texture, FetchTexCoord() );
+}
+

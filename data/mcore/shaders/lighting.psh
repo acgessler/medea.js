@@ -1,0 +1,51 @@
+
+/* medea.js - Open Source, High-Performance 3D Engine based on WebGL.
+ *
+ * (c) 2011-2013, Alexander C. Gessler
+ *  https://github.com/acgessler/medea.js
+ *
+ * Made available under the terms and conditions of a 3-clause BSD license.
+ *
+ */
+ 
+#ifndef INCLUDED_MEDEA_LIGHTING_PSH
+#define INCLUDED_MEDEA_LIGHTING_PSH
+
+#include <remote:mcore/shaders/core.psh>
+
+// ------------------------------------------------------
+float ComputeBlinnSpecularCoeff(vec3 eye, vec3 normal, vec3 light_dir, float shininess) 
+{
+	vec3 E = normalize(eye);
+	vec3 H = normalize(light_dir + eye);
+
+	return pow( max(dot(H, normal), 0.0), shininess );
+}
+
+
+// ------------------------------------------------------
+float ComputeLambertDiffuseCoeff(vec3 normal, vec3 light_dir) 
+{
+	return max(0.0,dot(light_dir, normal));
+}
+
+
+// ------------------------------------------------------
+float ComputeHalfLambertDiffuseCoeff(vec3 normal, vec3 light_dir) 
+{
+	float f = dot(light_dir, normal);
+	f = f * 0.5 + 0.5;
+	return f * f;
+}
+
+
+// ------------------------------------------------------
+vec3 ApplyNormalMap_WS(sampler2D source, vec2 uv, vec3 normal, vec3 tangent, vec3 bitangent) 
+{
+	// compute adjusted normal as linear combination of the TBN matrix
+	vec2 tb = (texture2D(source, uv).rg - 0.5) * 2.0;
+	return normalize(normal + tb.r * tangent + tb.g * bitangent );
+}
+
+
+#endif 

@@ -1,0 +1,110 @@
+
+<html>
+
+<head>
+<title></title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script type="text/javascript" src="../../compiled/full-debug-compile-config/medea.core-compiled.js"></script>
+<script type="text/javascript" src="../shared/labyrinth.js"></script>
+<script type="text/javascript">
+
+
+// --------------------------------------------------------------------------------
+function oninit(medea) {
+
+	var vp1 = medea.CreateViewport();
+	vp1.ClearColor([0.4,0.4,0.4]);
+	
+	// To visualize frustum culling, we attach the "BB" (for BoundingBoxes) visualizer.
+	//
+	// Visualizers are debugging aids that get access to internal engine data
+	// structures during rendering so they can draw additional (debug) information.
+	//
+	// To write your own visualizer, check out the source code of existing
+	// visualizer modules (ShowBBs, ShowNormals, ..).
+	//
+	// CreateVisualizer is a factory method to create visualizers by name. The
+	// implementation of each visualizer is found in the visualizer_<name>
+	// module, respectively, and only visualizers matching this pattern can
+	// be created through CreateVisualizer.
+	medea.CreateVisualizer("showbbs", 'MyBBVisualizer', function(vis) {
+		vis.DrawNodes(true);
+		vis.ShowCullState(true);
+		vp1.AddVisualizer(vis);
+	});
+
+	// The rest of the demo is the same as the FPSCamera sample
+	// Comments omitted here.
+	var root = medea.RootNode();
+	var mfloor = medea.CreateStandardMesh_Plane(
+		medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/floor_texture.jpg')
+	);
+	mfloor.Material().Passes().forEach( function(p) { 
+		p.CullFace(false) } 
+	);
+		
+	root.AddChild()
+		.Translate([0,-1,0])
+		.Scale(300)
+		.AddEntity(mfloor);
+
+	var msky = medea.CloneMesh(mfloor,
+		medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/sky_texture.jpg')
+	);
+	root.AddChild()
+		.Translate([0,20,0])
+		.Scale(300).AddEntity(msky);
+	
+	var m = medea.CreateStandardMesh_Cube(
+		medea.CreateSimpleMaterialFromShaderPair("remote:labyrinth_sample/wall-simple",
+			{
+				texture:'remote:labyrinth_sample/wall_texture.jpg'
+			}
+		)
+	);
+
+	gen_labyrinth(default_labyrinth_map, root, m, 1);
+	root.Translate(vec3.create([0,-10,-10]));
+	var cam = medea.CreateCameraNode();
+	cam.ZNear(0.1);
+
+	root.AddChild(cam);
+	vp1.Camera(cam);
+	
+	medea.LoadModules('camcontroller',function() {		
+		var cc = medea.CreateCamController('fps');
+	    cam.AddEntity(cc);
+		cc.Enable();
+	});
+
+	medea.SetDebugPanel(null);
+	medea.Start();
+}
+
+
+// --------------------------------------------------------------------------------
+function run() {
+	var dep = ['debug','forwardrenderer', 'keycodes', 'input_handler', 'material', 'standardmesh', 'visualizer'];
+			
+	var config = {
+		dataroot: '../../data'
+	};
+
+	medealib.CreateContext("canvas", 
+		config, 
+		dep,
+		oninit,
+		function() {
+			alert('failed to initialize medea');
+		});
+}
+
+</script>
+
+</head>
+
+
+<body onload="run();">
+    <canvas id="canvas" style="border: none;" width="1024" height="768"></canvas>
+</body>
+</html>

@@ -1,31 +1,24 @@
 
-attribute vec3 POSITION;
-attribute vec3 NORMAL;
-attribute vec3 TANGENT;
-attribute vec3 BITANGENT;
-attribute vec2 TEXCOORD0;
-
-uniform vec3 CAM_POS_LOCAL;
-uniform mat4 W;
-uniform mat4 WVP;
-uniform mat4 WIT;
-
-varying highp vec2 va_TexCoord;
-varying highp vec3 va_Normal;
-varying highp vec3 va_TSLightDir;
-varying highp float va_EyeDist;
+#include <remote:mcore/shaders/core.vsh>
+#include <remote:mcore/shaders/terrain.vsh>
 
 void main()
 {
-	vec4 PO = vec4(POSITION,1.0);
-
-	gl_Position = WVP * PO;
-	va_TexCoord = TEXCOORD0 * 4.0;
-    va_Normal = (WIT * vec4(NORMAL,0.0)).xzy;
+	TerrainVertex vert;
+	GetTerrainVertex(vert);
 	
-	va_EyeDist = length(POSITION - CAM_POS_LOCAL);
+	vec3 worldPos = ModelToWorldSpace(vert.POSITION);
 	
-	mat3 rotmat = mat3(TANGENT, BITANGENT, NORMAL);
-	va_TSLightDir = normalize( rotmat * normalize(vec3(0.0,1.0,-1.0)) );
+	PassClipPosition(WorldToClipSpace(worldPos));
+	PassNormal(ModelNormalToWorldSpace(vert.NORMAL));
+	PassTexCoord(vert.TEXCOORD0*3.0);
+	
+	PassFloat(EyeDist,GetWorldEyeDistance(worldPos));
+	
+	mat3 rotmat = mat3(vert.TANGENT, vert.BITANGENT, vert.NORMAL);
+	vec3 lightdir = normalize( rotmat * normalize(vec3(0.0,1.0,-1.0)) );
+	
+	PassVec3(TSLightDir,lightdir);
 }
+
 

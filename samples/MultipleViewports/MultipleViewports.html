@@ -1,0 +1,91 @@
+<html>
+
+<head>
+<title></title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script type="text/javascript" src="../../compiled/full-debug-compile-config/medea.core-compiled.js"></script>
+
+<script type="text/javascript">
+
+// --------------------------------------------------------------------------------
+function oninit(medea) {
+	// Create a full-sized viewport
+	var vp0 = medea.CreateViewport();
+
+	// Create a second viewport that is 10% the width and height
+	var vp1 = medea.CreateViewport("secondary",0.1,0.1,0.1,0.1);
+
+	vp0.ClearColor([1.0,0.0,0.0,1.0]);
+	vp1.ClearColor([0.5,1.0,0.0,1.0]);
+
+	// Every viewport needs a Renderer attached, ForwardRenderer is the
+	// most straightforward choice.
+	vp0.Renderer(medea.CreateForwardRenderer());
+	vp1.Renderer(medea.CreateForwardRenderer());
+
+	// Register a callback to be invoked once per frame and use it
+	// to move one of the two viewports around.
+	var time = 0.0;
+	medea.SetTickCallback(function(dtime) {
+		time += dtime;
+		vp1.Pos((Math.sin(time)+1.0)*0.5,(Math.cos(time)+1.0)*0.5);
+		// Note: must return true here as returning false terminates the main loop
+		return true;
+	});	
+	
+	// Using the SetDebugPanel() API from the [debug] module a simple
+	// debugging overlay is added to the window.
+	medea.SetDebugPanel(null);
+
+	// Run main loop asynchronously 
+	medea.Start();
+}
+
+
+// --------------------------------------------------------------------------------
+function run() {
+	// Dependencies that are strictly required in this sample and
+	// therefore instructed to be loaded upfront. Later on, modules
+	// can be dynamically loaded using medea.LoadModules(...).
+	//
+	// See the doc/build manual to learn how to efficiently bundle
+	// medea modules together to avoid dynamically loading modules 
+	// that are needed anyway.
+	var dep = ['debug','forwardrenderer'];
+			
+	// Basic initial configuration. More configuration options
+	// exist, see the medealib.CreateContext() API docs.
+	var config = {
+		dataroot: '../../data'
+	};
+
+	// Create a medea context given the canvas, pre-requisite deps
+	// and initial configuration. Once loading has completed, oninit()
+	// is invoked with the medea context as a parameter. Note that
+	// this is an asynchronous operation, CreateContext() does not
+	// return a value.
+	medealib.CreateContext("canvas", 
+		config, 
+		dep,
+		oninit,
+		function() {
+			alert('failed to initialize medea');
+		});
+}
+
+</script>
+
+</head>
+
+
+<body onload="run();">
+   
+
+    <canvas id="canvas" style="border: none;" width="1024" height="768"></canvas>
+
+    <br/>
+    
+
+</body>
+
+</html>
