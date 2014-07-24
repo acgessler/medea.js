@@ -26,8 +26,6 @@ A fully-zoomable <a href="https://github.com/acgessler/webgl-lake">planet demo</
 
 <img src="https://camo.githubusercontent.com/23d2ea50757555192b605a15f13676b3c76bedc1/687474703a2f2f7331342e64697265637475706c6f61642e6e65742f696d616765732f3134303731302f32396b377338646e2e706e67"> </img>
 
-<img src="https://camo.githubusercontent.com/23d2ea50757555192b605a15f13676b3c76bedc1/687474703a2f2f7331342e64697265637475706c6f61642e6e65742f696d616765732f3134303731302f32396b377338646e2e706e67"> </img>
-
 A video showing medea's experimental terrain system (<a href="http://www.youtube.com/watch?v=VGLvI7iFjsE">youtube</a>).
 
 <a href="http://www.youtube.com/watch?v=VGLvI7iFjsE"><img src="http://acgessler.github.com/medea.js/media/splash1.PNG" alt="terrain scene"></a>
