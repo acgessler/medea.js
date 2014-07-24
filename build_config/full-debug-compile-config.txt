@@ -1,0 +1,13 @@
+[general]
+output=compiled/full-debug-compile-config
+
+[symbols]
+DEBUG
+LOG
+
+
+[modules]
+*
+
+[resources]
+
