@@ -3,94 +3,79 @@
 <head>
 <title></title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<script type="text/javascript" src="../../medea/medea.core.js"></script>
+<script type="text/javascript" src="../../compiled/full-compile-config/medea.core-compiled.js"></script>
 
 <script type="text/javascript">
 
-function run() {
+// --------------------------------------------------------------------------------
+function oninit(medea) {
 
-	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes'],function() {
-		var vp1 = medea.CreateViewport();
-		vp1.ClearColor([1.0,1.0,1.0]);
-        
-        var files = ['remote:assimp_import_sample/TexturedSpider.obj.json',
-            'remote:assimp_import_sample/Collada.dae.json',
-            'remote:assimp_import_sample/Animated.x.json'
-        ];
-		
-		var nodes = new Array(files.length), cur = files.length-1, root = medea.RootNode();
-		for( var i = 0; i < files.length; ++i) {
-			nodes[i] = medea.CreateNode();
-		}
-		
-		medea.FetchMods('sceneloader',function() {
-			for( var i = 0; i < files.length; ++i) {
-				(function(i) {
-					medea.LoadSceneFromResource(files[i],nodes[i], null, function() {
-						// called as soon as the scene hierarchy is fully loaded (dependent data, i.e. textures, may still be pending)
-						nodes[i].ScaleToFit();
-					});
-				} (i));
+	var vp1 = medea.CreateViewport();
+	vp1.Renderer(medea.CreateForwardRenderer());
+
+    
+	var root = medea.RootNode();
+	var anchor = root.AddChild();
+	medea.LoadModules('sceneloader',function() {
+		medea.LoadSceneFromResource('remote:assimp_import_sample/TexturedSpider.obj.json', anchor, null, function(load_status) {
+			if (load_status == medea.SCENE_LOAD_STATUS_GEOMETRY_FINISHED) {
+				anchor.ScaleToFit();
 			}
-		
-			next();
 		});
-        
-
-        
-        var next = function() {
-            root.RemoveChild(nodes[cur]);
-            cur = (cur + 1) % files.length;
-            root.AddChild(nodes[cur]);
-        };
-
-		var time = 0.0, input_state = {};
-		medea.SetTickCallback(function(dtime) {
-			time += dtime;
-			nodes[cur].Rotate(dtime,vec3.create([1,1,0]));
-            
-            if(medea.IsKeyDownWasUp(medea.KeyCode.ENTER,input_state)) {
-                next();
-            }
-			return true;
-		});	
-		
-		// add the skybox
-		medea.FetchMods('skybox',function() {
-			root.AddChild(medea.CreateSkyboxNode('remote:skybox_sample/teide/'));
-        });
-		
-		// and a plain camera controller
-		medea.FetchMods('camcontroller',function() {
-			var cam = medea.CreateCameraNode();
-			root.AddChild(cam);
-			vp1.Camera(cam);
-			
-			cam.Translate(vec3.create([0,0,5]));
-			
-			var cc = medea.CreateCamController('fps');
-            cam.AddEntity(cc);
-			cc.Enable();
-		});
-        
-		medea.SetDebugPanel(null,true);
-		medea.Start();
 	});
+
+	// Add the skybox itself - the skybox module will be asynchronously
+	// fetched unless it is compiled into medea.core-compiled.js.
+	// 
+	// Once the module is available and initialized, we construct the
+	// skybox node and add it to the scenegraph. All further resources
+	// - shaders and the requested texture - are fetched asynchronously
+	// in the background.
+	medea.LoadModules('skybox',function() {
+		root.AddChild(medea.CreateSkyboxNode('remote:skybox_sample/teide/'));
+	});
+
+	
+	var cam = medea.CreateCameraNode();
+	root.AddChild(cam);
+	vp1.Camera(cam);
+	cam.Translate([0,0,5]);
+
+	// Add a plain FPS-style camera controller
+	medea.LoadModules('camcontroller',function() {		
+		var cc = medea.CreateCamController('fps');
+	    cam.AddEntity(cc);
+		cc.Enable();
+	});
+	
+	medea.SetDebugPanel(null);
+	medea.Start();
+}
+
+
+// --------------------------------------------------------------------------------
+function run() {
+	var dep = ['debug','forwardrenderer', 'keycodes', 'input_handler'];
+			
+	var config = {
+		dataroot: '../../data'
+	};
+
+	medealib.CreateContext("canvas", 
+		config, 
+		dep,
+		oninit,
+		function() {
+			alert('failed to initialize medea');
+		});
 }
 
 </script>
 
 </head>
 
-
 <body onload="run();">
-Press ENTER to toggle scene.   (Skybox is (c) Emil Persson, http://www.humus.name)
-
-    <canvas id="canvas" style="border: none;" width="1024" height="768"></canvas>
-
-    <br/>
-    
-
+	<div style="margin-left: 300px;">Press ENTER to toggle scene.  (Skybox is (c) Emil Persson, http://www.humus.name)</div>
+	<canvas id="canvas" style="border: none;" width="1024" height="768"></canvas>
 </body>
-
 </html>

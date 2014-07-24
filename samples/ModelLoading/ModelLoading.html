@@ -3,65 +3,117 @@
 <head>
 <title></title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<script type="text/javascript" src="../../medea/medea.core.js"></script>
+
+
+<script type="text/javascript" src="../../compiled/full-compile-config/medea.core-compiled.js"></script>
 
 <script type="text/javascript">
 
-function run() {
+// Model files to cycle through
+var files = [
+    'remote:assimp_import_sample/TexturedSpider.obj.json',
+    'remote:assimp_import_sample/Collada.dae.json',
+    'remote:assimp_import_sample/Animated.x.json'
+];
 
-	medea.Ready("canvas",{dataroot:'../../data'},['debug','sceneloader','keycodes'],function() {
-		var vp1 = medea.CreateViewport();
-		vp1.ClearColor([1.0,1.0,1.0]);
-        
-        var files = ['remote:assimp_import_sample/TexturedSpider.obj.json',
-            'remote:assimp_import_sample/Collada.dae.json',
-            'remote:assimp_import_sample/Animated.x.json'
-        ];
-		
-		var nodes = new Array(files.length), cur = files.length-1, root = medea.RootNode();
+// --------------------------------------------------------------------------------
+function oninit(medea) {
+
+    // Cycle through available models
+    function next_model() {
+        root.RemoveChild(nodes[cur]);
+        cur = (cur + 1) % files.length;
+        root.AddChild(nodes[cur]);
+    }
+
+    var vp1 = medea.CreateViewport();
+    vp1.ClearColor([0.5, 0.5, 0.5]);
+    vp1.Renderer(medea.CreateForwardRenderer());
+
+    // Allocate an anchor scenegraph node for each of the model files
+    // to be loaded.
+    var root = medea.RootNode();
+    var nodes = new Array(files.length), cur = files.length-1;
+    for( var i = 0; i < files.length; ++i) {
+        nodes[i] = medea.CreateNode();
+    }
+
+    // Then, fetch the |sceneloader| modules and asynchronously load
+    // the models as children of their respective anchors.
+    medea.LoadModules('sceneloader',function() {
         for( var i = 0; i < files.length; ++i) {
-            nodes[i] = medea.CreateNode();
             (function(i) {
-        		medea.LoadSceneFromResource(files[i],nodes[i], null, function() {
-                    // called as soon as the scene hierarchy is fully loaded (dependent data, i.e. textures, may still be pending)
-                    nodes[i].ScaleToFit();
+                medea.LoadSceneFromResource(files[i], nodes[i], null, function(load_status) {
+                    if (load_status == medea.SCENE_LOAD_STATUS_GEOMETRY_FINISHED) {
+                        nodes[i].ScaleToFit();
+                    }
                 });
             } (i));
+        }   
+    });
+
+    // Set initial model
+    next_model();
+    var time = 0.0;
+
+    // Create a |medea.InputHandler| to hold input state i.e.
+    // to remember which events have been already processed.
+    var input_state = medea.CreateInputHandler();
+
+    // Register a callback to be invoked once per frame. We use this
+    // callback to cycle through models when the ENTER key is pressed.
+    medea.SetTickCallback(function(dtime) {
+        time += dtime;
+        nodes[cur].Rotate(dtime,vec3.create([1,1,0]));
+        
+        if(input_state.ConsumeKeyDown(medea.KeyCode.ENTER)) {
+            next_model();
         }
-        
-        root.Translate(vec3.create([0,0,-2.4]));
-        
-        var next = function() {
-            root.RemoveChild(nodes[cur]);
-            cur = (cur + 1) % files.length;
-            root.AddChild(nodes[cur]);
-        };
+        return true;
+    }); 
+    
+    var cam = medea.CreateCameraNode();
+    root.AddChild(cam);
+    vp1.Camera(cam);
+    cam.Translate(vec3.create([0,1,5]));
 
-		var time = 0.0, input_state = {};
-		medea.SetTickCallback(function(dtime) {
-			time += dtime;
-			root.Rotate(dtime,vec3.create([1,1,0]));
+    medea.LoadModules('camcontroller',function() {      
+        var cc = medea.CreateCamController('fps');
+        cam.AddEntity(cc);
+        cc.Enable();
+    });
+
+    
+    medea.SetDebugPanel(null);
+    medea.Start();
+}
+
+
+// --------------------------------------------------------------------------------
+function run() {
+    var dep = ['debug','forwardrenderer', 'keycodes', 'input_handler'];
             
-            if(medea.IsKeyDownWasUp(medea.KeyCode.ENTER,input_state)) {
-                next();
-            }
-			return true;
-		});	
-        
-        next();
+    var config = {
+        dataroot: '../../data'
+    };
 
-		medea.SetDebugPanel(null,true);
-		medea.Start();
-	});
+    medealib.CreateContext("canvas", 
+        config, 
+        dep,
+        oninit,
+        function() {
+            alert('failed to initialize medea');
+        });
 }
 
 </script>
+
 
 </head>
 
 
 <body onload="run();">
-Press ENTER to toggle scene.   
+Press ENTER to toggle model.
 
     <canvas id="canvas" style="border: none;" width="1024" height="768"></canvas>
 
