@@ -18,22 +18,19 @@ Medea has a __stable, declarative and consistent API__ with nonzero testing cove
 Crytek's Sponza Test Scene with dynamic lighting without shadows with medea debug tools enabled.
 </sub>
 <img src="http://www7.pic-upload.de/19.10.13/bxig953ohjh7.png"> </img>
-<sub>
 
-A fully-zoomable <a href="https://github.com/acgessler/webgl-lake">planet demo</a>, drawn with medea in less than 500 lines of code.
+
+<sub>A fully-zoomable <a href="https://github.com/acgessler/webgl-lake">planet demo</a>, drawn with medea in less than 500 lines of code.
 </sub>
 <img src="https://camo.githubusercontent.com/23d2ea50757555192b605a15f13676b3c76bedc1/687474703a2f2f7331342e64697265637475706c6f61642e6e65742f696d616765732f3134303731302f32396b377338646e2e706e67"> </img>
 
-A video showing medea's experimental terrain system (<a href="http://www.youtube.com/watch?v=VGLvI7iFjsE">youtube</a>).
-
-<a href="http://www.youtube.com/watch?v=VGLvI7iFjsE"><img src="http://acgessler.github.com/medea.js/media/splash1.PNG" alt="terrain scene"></a>
 
 ### Getting started ###
 
  - Clone this repo
  - Run `testserver.py` to start a local dev web server
  - Navigate your browser to <a href="http://localhost/samples">http://localhost/samples</a> to see live samples
- - 
+ 
 ### Documentation ###
 
 Medea's API structure is very similar to that of other, non-browser-based 3D engines. Documentation will soon be available; for now, have a look at the samples.
