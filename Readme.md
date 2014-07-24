@@ -7,8 +7,8 @@ Medea is a __stable, clean and consistent API__ with testing coverage. It enable
 
 **Design Goals**
 
- - _Fast_: The framework internally optimizes the rendering as to maximize performance
- - A _content pipeline_ for distributing 3D content on the web. 3D data from authoring tools is converted offline to a representation that is highly optimized for loading at runtime.  <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
+ - Fast: The framework internally optimizes rendering as to maximize Gl performance.
+ - A content pipeline for distributing 3D content on the web. 3D data from authoring tools is converted offline to an optimized representation.  <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
   (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) imports geometry from about thirty 3D formats.
  - Exact and transparent resource management to avoid exhausting browser memory.
  - Library tools for managing Level of Detail to ease running across a wide range of devices, including Mobile/Tablets.
