@@ -3,24 +3,23 @@ medea.js
 
 #### Highly optimized, robust, lightweight __3D engine for JavaScript__.  ####
 
-Medea is a __stable, clean and consistent API__ with extensive test coverage. It enables productive WebGl development and strives to meet high requirements in terms of performance and robustness. In a long-term view, the library aims to be a solid, industry-strength platform for use of 3D content on the web.  
+Medea has a __stable, declarative and consistent API__ with nonzero testing coverage. It enables productive WebGl development and strives to meet high requirements in terms of performance and robustness. It is also blazingly fast.
 
 **Design Goals**
 
- - A _full content pipeline_ for distributing 3D content on the web. 3D data from authoring tools is converted offline to a representation that is highly optimized for loading at runtime.  <a href="http://assimp.sourceforge.net">Open Asset Import Library</a> 
-  (via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>) is used to import geometry from about thirty 3D formats.
- - Exact and transparent _resource management_ to avoid hitting GC, or to exhaust browser memory.
- - Recovery from failure (i.e. HTTP failure) is largely ignored by other JS 3D engines, but not by medea.
- - _Automatic detail management_ so medea-based applications can scale to all platforms, including mobile devices.
- - Optimized _scene management and visibility detection_.
- - _Data-driven material system_ supporting automatic dynamic lighting and shadowing. The framework abstracts both forward and deferred lighting methods while still offering full flexibility to shader authors.
-
-### Media ###
-
+ - Fast: The framework internally optimizes rendering as to maximize Gl performance.
+ - A content pipeline for distributing 3D content on the web. 3D data from authoring tools is converted offline to an optimized representation. <a href="https://github.com/acgessler/assimp2json">assimp2json</a> imports geometry from 40+ 3D formats.
+ - Exact and transparent resource management to avoid exhausting browser memory.
+ - Library tools for managing Level of Detail to easily scale a wide range of devices, including Mobile/Tablets.
+ - Automatic Scene Management and Visibility Detection.
 
 Crytek's Sponza Test Scene with dynamic lighting without shadows with medea debug tools enabled (loaded via <a href="https://github.com/acgessler/assimp2json">assimp2json</a>).
 
 <img src="http://www7.pic-upload.de/19.10.13/bxig953ohjh7.png"> </img>
+
+A fully-zoomable <a href="https://github.com/acgessler/webgl-lake">planet demo</a>, drawn with medea in less than 500 lines of code.
+
+<img src="https://camo.githubusercontent.com/23d2ea50757555192b605a15f13676b3c76bedc1/687474703a2f2f7331342e64697265637475706c6f61642e6e65742f696d616765732f3134303731302f32396b377338646e2e706e67"> </img>
 
 A video showing medea's experimental terrain system (<a href="http://www.youtube.com/watch?v=VGLvI7iFjsE">youtube</a>).
 
@@ -46,29 +45,29 @@ medealib.CreateContext("canvas",
    // initial module dependencies
    ['camcontroller', 'forwardrenderer'],
    
-   // startup function gets called once the context is ready to use
+   // Startup function gets called once the context is ready to use
    function(medea) {
 
-	// create a viewport to fill the entire <canvas>
+	// Create a viewport to fill the entire <canvas>
 	var viewport = medea.CreateViewport();
 	viewport.Renderer(medea.CreateForwardRenderer());
 	viewport.ClearColor([1.0,1.0,1.0]);
  
 	var root = medea.RootNode();
 
-	// create a camera node and attach it to both the scenegraph and the viewport.
+	// Create a camera node and attach it to both the scenegraph and the viewport.
 	var cam = medea.CreateCameraNode("MainCamera");
 	root.AddChild(cam);
 	viewport.Camera(cam);
 	
-	// add a first-person-style camera controller (i.e. input handler).
+	// Add a first-person-style camera controller (i.e. input handler).
 	// camera controllers are entities and can be attached to
 	// arbitrary nodes, not only cameras.
 	var cam_controller = medea.CreateCamController('fps');
 	cam.AddEntity(cam_controller);
 	cam_controller.Enabled(true);
 		
-	// add terrain - this is highly asynchronous because a lot of data needs to be loaded
+	// Add terrain - this is highly asynchronous because a lot of data needs to be loaded
 	medea.LoadModules(['terrain'], function() {
 		medea.CreateDefaultTerrainDataProviderFromResource('remote:terrain_sample/terrain.json', function(p) {
 		
@@ -93,13 +92,13 @@ medealib.CreateContext("canvas",
 
 ### Deployment ###
 
-The `compile.py` script is used to compile all the medea modules that are needed by an application into one file. It optionally embeds textual resources, such as shaders, into the compiled package. The resulting files can then be minified using standard JS minifiers (Google Closure Compiler is recommended because it knows how to keep necessary license headers).
+The `compile.py` script is used to compile all medea modules needed by an application into a single file. It optionally embeds text resources such as shaders into the compiled package as well. The resulting files can then be minified using standard JS minifiers (Google Closure Compiler is recommended).
 
 An _average_ medea distribution is only about `120 KiB`.
 
 ### License ###
 
-The license of medea is based on a 3-clause BSD-style license. This means, you are free to use medea even in your commercial websites provided the copyright notice, conditions and disclaimer of the license are included. 
+Medea is licensed under a 3-clause BSD-style license. This means, in short and non-lawyerish, you are free to use medea even in your commercial websites provided the copyright notice, conditions and disclaimer of the license are included. 
 
 See the `LICENSE` file for the full wording.
 
@@ -108,5 +107,5 @@ See the `LICENSE` file for the full wording.
 Are very welcome! Fork it on Github, and do a pull request against the main repository.
 
 
-_Estimated date for first major release: January 2014_
+
 
