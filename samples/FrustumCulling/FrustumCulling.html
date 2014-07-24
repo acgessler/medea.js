@@ -1,106 +1,102 @@
+
 <html>
 
 <head>
 <title></title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-
-<script type="text/javascript" src="../../medea/medea.core.js"></script>
-
+<script type="text/javascript" src="../../compiled/full-compile-config/medea.core-compiled.js"></script>
+<script type="text/javascript" src="../shared/labyrinth.js"></script>
 <script type="text/javascript">
 
 
-var default_map = 
-"XXXXXXXXXXXXXX XXXXXXXXXX\n" +
-"X XXXXXXX XXXX XXXXXXXXXX\n" +
-"X         XXX          XX\n" +
-"X  XXXXXX XXXXXXXXXXXX XX\n" +
-"XX XXXXXX         XXXX XX\n" +
-"X     XXX XXXXXXX XXX  XX\n" +
-"XXXXX XXX XXX XXX XXX XXX\n" +
-"X XXX XXXXXXX XXX XXX XXX\n" +
-"X             XXX XX    X\n" +
-"XXXXX XXX XXXXXXX XX XX X\n" +
-"XXXXX XXXXXXXXXXX XX XX X\n" +
-"XX           XX   XXXXX X\n" +
-"XX XXXXXXXXX XXXX       X\n" +
-"XXXXXXXXXXXX XXXXXXXXXXXX\n";
+// --------------------------------------------------------------------------------
+function oninit(medea) {
 
-function gen_labyrinth(src,root,mesh,height) {
-
-	height = height || 5;
+	var vp1 = medea.CreateViewport();
+	vp1.ClearColor([0.4,0.4,0.4]);
 	
-	var x = -src.indexOf('\n')/2.0, xinit = x;
-	var z = -src.split('\n').length/2.0;
-
-	
-	for (var i = 0; i < src.length; ++i) {
-		var c = src[i];
-		if (c === '\n') {
-			z += 1;
-			x = xinit;
-			continue;
-		}
-		
-		if (c === 'X') {
-			for(var n = 0; n < height; ++n) { 
-				var ch = root.AddChild();
-				ch.AddEntity(mesh);
-				
-				ch.Translate([x,n,z]);
-				ch.Scale(0.5);
-			}
-		}
-		
-		x += 1;
-	}
-}
-
-function run() {
-
-	medea.Ready("canvas",{dataroot:'../../data'},['standardmesh','camcontroller','debug','visualizer_showbbs'],function() {
-		var vp1 = medea.CreateViewport();
-		vp1.ClearColor([0.4,0.4,0.4]);
-		
-		var vis = medea.CreateVisualizer_ShowBBs();
+	// To visualize frustum culling, we attach the "BB" (for BoundingBoxes) visualizer.
+	//
+	// Visualizers are debugging aids that get access to internal engine data
+	// structures during rendering so they can draw additional (debug) information.
+	//
+	// To write your own visualizer, check out the source code of existing
+	// visualizer modules (ShowBBs, ShowNormals, ..).
+	//
+	// CreateVisualizer is a factory method to create visualizers by name. The
+	// implementation of each visualizer is found in the visualizer_<name>
+	// module, respectively, and only visualizers matching this pattern can
+	// be created through CreateVisualizer.
+	medea.CreateVisualizer("showbbs", 'MyBBVisualizer', function(vis) {
 		vis.DrawNodes(true);
 		vis.ShowCullState(true);
 		vp1.AddVisualizer(vis);
-		
-		var root = medea.RootNode();
-		
-		var mfloor = medea.CreateStandardMesh_Plane(medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/floor_texture.jpg'));
-		root.AddChild().Translate([0,-1,0]).Scale(300).AddEntity(mfloor);
-		
-		mfloor.Material().Pass(0).CullFace(false);
-		
-		var msky = medea.CreateStandardMesh_Plane(medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/sky_texture.jpg'));
-		root.AddChild().Translate([0,20,0]).Scale(300).AddEntity(msky);
-		
-		var m = medea.CreateStandardMesh_Cube(new medea.Material(medea.CreatePassFromShaderPair("remote:labyrinth_sample/wall-simple", {texture:'remote:labyrinth_sample/wall_texture.jpg'})));
-		gen_labyrinth(default_map,root,m,1);
-
-		var time = 0.0;
-		medea.SetTickCallback(function(dtime) {
-			time += dtime;
-			
-			return true;
-		});	
-		
-		root.Translate(vec3.create([0,-10,-10]));
-		
-		var cam = medea.CreateCameraNode();
-		root.AddChild(cam);
-		
-		vp1.Camera(cam);
-		
-		
-		var cc = medea.CreateCamController('fps');
-        cam.AddEntity(cc);
-		cc.Enable();
-
-		medea.SetDebugPanel(null,true);
-		medea.Start();
 	});
+
+	// The rest of the demo is the same as the FPSCamera sample
+	// Comments omitted here.
+	var root = medea.RootNode();
+	var mfloor = medea.CreateStandardMesh_Plane(
+		medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/floor_texture.jpg')
+	);
+	mfloor.Material().Passes().forEach( function(p) { 
+		p.CullFace(false) } 
+	);
+		
+	root.AddChild()
+		.Translate([0,-1,0])
+		.Scale(300)
+		.AddEntity(mfloor);
+
+	var msky = medea.CloneMesh(mfloor,
+		medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/sky_texture.jpg')
+	);
+	root.AddChild()
+		.Translate([0,20,0])
+		.Scale(300).AddEntity(msky);
+	
+	var m = medea.CreateStandardMesh_Cube(
+		medea.CreateSimpleMaterialFromShaderPair("remote:labyrinth_sample/wall-simple",
+			{
+				texture:'remote:labyrinth_sample/wall_texture.jpg'
+			}
+		)
+	);
+
+	gen_labyrinth(default_labyrinth_map, root, m, 1);
+	root.Translate(vec3.create([0,-10,-10]));
+	var cam = medea.CreateCameraNode();
+	cam.ZNear(0.1);
+
+	root.AddChild(cam);
+	vp1.Camera(cam);
+	
+	medea.LoadModules('camcontroller',function() {		
+		var cc = medea.CreateCamController('fps');
+	    cam.AddEntity(cc);
+		cc.Enable();
+	});
+
+	medea.SetDebugPanel(null);
+	medea.Start();
+}
+
+
+// --------------------------------------------------------------------------------
+function run() {
+	var dep = ['debug','forwardrenderer', 'keycodes', 'input_handler', 'material', 'standardmesh', 'visualizer'];
+			
+	var config = {
+		dataroot: '../../data'
+	};
+
+	medealib.CreateContext("canvas", 
+		config, 
+		dep,
+		oninit,
+		function() {
+			alert('failed to initialize medea');
+		});
 }
 
 </script>
@@ -109,13 +105,6 @@ function run() {
 
 
 <body onload="run();">
-   
-
     <canvas id="canvas" style="border: none;" width="1024" height="768"></canvas>
-
-    <br/>
-    
-
 </body>
-
 </html>
