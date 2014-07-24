@@ -3,35 +3,69 @@
 <head>
 <title></title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<script type="text/javascript" src="../../medea/medea.core.js"></script>
-
+<script type="text/javascript" src="../../compiled/full-compile-config/medea.core-compiled.js"></script>
 
 <script type="text/javascript">
 
+// --------------------------------------------------------------------------------
+function oninit(medea) {
+	// This sample is only commented where it differs from the RotatingCube sample
+
+	var vp1 = medea.CreateViewport();
+	vp1.ClearColor([0.5,0.5,0.5]);
+
+	vp1.Renderer(medea.CreateForwardRenderer());
+
+	var root = medea.RootNode();
+
+	// Create again a cube mesh and assign a simple textured material to it.
+	//
+	// CreateSimpleMaterialFromTexture() is a utility that creates a so-called
+	// 'stock' material that is mainly useful for prototyping. The texture
+	// itself is loaded asynchronously. If the details of texture creation
+	// were to be modified (i.e. surface format, MIP settings),
+	// |medea.CreateTexture()| should be used to create a texture object.
+	//
+	// All of these stock materials required shaders to be loaded from
+	// /data/mcore. Such shaders can be bundled with medea to avoid
+	// fetching them every time. Look at the /build_config folder for
+	// sample build configurations that do this.
+	var m = medea.CreateStandardMesh_Cube(
+		medea.CreateSimpleMaterialFromTexture('remote:../samples/RotatingTexturedCube/test_texture.png')
+	);
+
+	root.AddEntity(m);
+	root.Translate([0,0,-5]);
+
+
+	var time = 0.0;
+	medea.SetTickCallback(function(dtime) {
+		time += dtime;
+		root.Rotate(dtime,[1,1,0]);
+		return true;
+	});	
+	
+	medea.SetDebugPanel(null);
+	medea.Start();
+}
+
+
+// --------------------------------------------------------------------------------
 function run() {
 
-	medea.Ready("canvas",{dataroot:'../../data'},['debug','standardmesh'],function() {
-		var vp1 = medea.CreateViewport();
-		vp1.ClearColor([0.5,0.5,0.5]);
-		
-		var m = medea.CreateStandardMesh_Cube(medea.CreateSimpleMaterialFromTexture('remote:../samples/RotatingTexturedCube/test_texture.png'));
-		
-		// test child nodes
-		var root = medea.RootNode().AddChild();
-		root.AddEntity(m);
-		
-		root.Translate(vec3.create([0,0,-5]));
+	var dep = ['debug','forwardrenderer', 'standardmesh'];
+			
+	var config = {
+		dataroot: '../../data'
+	};
 
-		var time = 0.0;
-		medea.SetTickCallback(function(dtime) {
-			time += dtime;
-			root.Rotate(dtime,vec3.create([1,1,0]));
-			return true;
-		});	
-
-		medea.SetDebugPanel(null,true);
-		medea.Start();
-	});
+	medealib.CreateContext("canvas", 
+		config, 
+		dep,
+		oninit,
+		function() {
+			alert('failed to initialize medea');
+		});
 }
 
 </script>
@@ -40,13 +74,7 @@ function run() {
 
 
 <body onload="run();">
-   
-
     <canvas id="canvas" style="border: none;" width="1024" height="768"></canvas>
-
-    <br/>
-    
-
 </body>
 
 </html>
