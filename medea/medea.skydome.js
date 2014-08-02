@@ -15,7 +15,7 @@ medealib.define('skydome',['mesh'],function(medealib, undefined) {
 	// based on my old engine code, which itself took this algorithm from
 	// this paper on athmospheric scattering:
 	// http://www2.imm.dtu.dk/pubdb/views/edoc_download.php/2554/pdf/imm2554.pdf
-	var CreateDomeMesh = function(mat, lower_amount, rings) {
+	var CreateDomeMesh = medea.CreateDomeMesh = function(mat, lower_amount, rings, equator_overlap) {
 		var pi = Math.PI, sin = Math.sin, cos = Math.cos, sqrt = Math.sqrt, round = Math.round, abs = Math.abs;
 
 		rings = rings || 35;
@@ -25,7 +25,7 @@ medealib.define('skydome',['mesh'],function(medealib, undefined) {
 		var ring_info = new Array(rings);
 		ring_info[0] = [0,0.0];
 
-		var lat = 0.0, lad = pi*0.5/rings, fac = pi*2.0/sin(lad), pcnt = 1;
+		var lat = 0.0, lad = pi*0.5/(rings - (equator_overlap | 0)), fac = pi*2.0/sin(lad), pcnt = 1;
 		for(var r = 1; r < rings; ++r) {
 			lat += lad;
 

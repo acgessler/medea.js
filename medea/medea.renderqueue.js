@@ -19,11 +19,17 @@ medealib.define('renderqueue',['renderstate'],function(medealib, undefined) {
 	this.RENDERQUEUE_DEFAULT = 11;
 	this.RENDERQUEUE_DEFAULT_LATE = 12;
 
+	// Since background drawing (i.e. skybox) typically runs on the
+	// full screen size with depth_write=false, depth_test=true and
+	// therefore overrides geometry that doesn't leave traces in
+	// the depth buffer, it need be rendered before alpha geometry.
+	this.RENDERQUEUE_BACKGROUND = 13;
+
 	this.RENDERQUEUE_ALPHA_EARLY = 14;
 	this.RENDERQUEUE_ALPHA = 15;
 	this.RENDERQUEUE_ALPHA_LATE = 16;
 
-	this.RENDERQUEUE_BACKGROUND = 18;
+	
 
 	this.RENDERQUEUE_LAST = 19;
 
@@ -72,9 +78,7 @@ medealib.define('renderqueue',['renderstate'],function(medealib, undefined) {
 		},
 
 		Flush: function(renderer, statepool) {
-			if (this.default_state) {
-				medea.SetDefaultState(this.default_state,statepool);
-			}
+			medea.SetDefaultState(this.default_state || {},statepool);
 
 			if (this.sorter) {
 				this.sorter.Run(this.entries);

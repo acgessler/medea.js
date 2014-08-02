@@ -3,25 +3,84 @@
 <head>
 <title>Medea Sample Browser</title>
 
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<link rel="stylesheet" href="bootstrap.min.css">
+<style type="text/css">
+
+div.samplebox {
+	float: left;
+	width: 250px;
+	height: 320px;
+
+	padding: 0px;
+	margin: 4px;
+
+	border-color: #cdcdcd;
+	border-width: 1px;
+	border-style: solid;
+
+	cursor: pointer;
+}
+
+div.samplebox:hover {
+	background-color: #f0f5ff;
+}
+
+div.samplebox img {
+	position: relative;
+	bottom: 0px;
+	width: 248px;
+	height: 245px;
+}
+
+div.sampletext {
+	font-size: 13px;
+	padding: 1px;
+	margin: 4px;
+}
+
+</style>
+
+<script type="text/javascript">
+
+var samples = {
+	'SimpleInit' : 'Framework initialization, basic setup',
+	'MultipleViewports' : 'Shows how to initialize and populate multiple viewports',
+	'RotatingCube' : 'A simple cube that rotates and changes color over time',
+	'RotatingTexturedCube' : 'The same cube with a simple texture image',
+	'FPSCamera' : 'A simple labyrinth scene that can be traversed using standard FPS controls',
+	'FrustumCulling' : 'Demonstrates how automatic frustum culling greatly reduces batch count',
+	'ModelLoading' : 'Loading models from a JSON-based format (via <a href="https://github.com/acgessler/assimp2json/tree/master/assimp2json">assimp2json</a>), modifying the scenegraph',
+	'Skybox' : 'A simple skybox background with a 3D model at its center',
+	'Skydome' : 'A simple skydome background with a 3D model at its center and a ground plane',
+	'TerrainTile' : ' Creates a static terrain tile (with LOD) from a heightmap. Demonstrates basic lighting. ',
+};
+
+$(document).ready(function() {
+	var anchor = $('#sample_anchor');
+	for (var k in samples) {
+		var v = samples[k];
+		var box = $('<div class="samplebox"><img src="' + (k + '/thumb.PNG')  +
+			'"><div class="sampletext">' + v + '</div></img></div>');
+
+		box.click((function(k) {
+			return function() {
+				window.location.href = './' + k + '/' + k + '.html';
+			}; 
+		})(k));
+		anchor.append(box);
+	}
+});
+
+</script>
+
 </head>
 <body>
 
 <h1>Medea Samples</h1>
 
-<ul>
-<li> <a href='./SimpleInit/SampleSimpleInit.html'>SimpleInit</a> - framework initialization, basic setup</li>
-<li> <a href='./MultipleViewports/SampleMultipleViewports.html'>MultipleViewports</a> - shows how to initialize and populate multiple viewports</li>
-<li> <a href='./RotatingCube/RotatingCube.html'>RotatingCube</a> - a simple cube that rotates and changes color over time</li>
-<li> <a href='./RotatingTexturedCube/RotatingTexturedCube.html'>RotatingTexturedCube</a> - the same cube, this time with a texture image applied to it</li>
-<li> <a href='./FPSCamera/FPSCamera.html'>FPSCamera</a> - a simple labyrinth scene that can be traversed using standard FPS controls</li>
-<li> <a href='./FrustumCulling/FrustumCulling.html'>FrustumCulling</a> - demonstrates how automatic frustum culling greatly reduces the batch count</li>
-<li> <a href='./ModelLoading/ModelLoading.html'>ModelLoading</a> - load models from a JSON-based format (via <a href="https://github.com/acgessler/assimp2json/tree/master/assimp2json">assimp2json</a>)</li>
-<li> <a href='./Skybox/Skybox.html'>Skybox</a> - Based on the ModelLoading sample, but renders a skybox background. Additionally, this samples uses FetchMod() to load its contents asynchronously</li>
-<li> <a href='./Skydome/Skydome.html'>Skydome</a> - Based on the Skybox sample, but renders a static skydome. </li>
-<li> <a href='./TerrainTile/TerrainTile.html'>TerrainTile</a> - Creates a static terrain tile from a heightmap. </li>
-<li> <a href='./Terrain/Terrain.html'>Terrain</a> - Seamless terrain rendering. </li>
-<li> <a href='./TerrainBenchmark/TerrainBenchmark.html'>TerrainBenchmark</a> - Same as the <i>Terrain</i> sample, except the camera moves along a bezier spline to allow reproducible profiling on the way. </li>
-</ul>
+<div id="sample_anchor">
+</div>
 
 </body>
 </html>

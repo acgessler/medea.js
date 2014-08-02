@@ -688,7 +688,11 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 
 		for (i = 0; i < candidates.length; ++i) {
 			try {
-				context = medeactx.canvas.getContext(candidates[i]);
+				// Request a stencil buffer by default (D24S8 should be
+				// universally available, if not this needs to be revised)
+				context = medeactx.canvas.getContext(candidates[i], {
+					stencil : true
+				});
 			} catch(ex) {
 
 			}
@@ -744,7 +748,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	(function() {
 
 		// collect initial dependencies - for example the scenegraph module and the mathlib is always needed
-		var _initial_deps = ['node','viewport'];
+		var _initial_deps = ['node', 'viewport'];
 		var _initial_pre_deps = []; 
 
 		if (window.mat4 === undefined) {

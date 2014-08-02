@@ -9,40 +9,20 @@
 
 // --------------------------------------------------------------------------------
 function oninit(medea) {
-
 	// Create a viewport (i.e. a part of the canvas that we can 3D to)
 	var vp1 = medea.CreateViewport();
-
-	// Set the viewport's background color to gray
-	vp1.ClearColor([0.5,0.5,0.5]);
 
 	// Every viewport needs a Renderer attached, ForwardRenderer is the
 	// most straightforward choice.
 	vp1.Renderer(medea.CreateForwardRenderer());
 
-	var root = medea.RootNode();
-	var m = medea.CreateStandardMesh_Cube();
-	root.AddEntity(m);
-	
-	root.Translate([0,0,-5]);
-
-	// Register a callback to be invoked once per frame and set it to
-	// animate the color of the cube
+	// Register a callback to be invoked once per frame. We use this
+	// callback to add a color fade animation to the background.
 	var time = 0.0;
 	medea.SetTickCallback(function(dtime) {
 		time += dtime;
-		root.Rotate(dtime,[1,1,0]);
-		
-		// As no special material as requested, the cube had gotten a
-		// simple colored default material attached.
-		//
-		// Set() on a |medea.Pass| updates a named shader uniform.
-		//
-		// *NOTE* you can also specify a function as the value for a shader
-		// constant. In this case, the function is re-evaluated every frame.
-		// This is oftentimes easier for simple animations, or frequently
-		// updating values than to use tick callbacks.
-		m.Material().Pass(0).Set('color', [Math.sin(time),Math.sin(time+1.6),0.5,1.0] );
+		vp1.ClearColor([(Math.sin(time)+1.0)*0.5,(Math.cos(time)+1.0)*0.5,0.0,1.0]);
+		// note: must return true here as returning false terminates the main loop
 		return true;
 	});	
 	
@@ -65,7 +45,7 @@ function run() {
 	// See the doc/build manual to learn how to efficiently bundle
 	// medea modules together to avoid dynamically loading modules 
 	// that are needed anyway.
-	var dep = ['debug','forwardrenderer', 'standardmesh'];
+	var dep = ['debug','forwardrenderer'];
 			
 	// Basic initial configuration. More configuration options
 	// exist, see the medealib.CreateContext() API docs.
@@ -76,7 +56,8 @@ function run() {
 	// Create a medea context given the canvas, pre-requisite deps
 	// and initial configuration. Once loading has completed, oninit()
 	// is invoked with the medea context as a parameter. Note that
-	// this is an asynchronous operation.
+	// this is an asynchronous operation, CreateContext() does not
+	// return a value.
 	medealib.CreateContext("canvas", 
 		config, 
 		dep,
@@ -92,7 +73,13 @@ function run() {
 
 
 <body onload="run();">
+   
+
     <canvas id="canvas" style="border: none;" width="1024" height="768"></canvas>
+
+    <br/>
+    
+
 </body>
 
 </html>

@@ -3,99 +3,115 @@
 <head>
 <title></title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<script type="text/javascript" src="../../medea/medea.core.js"></script>
-
-
+<script type="text/javascript" src="../../compiled/full-debug-compile-config/medea.core-compiled.js"></script>
+<script type="text/javascript" src="../shared/labyrinth.js"></script>
 <script type="text/javascript">
 
 
-var default_map = 
-"XXXXXXXXXXXXXX XXXXXXXXXX\n" +
-"X XXXXXXX XXXX XXXXXXXXXX\n" +
-"X         XXX          XX\n" +
-"X  XXXXXX XXXXXXXXXXXX XX\n" +
-"XX XXXXXX         XXXX XX\n" +
-"X     XXX XXXXXXX XXX  XX\n" +
-"XXXXX XXX XXX XXX XXX XXX\n" +
-"X XXX XXXXXXX XXX XXX XXX\n" +
-"X             XXX XX    X\n" +
-"XXXXX XXX XXXXXXX XX XX X\n" +
-"XXXXX XXXXXXXXXXX XX XX X\n" +
-"XX           XX   XXXXX X\n" +
-"XX XXXXXXXXX XXXX       X\n" +
-"XXXXXXXXXXXX XXXXXXXXXXXX\n";
+// --------------------------------------------------------------------------------
+function oninit(medea) {
 
-function gen_labyrinth(src,root,mesh,height) {
-
-	height = height || 5;
+	var vp1 = medea.CreateViewport();
+	vp1.ClearColor([0.4,0.4,0.4]);
 	
-	var x = -src.indexOf('\n')/2.0, xinit = x;
-	var z = -src.split('\n').length/2.0;
-
+	var root = medea.RootNode();
 	
-	for (var i = 0; i < src.length; ++i) {
-		var c = src[i];
-		if (c === '\n') {
-			z += 1;
-			x = xinit;
-			continue;
-		}
+	// Add a plain ground to the scene.
+	// The standardmesh module provides utilities to procedurally
+	// generate simple geometries, such as planes or spheres.
+	//
+	// The material module is used to disable backface culling on
+	// the plane.
+	//
+	// Unlike in other samples, material and standardmesh modules
+	// are pre-initialized in medea.CreateContext() so this does
+	// not need to be formulated asynchronously.
+	var mfloor = medea.CreateStandardMesh_Plane(
+		medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/floor_texture.jpg')
+	);
+	mfloor.Material().Passes().forEach( function(p) { 
+		p.CullFace(false) } 
+	);
 		
-		if (c === 'X') {
-			for(var n = 0; n < height; ++n) { 
-				var ch = root.AddChild();
-				ch.AddEntity(mesh);
-				
-				ch.Translate([x,n,z]);
-				ch.Scale(0.5);
+	root.AddChild()
+		.Translate([0,-1,0])
+		.Scale(300)
+		.AddEntity(mfloor);
+
+	// Use a second plane for the sky.
+	// |CloneMesh()| takes the existing mesh and creates a shallow clone
+	// that uses a different material whilst sharing all underlying
+	// resources.
+	var msky = medea.CloneMesh(mfloor,
+		medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/sky_texture.jpg')
+	);
+	root.AddChild()
+		.Translate([0,20,0])
+		.Scale(300).AddEntity(msky);
+	
+
+	// Create a single cube mesh.
+	//
+	// The source shader is created from two files with the given base name
+	// and prefixes .ps (pixel shader) and .vs (vertex shader).
+	// Shader loading happens asynchronously.
+	//
+	// The dictionary contains initial values for shader uniforms. If
+	// sampler uniforms are specified as strings, the corresponding texture
+	// is loaded automatically (specifying an explicit medea.Texture object
+	// is possible as well).
+	var m = medea.CreateStandardMesh_Cube(
+		medea.CreateSimpleMaterialFromShaderPair("remote:labyrinth_sample/wall-simple",
+			{
+				texture:'remote:labyrinth_sample/wall_texture.jpg'
 			}
-		}
-		
-		x += 1;
-	}
+		)
+	);
+
+	// Generate the labyrinth, re-using the same cube mesh for each node
+	gen_labyrinth(default_labyrinth_map, root, m, 1);
+	
+	root.Translate(vec3.create([0,-10,-10]));
+	
+	var cam = medea.CreateCameraNode();
+
+	// Use very low near z plane
+	cam.ZNear(0.1);
+
+	root.AddChild(cam);
+	vp1.Camera(cam);
+	
+	// Add a plain FPS-style camera controller
+	medea.LoadModules('camcontroller',function() {		
+		var cc = medea.CreateCamController('fps');
+	    cam.AddEntity(cc);
+		cc.Enable();
+	});
+
+	medea.SetDebugPanel(null);
+	medea.Start();
 }
 
+
+// --------------------------------------------------------------------------------
 function run() {
-
-	medea.Ready("canvas",{dataroot:'../../data'},['standardmesh','camcontroller','debug'],function() {
-		var vp1 = medea.CreateViewport();
-		vp1.ClearColor([0.4,0.4,0.4]);
-		
-		var root = medea.RootNode();
-		
-		var mfloor = medea.CreateStandardMesh_Plane(medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/floor_texture.jpg'));
-		root.AddChild().Translate([0,-1,0]).Scale(300).AddEntity(mfloor);
-		
-		mfloor.Material().Pass(0).CullFace(false);
-		
-		var msky = medea.CreateStandardMesh_Plane(medea.CreateSimpleMaterialFromTexture('remote:labyrinth_sample/sky_texture.jpg'));
-		root.AddChild().Translate([0,20,0]).Scale(300).AddEntity(msky);
-		
-		var m = medea.CreateStandardMesh_Cube(new medea.Material(medea.CreatePassFromShaderPair("remote:labyrinth_sample/wall-simple", {texture:'remote:labyrinth_sample/wall_texture.jpg'})));
-		gen_labyrinth(default_map,root,m,1);
-
-		var time = 0.0;
-		medea.SetTickCallback(function(dtime) {
-			time += dtime;
+	// Note that material and standardesh are specified as initial dependencies.
+	//
+	// We cannot do much of what we want to do in this sample without either
+	// of them, so making them lazy dependencies does not make things faster.
+	var dep = ['debug','forwardrenderer', 'keycodes', 'input_handler', 'material', 'standardmesh'];
 			
-			return true;
-		});	
-		
-		root.Translate(vec3.create([0,-10,-10]));
-		
-		var cam = medea.CreateCameraNode();
-		root.AddChild(cam);
-		
-		vp1.Camera(cam);
-		
-		
-		var cc = medea.CreateCamController('fps');
-        cam.AddEntity(cc);
-		cc.Enable();
+	var config = {
+		dataroot: '../../data'
+	};
 
-		medea.SetDebugPanel(null,true);
-		medea.Start();
-	});
+	medealib.CreateContext("canvas", 
+		config, 
+		dep,
+		oninit,
+		function() {
+			alert('failed to initialize medea');
+		});
 }
 
 </script>
@@ -104,13 +120,6 @@ function run() {
 
 
 <body onload="run();">
-   
-
     <canvas id="canvas" style="border: none;" width="1024" height="768"></canvas>
-
-    <br/>
-    
-
 </body>
-
 </html>

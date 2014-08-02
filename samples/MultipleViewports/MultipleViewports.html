@@ -3,27 +3,33 @@
 <head>
 <title></title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<script type="text/javascript" src="../../compiled/medea.core-compiled.js"></script>
+<script type="text/javascript" src="../../compiled/full-debug-compile-config/medea.core-compiled.js"></script>
 
 <script type="text/javascript">
 
 // --------------------------------------------------------------------------------
 function oninit(medea) {
+	// Create a full-sized viewport
+	var vp0 = medea.CreateViewport();
 
-	// Create a viewport (i.e. a part of the canvas that we can 3D to)
-	var vp1 = medea.CreateViewport();
+	// Create a second viewport that is 10% the width and height
+	var vp1 = medea.CreateViewport("secondary",0.1,0.1,0.1,0.1);
+
+	vp0.ClearColor([1.0,0.0,0.0,1.0]);
+	vp1.ClearColor([0.5,1.0,0.0,1.0]);
 
 	// Every viewport needs a Renderer attached, ForwardRenderer is the
 	// most straightforward choice.
+	vp0.Renderer(medea.CreateForwardRenderer());
 	vp1.Renderer(medea.CreateForwardRenderer());
 
-	// Register a callback to be invoked once per frame. We use this
-	// callback to add a color fade animation to the background.
+	// Register a callback to be invoked once per frame and use it
+	// to move one of the two viewports around.
 	var time = 0.0;
 	medea.SetTickCallback(function(dtime) {
 		time += dtime;
-		vp1.ClearColor([(Math.sin(time)+1.0)*0.5,(Math.cos(time)+1.0)*0.5,0.0,1.0]);
-		// note: must return true here as returning false terminates the main loop
+		vp1.Pos((Math.sin(time)+1.0)*0.5,(Math.cos(time)+1.0)*0.5);
+		// Note: must return true here as returning false terminates the main loop
 		return true;
 	});	
 	
@@ -38,7 +44,6 @@ function oninit(medea) {
 
 // --------------------------------------------------------------------------------
 function run() {
-
 	// Dependencies that are strictly required in this sample and
 	// therefore instructed to be loaded upfront. Later on, modules
 	// can be dynamically loaded using medea.LoadModules(...).
@@ -57,7 +62,8 @@ function run() {
 	// Create a medea context given the canvas, pre-requisite deps
 	// and initial configuration. Once loading has completed, oninit()
 	// is invoked with the medea context as a parameter. Note that
-	// this is an asynchronous operation.
+	// this is an asynchronous operation, CreateContext() does not
+	// return a value.
 	medealib.CreateContext("canvas", 
 		config, 
 		dep,

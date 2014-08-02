@@ -52,13 +52,13 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 
 	// Hint that vertex shader access will be required for this texture
 	//
-	// Currently, this implies |TEXTURE_FLAG_NO_MIPS| as MIP mapping is
-	// not supported for vertex texture fetch. This requirement could
-	// go away in future (we might copy to a second, non MIPed texture
-	// internally). Therefore you should still specify the
-	// |TEXTURE_FLAG_NO_MIPS| flag if you intend to never use MIPs
-	// with a texture that is also used from vertex shaders.
-	medea.TEXTURE_VERTEX_SHADER_ACCESS = 0x10 | medea.TEXTURE_FLAG_NO_MIPS;
+	// Depending on the hardware, this may disable certain filtering options.
+	//
+	medea.TEXTURE_VERTEX_SHADER_ACCESS = 0x10;
+
+	// Set clamp-to-edge mode for the texture. If not specified, textures
+	// default to wrap on all axes.
+	medea.TEXTURE_FLAG_CLAMP_TO_EDGE = 0x20;
 
 
 	// possible values for the `format` parameter
@@ -392,20 +392,28 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			}
 
 			// Setup sampler states and generate MIPs
-			gl.texParameteri(TEX, gl.TEXTURE_WRAP_S, gl.REPEAT);
-			gl.texParameteri(TEX, gl.TEXTURE_WRAP_T, gl.REPEAT);
+			if (this.flags & medea.TEXTURE_FLAG_CLAMP_TO_EDGE) {
+				// Important to set this first as it influences MIP generation
+				gl.texParameteri(TEX, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+				gl.texParameteri(TEX, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			}
+			else {
+				gl.texParameteri(TEX, gl.TEXTURE_WRAP_S, gl.REPEAT);
+				gl.texParameteri(TEX, gl.TEXTURE_WRAP_T, gl.REPEAT);
+			}
+
 			gl.texParameteri(TEX, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
 			if (mips) {
-				gl.texParameteri(TEX, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+				gl.texParameteri(TEX, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
 				if(gen_mips) {
 					gl.generateMipmap(TEX);
 				}
 
-				// Setup anistropic filter
-				// TODO: quality adjust
-				if (aniso_ext) {
+				// Setup anistropic filter unless the texture is going to
+				// be used with Vertex Texture Fetch (VTF)
+				if (aniso_ext && !(this.flags & medea.TEXTURE_VERTEX_SHADER_ACCESS)) {
 					gl.texParameterf(gl.TEXTURE_2D, aniso_ext.TEXTURE_MAX_ANISOTROPY_EXT, 
 						max_anisotropy);
 				}
@@ -413,6 +421,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			else {
 				gl.texParameteri(TEX, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 			}
+
 
 			// Because _Upload may be called at virtually any time, we
 			// need to ensure that the global state is not altered.

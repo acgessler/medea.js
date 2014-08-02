@@ -92,6 +92,13 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			gl.uniformMatrix4fv(pos, false, state.Get("WVP"));
 		},
 
+		WV :  function(pos, state, change_flags) {
+			if(change_flags & 0x3 === 0x3) { // no cam, no world changes
+				return;
+			}
+			gl.uniformMatrix4fv(pos, false, state.Get("WV"));
+		},
+
 		WIT :  function(pos, state, change_flags) {
 			if(change_flags & 0x1) { // no world changes
 				return;
@@ -234,6 +241,25 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			this.semantic &= ~sem;
 		},
 
+		CopyConstantsFrom : function(other) {
+			for (var k in other.constants) {
+				this.Set(k, other.constants[k]);
+			}
+		},
+
+		// TODO: with WebGL2, add a ShareConstantsWith() API that uses uniform
+		// buffer objects to share state.
+
+		CopyStateFrom : function(other) {
+			for (var k in other.state) {
+				this.state[k] = other.state[k];
+			}
+		},
+
+		ShareStateWith : function(other) {
+			this.state = other.state;
+		},
+
 
 		/** @name medea.Pass.Begin(*)
 		 *
@@ -277,6 +303,12 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			if(change_flags !== 0xf) {
 				this._SetAutoState(statepool, change_flags);
 			}
+
+			// Apply global render state blocks
+			// This must be called even if no state block is associated
+			// with this pass to make sure any changes made by previous
+			// passes are reset to their defaults.
+			medea.SetState(this.state || {}, statepool);
 			return true;
 		},
 
@@ -901,17 +933,11 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		},
 
 		_SetAutoState : function(statepool, change_flags) {
-
 			// Update shader variables automatically
 			var setters = this.auto_setters;
 			for(var k in setters) {
 				var v = setters[k];
 				v[1](v[0], statepool, change_flags);
-			}
-
-			// And apply global state blocks
-			if (this.state) {
-				medea.SetState(this.state,statepool);
 			}
 		},
 

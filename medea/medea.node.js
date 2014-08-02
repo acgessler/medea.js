@@ -341,21 +341,10 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 				this._UpdateBB();
 				return;
 			}
-			this.flags |= medea._NODE_FLAG_STATIC_BB;
-			this.flags &= ~medea._NODE_FLAG_DIRTY_BB;
-
+			this.flags |= medea._NODE_FLAG_STATIC_BB | medea._NODE_FLAG_DIRTY_BB;
 			this.static_bb = static_bb;
 
-			// Ensure the |bb| is updated with |static_bb| transformed
-			// by the node's world transform. If a static bb is active,
-			// _UpdateGlobalTransform() automatically takes care of
-			// that but we have to ensure it happens a first time.
-			if (this.flags & medea._NODE_FLAG_DIRTY) {
-				this._UpdateGlobalTransform();
-			}
-			else {
-				this.bb = medea.MakeAABB(medea.TransformBB( this.static_bb, this.gmatrix ));
-			}
+			this.bb = null;
 			this._FireListener("OnUpdateBB");
 
 			// Propagate the static bounding box up in the tree
@@ -585,6 +574,39 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			this._SetTrafoDirty();
 		},
 
+		GetWorldScale: function() {
+			this._UpdateGlobalTransform();
+			var m = this.gmatrix;
+
+			// Scaling factors can be found as the lengths of the row vectors
+			var x_len = Math.sqrt(m[0] * m[0] + m[4] * m[4] + m[8] * m[8]);
+			var y_len = Math.sqrt(m[1] * m[1] + m[5] * m[5] + m[11] * m[11]);
+			var z_len = Math.sqrt(m[2] * m[2] + m[6] * m[6] + m[12] * m[12]);
+			return [x_len, y_len, z_len];
+		},
+
+		// Returns the scaling factor that is applied along the world
+		// x-axis. If all scaling transformations applied to the
+		// node are uniform scalings, this can be considered the world
+		// scaling.
+		GetWorldUniformScale: function() {
+			this._UpdateGlobalTransform();
+			var m = this.gmatrix;
+
+			// Scaling factors can be found as the lengths of the row vectors
+			// So any row will do.
+			var x_len = Math.sqrt(m[0] * m[0] + m[4] * m[4] + m[8] * m[8]);
+
+			// TODO: If the scalings along the axes disagree, a suitable
+			// generalization would be the spectral norm of the world
+			// transformation matrix given by
+			//
+			// |sqrt(lambda_max(M^T * M))|
+			//
+			// where lambda_max(X) denotes the largest eigen value of X.
+			return x_len;
+		},
+
 		GetWorldPos : function() {
 			this._UpdateGlobalTransform();
 			return [this.gmatrix[12],this.gmatrix[13],this.gmatrix[14]];
@@ -636,10 +658,6 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			else {
 				this.gmatrix = mat4.create( this.lmatrix );
 			}
-
-			if (this.flags & medea._NODE_FLAG_STATIC_BB) {
-				this.bb = medea.MakeAABB(medea.TransformBB( this.static_bb, this.gmatrix ));
-			}
 			this._FireListener("OnUpdateGlobalTransform");
 		},
 
@@ -658,8 +676,9 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			this.flags |= this.trafo_dirty_flag;
 			this._SetBBDirty();
 
-			for( var i = 0, c = this.children, l = c.length; i < l; ++i) {
-				c[i]._SetTrafoDirty();
+			var children = this.children;
+			for( var i = children.length-1; i >= 0; --i ) {
+				children[i]._SetTrafoDirty();
 			}
 		},
 
@@ -681,22 +700,28 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			if (!(this.flags & medea._NODE_FLAG_DIRTY_BB)) {
 				return;
 			}
-			// No updates for static bounding boxes.
+
+			var trafo = this.GetGlobalTransform();
+			this.flags &= ~medea._NODE_FLAG_DIRTY_BB;
+
+			// For static bounding boxes, the BB is only transformed to a
+			// worldspace AABB. Children are not taken into account.
 			// See SetStaticBB()
 			if (this.flags & medea._NODE_FLAG_STATIC_BB) {
+				this.bb = medea.MakeAABB(medea.TransformBB( this.static_bb, trafo ));
 				return;
 			}
-			this.flags &= ~medea._NODE_FLAG_DIRTY_BB;
-			var bbs = [];
 
-			for( var i = 0, c = this.children, l = c.length; i < l; ++i) {
-				bbs.push(c[i].GetBB());
+			var bbs = new Array(this.children.length + this.entities.length);
+
+			var children = this.children;
+			for( var i = children.length-1; i >= 0; --i ) {
+				bbs[i] = children[i].GetBB();
 			}
 
-			// TODO: avoid temporary matrices
-			var trafo = this.GetGlobalTransform();
-			for( var i = 0, c = this.entities, l = c.length; i < l; ++i) {
-				bbs.push(medea.TransformBB( c[i].BB(), trafo ));
+			var entities = this.entities;
+			for( var i = entities.length-1; i >= 0; --i ) {
+				bbs[i + children.length] = medea.TransformBB( entities[i].BB(), trafo );
 			}
 
 			this.bb = medea.MergeBBs(bbs);

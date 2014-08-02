@@ -1,0 +1,7 @@
+[general]
+output=compiled/full-compile-config
+
+[modules]
+*
+
+[resources]

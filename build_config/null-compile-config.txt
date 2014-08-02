@@ -1,0 +1,7 @@
+[general]
+output=compiled/null-compile-config
+
+[modules]
+
+
+[resources]

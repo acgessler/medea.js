@@ -3,6 +3,7 @@ import sys
 import re
 import os
 import shutil
+import glob
 
 import preprocessor
 
@@ -16,6 +17,11 @@ def get_full_file_name(file):
 	return ('medea.' + file + '.js') if not ".js" in file.lower()\
 		 else os.path.join('3rdparty',file)
 
+def get_module_name_from_full_file_name(file):
+	file= os.path.splitext(os.path.split(file)[1])[0]
+	if file[:6] == 'medea.':
+		return file[6:]
+	return file + '.js'
 
 # --------------------------------------------------------------------------------
 def get_google_closure_params():
@@ -135,21 +141,27 @@ def run(input_folder, config):
 		path = os.path.join(input_folder, full_file_name) 
 		print('processing: ' + path)
 
-		with open(path, 'rt') as inp:
-			contents = inp.read()
+        # Support wildcards in modules and resolve them using GLOB on
+        # a filesystem level.
+		for matched_path in glob.iglob(path):
+			with open(matched_path, 'rt') as inp:
+				contents = inp.read()
 
-			l = parse_module_dependencies(contents, all_deps)
-			for dep in (dep for dep in l if not dep in mods_by_deps and not dep in files_to_compact):
-				files_to_compact.append(dep)
-				print full_file_name + ' depends on ' + dep
+				l = parse_module_dependencies(contents, all_deps)
+				for dep in (dep for dep in l if not dep in mods_by_deps and not dep in files_to_compact):
+					files_to_compact.append(dep)
+					print full_file_name + ' depends on ' + dep
 			
-			mods_by_deps[file] = l 
+				# Extract the original module name from the file name
+				# For non-wildcard modules, this simply reproduces the
+				# original name (i.e. |file|).
+				mods_by_deps[get_module_name_from_full_file_name(matched_path)] = l 
 
 	print('deriving topological order of collated modules')
 
 	# pre-define sprintf, matrix and the core module as they do not follow the 
 	# usual module dependency system.
-	topo_order = derive_topological_order(['core', 'glMatrix.js'],mods_by_deps)
+	topo_order = derive_topological_order(['core', 'glMatrix.js'], mods_by_deps)
 	print(topo_order)
 	print('writing medea.core-compiled.js')
 	
@@ -163,11 +175,12 @@ def run(input_folder, config):
 			path = os.path.join(input_folder, name);
 			print('collating: ' + path)
 
-			with open(path, 'rt') as inp:
-				outp.write(preprocessor.run(inp.read(), input_folder, name, symbols))
-				if '.js' in dep:
-					outp.write('medealib._MarkScriptAsLoaded("'+ dep +'");')
-				outp.write('\n')
+			for matched_path in glob.iglob(path):
+				with open(matched_path , 'rt') as inp:
+					outp.write(preprocessor.run(inp.read(), input_folder, name, symbols))
+					if '.js' in dep:
+						outp.write('medealib._MarkScriptAsLoaded("'+ dep +'");')
+					outp.write('\n')
 
 		# embed resource files
 		if resources_to_include:

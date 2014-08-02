@@ -7,29 +7,25 @@
  *
  */
 
-medealib.define('light', ['entity'],function(medealib, undefined) {
+medealib.define('light', ['entity', 'renderer'],function(medealib, undefined) {
 	"use strict";
 	var medea = this, gl = medea.gl;
 
 	
 
 	// class LightJob
-	medea.LightJob = medealib.Class.extend({
+	medea.LightJob = medea.RenderJob.extend({
 
 		distance 	: null,
 		light 		: null,
-		node 		: null,
-		viewport 	: null,
+
+		init : function(light, node, camera) {
+			this._super(light, node, camera);
+			this.light = light;
+		},
 
 		Draw : function(renderer, statepool) {
 			renderer.DrawLight(this, statepool);
-		},
-
-
-		init : function(light, node, camera) {
-			this.light = light;
-			this.node = node;
-			this.camera = camera;
 		},
 	});
 
@@ -74,7 +70,7 @@ medealib.define('light', ['entity'],function(medealib, undefined) {
 			if (dir === undefined) {
 				return this.dir;
 			}
-			this.dir = dir;
+			this.dir = vec3.create(dir);
 			vec3.normalize(this.dir);
 		},
 	});

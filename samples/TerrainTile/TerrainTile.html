@@ -3,61 +3,90 @@
 <head>
 <title></title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<script type="text/javascript" src="../../medea/medea.core.js"></script>
+<script type="text/javascript" src="../../compiled/full-debug-compile-config/medea.core-compiled.js"></script>
 <script type="text/javascript">
 
-function run() {
+// --------------------------------------------------------------------------------
+function oninit(medea) {
+	var vp1 = medea.CreateViewport();
+	vp1.Renderer(medea.CreateForwardRenderer());
 
-	medea.Ready("canvas",{dataroot:'../../data'},['debug','keycodes'],function() {
-		var vp1 = medea.CreateViewport();
-		vp1.ClearColor([1.0,1.0,1.0]);
-     
-        var root = medea.RootNode();
-		medea.FetchMods(['terraintile'], function() {
-			medea.CreateTerrainTileMesh('remote:terraintile_sample/heightmap_257.png',
-				medea.CreateSimpleMaterialFromColor([0.8,0.8,0.8,1.0], true),
-				function(mesh) {
-					root.AddChild().Translate([-64,10,-64]).AddEntity(mesh);
-				}
-			);
-		});
-        
-		// add the skydome, as in the previous sample
-		medea.FetchMods('skydome',function() {
-			root.AddChild(medea.CreateSkydomeNode('remote:skydome_sample/midmorning/midmorning.png',0.4));
-        });
-		
-		// and a plain camera controller
-		medea.FetchMods('camcontroller',function() {
-			var cam = medea.CreateCameraNode();
-			root.AddChild(cam);
-			vp1.Camera(cam);
-			
-			cam.Translate(vec3.create([0,25,5]));
-			
-			var cc = medea.CreateCamController('fps');
-            cam.AddEntity(cc);
-			cc.Enable();
-		});
-        
-		medea.SetDebugPanel(null,true);
-		medea.Start();
+	var root = medea.RootNode();
+
+	// The terraintile module provides utilities for converting even or odd-sized
+	// heightmaps to small terrain patches. It is not a fully-fleshed terrain
+	// system, but can serve as a basic building block.
+	var material = medea.CreateSimpleMaterialFromTexture(
+		'remote:labyrinth_sample/floor_texture.jpg',
+		true /* one directional light */
+	);
+
+   	medea.LoadModules('terraintile', function() {
+		medea.CreateTerrainTileMesh('remote:terraintile_sample/heightmap_257.png',
+			material,
+			function(mesh) {
+				root.AddChild()
+					.Translate([-64,10,-64])
+					.AddEntity(mesh);
+			}
+		);
 	});
+
+   	// The terrain material takes one directional input as source for computing
+   	// lighting, so we have to add one to the scene. Lights are added as entities
+   	// to the scenegraph. Internally, they are queued up and automatically bound
+   	// to shader uniforms with 'magic' names. In addition, the |medea.Renderer|
+   	// implementation receives access to a full list of active lights, allowing
+   	// for alternative approaches such as Deferred Rendering.
+	medea.LoadModules('light', function() {
+		root.AddChild().AddEntity(medea.CreateDirectionalLight([1, 1, 1], [0.5, -0.6, 0.1]));
+	});
+   
+	// add the skydome, as in the previous samples
+	medea.LoadModules('skydome',function() {
+		root.AddChild(medea.CreateSkydomeNode('remote:skydome_sample/midmorning/midmorning.png',0.4));
+    });
+	
+	var cam = medea.CreateCameraNode();
+	root.AddChild(cam);
+	vp1.Camera(cam);
+	cam.Translate([0, 15, 5]);
+
+	medea.LoadModules('camcontroller',function() {		
+		var cc = medea.CreateCamController('fps');
+	    cam.AddEntity(cc);
+		cc.Enable();
+	});
+	
+	medea.SetDebugPanel(null);
+	medea.Start();
 }
+
+
+// --------------------------------------------------------------------------------
+function run() {
+	var dep = ['debug','forwardrenderer', 'keycodes', 'input_handler', 'material'];
+			
+	var config = {
+		dataroot: '../../data'
+	};
+
+	medealib.CreateContext("canvas", 
+		config, 
+		dep,
+		oninit,
+		function() {
+			alert('failed to initialize medea');
+		});
+}
+
 
 </script>
 
 </head>
 
-
 <body onload="run();">
-Press ENTER to toggle scene.   (Skydome from  http://www.tutorialsforblender3d.com/Textures/Skys/Sky_Dome_1.html, free for non-commercial use; Heightmap from Wikipedia, Public Domain)
-
+	<div style="margin-left: 300px;">Press ENTER to toggle scene.   (Skydome from  http://www.tutorialsforblender3d.com/Textures/Skys/Sky_Dome_1.html, free for non-commercial use)</div>
     <canvas id="canvas" style="border: none;" width="1024" height="768"></canvas>
-
-    <br/>
-    
-
 </body>
-
 </html>
