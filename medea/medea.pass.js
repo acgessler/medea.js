@@ -635,12 +635,14 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			// #endif
 
 			var tex_assignment = this.tex_assignment;
-			var setup_texture = function(i, tex) {
-				var res = tex._Bind(i);
-				// #ifdef DEBUG
-				medealib.DebugAssert(res !== null, 
-					'invariant, bind should not fail');
-				// #endif
+			var setup_texture = function(i, tex, no_bind) {
+				if (!no_bind) {
+					var res = tex._Bind(i);
+					// #ifdef DEBUG
+					medealib.DebugAssert(res !== null, 
+						'invariant, bind should not fail');
+					// #endif
+				}
 
 				var key = '' + tex.GetResourceID();
 				if (tex_assignment[key] !== i) {
@@ -681,7 +683,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 					}
 					else if (slots[i][1] === curgl) {
 						slots[i][0] = state.texage++;
-						setup_texture(i, curval);
+						setup_texture(i, curval, true);
 						return;
 					}
 					else if ( slots[i][0] < oldest && oldest !== state.texage+2) {
