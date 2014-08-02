@@ -73,6 +73,7 @@ medealib.define('filesystem',[],function(medealib, undefined) {
 		return name;
 	};
 	
+	var resource_id_counter = 0;
 
 	// class Resource
 	medea.Resource = medealib.Class.extend({
@@ -81,8 +82,11 @@ medealib.define('filesystem',[],function(medealib, undefined) {
 		complete : false,
 		callback : null,
 		src : null,
+		rid : -1,
 
 		init : function(src, callback, do_not_load) {
+			// Always assign a resource ID
+			this.rid = resource_id_counter++;
 			if(!src) {
 				this.complete = true;
 				this.src = '';
@@ -104,6 +108,10 @@ medealib.define('filesystem',[],function(medealib, undefined) {
 					}
 				);
 			}
+		},
+
+		GetResourceID : function() {
+			return this.rid;
 		},
 
 		AddRef : function() {
