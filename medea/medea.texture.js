@@ -144,6 +144,9 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 					medealib._AjaxFetch(medea.FixURL(src_or_img), function(ab, status) {
 						if(!ab || !ab.byteLength) {
 							// TODO: set to permanently failed state
+							// #ifdef DEBUG
+							medealib.DebugAssert(false, 'No data loaded from dds');
+							// #endif
 							return;
 						}
 						
