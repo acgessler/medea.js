@@ -56,9 +56,9 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		'bvec2'	: gl.BOOL_VEC2,
 		'bvec3'	: gl.BOOL_VEC2,
 		'bvec4'	: gl.BOOL_VEC4,
-		'mat2'	: gl.BOOL_MAT2,
-		'mat3'	: gl.BOOL_MAT3,
-		'mat4'	: gl.BOOL_MAT4,
+		'mat2'	: gl.FLOAT_MAT2,
+		'mat3'	: gl.FLOAT_MAT3,
+		'mat4'	: gl.FLOAT_MAT4,
 		'sampler2D'	: gl.SAMPLER_2D,
 		'samplerCube'	: gl.SAMPLER_CUBE
 	};
