@@ -449,6 +449,9 @@ medealib = new function() {
 	  		ajax = new ActiveXObject("Microsoft.XMLHTTP");
 		}
 
+		// Note: open() must called before responseType is set.
+		// Chrome doesn't bother, but Firefox throws invalid state otherwise.
+		ajax.open("GET",url + (no_client_cache ?  '?nocache='+(new Date()).getTime() : ''), true);
 		ajax.onreadystatechange = function() {
 			if (ajax.readyState === 4) {
 				callback(ajax.status === 200 ? (array_buffer ? ajax.response 
@@ -459,8 +462,6 @@ medealib = new function() {
 		if(array_buffer) {
 			ajax.responseType = "arraybuffer";
 		}
-
-		ajax.open("GET",url + (no_client_cache ?  '?nocache='+(new Date()).getTime() : ''),true);
 		ajax.send(null);
 	};
 

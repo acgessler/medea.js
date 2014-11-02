@@ -200,10 +200,13 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		semantic : medea.PASS_SEMANTIC_COLOR_FORWARD_LIGHTING,
 		cache_name : null,
 
+		tex_assignment : null,
+
 		clone_flags : null,
 		original : null,
 
 		uniform_type_cache : null,
+		uniform_pos_cache : null,
 
 // #ifdef DEBUG
 		ignore_uniform_errors : false,
@@ -219,6 +222,8 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			this.attr_map = attr_map;
 			this.state = state || {};
 			this.uniform_type_cache = {};
+			this.tex_assignment = {};
+			this.uniform_pos_cache = {};
 
 // #ifdef DEBUG
 			if (!vs || !ps) {
@@ -494,7 +499,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				return;
 			}
 
-			var pos = gl.getUniformLocation(this.program, k);
+			var pos = this._GetUniformPos(k);
 			if (!pos) {
 				// #ifdef DEBUG
 				if (!this.ignore_uniform_errors) {
@@ -624,13 +629,27 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		},
 
 		_SetTexture : function(k, val, pos) {
-			// Explicitly bound texture - this is a special case because string values
-			// for texture parameters are not eval()ed but requested as textures from
-			// the server.
 			var prog = this.program;
 			// #ifdef DEBUG
 			medealib.DebugAssert(prog, 'program must exist already');
 			// #endif
+
+			var tex_assignment = this.tex_assignment;
+			var setup_texture = function(i, tex, no_bind) {
+				if (!no_bind) {
+					var res = tex._Bind(i);
+					// #ifdef DEBUG
+					medealib.DebugAssert(res !== null, 
+						'invariant, bind should not fail');
+					// #endif
+				}
+
+				var key = '' + tex.GetResourceID();
+				if (tex_assignment[key] !== i) {
+					gl.uniform1i(pos, i);
+					tex_assignment[key] = i;
+				}
+			};
 
 			this.auto_setters[k] = [pos, function(pos, state) {
 				// Note: constants[k] is not set to be the texture as it is loaded.
@@ -638,7 +657,6 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				// APIs, so we cannot change the object type in the background. The
 				// texture object only exists in the Set() closure.
 				var curval = val;
-
 				if (!(curval instanceof medea.Resource) || !curval.IsRenderable()) {
 					curval = medea.GetDefaultTexture();
 				}
@@ -665,16 +683,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 					}
 					else if (slots[i][1] === curgl) {
 						slots[i][0] = state.texage++;
-
-						// XXX why do we need _Bind() here? Setting the index should suffice
-						// since the texture is already set.
-						var res = curval._Bind(i);
-						// #ifdef DEBUG
-						medealib.DebugAssert(res !== null, 
-							'invariant, bind should not fail (2)');
-						// #endif
-
-						gl.uniform1i(pos, res);
+						setup_texture(i, curval, true);
 						return;
 					}
 					else if ( slots[i][0] < oldest && oldest !== state.texage+2) {
@@ -684,13 +693,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				}
 
 				slots[oldesti] = [state.texage++,curgl];
-				var res = curval._Bind(oldesti);
-				// #ifdef DEBUG
-				medealib.DebugAssert(res !== null, 
-					'invariant, bind should not fail (1)');
-				// #endif
-
-				gl.uniform1i(pos, res);
+				setup_texture(oldesti, curval);
 				state.tex_slots = slots;
 			}];
 
@@ -789,6 +792,10 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 
 			// Uniform type cache can be shared between clones
 			out.uniform_type_cache = this.uniform_type_cache;
+			out.uniform_pos_cache = this.uniform_pos_cache;
+
+			// Texture assignment cache can be shared between clones
+			out.tex_assignment = this.tex_assignment;
 
 			// However, we need to rebuild setters from scratch
 			out.auto_setters = {};
@@ -939,6 +946,16 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				var v = setters[k];
 				v[1](v[0], statepool, change_flags);
 			}
+		},
+
+		_GetUniformPos : function(name) {
+			var cache = this.uniform_pos_cache;
+			var cached_pos = cache[name];
+			if (cached_pos === undefined) {
+				cached_pos = gl.getUniformLocation(this.program, name);
+				cache[name] = cached_pos;
+			}
+			return cached_pos;
 		},
 
 		_GetUniformType : function(name) {

@@ -13,7 +13,29 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 
 	var medea = this;
 
+	// #constant
+
+	//-
+	// A constant to designate a bounding box of infinite extent.
+	//
+	// BB_INFINITE can be used almost every time a bounding box
+	// is expected, except when otherwise noted.
+	//
+	// It is possible to assign a static bounding box of this type to a node,
+	// effectively disabling culling for it since an infinite bounding box
+	// is always visible.
+	//
+	// Be careful: BB_INFINITE propagates the scene hierarchy upwards.
+	// #medea:Node:SetStaticBB
 	medea.BB_INFINITE = 'i';
+
+	//-
+	// A constant to designate a zero-sized bonding box.
+	//
+	// BB_EMPTY can be used almost every time a bounding box
+	// is expected, except when otherwise noted.
+	//
+	// Culling-wise, an empty bounding box is never visible.
 	medea.BB_EMPTY = 'e';
 
 	medea._NODE_FLAG_DIRTY = 0x1;
@@ -21,17 +43,47 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 	medea._NODE_FLAG_DIRTY_GI = 0x4;
 	medea._NODE_FLAG_STATIC_BB = 0x8;
 
+	//-
 	medea.NODE_FLAG_NO_ROTATION = 0x40;
+	
+	//-
 	medea.NODE_FLAG_NO_SCALING = 0x80;
 
 	medea.NODE_FLAG_USER = 0x100000;
 
 	var id_source = 0;
 
+	//-
+	// Represents a node in the scenegraph.
+	//
+	// A scene is represented by a tree structure, called the "scenegraph",
+	// which is rooted at a pre-existing root node that is accessible
+	// via -> #medea:RootNode.
+	//
+	// Each node in the tree carries a transformation offset with respect
+	// to its parent and offers convenience methods to scale, rotate or
+	// translate the subtree of the scenegraph that is rooted here.
+	//
+	// Entities (i.e. meshes, lights) are attached to the scene graph nodes.
+	// (this means they form the leaves of the tree).
+	//
+	// Furthermore, nodes carry a bounding box, which is used to determine
+	// visibility (culling) of a subtree during rendering. The bounding
+	// box is by default calculated as the union of all child nodes and
+	// attached entities. A custom bounding box can be set using
+	// -> #medea:Node:SetStaticBB.
+	//
+	// While some frameworks encourage to inherit from the scenegraph
+	// Node class, medea does not: in most cases, custom logic can
+	// reside in entities, not nodes.
+	//
+	// -> #medea:Entity
+	// -> #medea:CreateNode
 	medea.Node = medealib.Class.extend({
 
-		// this is to allow subclasses to have their own flags set when the node's transformation
-		// matrix is altered. By default we only set DIRTY.
+		// This is to allow subclasses to have their own flags set when
+		// the node's transformation matrix is altered. By default we
+		// only set DIRTY.
 		trafo_dirty_flag: medea._NODE_FLAG_DIRTY |
 			medea._NODE_FLAG_DIRTY_GI |
 			medea._NODE_FLAG_DIRTY_BB,
@@ -77,6 +129,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			this.enabled = true;
 		},
 		
+		//-
 		// Enable or disable a node for rendering and updating.
 		//
 		// Disabled nodes still contribute their BB to the parent's
@@ -93,6 +146,9 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			this.enabled = e;
 		},
 
+		//-
+		// Name property: names are used to identify nodes, for example
+		// during scenegraph traversal.
 		Name : function(n) {
 			if (n === undefined) {
 				return this.name;
@@ -104,10 +160,14 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			return this.entities;
 		},
 
+		//- Currently the same as -> #GetEntities
 		GetActiveEntities: function(cam) {
 			return this.entities;
 		},
 
+		//- Add an entity to the nodes.
+		//
+		// |ent| : #medea:Entity
 		AddEntity: function(ent) {
 			// #ifdef DEBUG
 			medealib.DebugAssert(ent instanceof medea.Entity,'need valid entity to attach');
@@ -119,7 +179,8 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			this._SetBBDirty();
 		},
 
-		// note: when doing this from within Entity.Update(), return medea.ENTITY_UPDATE_WAS_REMOVED
+		//-
+		// Note: when doing this from within Entity.Update(), return medea.ENTITY_UPDATE_WAS_REMOVED
 		RemoveEntity: function(ent) {
 			var idx = this.entities.indexOf(ent);
 			if(idx !== -1) {
@@ -130,6 +191,8 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			}
 		},
 		
+		//-
+		//
 		RemoveAllEntities: function(tag) {
 			if(tag === undefined) {
 				for (var i = 0; i < this.entities.length; ++i) {
