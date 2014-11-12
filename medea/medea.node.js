@@ -51,6 +51,14 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 
 	medea.NODE_FLAG_USER = 0x100000;
 
+
+	// Flag for |medea.CloneNode|
+	// Performs a shallow clone of the node hierarchy, using the same
+	// entities as the original node. 
+	medea.NODE_CLONE_SHALLOW = 0x1;
+
+
+
 	var id_source = 0;
 
 	//-
@@ -127,6 +135,12 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 
 			this.flags = this.trafo_dirty_flag | (flags || 0);
 			this.enabled = true;
+		},
+
+		// 
+		GetFlags : function() {
+			// Dirty flags should never be of relevance to a user
+			return this.flags & ~this.trafo_dirty_flag;
 		},
 		
 		//-
@@ -756,6 +770,41 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 	//
 	medea.CreateNode = function(name, flags) {
 		return new medea.Node(name, flags);
+	};
+
+
+	// Clone the existing |node|.
+	// |clone_flags| can be any of the |medea.NODE_CLONE_XXX| bitwise flags to control cloning.
+	//
+	// Currently, cloning is not polymorphic. Inheriting classes such as Camera do
+	// get cloned as raw nodes only.
+	medea.CloneNode = function(node, clone_flags) {
+		clone_flags = clone_flags | medea.NODE_CLONE_SHALLOW;
+		if (!(clone_flags & medea.NODE_CLONE_SHALLOW)) {
+			medealib.DebugAssert("CloneNode: modes other than NODE_CLONE_SHALLOW are not currently supported");
+		}
+
+		// TODO: assign a proper name
+		var new_node = medea.CreateNode(undefined, node.GetFlags());
+
+		new_node.LocalTransform(node.LocalTransform());
+		new_node.Enabled(node.Enabled());
+		new_node.SetStaticBB(node.GetStaticBB());
+
+		// TODO: dispatch to Node implementation to allow descendents to modify or block the cloning
+
+		var entities = node.entities;
+		for (var i = 0; i < entities.length; ++i) {
+			new_node.AddEntity(entities[i]);
+		}
+
+		var children = node.children;
+		for (var i = 0; i < children.length; ++i) {
+			var new_child = medea.CloneNode(children[i], clone_flags);
+			new_node.AddChild(new_child);
+		}
+
+		return new_node;
 	};
 });
 
