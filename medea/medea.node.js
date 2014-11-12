@@ -691,7 +691,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 		_SetBBDirty : function() {
 			// No upwards propagation for static bounding boxes.
 			// See SetStaticBB()
-			if (this.flags & medea._NODE_FLAG_STATIC_BB) {
+			if (this.flags & (medea._NODE_FLAG_STATIC_BB | medea._NODE_FLAG_DIRTY_BB)) {
 				return;
 			}
 			var node = this, flag = medea._NODE_FLAG_DIRTY_BB;
@@ -699,7 +699,10 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 				node.flags |= flag;
 				node = node.parent;
 			}
-			while(node != null);
+			// This could be simplified by calling _SetBBDirty()
+			// on the parent. This would have significant perf
+			// overhead though, so let's leave it unrolled.
+			while(node != null && (node.flags & (medea._NODE_FLAG_STATIC_BB | medea._NODE_FLAG_DIRTY_BB)) === 0);
 		},
 
 		_UpdateBB: function() {
