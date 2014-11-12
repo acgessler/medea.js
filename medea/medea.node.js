@@ -289,6 +289,12 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			}
 		},
 
+		RemoveAllChildren: function() {
+			while (this.children.length > 0) {
+				this.RemoveChild(this.children[0]);
+			}
+		},
+
 		OnAttach : function(parent) {
 			// #ifdef DEBUG
 			medealib.DebugAssert(parent !== this,'cannot attach node to itself');
