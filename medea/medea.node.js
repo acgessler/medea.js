@@ -181,11 +181,17 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 
 		//- Add an entity to the nodes.
 		//
+		// Nothing happens if the entity has been added before.
+		//
 		// |ent| : #medea:Entity
 		AddEntity: function(ent) {
 			// #ifdef DEBUG
 			medealib.DebugAssert(ent instanceof medea.Entity,'need valid entity to attach');
 			// #endif
+
+			if (this.entities.indexOf(ent) !== -1) {
+				return;
+			}
 
 			this.entities.push(ent);
 			ent.OnAttach(this);
