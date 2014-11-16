@@ -210,6 +210,10 @@ medealib.define('camera',['statepool'],function(medealib, undefined) {
 					return medea.VISIBLE_NONE;
 				}
 
+				// #ifdef DEBUG
+				medealib.DebugAssert(parent_visible !== medea.VISIBLE_NONE, 'traversal bug');
+				// #endif
+
 				var vis = parent_visible === medea.VISIBLE_ALL ? medea.VISIBLE_ALL : node.Cull(frustum);
 				var e = node.GetActiveEntities(outer);
 

@@ -60,7 +60,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 	medeactx.FRAME_VIEWPORT_UPDATED = 0x1;
 	medeactx.FRAME_CANVAS_SIZE_CHANGED = medeactx.FRAME_VIEWPORT_UPDATED | 0x2;
 
-	medeactx.VISIBLE_NONE = 0x0;
+	medeactx.VISIBLE_NONE = 0x0; // Must be 'falsy'
 	medeactx.VISIBLE_ALL = 0x1;
 	medeactx.VISIBLE_PARTIAL = 0x2;
 
@@ -465,7 +465,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 				}	
 
 				if(!node.Enabled()) {
-					return true;
+					return false;
 				}
 				var e = node.GetEntities();
 				// If entities return medeactx.ENTITY_UPDATE_WAS_REMOVED  from Update(), it means they
