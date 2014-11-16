@@ -109,6 +109,7 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 		bb : null,
 		flags : null,
 		enabled : null,
+		enabled_predicate : null,
 		static_bb : null,
 
 		init : function(name, flags) {
@@ -158,6 +159,19 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 				return this.enabled;
 			}
 			this.enabled = e;
+		},
+
+
+		//-
+		// Set a predicate function that is evaluated once every frame
+		// to determine if the node is enabled or not.
+		//
+		// The |EnabledIf| function directly affects the |Enabled| property.
+		EnabledIf : function(e) {
+			if (e === undefined) {
+				return this.enabled_predicate;
+			}
+			this.enabled_predicate = e;
 		},
 
 		//-

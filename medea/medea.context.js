@@ -414,7 +414,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 			return;
 		}
 
-		// get time delta and detect canvas changes
+		// Get time delta and detect canvas changes
 		function update_stats() {
 			// get time delta if not specified
 			if (dtime === undefined) {
@@ -437,9 +437,9 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 			medeactx._UpdateFrameStatistics(dtime);
 		}
 
-		// call user tick callbacks, result of false kills the frame
+		// Call user tick callbacks, result of false kills the frame
 		function call_user_callbacks() {
-			// call user-defined logic, operate on a copy of the dictionary just in case
+			// Call user-defined logic, operate on a copy of the dictionary just in case
 			// somebody changed its contents while we're iterating it.
 			var temp_callbacks = [];
 			for(var k in medeactx.tick_callbacks) {
@@ -454,14 +454,22 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 			return true;
 		}
 
-		// perform scenegraph update 
+		// Perform scenegraph update 
 		function update() {
 			medeactx.VisitGraph(medeactx.scene_root,function(node) {
+				// If the node specifies a predicate to determine whether it is active or not,
+				// we evaluate it now and update the |Enabled| property accordingly.
+				var enabled_predicate = node.EnabledIf();
+				if (enabled_predicate) {
+					node.Enabled(enabled_predicate() ? true : false);
+				}	
+
 				if(!node.Enabled()) {
 					return true;
 				}
 				var e = node.GetEntities();
-				// if entities return medea.ENTITY_UPDATE_WAS_REMOVED  from Update(), medeactx means they removed
+				// If entities return medeactx.ENTITY_UPDATE_WAS_REMOVED  from Update(), it means they
+				// removed themselves from the scenegraph during the update.
 				for(var i = 0; i < e.length; ++i) {
 					if(e[i].Update(dtime,node) === medeactx.ENTITY_UPDATE_WAS_REMOVED) {
 						--i;
@@ -473,9 +481,9 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 			});
 		}
 
-		// dispatch collected batch jobs to our viewport(s)
+		// Dispatch collected batch jobs to our viewport(s)
 		function draw() {
-			// adjust render settings if we switched to multiple viewports or vice versa
+			// Adjust render settings if we switched to multiple viewports or vice versa
 			if (medeactx.frame_flags & medeactx.FRAME_VIEWPORT_UPDATED) {
 				if (medeactx.GetEnabledViewportCount()>1) {
 					medeactx.gl.enable(medeactx.gl.SCISSOR_TEST);
@@ -485,7 +493,7 @@ var Context = medealib.Context = function(where, settings, deps, user_on_ready, 
 				}
 			}
 
-			// perform rendering
+			// Perform rendering
 			var viewports = medeactx.GetViewports();
 			for(var vn = 0; vn < viewports.length; ++vn) {
 				viewports[vn].Render(medeactx,dtime);
