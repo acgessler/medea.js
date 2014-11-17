@@ -466,7 +466,7 @@ medealib.define('texture',['nativeimagepool','filesystem', 'imagestream', 'dummy
 			slot = slot || 0;
 
 			gl.activeTexture(gl.TEXTURE0 + slot);
-			gl.bindTexture(TEX,this.texture);
+			gl.bindTexture(TEX, this.texture);
 
 			// No texture uploads while responsiveness is important
 			if (!this.uploaded) {

@@ -36,11 +36,20 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 	medea.MAX_DIRECTIONAL_LIGHTS = 8;
 
 
-	// Cache for gl program objects and their ids, keyed by "vs_id" + "ps_id" (
+	// Cache for gl program objects and their ids, keyed by <vs_id>_<ps_id> (
 	// corresponding to pass.cache_id)
 	var program_cache = {};
 	var program_ids = {};
 	var program_id_counter = 0;
+
+	// Cache for texture assignments, keyed by <program_id>_<uniform_name>,
+	// the value is the texture slot. This cannot be local to |medea.Pass|
+	// since multiple independent passes that are not clones of each other
+	// (and in fact do not know about each other) can still share the same
+	// underlying program and thus could affect each other's texture
+	// mappings.
+	var tex_assignment = {};
+
 
 	// Map from GLSL type identifiers to the corresponding GL enumerated types
 	var glsl_typemap = {
@@ -200,8 +209,6 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		semantic : medea.PASS_SEMANTIC_COLOR_FORWARD_LIGHTING,
 		cache_name : null,
 
-		tex_assignment : null,
-
 		clone_flags : null,
 		original : null,
 
@@ -222,7 +229,6 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			this.attr_map = attr_map;
 			this.state = state || {};
 			this.uniform_type_cache = {};
-			this.tex_assignment = {};
 			this.uniform_pos_cache = {};
 
 // #ifdef DEBUG
@@ -630,12 +636,14 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 
 		_SetTexture : function(k, val, pos) {
 			var prog = this.program;
+			var texture_key = this.program_id.toString() + k;
+
 			// #ifdef DEBUG
 			medealib.DebugAssert(prog, 'program must exist already');
 			// #endif
 
-			var tex_assignment = this.tex_assignment;
 			var setup_texture = function(i, tex, no_bind) {
+				
 				if (!no_bind) {
 					var res = tex._Bind(i);
 					// #ifdef DEBUG
@@ -645,10 +653,10 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				}
 
 				var key = '' + tex.GetResourceID();
-				if (tex_assignment[key] !== i) {
+				if (tex_assignment[texture_key] !== i) {
 					gl.uniform1i(pos, i);
-					tex_assignment[key] = i;
-				}
+					tex_assignment[texture_key] = i;
+				}			
 			};
 
 			this.auto_setters[k] = [pos, function(pos, state) {
@@ -787,15 +795,12 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 			// with explicit disposal semantics).
 			out.program = this.program;
 
-			// Attribute mapping is always safe to share
+			// Attribute mapping is always shared.
 			out.attr_map = this.attr_map;
 
 			// Uniform type cache can be shared between clones
 			out.uniform_type_cache = this.uniform_type_cache;
 			out.uniform_pos_cache = this.uniform_pos_cache;
-
-			// Texture assignment cache can be shared between clones
-			out.tex_assignment = this.tex_assignment;
 
 			// However, we need to rebuild setters from scratch
 			out.auto_setters = {};
@@ -806,7 +811,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		},
 
 		_ExtractUniforms : function() {
-			// extract uniforms that we update automatically and setup state managers for them
+			// Extract uniforms that we update automatically and setup state managers for them
 			for(var k in medea.ShaderSetters) {
 				var pos = gl.getUniformLocation(this.program, k);
 				if(pos) {
@@ -816,7 +821,7 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 		},
 
 		_RefreshState : function() {
-			// re-install state managers for all constants
+			// Re-install state managers for all constants
 			var old = this.constants;
 			this.constants = {};
 			for(var k in old) {
@@ -870,6 +875,13 @@ medealib.define('pass',['shader','texture'],function(medealib, undefined) {
 				// #endif
 			}
 			else {
+				// Sharing programs between materials is effectively like cloning,
+				// except that both materials were created independently, not
+				//. knowing about each other, with potentially different other
+				// parameters such as attribute mappings.
+				//
+				// This is the reason why |tex_assignments| is handled globally.
+				// This should be made cleaner in a future re-design (sigh).
 				this.program_id = program_ids[cache_name];
 				this.program = p;
 				gl.useProgram(this.program);
