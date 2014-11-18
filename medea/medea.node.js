@@ -647,6 +647,12 @@ medealib.define('node',['frustum'],function(medealib, undefined) {
 			return x_len;
 		},
 
+		GetWorldUniformScaleSqr: function() {
+			this._UpdateGlobalTransform();
+			var m = this.gmatrix;
+			return m[0] * m[0] + m[4] * m[4] + m[8] * m[8];
+		},
+
 		GetWorldPos : function() {
 			this._UpdateGlobalTransform();
 			return [this.gmatrix[12],this.gmatrix[13],this.gmatrix[14]];

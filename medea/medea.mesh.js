@@ -41,19 +41,22 @@ medealib.define('mesh',['vertexbuffer','indexbuffer','material','entity','render
 		DistanceEstimate : (function() {
 			var scratch_vec = vec3.create();
 			return function() {
+				var node = this.node;
+				var mesh = this.mesh;
 				if (this.distance === null) {
-					if (this.mesh.IsUnbounded()) {
+					if (mesh.IsUnbounded()) {
 						this.distance = 0;
 					}
 					else {
 						// TODO: this does *not* handle scaled meshes correctly
 						var cam_pos = this.camera.GetWorldPos();
-						var node_pos = vec3.add(this.node.GetWorldPos(), this.mesh.GetCenter(), scratch_vec);
+						var node_pos = vec3.add(node.GetWorldPos(), mesh.GetCenter(), scratch_vec);
 						var delta = vec3.subtract(cam_pos, node_pos, scratch_vec);
 
 						// Subtract the mesh' bounding radius from the estimate
-						var radius = this.mesh.GetRadius();
-						this.distance = Math.max(0, vec3.dot(delta, delta) - radius * radius);
+						var radius = mesh.GetRadius();
+						var offset = radius * radius * node.GetWorldUniformScaleSqr();
+						this.distance = Math.max(0, vec3.dot(delta, delta) - offset);
 					}
 				}
 				return this.distance;
