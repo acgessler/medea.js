@@ -34,23 +34,27 @@ medealib.define('renderqueue',['renderstate'],function(medealib, undefined) {
 	this.RENDERQUEUE_LAST = 19;
 
 
-	// class DistanceSorter
+	// class DistanceSorter (back-to-front)
 	this.DistanceSorter = medealib.Class.extend({
 
 		Run : function(entries) {
 			entries.sort(function(a,b) {
-				return a.DistanceEstimate() - b.DistanceEstimate();
+				return b.DistanceEstimate() - a.DistanceEstimate();
 			});
 		}
 	});
 
 
-	// class MaterialSorter
+	// class MaterialSorter (secondary sort by distance, front-to-back)
 	this.MaterialSorter = medealib.Class.extend({
 
 		Run : function(entries) {
-			entries.sort(function(a,b) {
-				return a.MaterialId() - b.MaterialId();
+			entries.sort(function(a, b) {
+				var d = a.MaterialId() - b.MaterialId();
+				if (d !== 0) {
+					return d;
+				}
+				return a.DistanceEstimate() - b.DistanceEstimate();
 			});
 		}
 	});
