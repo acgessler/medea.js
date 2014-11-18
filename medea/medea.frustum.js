@@ -18,7 +18,7 @@ medealib.define('frustum',[],function(medealib, undefined) {
 
 	// BB_INFINITE and BB_EMPTY are defined in the "node" module
 
-	medea.CreateBB = function(vmin,vmax, mat) {
+	medea.CreateBB = function(vmin, vmax, mat) {
 		var min_def = [1e10,1e10,1e10], max_def = [-1e10,-1e10,-1e10];
 		return mat ? [vmin || min_def, vmax || max_def, mat] : [vmin || min_def, vmax || max_def];
 	};
@@ -102,7 +102,7 @@ medealib.define('frustum',[],function(medealib, undefined) {
 		return bout;
 	};
 
-	medea.NormalizePlane = function(p,p_out) {
+	medea.NormalizePlane = function(p, p_out) {
 		if (!p_out) {
 			p_out = p;
 		}
@@ -124,52 +124,52 @@ medealib.define('frustum',[],function(medealib, undefined) {
 		var vp = mat4.multiply(proj, view, mat4.create());
 		var f = [
 			// left plane
-			[
+			new Float32Array([
 			 vp[3] + vp[0],
 			 vp[7] + vp[4],
 			 vp[11] + vp[8],
 			 vp[15] + vp[12]
-			],
+			]),
 
 			// right plane
-			[
+			new Float32Array([
 			 vp[3] - vp[0],
 			 vp[7] - vp[4],
 			 vp[11] - vp[8],
 			 vp[15] - vp[12]
-			],
+			]),
 
 			// near plane
-			[
+			new Float32Array([
 			 vp[3] + vp[2],
 			 vp[7] + vp[6],
 			 vp[11] + vp[10],
 			 vp[15] + vp[14]
-			],
+			]),
 
 			// far plane
-			[
+			new Float32Array([
 			 vp[3] - vp[2],
 			 vp[7] - vp[6],
 			 vp[11] - vp[10],
 			 vp[15] - vp[14]
-			],
+			]),
 
 			// bottom plane
-			[
+			new Float32Array([
 			 vp[3] + vp[1],
 			 vp[7] + vp[5],
 			 vp[11] + vp[9],
 			 vp[15] + vp[13]
-			],
+			]),
 
 			// top plane
-			[
+			new Float32Array([
 			 vp[3] - vp[1],
 			 vp[7] - vp[5],
 			 vp[11] - vp[9],
 			 vp[15] - vp[13]
-			]
+			]),
 		];
 
 		for (var i = 0; i < 6; ++i) {
@@ -183,7 +183,7 @@ medealib.define('frustum',[],function(medealib, undefined) {
 		var v0 = v[0];
 		for (var i = 0; i < 6; ++i) {
 			var ff = f[i];
-			if (ff[0] * v0 + ff[1] * v[1] + ff[2] * v[2] + v[3] <= 0) {
+			if (ff[0] * v0 + ff1 * v[1] + ff2 * v[2] + v[3] <= 0) {
 				return false;
 			}
 		}
@@ -224,28 +224,34 @@ medealib.define('frustum',[],function(medealib, undefined) {
 					i = 0;
 				}
 				var ff = f[i], c = 0;
-				if (ff[0] * min0 + ff[1] * min1 + ff[2] * min2 + ff[3] > 0) {
+
+				var ff0 = ff[0];
+				var ff1 = ff[1];
+				var ff2 = ff[2];
+				var ff3 = ff[3];
+
+				if (ff0 * min0 + ff1 * min1 + ff2 * min2 + ff3 > 0) {
 					++c;
 				}
-				if (ff[0] * max0 + ff[1] * min1 + ff[2] * min2 + ff[3] > 0) {
+				if (ff0 * max0 + ff1 * min1 + ff2 * min2 + ff3 > 0) {
 					++c;
 				}
-				if (ff[0] * max0 + ff[1] * max1 + ff[2] * min2 + ff[3] > 0) {
+				if (ff0 * max0 + ff1 * max1 + ff2 * min2 + ff3 > 0) {
 					++c;
 				}
-				if (ff[0] * max0 + ff[1] * max1 + ff[2] * max2 + ff[3] > 0) {
+				if (ff0 * max0 + ff1 * max1 + ff2 * max2 + ff3 > 0) {
 					++c;
 				}
-				if (ff[0] * max0 + ff[1] * min1 + ff[2] * max2 + ff[3] > 0) {
+				if (ff0 * max0 + ff1 * min1 + ff2 * max2 + ff3 > 0) {
 					++c;
 				}
-				if (ff[0] * min0 + ff[1] * max1 + ff[2] * max2 + ff[3] > 0) {
+				if (ff0 * min0 + ff1 * max1 + ff2 * max2 + ff3 > 0) {
 					++c;
 				}
-				if (ff[0] * min0 + ff[1] * max1 + ff[2] * min2 + ff[3] > 0) {
+				if (ff0 * min0 + ff1 * max1 + ff2 * min2 + ff3 > 0) {
 					++c;
 				}
-				if (ff[0] * min0 + ff[1] * min1 + ff[2] * max2 + ff[3] > 0) {
+				if (ff0 * min0 + ff1 * min1 + ff2 * max2 + ff3 > 0) {
 					++c;
 				}
 
@@ -267,68 +273,73 @@ medealib.define('frustum',[],function(medealib, undefined) {
 				}
 				var ff = f[i], c = 0;
 
+				var ff0 = ff[0];
+				var ff1 = ff[1];
+				var ff2 = ff[2];
+				var ff3 = ff[3];
+
 				// vtemp and vt are global to avoid the extra allocation
 				vtemp[0] = min0;
 				vtemp[1] = min1;
 				vtemp[2] = min2;
-				mat4.multiplyVec3(mat,vtemp, vt);
-				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
+				mat4.multiplyVec3(mat, vtemp, vt);
+				if (ff0 * vt[0] + ff1 * vt[1] + ff2 * vt[2] + ff3 > 0) {
 					++c;
 				}
 
 				vtemp[0] = min0;
 				vtemp[1] = max1;
 				vtemp[2] = min2;
-				mat4.multiplyVec3(mat,vtemp, vt);
-				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
+				mat4.multiplyVec3(mat, vtemp, vt);
+				if (ff0 * vt[0] + ff1 * vt[1] + ff2 * vt[2] + ff3 > 0) {
 					++c;
 				}
 
 				vtemp[0] = min0;
 				vtemp[1] = max1;
 				vtemp[2] = max2;
-				mat4.multiplyVec3(mat,vtemp, vt);
-				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
+				mat4.multiplyVec3(mat, vtemp, vt);
+				if (ff0 * vt[0] + ff1 * vt[1] + ff2 * vt[2] + ff3 > 0) {
 					++c;
 				}
 
 				vtemp[0] = min0;
 				vtemp[1] = min1;
 				vtemp[2] = max2;
-				mat4.multiplyVec3(mat,vtemp, vt);
-				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
+				mat4.multiplyVec3(mat, vtemp, vt);
+				if (ff0 * vt[0] + ff1 * vt[1] + ff2 * vt[2] + ff3 > 0) {
 					++c;
 				}
 
 				vtemp[0] = max0;
 				vtemp[1] = min1;
 				vtemp[2] = min2;
-				mat4.multiplyVec3(mat,vtemp, vt);
-				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
+				mat4.multiplyVec3(mat, vtemp, vt);
+				if (ff0 * vt[0] + ff1 * vt[1] + ff2 * vt[2] + ff3 > 0) {
 					++c;
 				}
 
 				vtemp[0] = max0;
 				vtemp[1] = max1;
 				vtemp[2] = min2;
-				mat4.multiplyVec3(mat,vtemp, vt);
-				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
+				mat4.multiplyVec3(mat, vtemp, vt);
+				if (ff0 * vt[0] + ff1 * vt[1] + ff2 * vt[2] + ff3 > 0) {
 					++c;
 				}
 
 				vtemp[0] = max0;
 				vtemp[1] = max1;
 				vtemp[2] = max2;
-				mat4.multiplyVec3(mat,vtemp, vt);
-				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
+				mat4.multiplyVec3(mat, vtemp, vt);
+				if (ff0 * vt[0] + ff1 * vt[1] + ff2 * vt[2] + ff3 > 0) {
 					++c;
 				}
 
 				vtemp[0] = max0;
 				vtemp[1] = min1;
 				vtemp[2] = max2;
-				mat4.multiplyVec3(mat,vtemp, vt);
-				if (ff[0] * vt[0] + ff[1] * vt[1] + ff[2] * vt[2] + ff[3] > 0) {
+				mat4.multiplyVec3(mat, vtemp, vt);
+				if (ff0 * vt[0] + ff1 * vt[1] + ff2 * vt[2] + ff3 > 0) {
 					++c;
 				}
 
