@@ -178,11 +178,83 @@ medealib.define('camera',['statepool'],function(medealib, undefined) {
 			return this.proj;
 		},
 
+		// Optimized rendering if the subtree up to (and including) |root_node|
+		// is known to be fully visible.
+		_RenderRecursively : function(root_node, rq) {
+			var outer = this;
+			// Traverse all nodes in the graph and collect their render jobs
+			medea.VisitGraph(root_node, function(node, parent_visible) {
+				if(!node.Enabled()) {
+					return medea.VISIBLE_NONE;
+				}
+
+				// Call node Render() implementation, then all entities
+				node.Render(outer, rq, medea.VISIBLE_ALL);
+				node.GetActiveEntities(outer).forEach(function(val) {
+					val.Render(outer, node, rq);
+				});
+
+				return medea.VISIBLE_ALL;
+			});
+		},
+
+		// Rendering of the subtree rooted at (and including) |root_node|
+		// using view frustum culling to reduce waste draw.
+		_RenderRecursivelyWithCulling : function(root_node, rq, frustum) {
+			var outer = this;
+			// Traverse all nodes in the graph and collect their render jobs
+			medea.VisitGraph(root_node, function(node, parent_visible) {
+				if(!node.Enabled()) {
+					return medea.VISIBLE_NONE;
+				}
+
+				// #ifdef DEBUG
+				//
+				// Control should never reach here if the parent is not partially visible.
+				medealib.DebugAssert(parent_visible === medea.VISIBLE_PARTIAL, 'traversal bug');
+				//
+				// #endif
+
+				var vis = node.Cull(frustum);
+				
+				if(vis === medea.VISIBLE_NONE) {
+					return medea.VISIBLE_NONE;
+				}
+				else if (vis === medea.VISIBLE_ALL) {
+					// #ifdef DEBUG
+					//
+					// If a node has infinite extents, it should claim only partial visibility.
+					// Otherwise, the entire subtree would accidentally be visible.
+					medealib.DebugAssert(node.GetWorldBB() !== medea.BB_INFINITE,
+						'infinite box culling bug');
+					//
+					// #endif
+
+					// The entire sub-tree is visible, so dispatch to a more efficient codepath.
+					outer._RenderRecursively(node, rq);
+					return medea.VISIBLE_NONE;
+				}
+
+				// Call node Render() implementation
+				node.Render(outer, rq, vis);
+
+				// Render entities that are attached to the node
+				var e = node.GetActiveEntities(outer);
+				if(e.length === 1) {
+					e[0].Render(outer, node, rq);
+				}
+				else {
+					e.forEach(function(val) {
+						if(val.Cull(node, frustum) !== medea.VISIBLE_NONE) {
+							val.Render(outer, node, rq);
+						}
+					});
+				}
+				return medea.VISIBLE_PARTIAL;
+			}, medea.VISIBLE_PARTIAL);
+		},
+
 		_FillRenderQueues : function(rq, statepool) {
-			var frustum = null;
-			if (this.culling) {
-				frustum = this.GetFrustum();
-			}
 			var outer = this;
 
 			// (hack) check if the (logical) canvas size changed, if so, dirty the projection
@@ -204,42 +276,12 @@ medealib.define('camera',['statepool'],function(medealib, undefined) {
 
 			statepool.Set("CAM_POS", this.GetWorldPos());
 
-			// Traverse all nodes in the graph and collect their render jobs
-			medea.VisitGraph(medea.RootNode(),function(node, parent_visible) {
-				if(!node.Enabled()) {
-					return medea.VISIBLE_NONE;
-				}
-
-				// #ifdef DEBUG
-				medealib.DebugAssert(parent_visible !== medea.VISIBLE_NONE, 'traversal bug');
-				// #endif
-
-				var vis = parent_visible === medea.VISIBLE_ALL ? medea.VISIBLE_ALL : node.Cull(frustum);
-				var e = node.GetActiveEntities(outer);
-
-				if(vis === medea.VISIBLE_NONE) {
-					return medea.VISIBLE_NONE;
-				}
-
-				node.Render(outer, rq);
-
-				if(vis === medea.VISIBLE_ALL || e.length === 1) {					
-					e.forEach(function(val, idx) {
-						val.Render(outer, node, rq);
-					});
-
-					return medea.VISIBLE_ALL;
-				}
-
-				// Partial visibility and more than one entity, cull per entity
-				e.forEach(function(val, idx) {
-					if(val.Cull(node, frustum) !== medea.VISIBLE_NONE) {
-						val.Render(outer, node, rq);
-					}
-				});
-
-				return medea.VISIBLE_PARTIAL;
-			}, this.culling ? medea.VISIBLE_PARTIAL : medea.VISIBLE_ALL);
+			if (this.culling) {
+				this._RenderRecursivelyWithCulling(medea.RootNode(), rq, this.GetFrustum());
+			}
+			else {
+				this._RenderRecursively(medea.RootNode(), rq);
+			}
 
 			// rq.Flush() is left to the caller
 			return statepool;
