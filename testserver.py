@@ -5,5 +5,7 @@ if sys.version_info <  (3,0):
 else:
 	from http.server import HTTPServer, SimpleHTTPRequestHandler
  
-httpd = HTTPServer(('0.0.0.0', 80), SimpleHTTPRequestHandler)
+httpd = HTTPServer(('0.0.0.0', 8080), SimpleHTTPRequestHandler)
+print 'Medea server is launched.' 
+print 'Please go to http://localhost:8080 to find demos'
 httpd.serve_forever()
